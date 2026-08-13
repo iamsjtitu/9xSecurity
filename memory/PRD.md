@@ -37,6 +37,15 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   (wa.9x email/password), Login/Security (change username & password)
 - .exe stack: Python (PyQt5 GUI + OpenCV + YOLOv8), packaged via PyInstaller
 
+## Implemented (update 2026-06 #2)
+- WhatsApp "Send Test Message" button in Settings → verifies API key + recipients live
+- Reliable photo delivery: image send auto-tries 5 known gateway formats (multipart file/media/image,
+  JSON base64, JSON media-object) and uses the first that returns 2xx; text fallback otherwise
+- GitHub Actions CI (.github/workflows/build-windows.yml): on tag push builds Windows .exe
+  (PyInstaller onefile) and publishes it to the release
+- In-app auto-update (Settings → Updates): checks GitHub latest release, downloads .exe, self-replaces
+  and restarts (frozen mode); updater.py APP_VERSION drives version compare
+
 ## Testing status
 - Core self-tested headless (test_engine.py): line-crossing event logging, snapshot save,
   tracker id persistence, side-of-line sign, auth hash/verify, WhatsApp text payload format,

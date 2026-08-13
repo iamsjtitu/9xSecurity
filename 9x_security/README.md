@@ -91,10 +91,38 @@ Plate: HR26AB1234
 ```bat
 venv\Scripts\activate
 pip install pyinstaller
-pyinstaller --noconfirm --windowed --name "9xSecurity" --add-data "yolov8n.pt;." main.py
+pyinstaller --noconfirm --onefile --windowed --name "9xSecurity" --add-data "yolov8n.pt;." main.py
 ```
-`.exe` file `dist\9xSecurity\9xSecurity.exe` me milega. Poora `dist\9xSecurity`
-folder kisi bhi Windows PC par copy karke chala sakte hain.
+Single `.exe` file `dist\9xSecurity.exe` me milega — use kisi bhi Windows PC par
+copy karke chala sakte hain (Python install ki zaroorat nahi).
+
+## 8. GitHub par push → automatic .exe build ⚙️
+> **Zaroori:** sirf GitHub par push karne se `.exe` **apne aap nahi banta**.
+> Iske liye ek **GitHub Actions** workflow add kiya gaya hai:
+> `.github/workflows/build-windows.yml`
+
+Kaise chalta hai:
+1. Chat input ke **"Save to Github"** button se apna code GitHub par push karein.
+2. Nayi release banane ke liye ek **version tag** push karein, jaise:
+   ```bash
+   git tag v1.0.1
+   git push origin v1.0.1
+   ```
+3. GitHub apne aap **Windows par `.exe` build** karega aur us tag ki **Release**
+   me `9xSecurity.exe` attach kar dega.
+   (Manually bhi Actions tab → "Build 9x Security" → *Run workflow* se chala sakte hain.)
+
+## 9. Software me se Auto-Update 🔄
+App ke andar **⚙ Settings → Updates** tab:
+- **GitHub Repo**: `owner/repository` daalein (jaise `yourname/9x-security`)
+- **Check for Updates** dabayein
+- Agar nayi version (release tag) mili, to app seedha nayi `.exe` **download +
+  install** kar dega aur restart ho jaayega. (Ye sirf `.exe` mode me kaam karta hai.)
+
+Nayi version release karne ka tarika:
+1. `updater.py` me `APP_VERSION` badhaayein (jaise `1.0.0` → `1.0.1`).
+2. Push karke naya tag banayein (`v1.0.1`) — Step 8 waala build chal jaayega.
+3. Users apne app se **Check for Updates** dabaa ke turant nayi version paa lenge.
 
 ---
 
@@ -107,6 +135,9 @@ folder kisi bhi Windows PC par copy karke chala sakte hain.
 | `confidence` | AI detection threshold (0.4 default) |
 | `enable_plate` | number plate OCR on/off |
 | `vehicle_classes` | kaunse vehicle detect karein: car / truck / bus |
+| `wa_enabled` / `wa_api_key` / `wa_recipients` | WhatsApp alert settings |
+| `github_repo` | auto-update ke liye GitHub `owner/name` |
+| `auth_user` / `auth_hash` | app login (default admin / 9xsecurity) |
 
 ## Tips
 - Kam roshni / raat me achhe results ke liye camera par IR/night-vision on rakhein.

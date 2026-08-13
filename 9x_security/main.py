@@ -511,6 +511,10 @@ class SettingsDialog(QtWidgets.QDialog):
         wf.addRow("X-API-Key", self.wa_key)
         wf.addRow("Recipients", self.wa_recipients)
         wf.addRow(self.wa_img)
+        self.wa_test_btn = QtWidgets.QPushButton("Send Test Message")
+        self.wa_test_btn.setObjectName("wa-test-btn")
+        self.wa_test_btn.clicked.connect(self._send_test)
+        wf.addRow(self.wa_test_btn)
         tabs.addTab(wa, "WhatsApp")
 
         # ---- Account tab (wa.9x.design credentials) ----
@@ -545,6 +549,30 @@ class SettingsDialog(QtWidgets.QDialog):
         sf.addRow("Confirm Password", self.sec_new2)
         tabs.addTab(sec, "Login / Security")
 
+        # ---- Updates tab ----
+        import updater as _upd
+
+        up = QtWidgets.QWidget()
+        uf = QtWidgets.QFormLayout(up)
+        self.ver_label = QtWidgets.QLabel(f"Current version:  v{_upd.APP_VERSION}")
+        self.ver_label.setStyleSheet("font-weight:700;")
+        self.gh_repo = QtWidgets.QLineEdit(cfg.get("github_repo", ""))
+        self.gh_repo.setPlaceholderText("owner/repository  (jaise yourname/9x-security)")
+        self.gh_repo.setObjectName("github-repo-input")
+        self.upd_btn = QtWidgets.QPushButton("Check for Updates")
+        self.upd_btn.setObjectName("check-update-btn")
+        self.upd_btn.clicked.connect(self._check_update)
+        uf.addRow(self.ver_label)
+        uf.addRow("GitHub Repo", self.gh_repo)
+        uf.addRow(self.upd_btn)
+        unote = QtWidgets.QLabel(
+            "GitHub Release me nayi version publish hone par yahan se seedha\n"
+            "download + install ho jaayegi (.exe mode me auto-replace)."
+        )
+        unote.setStyleSheet("color:#7d8ea1;")
+        uf.addRow(unote)
+        tabs.addTab(up, "Updates")
+
         btns = QtWidgets.QDialogButtonBox(
             QtWidgets.QDialogButtonBox.Save | QtWidgets.QDialogButtonBox.Cancel
         )
@@ -565,6 +593,7 @@ class SettingsDialog(QtWidgets.QDialog):
         c["wa_account_email"] = self.acc_email.text().strip()
         c["wa_account_password"] = self.acc_pass.text()
         c["auth_user"] = self.sec_user.text().strip() or "admin"
+        c["github_repo"] = self.gh_repo.text().strip()
         np1, np2 = self.sec_new.text(), self.sec_new2.text()
         if np1:
             if np1 != np2:
@@ -574,6 +603,98 @@ class SettingsDialog(QtWidgets.QDialog):
             c["auth_salt"], c["auth_hash"] = salt, h
         config.save_config(c)
         self.accept()
+
+    def _send_test(self):
+        from whatsapp import WhatsAppNotifier
+
+        cfg = {
+            "wa_enabled": True,
+            "wa_base_url": self.wa_base.text().strip() or "https://wa.9x.design",
+            "wa_api_key": self.wa_key.text().strip(),
+            "wa_recipients": [
+                x.strip() for x in self.wa_recipients.toPlainText().splitlines() if x.strip()
+            ],
+            "wa_send_image": self.wa_img.isChecked(),
+        }
+        if not cfg["wa_api_key"] or not cfg["wa_recipients"]:
+            QtWidgets.QMessageBox.warning(
+                self, "Info missing", "X-API-Key aur kam se kam ek recipient number daalein."
+            )
+            return
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        try:
+            ok, detail = WhatsAppNotifier(cfg).test_connection()
+        finally:
+            QtWidgets.QApplication.restoreOverrideCursor()
+        if ok:
+            QtWidgets.QMessageBox.information(
+                self, "Success", "Test bhej diya! WhatsApp check karein.\n\n" + detail
+            )
+        else:
+            QtWidgets.QMessageBox.critical(self, "Failed", "Test fail:\n\n" + detail)
+
+    def _check_update(self):
+        import os
+        import tempfile
+
+        import updater
+
+        repo = self.gh_repo.text().strip()
+        if not repo or "/" not in repo:
+            QtWidgets.QMessageBox.warning(
+                self, "Repo needed", "GitHub repo 'owner/name' format me daalein."
+            )
+            return
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        try:
+            tag, asset, url = updater.check_latest(repo)
+        except Exception as e:
+            QtWidgets.QApplication.restoreOverrideCursor()
+            QtWidgets.QMessageBox.critical(self, "Error", f"Update check fail:\n{e}")
+            return
+        QtWidgets.QApplication.restoreOverrideCursor()
+
+        if not tag:
+            QtWidgets.QMessageBox.information(self, "No release", "Koi release nahi mila.")
+            return
+        if not updater.is_newer(tag):
+            QtWidgets.QMessageBox.information(
+                self, "Up to date", f"Aap latest version par hain (v{updater.APP_VERSION})."
+            )
+            return
+        if not asset:
+            QtWidgets.QMessageBox.information(
+                self, "Update available",
+                f"Nayi version v{tag} hai par .exe asset nahi mila.\nRelease page:\n{url}",
+            )
+            return
+        if QtWidgets.QMessageBox.question(
+            self, "Update available",
+            f"Nayi version v{tag} available hai. Abhi download + install karein?",
+        ) != QtWidgets.QMessageBox.Yes:
+            return
+
+        dest = os.path.join(tempfile.gettempdir(), "9xSecurity_new.exe")
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        try:
+            updater.download(asset, dest)
+        except Exception as e:
+            QtWidgets.QApplication.restoreOverrideCursor()
+            QtWidgets.QMessageBox.critical(self, "Download failed", str(e))
+            return
+        QtWidgets.QApplication.restoreOverrideCursor()
+
+        if updater.apply_and_restart(dest):
+            QtWidgets.QMessageBox.information(
+                self, "Updating", "Update download ho gaya. App band hoke nayi version ke saath khulega."
+            )
+            QtWidgets.QApplication.quit()
+        else:
+            QtWidgets.QMessageBox.information(
+                self, "Downloaded",
+                f"Nayi .exe yahan save hui:\n{dest}\n\n"
+                "(Source/python mode me auto-replace nahi hota; .exe build me hota hai.)",
+            )
 
 
 def main():

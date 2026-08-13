@@ -174,6 +174,48 @@ def test_whatsapp_disabled_noop():
     print("PASS: WhatsApp disabled -> no API call")
 
 
+def test_updater_version_compare():
+    import updater
+
+    assert updater.is_newer("1.0.1", "1.0.0")
+    assert updater.is_newer("2.0.0", "1.9.9")
+    assert not updater.is_newer("1.0.0", "1.0.0")
+    assert not updater.is_newer("0.9.0", "1.0.0")
+    assert updater.is_newer("v1.2.0".lstrip("vV"), "1.1.0")
+    print("PASS: updater version compare")
+
+
+def test_whatsapp_image_multiformat():
+    import os
+    import tempfile
+
+    import whatsapp
+
+    p = os.path.join(tempfile.gettempdir(), "t.jpg")
+    with open(p, "wb") as f:
+        f.write(b"\xff\xd8\xff\xe0fakejpeg")
+
+    calls = []
+
+    class R:
+        def __init__(self, ok):
+            self.ok = ok
+            self.status_code = 200 if ok else 400
+            self.text = "x"
+
+    def fake_post(url, timeout=None, **kw):
+        calls.append(kw)
+        return R(len(calls) >= 3)  # first two fail, third succeeds
+
+    whatsapp.requests.post = fake_post
+    n = whatsapp.WhatsAppNotifier(
+        {"wa_enabled": True, "wa_api_key": "k", "wa_recipients": ["9"], "wa_send_image": True}
+    )
+    ok, label = n._send_image("9", "cap", p)
+    assert ok and len(calls) == 3, (ok, len(calls))
+    print("PASS: WhatsApp image auto-detects working format ->", label)
+
+
 if __name__ == "__main__":
     test_direction_mapping()
     test_tracker_ids_persist()
@@ -181,5 +223,7 @@ if __name__ == "__main__":
     test_auth_password()
     test_whatsapp_payload()
     test_whatsapp_disabled_noop()
+    test_updater_version_compare()
+    test_whatsapp_image_multiformat()
     test_real_yolo_if_available()
     print("\nALL CORE TESTS DONE")

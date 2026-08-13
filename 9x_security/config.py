@@ -24,6 +24,19 @@ DEFAULTS = {
     "detect_frame_skip": 2,          # run detector every N frames (CPU friendly)
     "enable_plate": True,
     "vehicle_classes": ["car", "truck", "bus"],
+    # ---- WhatsApp (wa.9x.design) alerts ----
+    "wa_enabled": False,
+    "wa_base_url": "https://wa.9x.design",
+    "wa_api_key": "",
+    "wa_recipients": [],          # ["919876543210", ...]
+    "wa_send_image": True,        # False => text-only alert
+    # ---- wa.9x.design account credentials (stored for reference) ----
+    "wa_account_email": "",
+    "wa_account_password": "",
+    # ---- App login (local, PBKDF2 hashed) ----
+    "auth_user": "admin",
+    "auth_salt": "",
+    "auth_hash": "",
 }
 
 

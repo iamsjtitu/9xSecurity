@@ -95,9 +95,91 @@ def test_real_yolo_if_available():
         print("SKIP real YOLO test:", e)
 
 
+def test_auth_password():
+    import auth
+
+    salt, h = auth.hash_password("secret123")
+    assert auth.verify_password("secret123", salt, h) is True
+    assert auth.verify_password("wrong", salt, h) is False
+    assert auth.verify_password("secret123", "", "") is False
+    print("PASS: auth password hash + verify")
+
+
+def test_whatsapp_payload(monkeypatch=None):
+    import whatsapp
+
+    captured = {}
+
+    class FakeResp:
+        ok = True
+        status_code = 200
+        text = '{"status":"sent"}'
+
+    def fake_post(url, headers=None, json=None, data=None, files=None, timeout=None):
+        captured["url"] = url
+        captured["headers"] = headers
+        captured["json"] = json
+        captured["data"] = data
+        captured["has_file"] = files is not None
+        return FakeResp()
+
+    whatsapp.requests.post = fake_post
+
+    cfg = {
+        "wa_enabled": True,
+        "wa_base_url": "https://wa.9x.design",
+        "wa_api_key": "wa9x_test",
+        "wa_recipients": ["919876543210"],
+        "wa_send_image": False,  # force text path (no file needed)
+    }
+    n = whatsapp.WhatsAppNotifier(cfg)
+    ev = {
+        "direction": "Entry",
+        "vehicle_type": "truck",
+        "timestamp": "2026-06-15T10:42:05",
+        "plate": "HR26AB1234",
+        "image_path": "",
+    }
+    n._send_all(ev)  # call synchronously
+    assert captured["url"] == "https://wa.9x.design/api/v1/messages"
+    assert captured["headers"]["X-API-Key"] == "wa9x_test"
+    assert captured["json"]["to"] == "919876543210"
+    assert "Entry" in captured["json"]["text"] and "TRUCK" in captured["json"]["text"]
+    assert "HR26AB1234" in captured["json"]["text"]
+    print("PASS: WhatsApp text alert payload ->", captured["json"]["text"].replace(chr(10), " | "))
+
+
+def test_whatsapp_disabled_noop():
+    import whatsapp
+
+    called = {"n": 0}
+
+    def fake_post(*a, **k):
+        called["n"] += 1
+
+        class R:
+            ok = True
+            status_code = 200
+            text = ""
+
+        return R()
+
+    whatsapp.requests.post = fake_post
+    n = whatsapp.WhatsAppNotifier({"wa_enabled": False})
+    n.notify({"direction": "Exit", "vehicle_type": "car", "timestamp": "x", "image_path": ""})
+    import time
+
+    time.sleep(0.2)
+    assert called["n"] == 0, "disabled notifier must not call the API"
+    print("PASS: WhatsApp disabled -> no API call")
+
+
 if __name__ == "__main__":
     test_direction_mapping()
     test_tracker_ids_persist()
     test_line_crossing_logs_event()
+    test_auth_password()
+    test_whatsapp_payload()
+    test_whatsapp_disabled_noop()
     test_real_yolo_if_available()
     print("\nALL CORE TESTS DONE")

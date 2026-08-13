@@ -32,7 +32,11 @@ python main.py
 ```
 
 ## 4. Kaise use karein
-1. Upar RTSP URL daalein, jaise:
+1. **Login screen** aayega — default:
+   - Username: `admin`
+   - Password: `9xsecurity`
+   (Baad me **⚙ Settings → Login / Security** se badal sakte hain.)
+2. Upar RTSP URL daalein, jaise:
    `rtsp://username:password@192.168.1.10:554/Streaming/Channels/101`
    (URL nahi doge to laptop webcam se test chalega.)
 2. **Connect** dabayein — live feed dikhega + "Connected" status.
@@ -48,14 +52,42 @@ python main.py
    Kisi row par **double-click** karke bada snapshot dekh sakte hain.
    **Open Snapshots** button se saari photos ka folder khulta hai.
 
-## 5. Data kahan save hota hai
+## 5. WhatsApp Alerts (wa.9x.design) 📲
+Har Entry/Exit par gaadi ka **photo + details** turant WhatsApp par bheji jaati hai.
+
+**Setup:** app me **⚙ Settings → WhatsApp** kholein:
+- ✅ *Enable WhatsApp alerts* on karein
+- **API Base URL**: `https://wa.9x.design` (ya aapka whitelabel URL)
+- **X-API-Key**: wa.9x.design dashboard se copy karke paste karein
+- **Recipients**: jitne number chahein, **ek line me ek** (country code ke saath), jaise:
+  ```
+  919876543210
+  919812345678
+  ```
+- *Send photo* ✅ = photo bhejega, ❌ = sirf text alert
+
+Alert format:
+```
+🚨 9x Security
+Entry - TRUCK
+Time: 2026-06-15 10:42:05
+Plate: HR26AB1234
+```
+> **Note:** Photo bhejne ke liye multipart upload use hota hai. Agar aapke plan ka
+> media-endpoint ka format alag ho aur image na jaaye, to app **automatically
+> text alert** bhej deta hai (alert kabhi miss nahi hoga). Har request ka jawab
+> `wa_log.txt` me save hota hai — zaroorat pade to usse exact format tune kar sakte hain.
+
+**Settings → Account** tab me aap wa.9x.design ka email/password bhi store kar sakte hain (reference ke liye).
+
+## 6. Data kahan save hota hai
 ```
 9x_security/
 ├── snapshots/2026-06-15/Entry_truck_10-42-05-123.jpg   ← photos (date-wise)
 └── events.db                                            ← saara record (SQLite)
 ```
 
-## 6. Ek .exe banana (bina Python ke chalane ke liye)
+## 7. Ek .exe banana (bina Python ke chalane ke liye)
 ```bat
 venv\Scripts\activate
 pip install pyinstaller

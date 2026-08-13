@@ -33,6 +33,10 @@ class SecurityEngine:
         self.last_dets = []
         self.on_event = None  # optional callback(event_dict) for the GUI
 
+        from whatsapp import WhatsAppNotifier
+
+        self.notifier = WhatsAppNotifier(self.cfg)
+
     # ---- line helpers (normalized <-> pixel) ------------------------------
     def line_points(self, w, h):
         ln = self.cfg["line"]
@@ -84,6 +88,10 @@ class SecurityEngine:
                     self.on_event(ev)
                 except Exception:
                     pass
+            try:
+                self.notifier.notify(ev)
+            except Exception:
+                pass
 
         annotated = self._annotate(frame, a, b)
         return annotated, events

@@ -30,13 +30,20 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Vehicle type label, number plate OCR toggle, per-class filters
 - GUI: live feed, draw-line by 2 clicks, event table with thumbnails, date/direction filters, today counters, snapshot preview, open-folder
 - README with Windows install/run + PyInstaller .exe build steps
+- WhatsApp alerts (wa.9x.design): on every Entry/Exit sends snapshot photo (multipart) with caption
+  {direction, vehicle type, time, plate}; text-alert fallback if media send fails; logs to wa_log.txt
+- App LOGIN screen (username/password, PBKDF2 hashed, default admin/9xsecurity)
+- Settings dialog: WhatsApp (enable, base URL, API key, recipients, send-image), Account
+  (wa.9x email/password), Login/Security (change username & password)
+- .exe stack: Python (PyQt5 GUI + OpenCV + YOLOv8), packaged via PyInstaller
 
 ## Testing status
-- Core engine self-tested headless (test_engine.py): line-crossing event logging,
-  snapshot save, tracker id persistence, side-of-line sign, real YOLO load + detect
-  on sample image (bus @0.87). ALL PASS.
-- NOT tested in this environment (headless Linux, no local camera): PyQt5 GUI render
-  and live RTSP connection — these must be run on the user's Windows machine.
+- Core self-tested headless (test_engine.py): line-crossing event logging, snapshot save,
+  tracker id persistence, side-of-line sign, auth hash/verify, WhatsApp text payload format,
+  disabled-notifier no-op, real YOLO load + detect on sample image (bus @0.87). ALL PASS.
+- NOT tested in this environment (headless Linux, no camera): PyQt5 GUI render, live RTSP,
+  and the REAL wa.9x.design media endpoint (docs are login-gated; multipart used + text fallback).
+  These run on the user's Windows machine.
 
 ## Backlog / Next
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

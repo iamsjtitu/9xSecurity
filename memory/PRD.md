@@ -126,6 +126,16 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Verified by testing agent /app/test_reports/iteration_3.json: 13/13 pass, all logic checks
   green. Live camera confirmation must come from user via Test button on Windows build.
 
+## Implemented (update 2026-06 #8) — Update 404 fix, no-link updates, bigger fonts, disconnect fix
+- Updates: DEFAULT_REPO baked into updater.py at CI (sed $GITHUB_REPOSITORY); Updates tab repo
+  input REMOVED — one-click Check for Updates; check_latest returns empty on GitHub 404
+  (no release yet) -> friendly Hindi message instead of error
+- Fonts: base 13px->15px, header 26px, login 28px, stat 36px, paddings up
+- Disconnect: signals disconnected instantly + non-blocking request_stop(); _open now
+  instance method honoring _running (returns None on abort); run() handles None cap
+- Verified by testing agent /app/test_reports/iteration_4.json: 14/14 pass incl. LIVE GitHub
+  404/normal checks + CI-bake sed simulation. Visual font/disconnect click = user on Windows.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

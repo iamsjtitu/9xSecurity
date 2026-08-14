@@ -123,8 +123,8 @@ install ho jaayega, **desktop shortcut** ban jaayega. Na zip, na extract.
 
 ## 9. Software me se Auto-Update 🔄
 App ke andar **⚙ Settings → Updates** tab:
-- **GitHub Repo**: `owner/repository` daalein (jaise `yourname/9x-security`)
-- **Check for Updates** dabayein
+- Bas **Check for Updates** dabayein — koi link/repo **nahi daalna** (update
+  source build me automatic set hota hai)
 - Agar nayi version (release) mili, to app naya **Setup installer download karke
   chupchaap install** kar dega aur nayi version ke saath restart ho jaayega.
   (Ye sirf installed build me kaam karta hai; aapka data — config, snapshots,

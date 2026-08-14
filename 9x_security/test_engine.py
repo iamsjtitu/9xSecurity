@@ -217,6 +217,26 @@ def test_probe_rtsp():
     print("PASS: probe_rtsp diagnoses bad URL + unreachable camera")
 
 
+def test_updater_404_and_default_repo():
+    import urllib.error
+
+    import updater
+
+    assert hasattr(updater, "DEFAULT_REPO")
+    orig = updater._api
+
+    def raise404(url):
+        raise urllib.error.HTTPError(url, 404, "Not Found", None, None)
+
+    updater._api = raise404
+    try:
+        tag, asset, page = updater.check_latest("owner/name")
+    finally:
+        updater._api = orig
+    assert tag == "" and asset is None
+    print("PASS: updater handles 404 (no release yet) gracefully; DEFAULT_REPO exists")
+
+
 def test_updater_pick_asset():
     import updater
 
@@ -294,6 +314,7 @@ if __name__ == "__main__":
     test_whatsapp_payload()
     test_whatsapp_disabled_noop()
     test_updater_version_compare()
+    test_updater_404_and_default_repo()
     test_updater_pick_asset()
     test_updater_zip_root()
     test_whatsapp_image_sendfile()

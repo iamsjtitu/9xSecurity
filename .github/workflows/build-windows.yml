@@ -36,7 +36,8 @@ jobs:
         run: |
           V="1.0.${{ github.run_number }}"
           sed -i "s/^APP_VERSION = .*/APP_VERSION = \"$V\"/" updater.py
-          grep "^APP_VERSION" updater.py
+          sed -i "s|^DEFAULT_REPO = .*|DEFAULT_REPO = \"$GITHUB_REPOSITORY\"  # baked|" updater.py
+          grep "^APP_VERSION\|^DEFAULT_REPO" updater.py
           echo "version=$V" >> "$GITHUB_OUTPUT"
 
       - name: Install dependencies

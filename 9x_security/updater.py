@@ -13,10 +13,12 @@ import ssl
 import subprocess
 import sys
 import tempfile
+import urllib.error
 import urllib.request
 import zipfile
 
 APP_VERSION = "1.0.0"
+DEFAULT_REPO = ""  # baked in at CI build time (owner/name)
 
 
 def _api(url):
@@ -44,8 +46,14 @@ def _pick_asset(assets):
 
 
 def check_latest(repo):
-    """repo = 'owner/name'. Returns (version, asset_url, release_page_url)."""
-    data = _api(f"https://api.github.com/repos/{repo}/releases/latest")
+    """repo = 'owner/name'. Returns (version, asset_url, release_page_url).
+    Returns empty version if the repo has no release yet (GitHub 404)."""
+    try:
+        data = _api(f"https://api.github.com/repos/{repo}/releases/latest")
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return "", None, ""
+        raise
     tag = (data.get("tag_name") or "").lstrip("vV")
     return tag, _pick_asset(data.get("assets")), data.get("html_url", "")
 

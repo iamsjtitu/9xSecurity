@@ -20,10 +20,10 @@ import auth
 
 BASE_STYLE = """
     QMainWindow, QDialog { background:#f6f8fb; }
-    QWidget { color:#1e293b; font-family:'Segoe UI'; font-size:13px; }
-    QLineEdit, QPlainTextEdit { background:#ffffff; border:1px solid #cbd5e1; border-radius:6px; padding:7px; color:#1e293b; }
+    QWidget { color:#1e293b; font-family:'Segoe UI'; font-size:15px; }
+    QLineEdit, QPlainTextEdit { background:#ffffff; border:1px solid #cbd5e1; border-radius:6px; padding:9px; color:#1e293b; }
     QLineEdit:focus, QPlainTextEdit:focus { border:1px solid #1f6feb; }
-    QPushButton { background:#1f6feb; border:none; border-radius:6px; padding:8px 14px; color:white; font-weight:600; }
+    QPushButton { background:#1f6feb; border:none; border-radius:6px; padding:10px 16px; color:white; font-weight:600; }
     QPushButton:hover { background:#2a7bff; }
     QPushButton#danger { background:#dc2626; }
     QPushButton#ghost { background:#ffffff; border:1px solid #cbd5e1; color:#1e293b; }
@@ -32,11 +32,11 @@ BASE_STYLE = """
     QGroupBox::title { subcontrol-origin: margin; left:10px; color:#64748b; }
     QTableWidget { background:#ffffff; gridline-color:#e2e8f0; border:1px solid #dbe3ec; border-radius:8px; }
     QTableWidget::item { color:#1e293b; }
-    QHeaderView::section { background:#eef2f7; color:#475569; padding:6px; border:none; }
-    QComboBox, QDateEdit { background:#ffffff; border:1px solid #cbd5e1; border-radius:6px; padding:5px; color:#1e293b; }
-    QCheckBox { padding:2px; }
+    QHeaderView::section { background:#eef2f7; color:#475569; padding:8px; border:none; font-weight:600; }
+    QComboBox, QDateEdit { background:#ffffff; border:1px solid #cbd5e1; border-radius:6px; padding:7px; color:#1e293b; }
+    QCheckBox { padding:3px; }
     QTabWidget::pane { border:1px solid #dbe3ec; background:#ffffff; }
-    QTabBar::tab { background:#eef2f7; color:#475569; padding:8px 16px; border:1px solid #dbe3ec; }
+    QTabBar::tab { background:#eef2f7; color:#475569; padding:10px 18px; border:1px solid #dbe3ec; }
     QTabBar::tab:selected { background:#1f6feb; color:white; }
     QMessageBox, QMenu, QCalendarWidget { background:#ffffff; }
 """
@@ -102,11 +102,14 @@ class VideoThread(QtCore.QThread):
             source = 0  # fallback to webcam for local testing
         self.status.emit("Connecting to source...")
         cap = self._open(source)
-        if not cap.isOpened():
-            self.status.emit(
-                "ERROR: Camera/RTSP stream nahi khula. URL ke bagal waala 'Test' button "
-                "dabayein — woh step-by-step bata dega problem kahan hai."
-            )
+        if cap is None or not cap.isOpened():
+            if cap is not None:
+                cap.release()
+            if self._running:
+                self.status.emit(
+                    "ERROR: Camera/RTSP stream nahi khula. URL ke bagal waala 'Test' button "
+                    "dabayein — woh step-by-step bata dega problem kahan hai."
+                )
             return
         self.status.emit("Connected - monitoring live feed")
 
@@ -119,6 +122,8 @@ class VideoThread(QtCore.QThread):
                     self.status.emit("Stream lost - reconnecting...")
                     cap.release()
                     cap = self._open(source)
+                    if cap is None:
+                        return
                     fail = 0
                 self.msleep(20)
                 continue
@@ -129,24 +134,31 @@ class VideoThread(QtCore.QThread):
             self.msleep(10)
         cap.release()
 
-    @staticmethod
-    def _open(source):
+    def _open(self, source):
         if isinstance(source, str) and source.lower().startswith("rtsp"):
             # TCP first (fixes open-but-no-frames), then UDP, then default backend.
             for transport in ("tcp", "udp"):
+                if not self._running:
+                    return None
                 os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = f"rtsp_transport;{transport}|timeout;5000000"
                 cap = cv2.VideoCapture(source, cv2.CAP_FFMPEG)
                 if cap.isOpened():
                     t0 = time.time()
-                    while time.time() - t0 < 5:
+                    while self._running and time.time() - t0 < 5:
                         ok, _f = cap.read()
                         if ok:
                             return cap
                     cap.release()
                 else:
                     cap.release()
+            if not self._running:
+                return None
             return cv2.VideoCapture(source)
         return cv2.VideoCapture(source)
+
+    def request_stop(self):
+        """Non-blocking stop: loop exits on its own; UI must not wait on it."""
+        self._running = False
 
     def stop(self):
         self._running = False
@@ -193,7 +205,7 @@ class MainWindow(QtWidgets.QMainWindow):
         left.setSpacing(10)
 
         header = QtWidgets.QLabel("9X SECURITY")
-        header.setStyleSheet("font-size:22px; font-weight:800; color:#1f6feb; letter-spacing:2px;")
+        header.setStyleSheet("font-size:26px; font-weight:800; color:#1f6feb; letter-spacing:2px;")
         left.addWidget(header)
 
         conn = QtWidgets.QHBoxLayout()
@@ -308,10 +320,10 @@ class MainWindow(QtWidgets.QMainWindow):
         box = QtWidgets.QGroupBox()
         lay = QtWidgets.QVBoxLayout(box)
         t = QtWidgets.QLabel(title)
-        t.setStyleSheet("color:#64748b; font-size:11px; font-weight:600;")
+        t.setStyleSheet("color:#64748b; font-size:13px; font-weight:600;")
         v = QtWidgets.QLabel(value)
         v.setObjectName("stat-value")
-        v.setStyleSheet(f"color:{color}; font-size:30px; font-weight:800;")
+        v.setStyleSheet(f"color:{color}; font-size:36px; font-weight:800;")
         lay.addWidget(t)
         lay.addWidget(v)
         box._value = v
@@ -335,10 +347,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def toggle_connect(self):
         if self.thread and self.thread.isRunning():
-            self.thread.stop()
+            t = self.thread
             self.thread = None
+            try:
+                t.frame_ready.disconnect(self.on_frame)
+                t.event_logged.disconnect(self.on_event)
+                t.status.disconnect(self.status.setText)
+            except TypeError:
+                pass
+            t.request_stop()  # non-blocking; UI turant free
             self.btn_connect.setText("Connect")
             self.status.setText("Disconnected.")
+            self.video.clear()
+            self.video.setText("Camera disconnected")
             return
         self.cfg["rtsp_url"] = self.url_edit.text().strip()
         self._save_opts()
@@ -513,7 +534,7 @@ class LoginDialog(QtWidgets.QDialog):
         lay.setSpacing(12)
 
         title = QtWidgets.QLabel("9X SECURITY")
-        title.setStyleSheet("font-size:24px;font-weight:800;color:#1f6feb;letter-spacing:3px;")
+        title.setStyleSheet("font-size:28px;font-weight:800;color:#1f6feb;letter-spacing:3px;")
         title.setAlignment(QtCore.Qt.AlignCenter)
         sub = QtWidgets.QLabel("Sign in to continue")
         sub.setStyleSheet("color:#64748b;")
@@ -630,18 +651,14 @@ class SettingsDialog(QtWidgets.QDialog):
         uf = QtWidgets.QFormLayout(up)
         self.ver_label = QtWidgets.QLabel(f"Current version:  v{_upd.APP_VERSION}")
         self.ver_label.setStyleSheet("font-weight:700;")
-        self.gh_repo = QtWidgets.QLineEdit(cfg.get("github_repo", ""))
-        self.gh_repo.setPlaceholderText("owner/repository  (jaise yourname/9x-security)")
-        self.gh_repo.setObjectName("github-repo-input")
         self.upd_btn = QtWidgets.QPushButton("Check for Updates")
         self.upd_btn.setObjectName("check-update-btn")
         self.upd_btn.clicked.connect(self._check_update)
         uf.addRow(self.ver_label)
-        uf.addRow("GitHub Repo", self.gh_repo)
         uf.addRow(self.upd_btn)
         unote = QtWidgets.QLabel(
-            "GitHub Release me nayi version publish hone par yahan se seedha\n"
-            "download + install ho jaayegi (packaged build me auto-install)."
+            "Koi link/repo daalne ki zaroorat nahi — bas button dabayein.\n"
+            "Nayi version milte hi seedha download + install ho jaayegi."
         )
         unote.setStyleSheet("color:#64748b;")
         uf.addRow(unote)
@@ -667,7 +684,6 @@ class SettingsDialog(QtWidgets.QDialog):
         c["wa_account_email"] = self.acc_email.text().strip()
         c["wa_account_password"] = self.acc_pass.text()
         c["auth_user"] = self.sec_user.text().strip() or "admin"
-        c["github_repo"] = self.gh_repo.text().strip()
         np1, np2 = self.sec_new.text(), self.sec_new2.text()
         if np1:
             if np1 != np2:
@@ -713,10 +729,12 @@ class SettingsDialog(QtWidgets.QDialog):
 
         import updater
 
-        repo = self.gh_repo.text().strip()
-        if not repo or "/" not in repo:
-            QtWidgets.QMessageBox.warning(
-                self, "Repo needed", "GitHub repo 'owner/name' format me daalein."
+        repo = updater.DEFAULT_REPO or self.cfg.get("github_repo", "").strip()
+        if not repo:
+            QtWidgets.QMessageBox.information(
+                self, "Updates",
+                "Update check installed (Setup) build me kaam karta hai.\n"
+                "Ye source/python mode hai isliye update source set nahi hai.",
             )
             return
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
@@ -724,12 +742,17 @@ class SettingsDialog(QtWidgets.QDialog):
             tag, asset, url = updater.check_latest(repo)
         except Exception as e:
             QtWidgets.QApplication.restoreOverrideCursor()
-            QtWidgets.QMessageBox.critical(self, "Error", f"Update check fail:\n{e}")
+            QtWidgets.QMessageBox.critical(
+                self, "Error",
+                f"Update check fail ho gaya:\n{e}\n\nInternet connection check karke dobara try karein.",
+            )
             return
         QtWidgets.QApplication.restoreOverrideCursor()
 
         if not tag:
-            QtWidgets.QMessageBox.information(self, "No release", "Koi release nahi mila.")
+            QtWidgets.QMessageBox.information(
+                self, "No release", "Abhi koi release available nahi hai. Thodi der baad try karein."
+            )
             return
         if not updater.is_newer(tag):
             QtWidgets.QMessageBox.information(

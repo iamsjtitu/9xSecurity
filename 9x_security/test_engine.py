@@ -201,6 +201,22 @@ def test_normalize_rtsp_url():
     print("PASS: RTSP url normalization (@ in password auto-encoded)")
 
 
+def test_probe_rtsp():
+    from engine import probe_rtsp
+
+    # invalid URL -> first step fails fast
+    ok, steps = probe_rtsp("notaurl")
+    assert not ok and steps[0][1] is False
+
+    # user's URL shape with unreachable TEST-NET host -> URL fixed, network step fails
+    ok, steps = probe_rtsp("rtsp://admin:Admin@123@192.0.2.1:554/stream1")
+    assert not ok
+    assert "Admin%40123" in steps[0][2]
+    assert any("192.0.2.1:554" in name for name, _o, _d in steps)
+    assert steps[-1][1] is False
+    print("PASS: probe_rtsp diagnoses bad URL + unreachable camera")
+
+
 def test_updater_pick_asset():
     import updater
 
@@ -271,6 +287,7 @@ def test_whatsapp_image_sendfile():
 if __name__ == "__main__":
     test_direction_mapping()
     test_normalize_rtsp_url()
+    test_probe_rtsp()
     test_tracker_ids_persist()
     test_line_crossing_logs_event()
     test_auth_password()

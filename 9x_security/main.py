@@ -6,6 +6,7 @@ snapshot logging (date+time+type+direction+plate) and an event gallery.
 """
 import os
 import sys
+import time
 from datetime import datetime
 
 import cv2
@@ -103,9 +104,8 @@ class VideoThread(QtCore.QThread):
         cap = self._open(source)
         if not cap.isOpened():
             self.status.emit(
-                "ERROR: Camera/RTSP stream nahi khula. Check karein: IP sahi hai? "
-                "Port 554 khula hai? Username/password sahi hai? "
-                "(Password me @ jaise characters app khud handle kar leta hai.)"
+                "ERROR: Camera/RTSP stream nahi khula. URL ke bagal waala 'Test' button "
+                "dabayein — woh step-by-step bata dega problem kahan hai."
             )
             return
         self.status.emit("Connected - monitoring live feed")
@@ -132,18 +132,38 @@ class VideoThread(QtCore.QThread):
     @staticmethod
     def _open(source):
         if isinstance(source, str) and source.lower().startswith("rtsp"):
-            # TCP transport: fixes streams that open but never deliver frames.
-            os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp"
-            cap = cv2.VideoCapture(source, cv2.CAP_FFMPEG)
-            if not cap.isOpened():
-                cap.release()
-                cap = cv2.VideoCapture(source)
-            return cap
+            # TCP first (fixes open-but-no-frames), then UDP, then default backend.
+            for transport in ("tcp", "udp"):
+                os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = f"rtsp_transport;{transport}|timeout;5000000"
+                cap = cv2.VideoCapture(source, cv2.CAP_FFMPEG)
+                if cap.isOpened():
+                    t0 = time.time()
+                    while time.time() - t0 < 5:
+                        ok, _f = cap.read()
+                        if ok:
+                            return cap
+                    cap.release()
+                else:
+                    cap.release()
+            return cv2.VideoCapture(source)
         return cv2.VideoCapture(source)
 
     def stop(self):
         self._running = False
         self.wait(3000)
+
+
+class ProbeThread(QtCore.QThread):
+    done = QtCore.pyqtSignal(bool, list)
+
+    def __init__(self, url, parent=None):
+        super().__init__(parent)
+        self.url = url
+
+    def run(self):
+        from engine import probe_rtsp
+        ok, steps = probe_rtsp(self.url)
+        self.done.emit(ok, steps)
 
 
 # ---------------------------------------------------------------------------
@@ -180,10 +200,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.url_edit = QtWidgets.QLineEdit(self.cfg.get("rtsp_url", ""))
         self.url_edit.setPlaceholderText("rtsp://user:pass@192.168.1.10:554/stream1  (password me @ ho to bhi chalega)")
         self.url_edit.setObjectName("rtsp-url-input")
+        self.btn_test = QtWidgets.QPushButton("Test")
+        self.btn_test.setObjectName("ghost")
+        self.btn_test.setToolTip("Camera connection ki step-by-step jaanch")
+        self.btn_test.clicked.connect(self.test_camera)
         self.btn_connect = QtWidgets.QPushButton("Connect")
         self.btn_connect.setObjectName("connect-btn")
         self.btn_connect.clicked.connect(self.toggle_connect)
         conn.addWidget(self.url_edit, 1)
+        conn.addWidget(self.btn_test)
         conn.addWidget(self.btn_connect)
         left.addLayout(conn)
 
@@ -324,6 +349,29 @@ class MainWindow(QtWidgets.QMainWindow):
         self.thread.status.connect(self.status.setText)
         self.thread.start()
         self.btn_connect.setText("Disconnect")
+
+    def test_camera(self):
+        url = self.url_edit.text().strip()
+        if not url:
+            QtWidgets.QMessageBox.warning(self, "Camera Test", "Pehle RTSP URL daalein.")
+            return
+        self.btn_test.setEnabled(False)
+        self.btn_test.setText("Testing...")
+        self.status.setText("Camera test chal raha hai (20 sec tak lag sakte hain)...")
+        self._probe = ProbeThread(url, self)
+        self._probe.done.connect(self._on_probe_done)
+        self._probe.start()
+
+    def _on_probe_done(self, ok, steps):
+        self.btn_test.setEnabled(True)
+        self.btn_test.setText("Test")
+        self.status.setText("Camera test complete.")
+        lines = [("✔ " if s_ok else "✘ ") + f"{name}\n    {detail}" for name, s_ok, detail in steps]
+        text = ("SAB THEEK — camera chal raha hai ✔\n\n" if ok else "PROBLEM MILI ✘\n\n") + "\n\n".join(lines)
+        if ok:
+            QtWidgets.QMessageBox.information(self, "Camera Test", text)
+        else:
+            QtWidgets.QMessageBox.warning(self, "Camera Test", text)
 
     def enable_draw(self):
         self.video.draw_mode = True

@@ -115,6 +115,17 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   YAML valid, sed version patch tested. Inno compile + install/update flow = user on Windows.
 
 
+## Implemented (update 2026-06 #7) — Camera Test diagnostics (RTSP still-not-working report)
+- User's camera (LAN 192.168.31.65) not reproducible from container; built diagnostic tooling:
+  • engine.probe_rtsp(): URL fix -> socket reachability (3s) -> capture TCP -> UDP with
+    frame verification; Hindi step results + hints (VLC check, stream1/stream2, creds)
+  • Main window: new "Test" button beside Connect (ProbeThread, result message box)
+  • VideoThread._open: TCP -> UDP -> default backend, each with 5s frame-arrival check;
+    ffmpeg option now 'timeout;5000000' (modern) instead of deprecated 'stimeout'
+  • opencv-python==4.10.0.84 pin confirmed (avoids opencv 4.11 RTSP no-frames bug #27091)
+- Verified by testing agent /app/test_reports/iteration_3.json: 13/13 pass, all logic checks
+  green. Live camera confirmation must come from user via Test button on Windows build.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

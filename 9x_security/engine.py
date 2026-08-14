@@ -5,6 +5,7 @@ The GUI (main.py) feeds frames into `process_frame` and renders `annotated`.
 """
 import os
 import re
+import time
 from datetime import datetime
 from urllib.parse import quote, unquote
 
@@ -32,6 +33,61 @@ def normalize_rtsp_url(url):
         pw = quote(unquote(pw), safe="")
         return f"{scheme}{user}:{pw}@{host}"
     return f"{scheme}{quote(unquote(creds), safe='')}@{host}"
+
+
+def _try_capture(url, transport, wait=6.0):
+    os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = f"rtsp_transport;{transport}|timeout;5000000"
+    cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
+    try:
+        if not cap.isOpened():
+            return False, "Stream open nahi hua (username/password ya stream path galat ho sakta hai)"
+        t0 = time.time()
+        while time.time() - t0 < wait:
+            ok, frame = cap.read()
+            if ok and frame is not None:
+                h, w = frame.shape[:2]
+                return True, f"Video aa raha hai ({w}x{h})"
+        return False, "Stream khula par video frames nahi aaye"
+    finally:
+        cap.release()
+
+
+def probe_rtsp(url, wait=6.0):
+    """Step-by-step camera connection diagnosis for the Test button.
+    Returns (ok, [(step_name, step_ok, detail), ...])."""
+    import socket
+
+    steps = []
+    fixed = normalize_rtsp_url(url)
+    steps.append(("URL check", True,
+                  f"Password ke special characters auto-fix kiye:\n    {fixed}" if fixed != url
+                  else "URL format theek hai"))
+    m = re.match(r"^rtsps?://(?:[^/]*@)?([^:/?#]+)(?::(\d+))?", fixed, re.IGNORECASE)
+    if not m:
+        steps[-1] = ("URL check", False, "URL 'rtsp://' se shuru hona chahiye")
+        return False, steps
+    host, port = m.group(1), int(m.group(2) or 554)
+    try:
+        socket.create_connection((host, port), timeout=3).close()
+        steps.append((f"Camera network ({host}:{port})", True, "Camera network par mil gaya"))
+    except Exception as e:
+        steps.append((f"Camera network ({host}:{port})", False,
+                      "Camera tak pahunch nahi paa rahe. Check: IP sahi hai? Camera on hai? "
+                      f"PC aur camera same network/WiFi par hain? ({e})"))
+        return False, steps
+    ok, detail = _try_capture(fixed, "tcp", wait)
+    steps.append(("Video stream (TCP)", ok, detail))
+    if ok:
+        return True, steps
+    ok, detail = _try_capture(fixed, "udp", wait)
+    steps.append(("Video stream (UDP)", ok, detail))
+    if ok:
+        return True, steps
+    steps.append(("Hint", False,
+                  "Camera network par hai par video nahi mila — zyada tar username/password "
+                  "ya stream path (stream1 vs stream2) galat hota hai. Yahi URL VLC me "
+                  "(Media > Open Network Stream) test karein."))
+    return False, steps
 
 
 class SecurityEngine:

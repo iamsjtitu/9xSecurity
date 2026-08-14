@@ -3,3 +3,7 @@
 2026-08-13T20:44:16 | image:multipart:file | to=9 | status=400 | x
 2026-08-13T20:44:16 | image:multipart:media | to=9 | status=400 | x
 2026-08-13T20:44:16 | image:multipart:image | to=9 | status=200 | x
+2026-08-14T06:42:18 | text | to=919876543210 | status=200 | {"status":"sent"}
+2026-08-14T06:42:18 | image:multipart:file | to=9 | status=400 | x
+2026-08-14T06:42:18 | image:multipart:media | to=9 | status=400 | x
+2026-08-14T06:42:18 | image:multipart:image | to=9 | status=200 | x

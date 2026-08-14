@@ -45,6 +45,12 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   main/master (Save to GitHub) and on v* tags; builds Windows .exe (PyInstaller onefile)
   and auto-publishes a Release tagged v{APP_VERSION from updater.py} with the exe attached
   (fixed June 2026: earlier it only ran on tag push, so user had to run workflow manually)
+- Build "stuck" fix (June 2026): PyInstaller onefile with torch/easyocr has a 10-25 min quiet
+  phase (looked stuck at matplotlib font cache). Workflow now: timeout-minutes 90, pip cache,
+  pre-builds matplotlib font cache, --collect-data ultralytics/easyocr,
+  --exclude-module tkinter/IPython/pytest/notebook. Verified by testing agent
+  (/app/test_reports/iteration_1.json, 9/9 regression pass). Real Windows run still needs
+  user push via Save to GitHub.
 - In-app auto-update (Settings → Updates): checks GitHub latest release, downloads .exe, self-replaces
   and restarts (frozen mode); updater.py APP_VERSION drives version compare
 

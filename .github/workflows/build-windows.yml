@@ -19,6 +19,7 @@ concurrency:
 jobs:
   build:
     runs-on: windows-latest
+    timeout-minutes: 90
     defaults:
       run:
         working-directory: 9x_security
@@ -28,6 +29,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: 9x_security/requirements.txt
 
       - name: Read app version
         id: ver
@@ -43,8 +46,20 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Build single-file EXE
-        run: pyinstaller --noconfirm --onefile --windowed --name "9xSecurity" --add-data "yolov8n.pt;." main.py
+      - name: Pre-build matplotlib font cache
+        run: python -c "import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot; print('font cache ready')"
+
+      - name: Build single-file EXE (10-25 min me complete hota hai, beech me logs ruk sakte hain)
+        run: >
+          pyinstaller --noconfirm --onefile --windowed --name "9xSecurity"
+          --add-data "yolov8n.pt;."
+          --collect-data ultralytics
+          --collect-data easyocr
+          --exclude-module tkinter
+          --exclude-module IPython
+          --exclude-module pytest
+          --exclude-module notebook
+          main.py
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

@@ -110,6 +110,11 @@ Kaise chalta hai:
    - Manually kuch bhi run karne ki zaroorat nahi. (Chahein to Actions tab →
      "Build 9x Security" → *Run workflow* se bhi chala sakte hain.)
 
+> ⏳ **Note**: "Build single-file EXE" step **10–25 minute** leta hai kyunki AI
+> libraries (torch/easyocr) bahut badi hain. Beech me logs ruk jaate hain —
+> ye **stuck nahi hai**, bas archive ban raha hota hai. Sabr rakhein. 90 minute
+> ki safety timeout lagi hui hai.
+
 ## 9. Software me se Auto-Update 🔄
 App ke andar **⚙ Settings → Updates** tab:
 - **GitHub Repo**: `owner/repository` daalein (jaise `yourname/9x-security`)

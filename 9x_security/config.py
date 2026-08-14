@@ -1,13 +1,21 @@
 """9x Security - Configuration handling (persisted to config.json)."""
 import json
 import os
+import sys
 
 APP_NAME = "9x Security"
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+if getattr(sys, "frozen", False):
+    # PyInstaller build: user data lives next to the exe (survives updates);
+    # bundled resources (model) live in _internal (sys._MEIPASS).
+    BASE_DIR = os.path.dirname(os.path.abspath(sys.executable))
+    _RES_DIR = getattr(sys, "_MEIPASS", BASE_DIR)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    _RES_DIR = BASE_DIR
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 SNAPSHOT_DIR = os.path.join(BASE_DIR, "snapshots")
 DB_PATH = os.path.join(BASE_DIR, "events.db")
-MODEL_PATH = os.path.join(BASE_DIR, "yolov8n.pt")
+MODEL_PATH = os.path.join(_RES_DIR, "yolov8n.pt")
 
 # Processing / display resolution (16:9). Detection & line are handled here.
 DISPLAY_WIDTH = 960

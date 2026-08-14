@@ -19,7 +19,7 @@ concurrency:
 jobs:
   build:
     runs-on: windows-latest
-    timeout-minutes: 90
+    timeout-minutes: 60
     defaults:
       run:
         working-directory: 9x_security
@@ -49,9 +49,9 @@ jobs:
       - name: Pre-build matplotlib font cache
         run: python -c "import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot; print('font cache ready')"
 
-      - name: Build single-file EXE (10-25 min me complete hota hai, beech me logs ruk sakte hain)
+      - name: Build app folder (onedir - fast build, fast startup)
         run: >
-          pyinstaller --noconfirm --onefile --windowed --name "9xSecurity"
+          pyinstaller --noconfirm --windowed --name "9xSecurity"
           --add-data "yolov8n.pt;."
           --collect-data ultralytics
           --collect-data easyocr
@@ -61,16 +61,20 @@ jobs:
           --exclude-module notebook
           main.py
 
+      - name: Zip app folder
+        shell: pwsh
+        run: Compress-Archive -Path dist\9xSecurity -DestinationPath "dist\9xSecurity-v${{ steps.ver.outputs.version }}.zip"
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: 9xSecurity-exe
-          path: 9x_security/dist/9xSecurity.exe
+          name: 9xSecurity-zip
+          path: 9x_security/dist/9xSecurity-v${{ steps.ver.outputs.version }}.zip
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.ver.outputs.version }}
           name: 9x Security v${{ steps.ver.outputs.version }}
-          files: 9x_security/dist/9xSecurity.exe
+          files: 9x_security/dist/9xSecurity-v${{ steps.ver.outputs.version }}.zip
           make_latest: true

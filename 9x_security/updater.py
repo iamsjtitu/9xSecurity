@@ -1,17 +1,20 @@
-"""9x Security - Self-updater via GitHub Releases.
+"""9x Security - Self-updater via GitHub Releases (folder-zip builds).
 
-Checks the latest release of a configured GitHub repo, and if a newer version
-is available, downloads its .exe asset and replaces the running executable.
-Only self-replaces when running as a PyInstaller-built .exe (frozen).
+New builds ship as a .zip containing the app folder (9xSecurity/ with the exe
+and _internal libs). The updater downloads the zip, extracts it, swaps the
+install folder via a batch script and restarts. Legacy single .exe assets are
+still supported. Only self-updates when running as a PyInstaller build (frozen).
 """
 import json
 import os
 import re
+import shutil
 import ssl
 import subprocess
 import sys
 import tempfile
 import urllib.request
+import zipfile
 
 APP_VERSION = "1.0.0"
 
@@ -25,16 +28,24 @@ def _api(url):
         return json.loads(r.read().decode())
 
 
+def _pick_asset(assets):
+    """Prefer the folder .zip build; fall back to legacy single .exe."""
+    zip_url = exe_url = None
+    for a in assets or []:
+        name = str(a.get("name", "")).lower()
+        url = a.get("browser_download_url")
+        if name.endswith(".zip") and zip_url is None:
+            zip_url = url
+        elif name.endswith(".exe") and exe_url is None:
+            exe_url = url
+    return zip_url or exe_url
+
+
 def check_latest(repo):
-    """repo = 'owner/name'. Returns (version, exe_asset_url, release_page_url)."""
+    """repo = 'owner/name'. Returns (version, asset_url, release_page_url)."""
     data = _api(f"https://api.github.com/repos/{repo}/releases/latest")
     tag = (data.get("tag_name") or "").lstrip("vV")
-    asset = None
-    for a in data.get("assets", []):
-        if str(a.get("name", "")).lower().endswith(".exe"):
-            asset = a.get("browser_download_url")
-            break
-    return tag, asset, data.get("html_url", "")
+    return tag, _pick_asset(data.get("assets")), data.get("html_url", "")
 
 
 def _ver(v):
@@ -62,11 +73,57 @@ def download(asset_url, dest, progress=None):
     return dest
 
 
-def apply_and_restart(new_exe):
-    """Replace the running frozen exe with new_exe and relaunch (Windows only).
-    Returns True if an update batch was launched, False if running from source."""
+def _install_dir():
+    return os.path.dirname(os.path.abspath(sys.executable))
+
+
+def _zip_app_root(extract_dir):
+    """Folder inside the extracted zip that contains 9xSecurity.exe."""
+    for root, _dirs, files in os.walk(extract_dir):
+        if "9xSecurity.exe" in files:
+            return root
+    return None
+
+
+def apply_update(path):
+    """path = downloaded .zip (folder build) or .exe (legacy single-file).
+    Swaps the install and relaunches (Windows only).
+    Returns True if an update script was launched, False if running from source."""
     if not getattr(sys, "frozen", False):
         return False
+    if str(path).lower().endswith(".zip"):
+        return _apply_zip(path)
+    return _apply_exe(path)
+
+
+def _apply_zip(zip_path):
+    extract_dir = os.path.join(tempfile.gettempdir(), "9x_update_new")
+    shutil.rmtree(extract_dir, ignore_errors=True)
+    with zipfile.ZipFile(zip_path) as z:
+        z.extractall(extract_dir)
+    src = _zip_app_root(extract_dir)
+    if not src:
+        return False
+    dst = _install_dir()
+    exe = os.path.join(dst, os.path.basename(sys.executable))
+    bat = os.path.join(tempfile.gettempdir(), "9x_update.bat")
+    script = (
+        "@echo off\r\n"
+        "timeout /t 2 /nobreak >nul\r\n"
+        f'xcopy /E /Y /I "{src}" "{dst}" >nul\r\n'
+        f'start "" "{exe}"\r\n'
+        f'rd /s /q "{extract_dir}" >nul 2>&1\r\n'
+        f'del "{zip_path}" >nul 2>&1\r\n'
+        'del "%~f0"\r\n'
+    )
+    with open(bat, "w") as f:
+        f.write(script)
+    # DETACHED_PROCESS so it survives after we exit.
+    subprocess.Popen(["cmd", "/c", bat], creationflags=0x00000008)
+    return True
+
+
+def _apply_exe(new_exe):
     cur = sys.executable
     bat = os.path.join(tempfile.gettempdir(), "9x_update.bat")
     script = (
@@ -78,6 +135,5 @@ def apply_and_restart(new_exe):
     )
     with open(bat, "w") as f:
         f.write(script)
-    # DETACHED_PROCESS so it survives after we exit.
     subprocess.Popen(["cmd", "/c", bat], creationflags=0x00000008)
     return True

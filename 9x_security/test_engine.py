@@ -184,6 +184,33 @@ def test_updater_version_compare():
     print("PASS: updater version compare")
 
 
+def test_updater_pick_asset():
+    import updater
+
+    exe = {"name": "9xSecurity.exe", "browser_download_url": "http://x/exe"}
+    zp = {"name": "9xSecurity-v1.0.1.zip", "browser_download_url": "http://x/zip"}
+    assert updater._pick_asset([exe, zp]) == "http://x/zip"  # zip preferred
+    assert updater._pick_asset([exe]) == "http://x/exe"      # legacy fallback
+    assert updater._pick_asset([]) is None
+    print("PASS: updater picks zip asset first, exe fallback")
+
+
+def test_updater_zip_root():
+    import os
+    import tempfile
+
+    import updater
+
+    d = tempfile.mkdtemp()
+    appdir = os.path.join(d, "9xSecurity")
+    os.makedirs(os.path.join(appdir, "_internal"))
+    with open(os.path.join(appdir, "9xSecurity.exe"), "wb") as f:
+        f.write(b"x")
+    assert updater._zip_app_root(d) == appdir
+    assert updater._zip_app_root(tempfile.mkdtemp()) is None
+    print("PASS: updater finds app root inside extracted zip")
+
+
 def test_whatsapp_image_sendfile():
     import os
     import tempfile
@@ -228,6 +255,8 @@ if __name__ == "__main__":
     test_whatsapp_payload()
     test_whatsapp_disabled_noop()
     test_updater_version_compare()
+    test_updater_pick_asset()
+    test_updater_zip_root()
     test_whatsapp_image_sendfile()
     test_real_yolo_if_available()
     print("\nALL CORE TESTS DONE")

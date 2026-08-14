@@ -89,40 +89,43 @@ Plate: HR26AB1234
 └── events.db                                            ← saara record (SQLite)
 ```
 
-## 7. Ek .exe banana (bina Python ke chalane ke liye)
+## 7. App ka build banana (bina Python ke chalane ke liye)
 ```bat
 venv\Scripts\activate
 pip install pyinstaller
-pyinstaller --noconfirm --onefile --windowed --name "9xSecurity" --add-data "yolov8n.pt;." main.py
+pyinstaller --noconfirm --windowed --name "9xSecurity" --add-data "yolov8n.pt;." main.py
 ```
-Single `.exe` file `dist\9xSecurity.exe` me milega — use kisi bhi Windows PC par
-copy karke chala sakte hain (Python install ki zaroorat nahi).
+`dist\9xSecurity\` folder banega jisme `9xSecurity.exe` hoga — poora folder kisi
+bhi Windows PC par copy karke exe chala sakte hain (Python install ki zaroorat
+nahi). Folder-style build ka fayda: **app seconds me khulti hai** (single-file
+.exe har baar 1.5 GB extract karti thi jisme minutes lagte the).
 
-## 8. GitHub par push → automatic .exe build ⚙️
-> **Zaroori:** sirf GitHub par push karne se `.exe` **apne aap nahi banta**.
+## 8. GitHub par push → automatic build ⚙️
+> **Zaroori:** sirf GitHub par push karne se build **apne aap nahi banta**.
 > Iske liye ek **GitHub Actions** workflow add kiya gaya hai:
 > `.github/workflows/build-windows.yml`
 
 Kaise chalta hai:
 1. Chat input ke **"Save to Github"** button se apna code GitHub par push karein.
 2. Bas itna hi! Ab **har "Save to GitHub" push par** workflow apne aap chalega:
-   - GitHub Windows par `.exe` build karega
+   - GitHub Windows par app **folder build** karega aur usse zip banayega
    - `updater.py` me jo `APP_VERSION` hai, usi naam se **Release** (jaise `v1.0.0`)
-     apne aap ban/refresh ho jaayegi aur usme `9xSecurity.exe` attach hoga.
+     apne aap ban/refresh ho jaayegi aur usme `9xSecurity-v1.0.0.zip` attach hoga.
    - Manually kuch bhi run karne ki zaroorat nahi. (Chahein to Actions tab →
      "Build 9x Security" → *Run workflow* se bhi chala sakte hain.)
 
-> ⏳ **Note**: "Build single-file EXE" step **10–25 minute** leta hai kyunki AI
-> libraries (torch/easyocr) bahut badi hain. Beech me logs ruk jaate hain —
-> ye **stuck nahi hai**, bas archive ban raha hota hai. Sabr rakhein. 90 minute
-> ki safety timeout lagi hui hai.
+Pehli baar install: zip download karein → extract karein → `9xSecurity.exe` chalayein.
+
+> ⏳ **Note**: Folder-zip build single-file se kaafi tez hai (~8–15 min). Beech
+> me logs ruk sakte hain — ye stuck nahi hai. 60 min ki safety timeout lagi hai.
 
 ## 9. Software me se Auto-Update 🔄
 App ke andar **⚙ Settings → Updates** tab:
 - **GitHub Repo**: `owner/repository` daalein (jaise `yourname/9x-security`)
 - **Check for Updates** dabayein
-- Agar nayi version (release tag) mili, to app seedha nayi `.exe` **download +
-  install** kar dega aur restart ho jaayega. (Ye sirf `.exe` mode me kaam karta hai.)
+- Agar nayi version (release) mili, to app nayi **zip download + extract karke
+  apne aap install** kar dega aur restart ho jaayega. (Ye sirf packaged build
+  me kaam karta hai; aapka data — config, snapshots, database — safe rehta hai.)
 
 Nayi version release karne ka tarika (sirf 2 kadam):
 1. `updater.py` me `APP_VERSION` badhaayein (jaise `1.0.0` → `1.0.1`).

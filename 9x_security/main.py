@@ -567,7 +567,7 @@ class SettingsDialog(QtWidgets.QDialog):
         uf.addRow(self.upd_btn)
         unote = QtWidgets.QLabel(
             "GitHub Release me nayi version publish hone par yahan se seedha\n"
-            "download + install ho jaayegi (.exe mode me auto-replace)."
+            "download + install ho jaayegi (packaged build me auto-install)."
         )
         unote.setStyleSheet("color:#7d8ea1;")
         uf.addRow(unote)
@@ -665,7 +665,7 @@ class SettingsDialog(QtWidgets.QDialog):
         if not asset:
             QtWidgets.QMessageBox.information(
                 self, "Update available",
-                f"Nayi version v{tag} hai par .exe asset nahi mila.\nRelease page:\n{url}",
+                f"Nayi version v{tag} hai par .zip/.exe asset nahi mila.\nRelease page:\n{url}",
             )
             return
         if QtWidgets.QMessageBox.question(
@@ -674,7 +674,8 @@ class SettingsDialog(QtWidgets.QDialog):
         ) != QtWidgets.QMessageBox.Yes:
             return
 
-        dest = os.path.join(tempfile.gettempdir(), "9xSecurity_new.exe")
+        ext = ".zip" if asset.lower().endswith(".zip") else ".exe"
+        dest = os.path.join(tempfile.gettempdir(), "9xSecurity_new" + ext)
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         try:
             updater.download(asset, dest)
@@ -684,7 +685,7 @@ class SettingsDialog(QtWidgets.QDialog):
             return
         QtWidgets.QApplication.restoreOverrideCursor()
 
-        if updater.apply_and_restart(dest):
+        if updater.apply_update(dest):
             QtWidgets.QMessageBox.information(
                 self, "Updating", "Update download ho gaya. App band hoke nayi version ke saath khulega."
             )
@@ -692,8 +693,8 @@ class SettingsDialog(QtWidgets.QDialog):
         else:
             QtWidgets.QMessageBox.information(
                 self, "Downloaded",
-                f"Nayi .exe yahan save hui:\n{dest}\n\n"
-                "(Source/python mode me auto-replace nahi hota; .exe build me hota hai.)",
+                f"Nayi build yahan save hui:\n{dest}\n\n"
+                "(Source/python mode me auto-install nahi hota; packaged build me hota hai.)",
             )
 
 

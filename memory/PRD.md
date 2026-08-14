@@ -73,6 +73,19 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   and the REAL wa.9x.design media endpoint (docs are login-gated; multipart used + text fallback).
   These run on the user's Windows machine.
 
+## Implemented (update 2026-06 #4) — Folder-zip build (user chose option c)
+- Workflow now builds ONEDIR (folder) instead of onefile: build 2-3x faster (~8-15 min),
+  app starts in seconds (no 1.5GB self-extract per launch). Zips dist/9xSecurity ->
+  9xSecurity-v{ver}.zip via Compress-Archive; release asset is the zip. timeout 60 min.
+- config.py frozen-aware paths: user data (config.json/events.db/snapshots/wa_log) next to
+  exe (survives updates); yolov8n.pt resolved from _internal (sys._MEIPASS).
+- updater.py: _pick_asset prefers .zip (legacy .exe fallback), apply_update() extracts zip,
+  finds app root, batch xcopy /E /Y (no delete -> user data safe) + restart; main.py uses
+  apply_update + ext-aware temp filename.
+- Verified: 11/11 test_engine.py pass (new: _pick_asset zip-first, _zip_app_root) +
+  workflow YAML valid. Windows-side install/restart flow needs real-device validation.
+
+
 ## Backlog / Next
 - P1: Vehicle re-identification to avoid double counting if it lingers on line
 - P1: CSV/Excel export of event log

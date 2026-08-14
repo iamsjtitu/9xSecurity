@@ -58,7 +58,9 @@ Har Entry/Exit par gaadi ka **photo + details** turant WhatsApp par bheji jaati 
 **Setup:** app me **⚙ Settings → WhatsApp** kholein:
 - ✅ *Enable WhatsApp alerts* on karein
 - **API Base URL**: `https://wa.9x.design` (ya aapka whitelabel URL)
-- **X-API-Key**: wa.9x.design dashboard se copy karke paste karein
+- **API Key**: wa.9x.design dashboard se copy karke paste karein (Bearer auth, `wa9x_...`)
+- Photo alerts official **`POST /api/v2/sendMessageFile`** (multipart direct upload) se
+  jaate hain, text **`POST /api/v2/sendMessage`** se — docs: https://wa.9x.design/docs
 - **Recipients**: jitne number chahein, **ek line me ek** (country code ke saath), jaise:
   ```
   919876543210

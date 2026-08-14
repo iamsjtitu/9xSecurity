@@ -54,7 +54,18 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - In-app auto-update (Settings → Updates): checks GitHub latest release, downloads .exe, self-replaces
   and restarts (frozen mode); updater.py APP_VERSION drives version compare
 
-## Testing status
+## Implemented (update 2026-06 #3)
+- wa.9x.design docs are now PUBLIC (https://wa.9x.design/docs). whatsapp.py rewritten to
+  the exact documented v2 API (old 5-format guessing removed):
+  • Text: POST {base}/api/v2/sendMessage — multipart form: phonenumber, text
+  • Photo: POST {base}/api/v2/sendMessageFile — multipart: phonenumber, file, caption, filename
+  • Auth: Authorization: Bearer <API_KEY>; recipients normalized to digits-only
+  Verified: 9/9 test_engine.py pass + LIVE endpoint sanity (both URLs return 401
+  "Invalid API token" with fake key → correct URL/format, not 404). Real delivery
+  pending user's API key + connected session (Settings → Send Test Message).
+- UI labels updated: "X-API-Key" → "API Key (Bearer)"
+
+
 - Core self-tested headless (test_engine.py): line-crossing event logging, snapshot save,
   tracker id persistence, side-of-line sign, auth hash/verify, WhatsApp text payload format,
   disabled-notifier no-op, real YOLO load + detect on sample image (bus @0.87). ALL PASS.

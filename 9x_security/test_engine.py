@@ -112,15 +112,14 @@ def test_whatsapp_payload(monkeypatch=None):
 
     class FakeResp:
         ok = True
-        status_code = 200
-        text = '{"status":"sent"}'
+        status_code = 201
+        text = '{"success":true}'
 
     def fake_post(url, headers=None, json=None, data=None, files=None, timeout=None):
         captured["url"] = url
         captured["headers"] = headers
-        captured["json"] = json
         captured["data"] = data
-        captured["has_file"] = files is not None
+        captured["files"] = files
         return FakeResp()
 
     whatsapp.requests.post = fake_post
@@ -129,7 +128,7 @@ def test_whatsapp_payload(monkeypatch=None):
         "wa_enabled": True,
         "wa_base_url": "https://wa.9x.design",
         "wa_api_key": "wa9x_test",
-        "wa_recipients": ["919876543210"],
+        "wa_recipients": ["+91 98765 43210"],  # should be normalized to digits
         "wa_send_image": False,  # force text path (no file needed)
     }
     n = whatsapp.WhatsAppNotifier(cfg)
@@ -141,12 +140,12 @@ def test_whatsapp_payload(monkeypatch=None):
         "image_path": "",
     }
     n._send_all(ev)  # call synchronously
-    assert captured["url"] == "https://wa.9x.design/api/v1/messages"
-    assert captured["headers"]["X-API-Key"] == "wa9x_test"
-    assert captured["json"]["to"] == "919876543210"
-    assert "Entry" in captured["json"]["text"] and "TRUCK" in captured["json"]["text"]
-    assert "HR26AB1234" in captured["json"]["text"]
-    print("PASS: WhatsApp text alert payload ->", captured["json"]["text"].replace(chr(10), " | "))
+    assert captured["url"] == "https://wa.9x.design/api/v2/sendMessage"
+    assert captured["headers"]["Authorization"] == "Bearer wa9x_test"
+    assert captured["files"]["phonenumber"] == (None, "919876543210")
+    text = captured["files"]["text"][1]
+    assert "Entry" in text and "TRUCK" in text and "HR26AB1234" in text
+    print("PASS: WhatsApp v2 sendMessage payload ->", text.replace(chr(10), " | "))
 
 
 def test_whatsapp_disabled_noop():
@@ -185,7 +184,7 @@ def test_updater_version_compare():
     print("PASS: updater version compare")
 
 
-def test_whatsapp_image_multiformat():
+def test_whatsapp_image_sendfile():
     import os
     import tempfile
 
@@ -198,22 +197,27 @@ def test_whatsapp_image_multiformat():
     calls = []
 
     class R:
-        def __init__(self, ok):
-            self.ok = ok
-            self.status_code = 200 if ok else 400
-            self.text = "x"
+        ok = True
+        status_code = 200
+        text = '{"success":true}'
 
     def fake_post(url, timeout=None, **kw):
-        calls.append(kw)
-        return R(len(calls) >= 3)  # first two fail, third succeeds
+        calls.append({"url": url, **kw})
+        return R()
 
     whatsapp.requests.post = fake_post
     n = whatsapp.WhatsAppNotifier(
-        {"wa_enabled": True, "wa_api_key": "k", "wa_recipients": ["9"], "wa_send_image": True}
+        {"wa_enabled": True, "wa_api_key": "k", "wa_recipients": ["919812345678"], "wa_send_image": True}
     )
-    ok, label = n._send_image("9", "cap", p)
-    assert ok and len(calls) == 3, (ok, len(calls))
-    print("PASS: WhatsApp image auto-detects working format ->", label)
+    ok, info = n._send_image("919812345678", "cap", p)
+    assert ok and len(calls) == 1, (ok, len(calls))
+    c = calls[0]
+    assert c["url"].endswith("/api/v2/sendMessageFile")
+    assert c["headers"]["Authorization"] == "Bearer k"
+    assert c["data"]["phonenumber"] == "919812345678" and c["data"]["caption"] == "cap"
+    fname, fbytes, ftype = c["files"]["file"]
+    assert fname == "t.jpg" and ftype == "image/jpeg" and fbytes.startswith(b"\xff\xd8")
+    print("PASS: WhatsApp v2 sendMessageFile multipart ->", info)
 
 
 if __name__ == "__main__":
@@ -224,6 +228,6 @@ if __name__ == "__main__":
     test_whatsapp_payload()
     test_whatsapp_disabled_noop()
     test_updater_version_compare()
-    test_whatsapp_image_multiformat()
+    test_whatsapp_image_sendfile()
     test_real_yolo_if_available()
     print("\nALL CORE TESTS DONE")

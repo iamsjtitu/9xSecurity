@@ -1,13 +1,13 @@
-"""9x Security - WhatsApp alerts via wa.9x.design REST API.
+"""9x Security - WhatsApp alerts via wa.9x.design REST API (official v2 docs).
 
-On every Entry/Exit event, sends the snapshot photo (with a caption) to all
-configured recipients. Photo is attempted using several known WhatsApp-gateway
-payload formats (auto-detect) and the first one that succeeds is used. If image
-sending fails entirely, it falls back to a plain text alert so notifications are
+Text  : POST {base}/api/v2/sendMessage      (multipart: phonenumber, text)
+Photo : POST {base}/api/v2/sendMessageFile  (multipart: phonenumber, file, caption)
+Auth  : Authorization: Bearer <API_KEY>
+If photo sending fails, falls back to a plain text alert so notifications are
 never silently lost. All attempts are logged to wa_log.txt.
 """
-import base64
 import os
+import re
 import threading
 from datetime import datetime
 
@@ -18,6 +18,11 @@ import config
 LOG_PATH = os.path.join(config.BASE_DIR, "wa_log.txt")
 
 
+def _phone(num):
+    """International format, digits only (no +, no spaces)."""
+    return re.sub(r"\D", "", str(num or ""))
+
+
 class WhatsAppNotifier:
     def __init__(self, cfg):
         self.update(cfg)
@@ -26,7 +31,7 @@ class WhatsAppNotifier:
         self.enabled = bool(cfg.get("wa_enabled", False))
         self.base = (cfg.get("wa_base_url") or "https://wa.9x.design").rstrip("/")
         self.api_key = cfg.get("wa_api_key", "").strip()
-        self.recipients = cfg.get("wa_recipients", []) or []
+        self.recipients = [p for p in (_phone(r) for r in (cfg.get("wa_recipients", []) or [])) if p]
         self.send_image = bool(cfg.get("wa_send_image", True))
 
     # ---- public -----------------------------------------------------------
@@ -39,9 +44,9 @@ class WhatsAppNotifier:
         """Synchronous test send used by the Settings 'Send Test Message' button.
         Returns (ok, detail_text)."""
         if not self.api_key:
-            return False, "X-API-Key khaali hai. Settings me API key daalein."
+            return False, "API key khaali hai. Settings me API key daalein."
         if not self.recipients:
-            return False, "Koi recipient number nahi mila. Ek number daalein."
+            return False, "Koi recipient number nahi mila. Ek number daalein (91XXXXXXXXXX)."
         text = (
             "✅ 9x Security test alert\n"
             f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
@@ -77,21 +82,15 @@ class WhatsAppNotifier:
             if not ok:
                 self._send_text(to, caption)
 
-    def _endpoint(self):
-        return f"{self.base}/api/v1/messages"
-
-    def _headers(self, json_mode=False):
-        h = {"X-API-Key": self.api_key}
-        if json_mode:
-            h["Content-Type"] = "application/json"
-        return h
+    def _headers(self):
+        return {"Authorization": f"Bearer {self.api_key}"}
 
     def _send_text(self, to, text):
         try:
             r = requests.post(
-                self._endpoint(),
-                headers=self._headers(json_mode=True),
-                json={"to": to, "text": text},
+                f"{self.base}/api/v2/sendMessage",
+                headers=self._headers(),
+                files={"phonenumber": (None, to), "text": (None, text)},
                 timeout=20,
             )
             self._log(to, "text", r.status_code, r.text)
@@ -101,7 +100,6 @@ class WhatsAppNotifier:
             return False, str(e)
 
     def _send_image(self, to, caption, path):
-        """Try several known gateway image formats; use the first that returns 2xx."""
         try:
             with open(path, "rb") as f:
                 raw = f.read()
@@ -109,39 +107,19 @@ class WhatsAppNotifier:
             self._log(to, "image-read-error", "-", str(e))
             return False, str(e)
         name = os.path.basename(path)
-        b64 = base64.b64encode(raw).decode()
-
-        attempts = [
-            # (label, kwargs for requests.post)
-            ("multipart:file", dict(
+        try:
+            r = requests.post(
+                f"{self.base}/api/v2/sendMessageFile",
+                headers=self._headers(),
+                data={"phonenumber": to, "caption": caption, "filename": name},
                 files={"file": (name, raw, "image/jpeg")},
-                data={"to": to, "caption": caption, "type": "image"},
-                headers=self._headers())),
-            ("multipart:media", dict(
-                files={"media": (name, raw, "image/jpeg")},
-                data={"to": to, "caption": caption},
-                headers=self._headers())),
-            ("multipart:image", dict(
-                files={"image": (name, raw, "image/jpeg")},
-                data={"to": to, "caption": caption},
-                headers=self._headers())),
-            ("json:image_b64", dict(
-                json={"to": to, "image": b64, "caption": caption},
-                headers=self._headers(json_mode=True))),
-            ("json:media_obj", dict(
-                json={"to": to, "type": "image",
-                      "media": {"data": b64, "mimetype": "image/jpeg", "caption": caption}},
-                headers=self._headers(json_mode=True))),
-        ]
-        for label, kwargs in attempts:
-            try:
-                r = requests.post(self._endpoint(), timeout=30, **kwargs)
-                self._log(to, "image:" + label, r.status_code, r.text)
-                if r.ok:
-                    return True, label
-            except Exception as e:
-                self._log(to, "image-error:" + label, "-", str(e))
-        return False, "all image formats failed"
+                timeout=45,
+            )
+            self._log(to, "image", r.status_code, r.text)
+            return r.ok, f"HTTP {r.status_code}"
+        except Exception as e:
+            self._log(to, "image-error", "-", str(e))
+            return False, str(e)
 
     def _log(self, to, kind, status, body):
         try:

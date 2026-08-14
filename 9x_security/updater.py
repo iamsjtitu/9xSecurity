@@ -29,16 +29,18 @@ def _api(url):
 
 
 def _pick_asset(assets):
-    """Prefer the folder .zip build; fall back to legacy single .exe."""
-    zip_url = exe_url = None
+    """Prefer the Setup installer .exe; fall back to .zip, then any .exe."""
+    setup = zip_url = exe_url = None
     for a in assets or []:
         name = str(a.get("name", "")).lower()
         url = a.get("browser_download_url")
-        if name.endswith(".zip") and zip_url is None:
+        if name.endswith(".exe") and "setup" in name and setup is None:
+            setup = url
+        elif name.endswith(".zip") and zip_url is None:
             zip_url = url
         elif name.endswith(".exe") and exe_url is None:
             exe_url = url
-    return zip_url or exe_url
+    return setup or zip_url or exe_url
 
 
 def check_latest(repo):
@@ -86,14 +88,22 @@ def _zip_app_root(extract_dir):
 
 
 def apply_update(path):
-    """path = downloaded .zip (folder build) or .exe (legacy single-file).
-    Swaps the install and relaunches (Windows only).
-    Returns True if an update script was launched, False if running from source."""
+    """path = downloaded Setup .exe (installer) or .zip (older folder build).
+    Installs the new version and relaunches (Windows only).
+    Returns True if an update was launched, False if running from source."""
     if not getattr(sys, "frozen", False):
         return False
     if str(path).lower().endswith(".zip"):
         return _apply_zip(path)
-    return _apply_exe(path)
+    return _run_installer(path)
+
+
+def _run_installer(setup_exe):
+    """Silent Inno Setup upgrade-in-place; relaunches the app after install."""
+    subprocess.Popen(
+        [setup_exe, "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/FORCECLOSEAPPLICATIONS"]
+    )
+    return True
 
 
 def _apply_zip(zip_path):
@@ -119,21 +129,5 @@ def _apply_zip(zip_path):
     with open(bat, "w") as f:
         f.write(script)
     # DETACHED_PROCESS so it survives after we exit.
-    subprocess.Popen(["cmd", "/c", bat], creationflags=0x00000008)
-    return True
-
-
-def _apply_exe(new_exe):
-    cur = sys.executable
-    bat = os.path.join(tempfile.gettempdir(), "9x_update.bat")
-    script = (
-        "@echo off\r\n"
-        "timeout /t 2 /nobreak >nul\r\n"
-        f'move /y "{new_exe}" "{cur}"\r\n'
-        f'start "" "{cur}"\r\n'
-        'del "%~f0"\r\n'
-    )
-    with open(bat, "w") as f:
-        f.write(script)
     subprocess.Popen(["cmd", "/c", bat], creationflags=0x00000008)
     return True

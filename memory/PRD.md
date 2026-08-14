@@ -99,7 +99,24 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   workflow YAML valid. Windows-side install/restart flow needs real-device validation.
 
 
+## Implemented (update 2026-06 #6) — Setup installer + auto-version (user chose installer)
+- User: "zip mat karo" + version auto-change per release. New flow:
+  • CI auto-version: 1.0.{github.run_number}; sed-patches updater.py APP_VERSION pre-build
+  • onedir build kept (fast), then Inno Setup (preinstalled on runner, choco fallback)
+    compiles installer.iss -> dist/9xSecuritySetup-v1.0.N.exe; release asset = installer only
+  • installer.iss: per-user install to {localappdata}\9xSecurity (writable, no admin),
+    desktop + start menu shortcuts, CloseApplications=force, [Run] relaunch postinstall
+  • updater: _pick_asset prefers Setup .exe > .zip > any .exe; apply_update runs installer
+    /VERYSILENT /FORCECLOSEAPPLICATIONS (upgrade-in-place, auto relaunch); legacy
+    single-exe replace removed; zip path kept
+  • Workflow triggers: push main/master + dispatch only (tag trigger removed - tags now
+    created by release action)
+- Verified: 12/12 test_engine.py pass (installer-first asset pick, 1.0.12>1.0.2 compare),
+  YAML valid, sed version patch tested. Inno compile + install/update flow = user on Windows.
+
+
 ## Backlog / Next
+
 - P1: Vehicle re-identification to avoid double counting if it lingers on line
 - P1: CSV/Excel export of event log
 - P2: Multi-camera support (separate entry/exit cams)

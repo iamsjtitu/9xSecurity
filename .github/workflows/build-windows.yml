@@ -1,12 +1,10 @@
-name: Build 9x Security (Windows EXE)
+name: Build 9x Security (Windows Installer)
 
 on:
   push:
     branches:
       - main
       - master
-    tags:
-      - "v*"
   workflow_dispatch: {}
 
 permissions:
@@ -32,13 +30,14 @@ jobs:
           cache: "pip"
           cache-dependency-path: 9x_security/requirements.txt
 
-      - name: Read app version
+      - name: Set automatic version (1.0.<build number>)
         id: ver
         shell: bash
         run: |
-          V=$(sed -n 's/^APP_VERSION = "\(.*\)"/\1/p' updater.py)
+          V="1.0.${{ github.run_number }}"
+          sed -i "s/^APP_VERSION = .*/APP_VERSION = \"$V\"/" updater.py
+          grep "^APP_VERSION" updater.py
           echo "version=$V" >> "$GITHUB_OUTPUT"
-          echo "App version: $V"
 
       - name: Install dependencies
         run: |
@@ -61,20 +60,23 @@ jobs:
           --exclude-module notebook
           main.py
 
-      - name: Zip app folder
+      - name: Build Setup installer (Inno Setup)
         shell: pwsh
-        run: Compress-Archive -Path dist\9xSecurity -DestinationPath "dist\9xSecurity-v${{ steps.ver.outputs.version }}.zip"
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress }
+          & $iscc /DAppVersion=${{ steps.ver.outputs.version }} installer.iss
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: 9xSecurity-zip
-          path: 9x_security/dist/9xSecurity-v${{ steps.ver.outputs.version }}.zip
+          name: 9xSecurity-setup
+          path: 9x_security/dist/9xSecuritySetup-v${{ steps.ver.outputs.version }}.exe
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.ver.outputs.version }}
           name: 9x Security v${{ steps.ver.outputs.version }}
-          files: 9x_security/dist/9xSecurity-v${{ steps.ver.outputs.version }}.zip
+          files: 9x_security/dist/9xSecuritySetup-v${{ steps.ver.outputs.version }}.exe
           make_latest: true

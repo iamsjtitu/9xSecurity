@@ -108,29 +108,32 @@ nahi). Folder-style build ka fayda: **app seconds me khulti hai** (single-file
 Kaise chalta hai:
 1. Chat input ke **"Save to Github"** button se apna code GitHub par push karein.
 2. Bas itna hi! Ab **har "Save to GitHub" push par** workflow apne aap chalega:
-   - GitHub Windows par app **folder build** karega aur usse zip banayega
-   - `updater.py` me jo `APP_VERSION` hai, usi naam se **Release** (jaise `v1.0.0`)
-     apne aap ban/refresh ho jaayegi aur usme `9xSecurity-v1.0.0.zip` attach hoga.
+   - **Version number apne aap badhta hai** — har build par `1.0.<build number>`
+     (jaise 1.0.7 → 1.0.8). Kuch manually badalna nahi padta.
+   - GitHub Windows par app build karke ek **Setup installer** banata hai
+   - Release me `9xSecuritySetup-v1.0.N.exe` attach ho jaata hai.
    - Manually kuch bhi run karne ki zaroorat nahi. (Chahein to Actions tab →
      "Build 9x Security" → *Run workflow* se bhi chala sakte hain.)
 
-Pehli baar install: zip download karein → extract karein → `9xSecurity.exe` chalayein.
+Pehli baar install: `9xSecuritySetup-v1.0.N.exe` download karein → double-click →
+install ho jaayega, **desktop shortcut** ban jaayega. Na zip, na extract.
 
-> ⏳ **Note**: Folder-zip build single-file se kaafi tez hai (~8–15 min). Beech
-> me logs ruk sakte hain — ye stuck nahi hai. 60 min ki safety timeout lagi hai.
+> ⏳ **Note**: Build ~10–18 min leta hai (AI libraries badi hain). Beech me logs
+> ruk sakte hain — ye stuck nahi hai. 60 min ki safety timeout lagi hai.
 
 ## 9. Software me se Auto-Update 🔄
 App ke andar **⚙ Settings → Updates** tab:
 - **GitHub Repo**: `owner/repository` daalein (jaise `yourname/9x-security`)
 - **Check for Updates** dabayein
-- Agar nayi version (release) mili, to app nayi **zip download + extract karke
-  apne aap install** kar dega aur restart ho jaayega. (Ye sirf packaged build
-  me kaam karta hai; aapka data — config, snapshots, database — safe rehta hai.)
+- Agar nayi version (release) mili, to app naya **Setup installer download karke
+  chupchaap install** kar dega aur nayi version ke saath restart ho jaayega.
+  (Ye sirf installed build me kaam karta hai; aapka data — config, snapshots,
+  database — safe rehta hai.)
 
-Nayi version release karne ka tarika (sirf 2 kadam):
-1. `updater.py` me `APP_VERSION` badhaayein (jaise `1.0.0` → `1.0.1`).
-2. **Save to GitHub** karein — build + release (`v1.0.1`) apne aap ban jaayegi.
-3. Users apne app se **Check for Updates** dabaa ke turant nayi version paa lenge.
+Nayi version release karne ka tarika (sirf 1 kadam):
+1. **Save to GitHub** karein — bas! Version apne aap badhega (1.0.N) aur
+   release apne aap ban jaayegi.
+2. Users apne app se **Check for Updates** dabaa ke turant nayi version paa lenge.
 
 ---
 

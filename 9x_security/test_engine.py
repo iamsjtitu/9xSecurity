@@ -204,12 +204,16 @@ def test_normalize_rtsp_url():
 def test_updater_pick_asset():
     import updater
 
+    setup = {"name": "9xSecuritySetup-v1.0.5.exe", "browser_download_url": "http://x/setup"}
     exe = {"name": "9xSecurity.exe", "browser_download_url": "http://x/exe"}
     zp = {"name": "9xSecurity-v1.0.1.zip", "browser_download_url": "http://x/zip"}
-    assert updater._pick_asset([exe, zp]) == "http://x/zip"  # zip preferred
-    assert updater._pick_asset([exe]) == "http://x/exe"      # legacy fallback
+    assert updater._pick_asset([exe, zp, setup]) == "http://x/setup"  # installer preferred
+    assert updater._pick_asset([exe, zp]) == "http://x/zip"           # then zip
+    assert updater._pick_asset([exe]) == "http://x/exe"               # then any exe
     assert updater._pick_asset([]) is None
-    print("PASS: updater picks zip asset first, exe fallback")
+    # auto-version compare: 1.0.12 > 1.0.2 numerically
+    assert updater.is_newer("1.0.12", "1.0.2")
+    print("PASS: updater picks Setup installer first; auto-version compare ok")
 
 
 def test_updater_zip_root():

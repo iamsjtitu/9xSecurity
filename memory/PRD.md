@@ -41,8 +41,10 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - WhatsApp "Send Test Message" button in Settings → verifies API key + recipients live
 - Reliable photo delivery: image send auto-tries 5 known gateway formats (multipart file/media/image,
   JSON base64, JSON media-object) and uses the first that returns 2xx; text fallback otherwise
-- GitHub Actions CI (.github/workflows/build-windows.yml): on tag push builds Windows .exe
-  (PyInstaller onefile) and publishes it to the release
+- GitHub Actions CI (.github/workflows/build-windows.yml): auto-runs on every push to
+  main/master (Save to GitHub) and on v* tags; builds Windows .exe (PyInstaller onefile)
+  and auto-publishes a Release tagged v{APP_VERSION from updater.py} with the exe attached
+  (fixed June 2026: earlier it only ran on tag push, so user had to run workflow manually)
 - In-app auto-update (Settings → Updates): checks GitHub latest release, downloads .exe, self-replaces
   and restarts (frozen mode); updater.py APP_VERSION drives version compare
 

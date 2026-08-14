@@ -103,14 +103,12 @@ copy karke chala sakte hain (Python install ki zaroorat nahi).
 
 Kaise chalta hai:
 1. Chat input ke **"Save to Github"** button se apna code GitHub par push karein.
-2. Nayi release banane ke liye ek **version tag** push karein, jaise:
-   ```bash
-   git tag v1.0.1
-   git push origin v1.0.1
-   ```
-3. GitHub apne aap **Windows par `.exe` build** karega aur us tag ki **Release**
-   me `9xSecurity.exe` attach kar dega.
-   (Manually bhi Actions tab → "Build 9x Security" → *Run workflow* se chala sakte hain.)
+2. Bas itna hi! Ab **har "Save to GitHub" push par** workflow apne aap chalega:
+   - GitHub Windows par `.exe` build karega
+   - `updater.py` me jo `APP_VERSION` hai, usi naam se **Release** (jaise `v1.0.0`)
+     apne aap ban/refresh ho jaayegi aur usme `9xSecurity.exe` attach hoga.
+   - Manually kuch bhi run karne ki zaroorat nahi. (Chahein to Actions tab →
+     "Build 9x Security" → *Run workflow* se bhi chala sakte hain.)
 
 ## 9. Software me se Auto-Update 🔄
 App ke andar **⚙ Settings → Updates** tab:
@@ -119,9 +117,9 @@ App ke andar **⚙ Settings → Updates** tab:
 - Agar nayi version (release tag) mili, to app seedha nayi `.exe` **download +
   install** kar dega aur restart ho jaayega. (Ye sirf `.exe` mode me kaam karta hai.)
 
-Nayi version release karne ka tarika:
+Nayi version release karne ka tarika (sirf 2 kadam):
 1. `updater.py` me `APP_VERSION` badhaayein (jaise `1.0.0` → `1.0.1`).
-2. Push karke naya tag banayein (`v1.0.1`) — Step 8 waala build chal jaayega.
+2. **Save to GitHub** karein — build + release (`v1.0.1`) apne aap ban jaayegi.
 3. Users apne app se **Check for Updates** dabaa ke turant nayi version paa lenge.
 
 ---

@@ -73,6 +73,19 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   and the REAL wa.9x.design media endpoint (docs are login-gated; multipart used + text fallback).
   These run on the user's Windows machine.
 
+## Implemented (update 2026-06 #5) — RTSP @ fix + WHITE theme
+- BUG FIX (user URL rtsp://admin:Admin@123@192.168.31.65:554/stream1 no video):
+  '@' in password broke FFmpeg URL parsing. engine.normalize_rtsp_url() percent-encodes
+  userinfo (Admin@123 -> Admin%40123), idempotent. VideoThread opens via CAP_FFMPEG with
+  OPENCV_FFMPEG_CAPTURE_OPTIONS=rtsp_transport;tcp (forced) + default-backend fallback;
+  reconnect uses same path; Hindi error message on failure.
+- WHITE THEME: BASE_STYLE + all inline styles rewritten light (#f6f8fb window, #ffffff
+  panels, #1e293b text, #1f6feb accent, video area #eef2f7, muted #64748b, entry #15803d,
+  exit #b45309, error #dc2626). Zero dark colors remain (grep-verified).
+- Verified by testing agent /app/test_reports/iteration_2.json: 12/12 tests pass, URL fix
+  confirmed with live cv2 attempt (correct host targeted). Visual theme check = user on Windows.
+
+
 ## Implemented (update 2026-06 #4) — Folder-zip build (user chose option c)
 - Workflow now builds ONEDIR (folder) instead of onefile: build 2-3x faster (~8-15 min),
   app starts in seconds (no 1.5GB self-extract per launch). Zips dist/9xSecurity ->

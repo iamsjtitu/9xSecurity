@@ -4,7 +4,9 @@ Ties together detection, tracking, line-crossing, snapshot saving and DB logging
 The GUI (main.py) feeds frames into `process_frame` and renders `annotated`.
 """
 import os
+import re
 from datetime import datetime
+from urllib.parse import quote, unquote
 
 import cv2
 
@@ -12,6 +14,24 @@ import config
 from database import EventDB
 from detector import VehicleDetector
 from tracker import CentroidTracker
+
+
+def normalize_rtsp_url(url):
+    """Fix RTSP URLs whose password contains special chars like '@'.
+    e.g. rtsp://admin:Admin@123@host:554/s -> rtsp://admin:Admin%40123@host:554/s
+    Idempotent (already-encoded URLs stay unchanged)."""
+    url = (url or "").strip()
+    m = re.match(r"^(rtsps?://)(.*)$", url, re.IGNORECASE)
+    if not m or "@" not in m.group(2):
+        return url
+    scheme, rest = m.groups()
+    creds, host = rest.rsplit("@", 1)
+    if ":" in creds:
+        user, pw = creds.split(":", 1)
+        user = quote(unquote(user), safe="")
+        pw = quote(unquote(pw), safe="")
+        return f"{scheme}{user}:{pw}@{host}"
+    return f"{scheme}{quote(unquote(creds), safe='')}@{host}"
 
 
 class SecurityEngine:

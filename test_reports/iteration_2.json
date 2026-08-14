@@ -1,0 +1,27 @@
+{
+  "summary": "Backend/logic-only verification of 9x_security desktop app fixes: (1) normalize_rtsp_url() correctly percent-encodes '@' in password, is idempotent, leaves normal & credential-less URLs alone; (2) OpenCV cv2.CAP_FFMPEG accepts the normalized URL and attempts connection to 192.168.31.65 (times out as expected since LAN camera unreachable from container); (3) main.py VideoThread.run uses normalize_rtsp_url + status message; _open uses cv2.CAP_FFMPEG with OPENCV_FFMPEG_CAPTURE_OPTIONS='rtsp_transport;tcp' and default-backend fallback; reconnect path also calls _open (verified via code inspection); (4) White-theme audit: grep for all 14 old dark colors + 'background:black/#000' in main.py returns zero matches; new palette uses #f6f8fb window, #ffffff panels, #1e293b text, #1f6feb accent, #eef2f7 video area, #64748b muted, #15803d entry, #b45309 exit, #dc2626 error; (5) pytest suite (12 tests, note request said 13 but file only defines 12 functions incl. new test_normalize_rtsp_url) all PASS; (6) py_compile on engine.py, main.py, test_engine.py all OK.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/test_engine.py",
+    "/app/test_reports/pytest/9x_security_results.xml"
+  ],
+  "action_items": [
+    "Minor: main agent stated '13 tests must pass' but test_engine.py only defines 12 test functions - all 12 pass, so this is just a miscount, no code change needed.",
+    "White-theme visual confirmation must be done by user on Windows (PyQt5 cannot run in this Linux container)."
+  ],
+  "critical_code_review_comments": [
+    "engine.py normalize_rtsp_url() correctly uses rsplit('@',1) so passwords containing '@' are handled robustly; unquote->quote pattern makes it idempotent - good.",
+    "main.py _open() uses os.environ.setdefault (not os.environ[...]='...') for OPENCV_FFMPEG_CAPTURE_OPTIONS - this means if user's shell already set the var to something else, TCP transport won't be forced. Consider os.environ[...] assignment or pass via cv2.VideoCapture params in OpenCV 4.10+. Not a blocker.",
+    "VideoThread.run reconnect branch calls self._open(source) correctly, so the TCP transport option is reapplied on stream loss - good.",
+    "main.py is 749 lines, exceeds the 700-line guideline; consider splitting SettingsDialog/LoginDialog into a separate settings.py module for maintainability."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "N/A (desktop PyQt5, cannot render in container)"},
+  "test_credentials": "N/A (desktop app; default login admin/9xsecurity seeded on first run per main.py:733)",
+  "seed_data_creation": "None; tests use tmp dirs / mocked WhatsApp API.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "9x_security is a Windows desktop PyQt5 app in /app/9x_security. Do NOT test /app/backend or /app/frontend for this project. PyQt5 CANNOT be installed here - use py_compile + code inspection for main.py. cv2/ultralytics/numpy already installed. Run pytest /app/9x_security/test_engine.py for regression. The RTSP camera at 192.168.31.65 is on user's LAN and unreachable - only verify URL parsing logic, not live streams.",
+  "rca of the issue": "USER BUG: RTSP URL 'rtsp://admin:Admin@123@192.168.31.65:554/stream1' has literal '@' in the password 'Admin@123', producing two '@' chars in the userinfo. FFmpeg's URL parser splits on the FIRST '@', mis-identifying host as '123@192.168.31.65:554' and failing to connect. FIX: engine.normalize_rtsp_url() rsplits on the LAST '@' to isolate credentials, then percent-encodes user/password (Admin@123 -> Admin%40123) using unquote->quote for idempotency. main.py VideoThread now runs the URL through this normalizer before cv2.VideoCapture, and forces rtsp_transport=tcp via OPENCV_FFMPEG_CAPTURE_OPTIONS env var with a default-backend fallback. All verified via unit tests + live cv2.VideoCapture attempt (attempts correct host, times out because LAN unreachable from container - expected)."
+}

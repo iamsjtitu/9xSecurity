@@ -13,26 +13,31 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 import config
 from database import EventDB
-from engine import SecurityEngine
+from engine import SecurityEngine, normalize_rtsp_url
 import auth
 
 
 BASE_STYLE = """
-    QMainWindow, QDialog { background:#0b0f14; }
-    QWidget { color:#e6edf3; font-family:'Segoe UI'; font-size:13px; }
-    QLineEdit, QPlainTextEdit { background:#111826; border:1px solid #263447; border-radius:6px; padding:7px; }
+    QMainWindow, QDialog { background:#f6f8fb; }
+    QWidget { color:#1e293b; font-family:'Segoe UI'; font-size:13px; }
+    QLineEdit, QPlainTextEdit { background:#ffffff; border:1px solid #cbd5e1; border-radius:6px; padding:7px; color:#1e293b; }
+    QLineEdit:focus, QPlainTextEdit:focus { border:1px solid #1f6feb; }
     QPushButton { background:#1f6feb; border:none; border-radius:6px; padding:8px 14px; color:white; font-weight:600; }
     QPushButton:hover { background:#2a7bff; }
-    QPushButton#danger { background:#b42318; }
-    QPushButton#ghost { background:#1b2430; border:1px solid #2b3b4e; }
-    QGroupBox { border:1px solid #1f2a37; border-radius:8px; margin-top:10px; padding-top:8px; }
-    QGroupBox::title { subcontrol-origin: margin; left:10px; color:#7d8ea1; }
-    QTableWidget { background:#0e141c; gridline-color:#1a2430; border:1px solid #1f2a37; border-radius:8px; }
-    QHeaderView::section { background:#111826; color:#9fb0c3; padding:6px; border:none; }
-    QComboBox, QDateEdit { background:#111826; border:1px solid #263447; border-radius:6px; padding:5px; }
+    QPushButton#danger { background:#dc2626; }
+    QPushButton#ghost { background:#ffffff; border:1px solid #cbd5e1; color:#1e293b; }
+    QPushButton#ghost:hover { background:#eef2f7; }
+    QGroupBox { background:#ffffff; border:1px solid #dbe3ec; border-radius:8px; margin-top:10px; padding-top:8px; }
+    QGroupBox::title { subcontrol-origin: margin; left:10px; color:#64748b; }
+    QTableWidget { background:#ffffff; gridline-color:#e2e8f0; border:1px solid #dbe3ec; border-radius:8px; }
+    QTableWidget::item { color:#1e293b; }
+    QHeaderView::section { background:#eef2f7; color:#475569; padding:6px; border:none; }
+    QComboBox, QDateEdit { background:#ffffff; border:1px solid #cbd5e1; border-radius:6px; padding:5px; color:#1e293b; }
     QCheckBox { padding:2px; }
-    QTabBar::tab { background:#111826; color:#9fb0c3; padding:8px 16px; border:1px solid #1f2a37; }
+    QTabWidget::pane { border:1px solid #dbe3ec; background:#ffffff; }
+    QTabBar::tab { background:#eef2f7; color:#475569; padding:8px 16px; border:1px solid #dbe3ec; }
     QTabBar::tab:selected { background:#1f6feb; color:white; }
+    QMessageBox, QMenu, QCalendarWidget { background:#ffffff; }
 """
 
 
@@ -46,7 +51,7 @@ class VideoLabel(QtWidgets.QLabel):
         super().__init__()
         self.setMinimumSize(config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT)
         self.setAlignment(QtCore.Qt.AlignCenter)
-        self.setStyleSheet("background:#0b0f14; border:1px solid #1f2a37;")
+        self.setStyleSheet("background:#eef2f7; border:1px solid #cbd5e1; color:#64748b;")
         self.draw_mode = False
         self._first = None
 
@@ -87,12 +92,21 @@ class VideoThread(QtCore.QThread):
             self.status.emit(f"Model load failed: {e}")
             return
 
-        url = self.cfg.get("rtsp_url", "").strip()
-        source = url if url else 0  # fallback to webcam for local testing
-        self.status.emit(f"Connecting to source...")
-        cap = cv2.VideoCapture(source)
+        raw_url = self.cfg.get("rtsp_url", "").strip()
+        if raw_url:
+            source = normalize_rtsp_url(raw_url)
+            if source != raw_url:
+                self.status.emit("URL me special characters (@ etc.) auto-fix kiye gaye.")
+        else:
+            source = 0  # fallback to webcam for local testing
+        self.status.emit("Connecting to source...")
+        cap = self._open(source)
         if not cap.isOpened():
-            self.status.emit("ERROR: Could not open camera / RTSP stream.")
+            self.status.emit(
+                "ERROR: Camera/RTSP stream nahi khula. Check karein: IP sahi hai? "
+                "Port 554 khula hai? Username/password sahi hai? "
+                "(Password me @ jaise characters app khud handle kar leta hai.)"
+            )
             return
         self.status.emit("Connected - monitoring live feed")
 
@@ -104,7 +118,7 @@ class VideoThread(QtCore.QThread):
                 if fail > 50:
                     self.status.emit("Stream lost - reconnecting...")
                     cap.release()
-                    cap = cv2.VideoCapture(source)
+                    cap = self._open(source)
                     fail = 0
                 self.msleep(20)
                 continue
@@ -114,6 +128,18 @@ class VideoThread(QtCore.QThread):
             self.frame_ready.emit(annotated)
             self.msleep(10)
         cap.release()
+
+    @staticmethod
+    def _open(source):
+        if isinstance(source, str) and source.lower().startswith("rtsp"):
+            # TCP transport: fixes streams that open but never deliver frames.
+            os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp"
+            cap = cv2.VideoCapture(source, cv2.CAP_FFMPEG)
+            if not cap.isOpened():
+                cap.release()
+                cap = cv2.VideoCapture(source)
+            return cap
+        return cv2.VideoCapture(source)
 
     def stop(self):
         self._running = False
@@ -152,7 +178,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         conn = QtWidgets.QHBoxLayout()
         self.url_edit = QtWidgets.QLineEdit(self.cfg.get("rtsp_url", ""))
-        self.url_edit.setPlaceholderText("rtsp://user:pass@192.168.1.10:554/stream")
+        self.url_edit.setPlaceholderText("rtsp://user:pass@192.168.1.10:554/stream1  (password me @ ho to bhi chalega)")
         self.url_edit.setObjectName("rtsp-url-input")
         self.btn_connect = QtWidgets.QPushButton("Connect")
         self.btn_connect.setObjectName("connect-btn")
@@ -208,7 +234,7 @@ class MainWindow(QtWidgets.QMainWindow):
         left.addLayout(opts)
 
         self.status = QtWidgets.QLabel("Idle. Enter RTSP URL and press Connect.")
-        self.status.setStyleSheet("color:#7d8ea1; padding:4px;")
+        self.status.setStyleSheet("color:#64748b; padding:4px;")
         left.addWidget(self.status)
 
         # ----- RIGHT: stats + events -----
@@ -216,8 +242,8 @@ class MainWindow(QtWidgets.QMainWindow):
         right.setSpacing(10)
 
         stats = QtWidgets.QHBoxLayout()
-        self.card_entry = self._stat_card("ENTRIES TODAY", "0", "#2ea043")
-        self.card_exit = self._stat_card("EXITS TODAY", "0", "#d29922")
+        self.card_entry = self._stat_card("ENTRIES TODAY", "0", "#15803d")
+        self.card_exit = self._stat_card("EXITS TODAY", "0", "#b45309")
         stats.addWidget(self.card_entry)
         stats.addWidget(self.card_exit)
         right.addLayout(stats)
@@ -257,7 +283,7 @@ class MainWindow(QtWidgets.QMainWindow):
         box = QtWidgets.QGroupBox()
         lay = QtWidgets.QVBoxLayout(box)
         t = QtWidgets.QLabel(title)
-        t.setStyleSheet("color:#7d8ea1; font-size:11px; font-weight:600;")
+        t.setStyleSheet("color:#64748b; font-size:11px; font-weight:600;")
         v = QtWidgets.QLabel(value)
         v.setObjectName("stat-value")
         v.setStyleSheet(f"color:{color}; font-size:30px; font-weight:800;")
@@ -389,7 +415,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self._set(row, 2, str(ev.get("vehicle_type", "")).upper())
         d = ev.get("direction", "")
         item = QtWidgets.QTableWidgetItem(d)
-        item.setForeground(QtGui.QColor("#2ea043" if d == "Entry" else "#d29922"))
+        item.setForeground(QtGui.QColor("#15803d" if d == "Entry" else "#b45309"))
         self.table.setItem(row, 3, item)
         self._set(row, 4, ev.get("plate", "") or "-")
         self.table.setItem(row, 1, self.table.item(row, 1))
@@ -442,7 +468,7 @@ class LoginDialog(QtWidgets.QDialog):
         title.setStyleSheet("font-size:24px;font-weight:800;color:#1f6feb;letter-spacing:3px;")
         title.setAlignment(QtCore.Qt.AlignCenter)
         sub = QtWidgets.QLabel("Sign in to continue")
-        sub.setStyleSheet("color:#7d8ea1;")
+        sub.setStyleSheet("color:#64748b;")
         sub.setAlignment(QtCore.Qt.AlignCenter)
         lay.addWidget(title)
         lay.addWidget(sub)
@@ -459,7 +485,7 @@ class LoginDialog(QtWidgets.QDialog):
         lay.addWidget(self.pw)
 
         self.msg = QtWidgets.QLabel("")
-        self.msg.setStyleSheet("color:#f85149;")
+        self.msg.setStyleSheet("color:#dc2626;")
         lay.addWidget(self.msg)
 
         btn = QtWidgets.QPushButton("Login")
@@ -528,7 +554,7 @@ class SettingsDialog(QtWidgets.QDialog):
         af.addRow("wa.9x.design Email", self.acc_email)
         af.addRow("wa.9x.design Password", self.acc_pass)
         note = QtWidgets.QLabel("Ye credentials sirf reference ke liye store hote hain.\nSending API key (Bearer) se hota hai (WhatsApp tab).")
-        note.setStyleSheet("color:#7d8ea1;")
+        note.setStyleSheet("color:#64748b;")
         af.addRow(note)
         tabs.addTab(ac, "Account")
 
@@ -569,7 +595,7 @@ class SettingsDialog(QtWidgets.QDialog):
             "GitHub Release me nayi version publish hone par yahan se seedha\n"
             "download + install ho jaayegi (packaged build me auto-install)."
         )
-        unote.setStyleSheet("color:#7d8ea1;")
+        unote.setStyleSheet("color:#64748b;")
         uf.addRow(unote)
         tabs.addTab(up, "Updates")
 

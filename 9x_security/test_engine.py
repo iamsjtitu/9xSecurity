@@ -184,6 +184,23 @@ def test_updater_version_compare():
     print("PASS: updater version compare")
 
 
+def test_normalize_rtsp_url():
+    from engine import normalize_rtsp_url as n
+
+    # password containing '@' gets percent-encoded (the user's reported case)
+    assert n("rtsp://admin:Admin@123@192.168.31.65:554/stream1") == \
+        "rtsp://admin:Admin%40123@192.168.31.65:554/stream1"
+    # normal URL untouched
+    assert n("rtsp://admin:pass@192.168.1.5:554/s") == "rtsp://admin:pass@192.168.1.5:554/s"
+    # idempotent - already-encoded stays same
+    assert n("rtsp://admin:Admin%40123@192.168.31.65:554/stream1") == \
+        "rtsp://admin:Admin%40123@192.168.31.65:554/stream1"
+    # no credentials / empty
+    assert n("rtsp://192.168.1.5:554/s") == "rtsp://192.168.1.5:554/s"
+    assert n("") == ""
+    print("PASS: RTSP url normalization (@ in password auto-encoded)")
+
+
 def test_updater_pick_asset():
     import updater
 
@@ -249,6 +266,7 @@ def test_whatsapp_image_sendfile():
 
 if __name__ == "__main__":
     test_direction_mapping()
+    test_normalize_rtsp_url()
     test_tracker_ids_persist()
     test_line_crossing_logs_event()
     test_auth_password()

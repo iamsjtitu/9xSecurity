@@ -93,7 +93,7 @@ Plate: HR26AB1234
 ```bat
 venv\Scripts\activate
 pip install pyinstaller
-pyinstaller --noconfirm --windowed --name "9xSecurity" --add-data "yolov8n.pt;." main.py
+pyinstaller --noconfirm --windowed --name "9xSecurity" --add-data "yolov8n.pt;." --collect-binaries imageio_ffmpeg main.py
 ```
 `dist\9xSecurity\` folder banega jisme `9xSecurity.exe` hoga — poora folder kisi
 bhi Windows PC par copy karke exe chala sakte hain (Python install ki zaroorat

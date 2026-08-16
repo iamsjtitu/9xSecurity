@@ -159,6 +159,20 @@ class VideoThread(QtCore.QThread):
                     cap.release()
             if not self._running:
                 return None
+            try:
+                from engine import FFmpegPipeSource
+
+                clog("connect: trying FFmpeg engine fallback")
+                src = FFmpegPipeSource(source)
+                ok, _first = src.read()
+                if ok and self._running:
+                    clog("connect ffmpeg-pipe: OK")
+                    return src
+                src.release()
+            except Exception as e:
+                clog(f"connect ffmpeg-pipe failed: {e}")
+            if not self._running:
+                return None
             clog("connect: falling back to default backend")
             return cv2.VideoCapture(source)
         return cv2.VideoCapture(source)

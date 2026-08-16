@@ -1,0 +1,29 @@
+{
+  "summary": "Iteration 6: Validated the VLC-grade FFmpeg pipe fallback for RTSP. Ran full regression (test_engine.py = 15 tests, test_iter5_diagnostics.py = 6 tests) plus a new dedicated suite (test_iter6_ffmpeg_fallback.py = 9 tests). All 30 tests pass. Confirmed: FFmpegPipeSource(lavfi testsrc) delivers consecutive BGR frames of shape (540,960,3) uint8 with non-zero std (real decoded pixels), isOpened() True while running, release() cleanly kills the subprocess (poll() != None afterwards). ffmpeg_err.txt is created/appended in /app/9x_security on use; camera_log.txt receives 'ffmpeg-pipe: starting' and 'OK first frame' lines (via _try_ffmpeg_pipe). _try_ffmpeg_pipe on an unreachable TEST-NET RTSP URL returns (False, hindi detail) within ~5s (well under the 30s cap) thanks to ffmpeg -timeout. probe_rtsp source has the correct order TCP -> UDP -> 'Video stream (FFmpeg engine)'; unreachable-host early-return still skips the FFmpeg engine step (network check fails first). main.py VideoThread._open imports FFmpegPipeSource, tries it after TCP/UDP loop, checks self._running, returns src on first-frame ok, falls back to default cv2.VideoCapture otherwise; py_compile passes. requirements.txt pins imageio-ffmpeg==0.6.0. build-windows.yml YAML is valid and contains '--collect-binaries imageio_ffmpeg'. README pyinstaller docs also carry the flag.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/test_engine.py",
+    "/app/9x_security/test_iter5_diagnostics.py",
+    "/app/9x_security/test_iter6_ffmpeg_fallback.py",
+    "/app/test_reports/pytest/9x_iter6_final.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "FFmpegPipeSource.read() reads a fixed nbytes (960*540*3=1,555,200 bytes) in a single blocking stdout.read call. If ffmpeg exits early with a partial frame it correctly returns (False,None); good. But there is no per-read timeout for a stalled-but-alive ffmpeg process (e.g. mid-stream freeze). Consider a watchdog or non-blocking read with poll for production robustness.",
+    "FFmpegPipeSource opens ffmpeg_err.txt in append mode ('ab') on every instantiation; over long-running use the file will grow unbounded. Add periodic truncation or size cap.",
+    "isOpened() only checks process liveness, not whether stdout has produced any bytes yet. main.py already mitigates this by doing a first-frame src.read() before accepting the source - good.",
+    "main.py._open lacks a max timeout for FFmpegPipeSource first-frame read (relies solely on ffmpeg's -timeout 5000000us and pipe EOF). Acceptable, but a wall-clock guard in Python would be safer.",
+    "engine.py is 311 lines with a mix of URL utils, ffmpeg fallback, probe, and SecurityEngine class - consider splitting rtsp_io.py from engine.py for maintainability."
+  ],
+  "updated_files": [
+    "/app/9x_security/test_iter6_ffmpeg_fallback.py (new)"
+  ],
+  "success_rate": {"backend": "100% (30/30)", "frontend": "N/A"},
+  "test_credentials": "N/A - user RTSP camera unreachable; used lavfi testsrc and TEST-NET (192.0.2.1) as instructed.",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "test_iter6_ffmpeg_fallback.py contains lavfi-based validation of the FFmpeg fallback. On Linux CI, imageio-ffmpeg==0.6.0 ships ffmpeg-linux-aarch64-v7.0.2 which decodes lavfi testsrc successfully. On Windows the packaged --collect-binaries imageio_ffmpeg will place ffmpeg.exe next to the app. Final live-camera confirmation (user's RTSP admin:Admin@123@192.168.31.65:554/stream1) remains a user-side Windows/LAN test. If future iterations touch FFmpegPipeSource, re-run all three test files - they cover shape/dtype/std, log emission, process cleanup, unreachable-host fast-fail, probe_rtsp step ordering, main.py wiring, requirements pin, and workflow YAML.",
+  "rca of the issue": "Original bug: OpenCV's ffmpeg-backed cv2.VideoCapture cannot decode a stream that VLC can. Root cause is typically OpenCV's ffmpeg build lacking codecs/options VLC's own libav enjoys, plus RTSP handshake quirks. Mitigation implemented and now verified: after cv2.VideoCapture TCP+UDP attempts fail, spawn bundled imageio-ffmpeg's ffmpeg binary directly with '-rtsp_transport tcp -timeout 5000000 -analyzeduration 10000000 -probesize 5000000 -i URL -an -vf scale=960:540 -pix_fmt bgr24 -f rawvideo pipe:1' and read raw BGR bytes from stdout. FFmpegPipeSource exposes cv2-compatible isOpened/read/release so VideoThread's run loop works unchanged. This gives VLC-equivalent decoding since it uses a full ffmpeg CLI (same codec matrix as VLC's libav) instead of OpenCV's linked ffmpeg."
+}

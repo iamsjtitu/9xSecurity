@@ -10,6 +10,7 @@ from datetime import datetime
 from urllib.parse import quote, unquote
 
 import cv2
+import numpy as np
 
 import config
 from database import EventDB
@@ -69,6 +70,76 @@ def _try_capture(url, transport, wait=10.0):
         cap.release()
 
 
+class FFmpegPipeSource:
+    """VLC-grade fallback: decodes RTSP via bundled ffmpeg into BGR frames.
+    Used when OpenCV's own capture cannot play a stream that works in VLC."""
+
+    def __init__(self, url, input_args=None):
+        import subprocess
+
+        import imageio_ffmpeg
+
+        exe = imageio_ffmpeg.get_ffmpeg_exe()
+        self._nbytes = config.DISPLAY_WIDTH * config.DISPLAY_HEIGHT * 3
+        if input_args is None:
+            input_args = [
+                "-rtsp_transport", "tcp", "-timeout", "5000000",
+                "-analyzeduration", "10000000", "-probesize", "5000000",
+            ]
+        cmd = [
+            exe, "-nostdin", "-loglevel", "error", *input_args, "-i", url,
+            "-an", "-vf", f"scale={config.DISPLAY_WIDTH}:{config.DISPLAY_HEIGHT}",
+            "-pix_fmt", "bgr24", "-f", "rawvideo", "pipe:1",
+        ]
+        self._err = open(os.path.join(config.BASE_DIR, "ffmpeg_err.txt"), "ab")
+        flags = 0x08000000 if os.name == "nt" else 0  # CREATE_NO_WINDOW
+        clog("ffmpeg-pipe: starting")
+        self.proc = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=self._err,
+            stdin=subprocess.DEVNULL, creationflags=flags,
+        )
+
+    def isOpened(self):
+        return self.proc.poll() is None
+
+    def read(self):
+        buf = self.proc.stdout.read(self._nbytes) if self.proc.stdout else b""
+        if not buf or len(buf) < self._nbytes:
+            return False, None
+        frame = np.frombuffer(buf, dtype=np.uint8).reshape(
+            config.DISPLAY_HEIGHT, config.DISPLAY_WIDTH, 3
+        )
+        return True, frame.copy()
+
+    def release(self):
+        try:
+            self.proc.kill()
+        except Exception:
+            pass
+        try:
+            self._err.close()
+        except Exception:
+            pass
+
+
+def _try_ffmpeg_pipe(url):
+    try:
+        src = FFmpegPipeSource(url)
+    except Exception as e:
+        clog(f"ffmpeg-pipe: unavailable ({e})")
+        return False, f"FFmpeg engine start nahi hua ({e})"
+    try:
+        t0 = time.time()
+        ok, _frame = src.read()  # blocks until first frame or ffmpeg exits
+        if ok:
+            clog(f"ffmpeg-pipe: OK first frame in {time.time()-t0:.1f}s")
+            return True, "Video aa raha hai (FFmpeg engine) — app isi engine se video chalayega"
+        clog("ffmpeg-pipe: no frames (process exited)")
+        return False, "FFmpeg engine se bhi video nahi mila (ffmpeg_err.txt file check karein)"
+    finally:
+        src.release()
+
+
 def probe_rtsp(url, wait=10.0):
     """Step-by-step camera connection diagnosis for the Test button.
     Returns (ok, [(step_name, step_ok, detail), ...])."""
@@ -101,6 +172,10 @@ def probe_rtsp(url, wait=10.0):
         return True, steps
     ok, detail = _try_capture(fixed, "udp", wait)
     steps.append(("Video stream (UDP)", ok, detail))
+    if ok:
+        return True, steps
+    ok, detail = _try_ffmpeg_pipe(fixed)
+    steps.append(("Video stream (FFmpeg engine)", ok, detail))
     if ok:
         return True, steps
     steps.append(("Hint", False,

@@ -147,6 +147,18 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   test_iter5_diagnostics.py by testing agent + 14 regression). AWAITING USER: Test dialog
   text + camera_log.txt from Windows build to pinpoint camera-side issue.
 
+## Implemented (update 2026-06 #10) — VLC-grade FFmpeg fallback engine (user: "VLC me chal raha hai")
+- Since VLC plays the stream, camera/creds/path are fine; OpenCV's linked ffmpeg fails it.
+- engine.FFmpegPipeSource: spawns bundled ffmpeg (imageio-ffmpeg==0.6.0) with rtsp tcp +
+  timeout/analyzeduration/probesize, scales to 960x540 bgr24 rawvideo pipe; cv2-compatible
+  read()/isOpened()/release(); stderr -> ffmpeg_err.txt; CREATE_NO_WINDOW on Windows
+- VideoThread._open ladder: cv2 TCP -> cv2 UDP -> FFmpegPipeSource -> default cv2
+- probe_rtsp new step "Video stream (FFmpeg engine)" after TCP/UDP
+- Packaging: --collect-binaries imageio_ffmpeg in workflow + README
+- Verified testing agent /app/test_reports/iteration_6.json: 30/30 pass incl. real lavfi
+  video decode through the pipe (shape/std checks), fast-fail on unreachable, cleanup.
+  Live camera confirmation pending user on Windows build.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

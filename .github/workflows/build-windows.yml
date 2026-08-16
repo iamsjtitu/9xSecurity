@@ -55,6 +55,7 @@ jobs:
           --add-data "yolov8n.pt;."
           --collect-data ultralytics
           --collect-data easyocr
+          --collect-binaries imageio_ffmpeg
           --exclude-module tkinter
           --exclude-module IPython
           --exclude-module pytest

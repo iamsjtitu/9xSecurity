@@ -237,6 +237,23 @@ def test_updater_404_and_default_repo():
     print("PASS: updater handles 404 (no release yet) gracefully; DEFAULT_REPO exists")
 
 
+def test_ffmpeg_pipe_source():
+    import config
+    from engine import FFmpegPipeSource
+
+    # lavfi testsrc = synthetic video; proves the decode->BGR pipe works end to end
+    src = FFmpegPipeSource("testsrc=duration=2:size=320x240:rate=5", input_args=["-f", "lavfi"])
+    try:
+        ok, frame = src.read()
+        assert ok, "no frame from ffmpeg pipe"
+        assert frame.shape == (config.DISPLAY_HEIGHT, config.DISPLAY_WIDTH, 3), frame.shape
+        ok2, _f2 = src.read()
+        assert ok2, "second frame missing"
+    finally:
+        src.release()
+    print("PASS: FFmpeg pipe engine decodes video -> BGR frames (VLC-grade fallback)")
+
+
 def test_updater_pick_asset():
     import updater
 
@@ -308,6 +325,7 @@ if __name__ == "__main__":
     test_direction_mapping()
     test_normalize_rtsp_url()
     test_probe_rtsp()
+    test_ffmpeg_pipe_source()
     test_tracker_ids_persist()
     test_line_crossing_logs_event()
     test_auth_password()

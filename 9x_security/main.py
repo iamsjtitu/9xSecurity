@@ -136,23 +136,30 @@ class VideoThread(QtCore.QThread):
 
     def _open(self, source):
         if isinstance(source, str) and source.lower().startswith("rtsp"):
+            from engine import FFMPEG_OPTS, clog
+
             # TCP first (fixes open-but-no-frames), then UDP, then default backend.
             for transport in ("tcp", "udp"):
                 if not self._running:
                     return None
-                os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = f"rtsp_transport;{transport}|timeout;5000000"
+                os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = f"rtsp_transport;{transport}{FFMPEG_OPTS}"
+                clog(f"connect attempt transport={transport}")
                 cap = cv2.VideoCapture(source, cv2.CAP_FFMPEG)
                 if cap.isOpened():
                     t0 = time.time()
-                    while self._running and time.time() - t0 < 5:
+                    while self._running and time.time() - t0 < 12:
                         ok, _f = cap.read()
                         if ok:
+                            clog(f"connect {transport}: OK first frame in {time.time()-t0:.1f}s")
                             return cap
+                    clog(f"connect {transport}: opened but no frames in 12s")
                     cap.release()
                 else:
+                    clog(f"connect {transport}: open failed")
                     cap.release()
             if not self._running:
                 return None
+            clog("connect: falling back to default backend")
             return cv2.VideoCapture(source)
         return cv2.VideoCapture(source)
 
@@ -386,13 +393,25 @@ class MainWindow(QtWidgets.QMainWindow):
     def _on_probe_done(self, ok, steps):
         self.btn_test.setEnabled(True)
         self.btn_test.setText("Test")
-        self.status.setText("Camera test complete.")
         lines = [("✔ " if s_ok else "✘ ") + f"{name}\n    {detail}" for name, s_ok, detail in steps]
         text = ("SAB THEEK — camera chal raha hai ✔\n\n" if ok else "PROBLEM MILI ✘\n\n") + "\n\n".join(lines)
-        if ok:
-            QtWidgets.QMessageBox.information(self, "Camera Test", text)
-        else:
-            QtWidgets.QMessageBox.warning(self, "Camera Test", text)
+        summary = next((f"Test: ✘ {n}" for n, o, _d in steps if not o), "Test: sab steps ✔")
+        self.status.setText(summary)
+
+        dlg = QtWidgets.QDialog(self)
+        dlg.setWindowTitle("Camera Test Result")
+        dlg.setMinimumSize(560, 420)
+        lay = QtWidgets.QVBoxLayout(dlg)
+        box = QtWidgets.QPlainTextEdit(text)
+        box.setReadOnly(True)
+        lay.addWidget(box)
+        note = QtWidgets.QLabel("Pura record 'camera_log.txt' file me bhi save hota hai (app folder me).")
+        note.setStyleSheet("color:#64748b;")
+        lay.addWidget(note)
+        btn = QtWidgets.QPushButton("OK")
+        btn.clicked.connect(dlg.accept)
+        lay.addWidget(btn)
+        dlg.exec_()
 
     def enable_draw(self):
         self.video.draw_mode = True

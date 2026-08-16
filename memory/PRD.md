@@ -136,6 +136,17 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Verified by testing agent /app/test_reports/iteration_4.json: 14/14 pass incl. LIVE GitHub
   404/normal checks + CI-bake sed simulation. Visual font/disconnect click = user on Windows.
 
+## Implemented (update 2026-06 #9) — Slow-camera hardening + camera_log.txt
+- User's blank-video persists on new build; root cause pending user's Test dialog output.
+- FFMPEG_OPTS: timeout+analyzeduration(10s)+probesize(5MB)+max_delay on all rtsp opens;
+  first-frame wait probe 10s / live connect 12s per transport (was 5-6s; slow cameras like
+  Tapo take >5s for first keyframe - likely why VLC worked but app gave up)
+- engine.clog() -> camera_log.txt (app folder) records every probe/connect attempt;
+  Test result now in copyable QPlainTextEdit dialog + one-line summary in status bar
+- Verified testing agent /app/test_reports/iteration_5.json: 20/20 pass (new
+  test_iter5_diagnostics.py by testing agent + 14 regression). AWAITING USER: Test dialog
+  text + camera_log.txt from Windows build to pinpoint camera-side issue.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

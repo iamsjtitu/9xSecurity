@@ -35,30 +35,48 @@ def normalize_rtsp_url(url):
     return f"{scheme}{quote(unquote(creds), safe='')}@{host}"
 
 
-def _try_capture(url, transport, wait=6.0):
-    os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = f"rtsp_transport;{transport}|timeout;5000000"
+CAMERA_LOG = os.path.join(config.BASE_DIR, "camera_log.txt")
+# analyzeduration/probesize: slow cameras get extra time to deliver stream info.
+FFMPEG_OPTS = "|timeout;5000000|analyzeduration;10000000|probesize;5000000|max_delay;500000"
+
+
+def clog(msg):
+    try:
+        with open(CAMERA_LOG, "a", encoding="utf-8") as f:
+            f.write(f"{datetime.now().isoformat(timespec='seconds')} | {msg}\n")
+    except Exception:
+        pass
+
+
+def _try_capture(url, transport, wait=10.0):
+    os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = f"rtsp_transport;{transport}{FFMPEG_OPTS}"
+    clog(f"capture attempt transport={transport} wait={wait}s")
     cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
     try:
         if not cap.isOpened():
+            clog(f"capture {transport}: open FAILED")
             return False, "Stream open nahi hua (username/password ya stream path galat ho sakta hai)"
         t0 = time.time()
         while time.time() - t0 < wait:
             ok, frame = cap.read()
             if ok and frame is not None:
                 h, w = frame.shape[:2]
+                clog(f"capture {transport}: OK first frame {w}x{h} in {time.time()-t0:.1f}s")
                 return True, f"Video aa raha hai ({w}x{h})"
-        return False, "Stream khula par video frames nahi aaye"
+        clog(f"capture {transport}: opened but NO frames in {wait}s")
+        return False, f"Stream khula par {int(wait)} sec me video frames nahi aaye"
     finally:
         cap.release()
 
 
-def probe_rtsp(url, wait=6.0):
+def probe_rtsp(url, wait=10.0):
     """Step-by-step camera connection diagnosis for the Test button.
     Returns (ok, [(step_name, step_ok, detail), ...])."""
     import socket
 
     steps = []
     fixed = normalize_rtsp_url(url)
+    clog(f"=== PROBE start: {fixed}")
     steps.append(("URL check", True,
                   f"Password ke special characters auto-fix kiye:\n    {fixed}" if fixed != url
                   else "URL format theek hai"))
@@ -69,8 +87,10 @@ def probe_rtsp(url, wait=6.0):
     host, port = m.group(1), int(m.group(2) or 554)
     try:
         socket.create_connection((host, port), timeout=3).close()
+        clog(f"probe: {host}:{port} reachable")
         steps.append((f"Camera network ({host}:{port})", True, "Camera network par mil gaya"))
     except Exception as e:
+        clog(f"probe: {host}:{port} UNREACHABLE ({e})")
         steps.append((f"Camera network ({host}:{port})", False,
                       "Camera tak pahunch nahi paa rahe. Check: IP sahi hai? Camera on hai? "
                       f"PC aur camera same network/WiFi par hain? ({e})"))

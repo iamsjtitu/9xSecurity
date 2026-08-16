@@ -1,0 +1,12 @@
+2026-08-16T08:32:05 | === PROBE start: notaurl
+2026-08-16T08:32:05 | === PROBE start: rtsp://admin:Admin%40123@192.0.2.1:554/stream1
+2026-08-16T08:32:08 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-16T08:33:25 | capture attempt transport=tcp wait=0.5s
+2026-08-16T08:33:30 | capture tcp: open FAILED
+2026-08-16T08:33:30 | UNIT_TEST_LINE_iter5
+2026-08-16T08:33:30 | MARKER_1786869210753
+2026-08-16T08:33:30 | === PROBE start: rtsp://admin:pw@192.0.2.1:554/stream1
+2026-08-16T08:33:33 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-16T08:33:36 | === PROBE start: notaurl
+2026-08-16T08:33:36 | === PROBE start: rtsp://admin:Admin%40123@192.0.2.1:554/stream1
+2026-08-16T08:33:39 | probe: 192.0.2.1:554 UNREACHABLE (timed out)

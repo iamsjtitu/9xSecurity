@@ -125,6 +125,12 @@ install ho jaayega, **desktop shortcut** ban jaayega. Na zip, na extract.
 App ke andar **⚙ Settings → Updates** tab:
 - Bas **Check for Updates** dabayein — koi link/repo **nahi daalna** (update
   source build me automatic set hota hai)
+- **Repo PRIVATE hai?** GitHub bina token ke private repo ki release nahi
+  dikhata (isse "koi release nahi" / 404 aata hai). Do options:
+  1. Repo ko **Public** kar dein (GitHub repo → Settings → Change visibility), ya
+  2. Settings → Updates me **GitHub Token** daalein:
+     github.com/settings/tokens → *Fine-grained token* → sirf apna repo select
+     karein → Permissions me **Contents: Read-only** → Generate → paste karein.
 - Agar nayi version (release) mili, to app naya **Setup installer download karke
   chupchaap install** kar dega aur nayi version ke saath restart ho jaayega.
   (Ye sirf installed build me kaam karta hai; aapka data — config, snapshots,

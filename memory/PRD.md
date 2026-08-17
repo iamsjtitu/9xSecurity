@@ -159,6 +159,19 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   video decode through the pipe (shape/std checks), fast-fail on unreachable, cleanup.
   Live camera confirmation pending user on Windows build.
 
+## Implemented (update 2026-06 #11) — Private-repo update fix (GitHub token support)
+- RCA: Save-to-GitHub repos are PRIVATE by default; /releases/latest returns 404 without
+  auth, so app showed "no release/no update" even though releases existed.
+- updater.py rewritten requests-based: check_latest(repo, token) -> Bearer auth; 404 =>
+  ('',None,''); 401/403 => Hindi RuntimeError (token/rate-limit hint); token flow picks API
+  asset 'url' (needed for private asset download; requests drops Authorization on S3 redirect)
+- Settings > Updates: optional GitHub Token field (config gh_token); "No release" dialog now
+  explains private repo -> fine-grained token (Contents: Read-only) OR make repo public
+- sed anchors (APP_VERSION/DEFAULT_REPO) preserved for CI bake
+- Verified testing agent /app/test_reports/iteration_7.json: 50/50 pass (mocks + live public
+  GitHub API + sed-bake simulation). USER MUST: install newest Setup manually ONCE (old build
+  lacks token support), then either make repo public or paste token.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

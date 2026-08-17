@@ -47,6 +47,7 @@ DEFAULTS = {
     "auth_hash": "",
     # ---- Auto-update (GitHub Releases) ----
     "github_repo": "",
+    "gh_token": "",
 }
 
 

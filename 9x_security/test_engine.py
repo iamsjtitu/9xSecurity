@@ -218,23 +218,60 @@ def test_probe_rtsp():
 
 
 def test_updater_404_and_default_repo():
-    import urllib.error
-
     import updater
 
     assert hasattr(updater, "DEFAULT_REPO")
     orig = updater._api
-
-    def raise404(url):
-        raise urllib.error.HTTPError(url, 404, "Not Found", None, None)
-
-    updater._api = raise404
+    updater._api = lambda url, token=None: (404, {})
     try:
         tag, asset, page = updater.check_latest("owner/name")
     finally:
         updater._api = orig
     assert tag == "" and asset is None
-    print("PASS: updater handles 404 (no release yet) gracefully; DEFAULT_REPO exists")
+    print("PASS: updater handles 404 (no release / private repo) gracefully; DEFAULT_REPO exists")
+
+
+def test_updater_token_and_private_repo():
+    import updater
+
+    orig = updater._api
+    captured = {}
+
+    def fake_api(url, token=None):
+        captured["url"] = url
+        captured["token"] = token
+        return 200, {
+            "tag_name": "v1.0.9",
+            "html_url": "http://rel",
+            "assets": [{
+                "name": "9xSecuritySetup-v1.0.9.exe",
+                "browser_download_url": "http://x/public",
+                "url": "http://api/asset/1",
+            }],
+        }
+
+    updater._api = fake_api
+    try:
+        tag, asset, page = updater.check_latest("owner/name", token="ghp_test")
+        assert captured["token"] == "ghp_test"
+        assert tag == "1.0.9"
+        assert asset == "http://api/asset/1", "private repo must use API asset url"
+        tag2, asset2, _p = updater.check_latest("owner/name")
+        assert asset2 == "http://x/public", "public repo uses browser_download_url"
+    finally:
+        updater._api = orig
+
+    # 403 (rate limit / access denied) must raise a helpful error
+    updater._api = lambda url, token=None: (403, {})
+    try:
+        try:
+            updater.check_latest("owner/name")
+            raise AssertionError("403 should raise")
+        except RuntimeError as e:
+            assert "403" in str(e)
+    finally:
+        updater._api = orig
+    print("PASS: token auth -> API asset url; public -> browser url; 403 raises helpful error")
 
 
 def test_ffmpeg_pipe_source():
@@ -333,6 +370,7 @@ if __name__ == "__main__":
     test_whatsapp_disabled_noop()
     test_updater_version_compare()
     test_updater_404_and_default_repo()
+    test_updater_token_and_private_repo()
     test_updater_pick_asset()
     test_updater_zip_root()
     test_whatsapp_image_sendfile()

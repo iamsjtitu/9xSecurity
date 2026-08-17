@@ -1,41 +1,41 @@
-"""9x Security - Self-updater via GitHub Releases (folder-zip builds).
+"""9x Security - Self-updater via GitHub Releases.
 
-New builds ship as a .zip containing the app folder (9xSecurity/ with the exe
-and _internal libs). The updater downloads the zip, extracts it, swaps the
-install folder via a batch script and restarts. Legacy single .exe assets are
-still supported. Only self-updates when running as a PyInstaller build (frozen).
+Builds ship as an Inno Setup installer attached to a GitHub Release
+(tag v{APP_VERSION}). check_latest() finds the newest release; apply_update()
+runs the installer silently and relaunches. Supports PRIVATE repos via an
+optional GitHub token (Settings -> Updates). Only self-updates when running
+as a PyInstaller build (frozen).
 """
-import json
 import os
 import re
 import shutil
-import ssl
 import subprocess
 import sys
 import tempfile
-import urllib.error
-import urllib.request
 import zipfile
+
+import requests
 
 APP_VERSION = "1.0.0"
 DEFAULT_REPO = ""  # baked in at CI build time (owner/name)
 
 
-def _api(url):
-    req = urllib.request.Request(
-        url,
-        headers={"User-Agent": "9xSecurity", "Accept": "application/vnd.github+json"},
-    )
-    with urllib.request.urlopen(req, timeout=25, context=ssl.create_default_context()) as r:
-        return json.loads(r.read().decode())
+def _api(url, token=None):
+    h = {"User-Agent": "9xSecurity", "Accept": "application/vnd.github+json"}
+    if token:
+        h["Authorization"] = f"Bearer {token}"
+    r = requests.get(url, headers=h, timeout=25)
+    return r.status_code, (r.json() if r.content else {})
 
 
-def _pick_asset(assets):
-    """Prefer the Setup installer .exe; fall back to .zip, then any .exe."""
+def _pick_asset(assets, use_api_url=False):
+    """Prefer the Setup installer .exe; fall back to .zip, then any .exe.
+    For private repos (token flow) the API asset url must be used."""
+    key = "url" if use_api_url else "browser_download_url"
     setup = zip_url = exe_url = None
     for a in assets or []:
         name = str(a.get("name", "")).lower()
-        url = a.get("browser_download_url")
+        url = a.get(key)
         if name.endswith(".exe") and "setup" in name and setup is None:
             setup = url
         elif name.endswith(".zip") and zip_url is None:
@@ -45,17 +45,24 @@ def _pick_asset(assets):
     return setup or zip_url or exe_url
 
 
-def check_latest(repo):
+def check_latest(repo, token=None):
     """repo = 'owner/name'. Returns (version, asset_url, release_page_url).
-    Returns empty version if the repo has no release yet (GitHub 404)."""
-    try:
-        data = _api(f"https://api.github.com/repos/{repo}/releases/latest")
-    except urllib.error.HTTPError as e:
-        if e.code == 404:
-            return "", None, ""
-        raise
+    Empty version = no release visible (none published yet, or PRIVATE repo
+    without a token)."""
+    code, data = _api(f"https://api.github.com/repos/{repo}/releases/latest", token)
+    if code == 404:
+        return "", None, ""
+    if code in (401, 403):
+        raise RuntimeError(
+            f"GitHub ne access mana kar diya (HTTP {code}). "
+            "Agar repo PRIVATE hai to Settings > Updates me GitHub token daalein, "
+            "ya thodi der baad try karein (rate limit)."
+        )
+    if code != 200:
+        raise RuntimeError(f"GitHub API error (HTTP {code})")
     tag = (data.get("tag_name") or "").lstrip("vV")
-    return tag, _pick_asset(data.get("assets")), data.get("html_url", "")
+    asset = _pick_asset(data.get("assets"), use_api_url=bool(token))
+    return tag, asset, data.get("html_url", "")
 
 
 def _ver(v):
@@ -67,19 +74,22 @@ def is_newer(latest, current=APP_VERSION):
     return _ver(latest) > _ver(current)
 
 
-def download(asset_url, dest, progress=None):
-    req = urllib.request.Request(asset_url, headers={"User-Agent": "9xSecurity"})
-    with urllib.request.urlopen(req, timeout=120, context=ssl.create_default_context()) as r, open(dest, "wb") as f:
+def download(asset_url, dest, progress=None, token=None):
+    h = {"User-Agent": "9xSecurity", "Accept": "application/octet-stream"}
+    if token:
+        h["Authorization"] = f"Bearer {token}"
+    # requests drops the Authorization header on the cross-host S3 redirect,
+    # which is exactly what GitHub asset downloads require.
+    with requests.get(asset_url, headers=h, timeout=120, stream=True) as r:
+        r.raise_for_status()
         total = int(r.headers.get("Content-Length", 0))
         read = 0
-        while True:
-            chunk = r.read(1 << 16)
-            if not chunk:
-                break
-            f.write(chunk)
-            read += len(chunk)
-            if progress and total:
-                progress(read, total)
+        with open(dest, "wb") as f:
+            for chunk in r.iter_content(1 << 16):
+                f.write(chunk)
+                read += len(chunk)
+                if progress and total:
+                    progress(read, total)
     return dest
 
 
@@ -88,7 +98,6 @@ def _install_dir():
 
 
 def _zip_app_root(extract_dir):
-    """Folder inside the extracted zip that contains 9xSecurity.exe."""
     for root, _dirs, files in os.walk(extract_dir):
         if "9xSecurity.exe" in files:
             return root
@@ -107,7 +116,6 @@ def apply_update(path):
 
 
 def _run_installer(setup_exe):
-    """Silent Inno Setup upgrade-in-place; relaunches the app after install."""
     subprocess.Popen(
         [setup_exe, "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/FORCECLOSEAPPLICATIONS"]
     )
@@ -136,6 +144,5 @@ def _apply_zip(zip_path):
     )
     with open(bat, "w") as f:
         f.write(script)
-    # DETACHED_PROCESS so it survives after we exit.
     subprocess.Popen(["cmd", "/c", bat], creationflags=0x00000008)
     return True

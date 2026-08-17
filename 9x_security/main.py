@@ -684,14 +684,20 @@ class SettingsDialog(QtWidgets.QDialog):
         uf = QtWidgets.QFormLayout(up)
         self.ver_label = QtWidgets.QLabel(f"Current version:  v{_upd.APP_VERSION}")
         self.ver_label.setStyleSheet("font-weight:700;")
+        self.gh_token = QtWidgets.QLineEdit(cfg.get("gh_token", ""))
+        self.gh_token.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.gh_token.setPlaceholderText("Sirf PRIVATE repo ke liye (optional) — github.com/settings/tokens")
+        self.gh_token.setObjectName("github-token-input")
         self.upd_btn = QtWidgets.QPushButton("Check for Updates")
         self.upd_btn.setObjectName("check-update-btn")
         self.upd_btn.clicked.connect(self._check_update)
         uf.addRow(self.ver_label)
+        uf.addRow("GitHub Token", self.gh_token)
         uf.addRow(self.upd_btn)
         unote = QtWidgets.QLabel(
             "Koi link/repo daalne ki zaroorat nahi — bas button dabayein.\n"
-            "Nayi version milte hi seedha download + install ho jaayegi."
+            "Repo PRIVATE ho to upar GitHub token daalein (Contents: Read),\n"
+            "ya repo ko public kar dein. Nayi version seedha install ho jaayegi."
         )
         unote.setStyleSheet("color:#64748b;")
         uf.addRow(unote)
@@ -717,6 +723,7 @@ class SettingsDialog(QtWidgets.QDialog):
         c["wa_account_email"] = self.acc_email.text().strip()
         c["wa_account_password"] = self.acc_pass.text()
         c["auth_user"] = self.sec_user.text().strip() or "admin"
+        c["gh_token"] = self.gh_token.text().strip()
         np1, np2 = self.sec_new.text(), self.sec_new2.text()
         if np1:
             if np1 != np2:
@@ -763,6 +770,7 @@ class SettingsDialog(QtWidgets.QDialog):
         import updater
 
         repo = updater.DEFAULT_REPO or self.cfg.get("github_repo", "").strip()
+        token = self.gh_token.text().strip()
         if not repo:
             QtWidgets.QMessageBox.information(
                 self, "Updates",
@@ -772,7 +780,7 @@ class SettingsDialog(QtWidgets.QDialog):
             return
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         try:
-            tag, asset, url = updater.check_latest(repo)
+            tag, asset, url = updater.check_latest(repo, token=token or None)
         except Exception as e:
             QtWidgets.QApplication.restoreOverrideCursor()
             QtWidgets.QMessageBox.critical(
@@ -784,7 +792,12 @@ class SettingsDialog(QtWidgets.QDialog):
 
         if not tag:
             QtWidgets.QMessageBox.information(
-                self, "No release", "Abhi koi release available nahi hai. Thodi der baad try karein."
+                self, "No release",
+                "GitHub par koi release nahi dikh rahi.\n\n"
+                "Agar aapka repo PRIVATE hai to GitHub bina token ke release nahi dikhata —\n"
+                "upar 'GitHub Token' me token daalein (github.com/settings/tokens →\n"
+                "Fine-grained token → apna repo → Contents: Read-only),\n"
+                "ya repo ko Public kar dein (repo Settings → Change visibility).",
             )
             return
         if not updater.is_newer(tag):
@@ -808,7 +821,7 @@ class SettingsDialog(QtWidgets.QDialog):
         dest = os.path.join(tempfile.gettempdir(), "9xSecurity_new" + ext)
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         try:
-            updater.download(asset, dest)
+            updater.download(asset, dest, token=token or None)
         except Exception as e:
             QtWidgets.QApplication.restoreOverrideCursor()
             QtWidgets.QMessageBox.critical(self, "Download failed", str(e))

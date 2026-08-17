@@ -84,14 +84,35 @@ class VideoThread(QtCore.QThread):
         self.engine = None
 
     def run(self):
+        from engine import clog
+
+        try:
+            self._run_impl(clog)
+        except Exception:
+            import traceback
+
+            err = traceback.format_exc()
+            clog("VideoThread CRASH:\n" + err)
+            self.status.emit("ERROR: video thread crash — camera_log.txt bhejein. "
+                             + err.strip().splitlines()[-1])
+
+    def _run_impl(self, clog):
         self._running = True
         self.status.emit("Loading AI model...")
+        clog("run: loading AI model")
         try:
             self.engine = SecurityEngine(cfg=self.cfg)
             self.engine.on_event = lambda e: self.event_logged.emit(e)
-        except Exception as e:
-            self.status.emit(f"Model load failed: {e}")
-            return
+            clog("run: AI model loaded")
+        except Exception:
+            import traceback
+
+            clog("run: MODEL LOAD FAILED:\n" + traceback.format_exc())
+            self.engine = None
+            self.status.emit(
+                "AI model load nahi hua — sirf video dikhegi (detection band). "
+                "camera_log.txt bhejein."
+            )
 
         raw_url = self.cfg.get("rtsp_url", "").strip()
         if raw_url:
@@ -106,20 +127,24 @@ class VideoThread(QtCore.QThread):
             if cap is not None:
                 cap.release()
             if self._running:
+                clog("run: could not open stream")
                 self.status.emit(
                     "ERROR: Camera/RTSP stream nahi khula. URL ke bagal waala 'Test' button "
                     "dabayein — woh step-by-step bata dega problem kahan hai."
                 )
             return
+        clog("run: connected, streaming started")
         self.status.emit("Connected - monitoring live feed")
 
         fail = 0
+        ai_error_told = False
         while self._running:
             ok, frame = cap.read()
             if not ok:
                 fail += 1
                 if fail > 50:
                     self.status.emit("Stream lost - reconnecting...")
+                    clog("run: stream lost, reconnecting")
                     cap.release()
                     cap = self._open(source)
                     if cap is None:
@@ -129,7 +154,21 @@ class VideoThread(QtCore.QThread):
                 continue
             fail = 0
             small = cv2.resize(frame, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
-            annotated, _ = self.engine.process_frame(small, original=frame)
+            if self.engine is not None:
+                try:
+                    annotated, _ = self.engine.process_frame(small, original=frame)
+                except Exception:
+                    import traceback
+
+                    clog("process_frame error:\n" + traceback.format_exc())
+                    annotated = small
+                    if not ai_error_told:
+                        ai_error_told = True
+                        self.status.emit(
+                            "AI processing error (video chalu hai) — camera_log.txt bhejein."
+                        )
+            else:
+                annotated = small
             self.frame_ready.emit(annotated)
             self.msleep(10)
         cap.release()
@@ -842,6 +881,18 @@ class SettingsDialog(QtWidgets.QDialog):
 
 
 def main():
+    import traceback
+
+    def _hook(t, v, tb):
+        try:
+            from engine import clog
+
+            clog("UNCAUGHT:\n" + "".join(traceback.format_exception(t, v, tb)))
+        except Exception:
+            pass
+
+    sys.excepthook = _hook
+
     app = QtWidgets.QApplication(sys.argv)
     app.setStyleSheet(BASE_STYLE)
 

@@ -73,3 +73,25 @@
 2026-08-17T07:20:25 | ffmpeg-pipe: no frames (process exited)
 2026-08-17T07:20:25 | === PROBE start: rtsp://u:p@192.0.2.1:554/s
 2026-08-17T07:20:28 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-17T07:24:35 | === PROBE start: notaurl
+2026-08-17T07:24:35 | === PROBE start: rtsp://admin:Admin%40123@192.0.2.1:554/stream1
+2026-08-17T07:24:38 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-17T07:24:38 | ffmpeg-pipe: starting
+2026-08-17T07:25:57 | === PROBE start: notaurl
+2026-08-17T07:25:57 | === PROBE start: rtsp://admin:Admin%40123@192.0.2.1:554/stream1
+2026-08-17T07:26:00 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-17T07:26:00 | ffmpeg-pipe: starting
+2026-08-17T07:26:00 | capture attempt transport=tcp wait=0.5s
+2026-08-17T07:26:05 | capture tcp: open FAILED
+2026-08-17T07:26:05 | UNIT_TEST_LINE_iter5
+2026-08-17T07:26:05 | MARKER_1786951565610
+2026-08-17T07:26:05 | === PROBE start: rtsp://admin:pw@192.0.2.1:554/stream1
+2026-08-17T07:26:08 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-17T07:26:08 | ffmpeg-pipe: starting
+2026-08-17T07:26:08 | ffmpeg-pipe: starting
+2026-08-17T07:26:08 | ffmpeg-pipe: starting
+2026-08-17T07:26:08 | ffmpeg-pipe: OK first frame in 0.0s
+2026-08-17T07:26:09 | ffmpeg-pipe: starting
+2026-08-17T07:26:14 | ffmpeg-pipe: no frames (process exited)
+2026-08-17T07:26:14 | === PROBE start: rtsp://u:p@192.0.2.1:554/s
+2026-08-17T07:26:17 | probe: 192.0.2.1:554 UNREACHABLE (timed out)

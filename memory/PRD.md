@@ -172,6 +172,18 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   GitHub API + sed-bake simulation). USER MUST: install newest Setup manually ONCE (old build
   lacks token support), then either make repo public or paste token.
 
+## Implemented (update 2026-06 #12) — Blank video fix: windowed-mode print crash guard
+- User screenshot: Test all GREEN incl. "Video aa raha hai (848x480)" (camera now .105/stream2)
+  yet live monitor blank. RCA: PyInstaller --windowed => sys.stdout/stderr None; ultralytics/
+  torch prints crash VideoThread at model load (probe path never imports ultralytics).
+- config.ensure_std_streams(): frozen mode redirects None stdout/stderr -> app_log.txt at
+  config import (before torch imports)
+- VideoThread hardened: run() wrapper logs CRASH tracebacks -> camera_log.txt; model load
+  failure => engine=None but RAW VIDEO STILL STREAMS; per-frame try/except (video continues
+  on AI error, one-time status); clog stage markers; main() excepthook -> UNCAUGHT to clog
+- Verified testing agent /app/test_reports/iteration_8.json: 51/51 pass incl. frozen-stdout
+  simulation + engine-raises-still-shows-frame simulation. Visual confirm = user Windows.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

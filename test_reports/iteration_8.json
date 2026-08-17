@@ -1,0 +1,25 @@
+{
+  "summary": "Iteration 8 (backend-only, desktop Python project). Verified crash-resilience fixes for VideoThread and the config.ensure_std_streams() safeguard that prevents PyInstaller --windowed builds from dying on library prints (torch/ultralytics/tqdm). Ran all 4 test files: test_engine.py (17 including new test_ensure_std_streams), test_iter5_diagnostics.py (6), test_iter6_ffmpeg_fallback.py (9), test_iter7_updater_private_repo.py (19). Total 51/51 passed in 23.5s. py_compile passes on main.py and config.py. Source-inspection checks confirm: (a) config.ensure_std_streams() called at import-time (line 94), before any ultralytics/torch import; no-op when not frozen; does not replace already-set streams; writes to BASE_DIR/app_log.txt with devnull fallback. (b) VideoThread.run is a thin try/except wrapper logging 'VideoThread CRASH' + traceback via engine.clog and emitting Hindi status message; _run_impl catches SecurityEngine load failure (sets self.engine=None, emits 'AI model load nahi hua - sirf video dikhegi', continues instead of returning); per-frame process_frame wrapped in try/except (traceback -> clog, annotated=small raw frame, one-time 'AI processing error (video chalu hai)' status via ai_error_told flag); when engine is None the raw resized frame is still emitted. All required clog markers present ('run: loading AI model', 'run: AI model loaded', 'run: connected, streaming started', 'run: stream lost, reconnecting', 'run: could not open stream'). main() installs sys.excepthook that clogs 'UNCAUGHT' tracebacks. (c) Functional headless simulation with SecurityEngine + BadDetector (raises inside detect()): process_frame raises RuntimeError; the main.py wrap-pattern (try/except -> annotated=small) still yields a (540,960,3) frame, confirming raw video reaches the UI even when AI errors. PyQt5 not installed in this container per instructions - GUI runtime confirmation is the user's Windows job.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/test_engine.py",
+    "/app/9x_security/test_iter5_diagnostics.py",
+    "/app/9x_security/test_iter6_ffmpeg_fallback.py",
+    "/app/9x_security/test_iter7_updater_private_repo.py",
+    "/app/test_reports/pytest/iter8.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "config.ensure_std_streams(): opens app_log.txt in append mode with buffering=1 (line-buffered) which is correct for a log; however the file handle is never closed on process exit - acceptable for a long-lived GUI process but worth documenting.",
+    "VideoThread._run_impl: when engine load fails and later cap fails to open, code returns without ever emitting a raw frame - user sees 'ERROR' message but no video. Acceptable since without a stream nothing to show.",
+    "main.py is 917 lines - well over the 700-line guideline; consider splitting VideoThread, dialogs and MainWindow into separate modules for maintainability (not blocking)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (51/51)", "frontend": "N/A (desktop app, skipped per instructions)"},
+  "test_credentials": "N/A - camera unreachable, None-stdout scenario simulated via sys.frozen/sys.stdout monkeypatching (restored in finally).",
+  "seed_data_creation": "None (test creates BASE_DIR/app_log.txt via ensure_std_streams simulation).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All 51 tests green. Fixes in place: (1) config.ensure_std_streams keeps prints alive under PyInstaller --windowed; (2) VideoThread never dies from AI/model exceptions - raw video always streams. Final visual confirmation is a Windows-only manual step for the user. If user still reports blank video after this build, ask for /app_log.txt and camera_log.txt contents - the new clog markers + UNCAUGHT hook will pinpoint where it dies."
+}

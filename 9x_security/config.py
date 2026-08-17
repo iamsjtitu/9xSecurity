@@ -72,4 +72,24 @@ def save_config(cfg):
         return False
 
 
+def ensure_std_streams():
+    """PyInstaller --windowed builds have no console: stdout/stderr are None and
+    any library print/log (torch/ultralytics/tqdm) crashes the thread.
+    Redirect them to app_log.txt so the app never dies from a print."""
+    if not getattr(sys, "frozen", False):
+        return
+    if sys.stdout is not None and sys.stderr is not None:
+        return
+    try:
+        log = open(os.path.join(BASE_DIR, "app_log.txt"), "a", buffering=1,
+                   encoding="utf-8", errors="replace")
+    except Exception:
+        log = open(os.devnull, "w")
+    if sys.stdout is None:
+        sys.stdout = log
+    if sys.stderr is None:
+        sys.stderr = log
+
+
+ensure_std_streams()
 os.makedirs(SNAPSHOT_DIR, exist_ok=True)

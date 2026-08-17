@@ -291,6 +291,30 @@ def test_ffmpeg_pipe_source():
     print("PASS: FFmpeg pipe engine decodes video -> BGR frames (VLC-grade fallback)")
 
 
+def test_ensure_std_streams():
+    import io
+    import sys as _sys
+
+    import config as _cfg
+
+    old_out, old_err = _sys.stdout, _sys.stderr
+    had_frozen = hasattr(_sys, "frozen")
+    try:
+        _sys.frozen = True
+        _sys.stdout = None
+        _sys.stderr = None
+        _cfg.ensure_std_streams()
+        assert _sys.stdout is not None and _sys.stderr is not None
+        print("frozen-mode print works now")  # must not crash
+        _sys.stderr.write("stderr works too\n")
+    finally:
+        _sys.stdout, _sys.stderr = old_out, old_err
+        if not had_frozen:
+            del _sys.frozen
+    assert os.path.exists(os.path.join(_cfg.BASE_DIR, "app_log.txt"))
+    print("PASS: frozen build stdout/stderr redirect -> app_log.txt (no None-print crash)")
+
+
 def test_updater_pick_asset():
     import updater
 
@@ -363,6 +387,7 @@ if __name__ == "__main__":
     test_normalize_rtsp_url()
     test_probe_rtsp()
     test_ffmpeg_pipe_source()
+    test_ensure_std_streams()
     test_tracker_ids_persist()
     test_line_crossing_logs_event()
     test_auth_password()

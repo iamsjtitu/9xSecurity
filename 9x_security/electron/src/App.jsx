@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { api, getToken, setToken } from './api';
+import { api, getToken, setToken, logout } from './api';
 import Login from './components/Login.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import Dashboard from './components/Dashboard.jsx';
@@ -46,7 +46,7 @@ export default function App() {
         setPage={setPage}
         version={state.version}
         connected={state.connected}
-        onLogout={() => { setToken(''); setAuthed(false); }}
+        onLogout={() => { logout(); setAuthed(false); }}
       />
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         <div className="flex-1 overflow-y-auto p-6">

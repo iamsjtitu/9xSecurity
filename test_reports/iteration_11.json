@@ -1,0 +1,30 @@
+{
+  "summary": "Iteration 11 - Security hardening validation. All 8 hardening surfaces verified: must_change_password flow, wrong-pw 401, secret masking in GET /api/settings + empty-string keep-existing on POST, POST /api/logout invalidates token, TOKEN_TTL=43200 present + expired token popped on _check, CORS rejects https://evil.com preflight and allows Origin 'null', engine.redact_url masks user:pass in camera_log 'PROBE start' lines, whatsapp/test falls back to stored key gracefully with empty body (no 500), electron-main.js open-path allowlist under os.homedir() -> 'blocked' otherwise, index.html has CSP meta with connect-src http://127.0.0.1:8971 and no external Google Fonts. E2E via Playwright: default login shows force-change form, all 3 validations (min 6 chars, mismatch, '9xsecurity' rejected) surface correct error messages via data-testid=force-change-error, setting GateTest#77 lands on dashboard, logout button in sidebar works (calls /api/logout, sessionStorage cleared, back to login), old default returns 401 'Galat username ya password.', new password logs in DIRECTLY to dashboard (must_change_password false). Settings > WhatsApp: input value empty and placeholder '•••• saved hai — badalne ke liye naya daalein' when secret is stored; Send Test with empty key returns backend graceful 401 toast (fallback to stored key wiring correct). 19/19 test_engine.py regression pass (spec mentioned 20 but only 19 tests exist in file - not a regression I introduced). 12/12 new tests pass in tests/test_security_iter11.py.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/9x_security/tests/test_security_iter11.py",
+    "/app/test_reports/pytest/iter11_security.xml",
+    "/app/9x_security/test_engine.py"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "test_engine.py contains 19 tests, not the 20 stated in the review request - verify whether a test was accidentally removed during hardening or the request count was stale (not a functional issue).",
+    "api.js hardcodes BASE=http://127.0.0.1:${window.ENGINE_PORT||8971}. This is intentional for the Electron file:// origin (CORS 'null' allowed), but blocks browser access via http://localhost:8971. Tester used http://127.0.0.1:8971 (same-origin) which works. Consider using relative paths when served from same-origin static so container/dev testing works with either localhost or 127.0.0.1; low priority given production is Electron file://.",
+    "Force-change flow calls POST /api/settings with only {new_password}; SettingsPage 'security' tab also does the same via newPass. Both paths reset password but do not clear the must_change flag until next login (natural because must_change is derived from hash comparison to default). Acceptable behavior."
+  ],
+  "updated_files": [
+    "/app/9x_security/tests/test_security_iter11.py (new)"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin / 9xsecurity (default). During E2E password was temporarily changed to GateTest#77 and restored to 9xsecurity at cleanup. wa_api_key/gh_token/wa_recipients/wa_account_password also cleared from config.json.",
+  "seed_data_creation": "None persisted; all writes reverted in fixture teardown + explicit cleanup snippet.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Service runs on http://127.0.0.1:8971 (also reachable via localhost but CORS blocks non-127.0.0.1 origins because Electron production origin is file:// -> 'null'). Use http://127.0.0.1:8971 for browser E2E to avoid CORS. Default credentials are admin/9xsecurity and must_change_password=true is the correct signal while config still holds default hash. All hardening from this iteration is in place and verified.",
+  "rca of the issue": "N/A - no bugs found; this iteration was verification of security fixes SEC-001 and SEC-003 plus hardening additions. All 20 listed acceptance checks pass."
+}

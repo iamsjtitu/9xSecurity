@@ -142,3 +142,13 @@
 2026-08-26T19:02:17 | === PROBE start: rtsp://admin:Admin%40123@192.0.2.1:554/stream1
 2026-08-26T19:02:20 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
 2026-08-26T19:02:20 | ffmpeg-pipe: starting
+2026-08-26T19:12:07 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-08-26T19:12:07 | purge: 0 old events removed (retention 7d, cutoff 2026-08-19)
+2026-08-26T19:12:28 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-08-26T19:12:31 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-26T19:14:14 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-08-26T19:14:17 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-26T19:14:31 | === PROBE start: notaurl
+2026-08-26T19:14:31 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-08-26T19:14:34 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-26T19:14:34 | ffmpeg-pipe: starting

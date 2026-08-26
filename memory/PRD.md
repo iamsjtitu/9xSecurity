@@ -254,6 +254,23 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   version-bake node -e works, 19/19 regression pass. Real run = user's next push.
 - LEARNING (do not repeat): never depend on yarn.lock in CI for this repo.
 
+## Implemented (update 2026-06 #18) — Security audit + hardening (verified iteration_11, 100%)
+- Audit findings fixed: (1) default-password FORCE CHANGE on first login (login returns
+  must_change_password; Login.jsx force-change form, min 6 chars, rejects default);
+  (2) CORS locked to ['null','file://','http://localhost:5173'] (evil origins blocked);
+  (3) /api/settings masks secrets (wa_api_key/gh_token/wa_account_password -> '' + *_set
+  bools; empty POST keeps stored secret; whatsapp/test falls back to stored key);
+  (4) token TTL 12h + /api/logout (UI logout calls it); (5) RTSP creds redacted in
+  camera_log (engine.redact_url); (6) Electron open-path IPC allowlisted to dirs under
+  home; (7) CSP meta + Google Fonts removed (system Segoe UI stack).
+- Deferred (documented): config.json at-rest encryption (DPAPI), code-signing of installer,
+  CI action SHA-pinning.
+- Verified testing agent /app/test_reports/iteration_11.json: backend 100% + frontend 100%
+  (force-change E2E, old default 401, masked placeholders). Password restored to default in
+  container; user's real install will force-change on next login after update.
+- NOTE (user's build error repeat): failed GH run used OLD workflow (yarn.lock/Node20) —
+  user must Save to GitHub for new workflow; "Re-run failed jobs" reruns the old commit.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

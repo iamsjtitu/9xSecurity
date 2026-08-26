@@ -41,6 +41,11 @@ CAMERA_LOG = os.path.join(config.BASE_DIR, "camera_log.txt")
 FFMPEG_OPTS = "|timeout;5000000|analyzeduration;10000000|probesize;5000000|max_delay;500000"
 
 
+def redact_url(url):
+    """Hide user:pass in URLs before logging."""
+    return re.sub(r"//[^/@]*@", "//****@", str(url))
+
+
 def clog(msg):
     try:
         with open(CAMERA_LOG, "a", encoding="utf-8") as f:
@@ -185,7 +190,7 @@ def probe_rtsp(url, wait=10.0):
 
     steps = []
     fixed = normalize_rtsp_url(url)
-    clog(f"=== PROBE start: {fixed}")
+    clog(f"=== PROBE start: {redact_url(fixed)}")
     steps.append(("URL check", True,
                   f"Password ke special characters auto-fix kiye:\n    {fixed}" if fixed != url
                   else "URL format theek hai"))

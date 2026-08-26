@@ -4,8 +4,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'Segoe UI', 'system-ui', 'sans-serif'],
-        mono: ['IBM Plex Mono', 'Consolas', 'monospace'],
+        sans: ['Segoe UI Variable', 'Segoe UI', 'system-ui', 'sans-serif'],
+        mono: ['Cascadia Mono', 'Consolas', 'monospace'],
       },
     },
   },

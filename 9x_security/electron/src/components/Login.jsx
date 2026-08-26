@@ -7,6 +7,9 @@ export default function Login({ onLogin }) {
   const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [mustChange, setMustChange] = useState(false);
+  const [np1, setNp1] = useState('');
+  const [np2, setNp2] = useState('');
 
   const submit = async (e) => {
     e.preventDefault();
@@ -15,9 +18,30 @@ export default function Login({ onLogin }) {
     try {
       const r = await api('/api/login', { method: 'POST', body: JSON.stringify({ username, password }) });
       setToken(r.token);
-      onLogin();
+      if (r.must_change_password) {
+        setMustChange(true);
+      } else {
+        onLogin();
+      }
     } catch (ex) {
       setErr(ex.message || 'Login fail');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const changePassword = async (e) => {
+    e.preventDefault();
+    setErr('');
+    if (np1.length < 6) { setErr('Password kam se kam 6 characters ka rakhein.'); return; }
+    if (np1 !== np2) { setErr('Dono password same nahi hain.'); return; }
+    if (np1 === '9xsecurity') { setErr('Default password dobara nahi rakh sakte.'); return; }
+    setBusy(true);
+    try {
+      await api('/api/settings', { method: 'POST', body: JSON.stringify({ new_password: np1 }) });
+      onLogin();
+    } catch (ex) {
+      setErr(ex.message);
     } finally {
       setBusy(false);
     }
@@ -46,6 +70,24 @@ export default function Login({ onLogin }) {
         <div className="text-xs text-slate-500">© {new Date().getFullYear()} 9x Security</div>
       </div>
       <div className="flex-1 flex items-center justify-center p-8">
+        {mustChange ? (
+          <form onSubmit={changePassword} className="w-full max-w-sm" data-testid="force-change-form">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Naya password set karein</h2>
+            <p className="text-sm text-slate-500 mt-1 mb-8">
+              Security ke liye default password badalna zaroori hai (sirf ek baar).
+            </p>
+            <label className="label">Naya Password</label>
+            <input type="password" className="input mb-4" value={np1}
+              onChange={(e) => setNp1(e.target.value)} data-testid="force-new-password" autoFocus />
+            <label className="label">Dobara likhein</label>
+            <input type="password" className="input mb-2" value={np2}
+              onChange={(e) => setNp2(e.target.value)} data-testid="force-confirm-password" />
+            {err && <div className="text-sm text-rose-600 mb-2" data-testid="force-change-error">{err}</div>}
+            <button type="submit" className="btn-primary w-full justify-center mt-4" disabled={busy} data-testid="force-change-btn">
+              {busy ? 'Saving…' : 'Password Set Karo'}
+            </button>
+          </form>
+        ) : (
         <form onSubmit={submit} className="w-full max-w-sm" data-testid="login-form">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Sign in</h2>
           <p className="text-sm text-slate-500 mt-1 mb-8">Apna username aur password daalein</p>
@@ -78,6 +120,7 @@ export default function Login({ onLogin }) {
             {busy ? 'Signing in…' : 'Login'}
           </button>
         </form>
+        )}
       </div>
     </div>
   );

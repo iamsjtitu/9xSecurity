@@ -28,10 +28,14 @@ from whatsapp import WhatsAppNotifier
 PORT = int(os.environ.get("ENGINE_PORT", "8971"))
 app = FastAPI(title="9x Security Engine")
 app.add_middleware(
-    CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
+    CORSMiddleware,
+    allow_origins=["null", "file://", "http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-_tokens = set()
+TOKEN_TTL = 12 * 3600
+_tokens = {}  # token -> created_ts
 _db = EventDB()
 
 
@@ -41,7 +45,10 @@ def _cfg():
 
 def _check(request: Request):
     t = request.headers.get("x-auth-token") or request.query_params.get("t")
-    if not t or t not in _tokens:
+    ts = _tokens.get(t) if t else None
+    if ts is None or time.time() - ts > TOKEN_TTL:
+        if t:
+            _tokens.pop(t, None)
         raise HTTPException(401, "unauthorized")
 
 
@@ -183,6 +190,9 @@ def health():
     return {"ok": True, "version": updater.APP_VERSION}
 
 
+DEFAULT_PASSWORD = "9xsecurity"
+
+
 @app.post("/api/login")
 def login(body: dict):
     cfg = _cfg()
@@ -192,9 +202,20 @@ def login(body: dict):
         p, cfg.get("auth_salt", ""), cfg.get("auth_hash", "")
     ):
         t = secrets.token_hex(24)
-        _tokens.add(t)
-        return {"token": t}
+        _tokens[t] = time.time()
+        must_change = auth.verify_password(
+            DEFAULT_PASSWORD, cfg.get("auth_salt", ""), cfg.get("auth_hash", "")
+        )
+        return {"token": t, "must_change_password": must_change}
     raise HTTPException(401, "Galat username ya password.")
+
+
+@app.post("/api/logout")
+def logout(request: Request):
+    t = request.headers.get("x-auth-token") or request.query_params.get("t")
+    if t:
+        _tokens.pop(t, None)
+    return {"ok": True}
 
 
 # ---- state / camera ---------------------------------------------------------
@@ -332,6 +353,7 @@ _SETTINGS_KEYS = (
     "capture_schedule_enabled", "capture_start", "capture_end",
     "auto_delete_enabled",
 )
+_SECRET_KEYS = ("wa_api_key", "gh_token", "wa_account_password")
 
 
 @app.get("/api/settings")
@@ -339,6 +361,9 @@ def get_settings(request: Request):
     _check(request)
     cfg = _cfg()
     out = {k: cfg.get(k) for k in _SETTINGS_KEYS}
+    for k in _SECRET_KEYS:  # never send stored secrets back to the UI
+        out[f"{k}_set"] = bool(cfg.get(k))
+        out[k] = ""
     out["auth_user"] = cfg.get("auth_user", "admin")
     out["retention_days"] = int(cfg.get("retention_days", 7) or 7)
     return out
@@ -350,6 +375,8 @@ def save_settings(body: dict, request: Request):
     cfg = _cfg()
     for k in _SETTINGS_KEYS:
         if k in body:
+            if k in _SECRET_KEYS and not str(body[k]).strip():
+                continue  # empty = keep existing secret
             cfg[k] = body[k]
     if body.get("auth_user"):
         cfg["auth_user"] = str(body["auth_user"]).strip() or "admin"
@@ -369,12 +396,13 @@ def save_settings(body: dict, request: Request):
 @app.post("/api/whatsapp/test")
 def whatsapp_test(body: dict, request: Request):
     _check(request)
+    cfg = _cfg()
     n = WhatsAppNotifier(
         {
             "wa_enabled": True,
-            "wa_base_url": body.get("wa_base_url") or "https://wa.9x.design",
-            "wa_api_key": body.get("wa_api_key", ""),
-            "wa_recipients": body.get("wa_recipients", []),
+            "wa_base_url": body.get("wa_base_url") or cfg.get("wa_base_url") or "https://wa.9x.design",
+            "wa_api_key": (str(body.get("wa_api_key", "")).strip() or cfg.get("wa_api_key", "")),
+            "wa_recipients": body.get("wa_recipients") or cfg.get("wa_recipients", []),
             "wa_send_image": bool(body.get("wa_send_image", True)),
         }
     )

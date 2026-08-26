@@ -1,5 +1,7 @@
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
+const os = require('os');
+const fs = require('fs');
 const { spawn } = require('child_process');
 const http = require('http');
 
@@ -61,7 +63,20 @@ if (!gotLock) {
   });
 }
 
-ipcMain.handle('open-path', (_e, p) => shell.openPath(p));
+ipcMain.handle('open-path', (_e, p) => {
+  try {
+    const real = path.resolve(String(p || ''));
+    const home = path.resolve(os.homedir());
+    if (
+      (real === home || real.startsWith(home + path.sep)) &&
+      fs.existsSync(real) &&
+      fs.statSync(real).isDirectory()
+    ) {
+      return shell.openPath(real);
+    }
+  } catch (_) { /* noop */ }
+  return 'blocked';
+});
 ipcMain.handle('quit-app', () => app.quit());
 
 function killEngine() {

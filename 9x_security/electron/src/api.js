@@ -29,4 +29,8 @@ export async function api(path, opts = {}) {
 
 export const streamUrl = () => `${BASE}/api/stream?t=${token}&r=${Date.now()}`;
 export const snapshotUrl = (p) => `${BASE}/api/snapshot?path=${encodeURIComponent(p)}&t=${token}`;
+export const logout = async () => {
+  try { await api('/api/logout', { method: 'POST' }); } catch (_) { /* noop */ }
+  setToken('');
+};
 export { BASE };

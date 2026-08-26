@@ -106,7 +106,8 @@ export default function SettingsPage({ showToast }) {
             </label>
             <div>
               <label className="label">API Key (Bearer)</label>
-              <input type="password" className="input" value={s.wa_api_key || ''} placeholder="wa9x_..."
+              <input type="password" className="input" value={s.wa_api_key || ''}
+                placeholder={s.wa_api_key_set ? '•••• saved hai — badalne ke liye naya daalein' : 'wa9x_...'}
                 onChange={(e) => set('wa_api_key', e.target.value)} data-testid="wa-api-key-input" />
             </div>
             <div>
@@ -213,6 +214,7 @@ export default function SettingsPage({ showToast }) {
             <div>
               <label className="label">Password</label>
               <input type="password" className="input" value={s.wa_account_password || ''}
+                placeholder={s.wa_account_password_set ? '•••• saved hai' : ''}
                 onChange={(e) => set('wa_account_password', e.target.value)} data-testid="wa-password-input" />
             </div>
             <p className="text-xs text-slate-400">Ye sirf yaad rakhne ke liye store hota hai — sending API key se hoti hai.</p>
@@ -247,6 +249,7 @@ export default function SettingsPage({ showToast }) {
             <div>
               <label className="label">GitHub Token (sirf private repo ke liye, optional)</label>
               <input type="password" className="input" value={s.gh_token || ''}
+                placeholder={s.gh_token_set ? '•••• saved hai — badalne ke liye naya daalein' : ''}
                 onChange={(e) => set('gh_token', e.target.value)} data-testid="gh-token-input" />
             </div>
             <div className="flex gap-3">

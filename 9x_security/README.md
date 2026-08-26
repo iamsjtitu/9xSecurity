@@ -1,5 +1,15 @@
 # 9x Security — Gate Vehicle Monitor 🚗🚚
 
+> **NAYA (Electron version)**: App ab **Electron (React) UI + Python AI engine** hai —
+> modern dashboard look (dark sidebar + light body). Windows installer GitHub Actions
+> se apne aap banta hai (`9xSecuritySetup-v1.0.N.exe`). Install karo, desktop shortcut
+> se chalao — Python/Node kuch install karne ki zaroorat NahI.
+>
+> - UI code: `electron/` (React + Vite + Tailwind)
+> - Engine: `service.py` (FastAPI, localhost:8971) — camera + YOLO + WhatsApp + updates
+> - Dev mode: `python service.py` chalao, phir `cd electron && yarn dev`
+> - Purana PyQt app (`main.py`) ab build nahi hota, sirf reference ke liye hai.
+
 Desktop software jo aapke **IP camera (RTSP)** se live feed leta hai, gate par
 aane/jaane wale **4-wheeler / truck / bus** ko AI se pehchanta hai, aur har
 gaadi ka **snapshot date + time + type + Entry/Exit label + number plate** ke

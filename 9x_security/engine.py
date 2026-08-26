@@ -140,6 +140,44 @@ def _try_ffmpeg_pipe(url):
         src.release()
 
 
+def open_stream(source, is_running=lambda: True):
+    """Open a video source with the TCP -> UDP -> FFmpeg-pipe -> default ladder.
+    Returns an opened capture-like object, or None if aborted/unavailable."""
+    if not (isinstance(source, str) and source.lower().startswith("rtsp")):
+        return cv2.VideoCapture(source)
+    for transport in ("tcp", "udp"):
+        if not is_running():
+            return None
+        os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = f"rtsp_transport;{transport}{FFMPEG_OPTS}"
+        clog(f"open_stream: transport={transport}")
+        cap = cv2.VideoCapture(source, cv2.CAP_FFMPEG)
+        if cap.isOpened():
+            t0 = time.time()
+            while is_running() and time.time() - t0 < 12:
+                ok, _f = cap.read()
+                if ok:
+                    clog(f"open_stream {transport}: OK first frame in {time.time()-t0:.1f}s")
+                    return cap
+            clog(f"open_stream {transport}: opened but no frames in 12s")
+        cap.release()
+    if not is_running():
+        return None
+    try:
+        clog("open_stream: trying FFmpeg engine fallback")
+        src = FFmpegPipeSource(source)
+        ok, _f = src.read()
+        if ok and is_running():
+            clog("open_stream ffmpeg-pipe: OK")
+            return src
+        src.release()
+    except Exception as e:
+        clog(f"open_stream ffmpeg-pipe failed: {e}")
+    if not is_running():
+        return None
+    clog("open_stream: falling back to default backend")
+    return cv2.VideoCapture(source)
+
+
 def probe_rtsp(url, wait=10.0):
     """Step-by-step camera connection diagnosis for the Test button.
     Returns (ok, [(step_name, step_ok, detail), ...])."""

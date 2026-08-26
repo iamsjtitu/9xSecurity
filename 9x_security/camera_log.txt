@@ -95,3 +95,38 @@
 2026-08-17T07:26:14 | ffmpeg-pipe: no frames (process exited)
 2026-08-17T07:26:14 | === PROBE start: rtsp://u:p@192.0.2.1:554/s
 2026-08-17T07:26:17 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-26T18:04:55 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-08-26T18:12:47 | === PROBE start: rtsp://u:p@192.0.2.1:554/s
+2026-08-26T18:12:50 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-26T18:12:50 | svc: loading AI model
+2026-08-26T18:12:57 | svc: AI model loaded
+2026-08-26T18:12:57 | open_stream: transport=tcp
+2026-08-26T18:13:02 | open_stream: transport=udp
+2026-08-26T18:13:18 | === PROBE start: rtsp://u:p@192.0.2.1:554/s
+2026-08-26T18:13:21 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-26T18:13:21 | svc: loading AI model
+2026-08-26T18:13:21 | svc: AI model loaded
+2026-08-26T18:13:21 | open_stream: transport=tcp
+2026-08-26T18:13:26 | open_stream: transport=udp
+2026-08-26T18:13:31 | open_stream: trying FFmpeg engine fallback
+2026-08-26T18:13:31 | ffmpeg-pipe: starting
+2026-08-26T18:13:44 | === PROBE start: notaurl
+2026-08-26T18:13:44 | === PROBE start: rtsp://admin:Admin%40123@192.0.2.1:554/stream1
+2026-08-26T18:13:47 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-26T18:13:47 | ffmpeg-pipe: starting
+2026-08-26T18:13:47 | capture attempt transport=tcp wait=0.5s
+2026-08-26T18:13:52 | capture tcp: open FAILED
+2026-08-26T18:13:52 | UNIT_TEST_LINE_iter5
+2026-08-26T18:13:52 | MARKER_1787768032757
+2026-08-26T18:13:52 | === PROBE start: rtsp://admin:pw@192.0.2.1:554/stream1
+2026-08-26T18:13:55 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-26T18:13:55 | ffmpeg-pipe: starting
+2026-08-26T18:13:56 | ffmpeg-pipe: starting
+2026-08-26T18:13:56 | ffmpeg-pipe: starting
+2026-08-26T18:13:56 | ffmpeg-pipe: OK first frame in 0.0s
+2026-08-26T18:13:56 | ffmpeg-pipe: starting
+2026-08-26T18:14:01 | ffmpeg-pipe: no frames (process exited)
+2026-08-26T18:14:01 | === PROBE start: rtsp://u:p@192.0.2.1:554/s
+2026-08-26T18:14:04 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-26T18:14:48 | === PROBE start: rtsp://u:p@192.0.2.1:554/s
+2026-08-26T18:14:51 | probe: 192.0.2.1:554 UNREACHABLE (timed out)

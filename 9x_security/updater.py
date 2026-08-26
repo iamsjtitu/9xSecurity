@@ -116,9 +116,8 @@ def apply_update(path):
 
 
 def _run_installer(setup_exe):
-    subprocess.Popen(
-        [setup_exe, "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/FORCECLOSEAPPLICATIONS"]
-    )
+    # electron-builder NSIS installer: /S = silent, --force-run = relaunch app after
+    subprocess.Popen([setup_exe, "/S", "--force-run"])
     return True
 
 

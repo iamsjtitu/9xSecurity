@@ -30,6 +30,20 @@ jobs:
           cache: "pip"
           cache-dependency-path: 9x_security/requirements.txt
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: 9x_security/electron/yarn.lock
+
+      - name: Cache Electron binaries
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~\AppData\Local\electron\Cache
+            ~\AppData\Local\electron-builder\Cache
+          key: electron-${{ runner.os }}-${{ hashFiles('9x_security/electron/yarn.lock') }}
+
       - name: Set automatic version (1.0.<build number>)
         id: ver
         shell: bash
@@ -37,10 +51,11 @@ jobs:
           V="1.0.${{ github.run_number }}"
           sed -i "s/^APP_VERSION = .*/APP_VERSION = \"$V\"/" updater.py
           sed -i "s|^DEFAULT_REPO = .*|DEFAULT_REPO = \"$GITHUB_REPOSITORY\"  # baked|" updater.py
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('electron/package.json'));p.version='$V';fs.writeFileSync('electron/package.json',JSON.stringify(p,null,2));"
           grep "^APP_VERSION\|^DEFAULT_REPO" updater.py
           echo "version=$V" >> "$GITHUB_OUTPUT"
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -49,9 +64,9 @@ jobs:
       - name: Pre-build matplotlib font cache
         run: python -c "import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot; print('font cache ready')"
 
-      - name: Build app folder (onedir - fast build, fast startup)
+      - name: Build engine (PyInstaller onedir)
         run: >
-          pyinstaller --noconfirm --windowed --name "9xSecurity"
+          pyinstaller --noconfirm --name "9xEngine"
           --add-data "yolov8n.pt;."
           --collect-data ultralytics
           --collect-data easyocr
@@ -60,25 +75,26 @@ jobs:
           --exclude-module IPython
           --exclude-module pytest
           --exclude-module notebook
-          main.py
+          --exclude-module PyQt5
+          service.py
 
-      - name: Build Setup installer (Inno Setup)
-        shell: pwsh
+      - name: Build Electron UI + NSIS installer
+        working-directory: 9x_security/electron
         run: |
-          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
-          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress }
-          & $iscc /DAppVersion=${{ steps.ver.outputs.version }} installer.iss
+          yarn install --frozen-lockfile
+          yarn build
+          yarn electron-builder --win nsis --publish never
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: 9xSecurity-setup
-          path: 9x_security/dist/9xSecuritySetup-v${{ steps.ver.outputs.version }}.exe
+          path: 9x_security/electron/release/9xSecuritySetup-v${{ steps.ver.outputs.version }}.exe
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.ver.outputs.version }}
           name: 9x Security v${{ steps.ver.outputs.version }}
-          files: 9x_security/dist/9xSecuritySetup-v${{ steps.ver.outputs.version }}.exe
+          files: 9x_security/electron/release/9xSecuritySetup-v${{ steps.ver.outputs.version }}.exe
           make_latest: true

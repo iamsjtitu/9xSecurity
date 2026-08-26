@@ -184,6 +184,34 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Verified testing agent /app/test_reports/iteration_8.json: 51/51 pass incl. frozen-stdout
   simulation + engine-raises-still-shows-frame simulation. Visual confirm = user Windows.
 
+## Implemented (update 2026-06 #13) — ELECTRON REBUILD (major architecture change)
+- User: "Electron me bana ke do, sundar and smart". Choices: Electron(React) UI + Python
+  engine in one installer; modern clean look; same features; faster builds; video confirmed
+  working on old build before rebuild.
+- New architecture:
+  • service.py — FastAPI engine on 127.0.0.1:8971 (reuses engine/detector/tracker/plate/
+    whatsapp/updater/database). Endpoints: /api/login (token), state, camera connect/
+    disconnect/test, stream (MJPEG), line, swap, options, events, counts, snapshot (path-
+    contained), settings GET/POST (+password change), whatsapp/test, update/check+apply.
+    Serves electron/dist statically when present (container testing).
+  • electron/ — React + Vite + Tailwind per /app/design_guidelines.json (dark slate-900
+    sidebar + slate-50 body, #1f6feb accent, bento dashboard: camera col-8, stats/controls
+    col-4, events table col-12, Hinglish strings, full data-testids). electron-main.js
+    spawns engine exe (resources/engine/9xEngine.exe), health-waits, kills on quit;
+    preload: openPath/quit.
+  • engine.open_stream() shared ladder (tcp->udp->ffmpeg-pipe->default); legacy PyQt
+    main.py no longer built (reference only); PyQt5 removed from requirements
+    (+fastapi, uvicorn).
+  • updater._run_installer now NSIS flags (/S --force-run) — installer is electron-builder
+    NSIS 9xSecuritySetup-v{V}.exe (name has 'setup' so _pick_asset works).
+  • Workflow: python engine (PyInstaller onedir 9xEngine from service.py) + yarn build +
+    electron-builder NSIS; auto-version 1.0.{run_number} baked into updater.py AND
+    electron/package.json; pip/yarn/electron caches. yarn.lock committed.
+- Verified testing agent /app/test_reports/iteration_9.json: 71/71 backend pytest + FULL
+  frontend E2E via playwright at :8971 (login, dashboard, settings tabs, line draw, swap,
+  camera test modal, events filters, logout). Electron shell + Windows installer = user
+  verification after Save to GitHub.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

@@ -86,3 +86,4 @@ android-sdk/
 credentials.json
 *.key
 .credentials
+9x_security/electron/node_modules/electron/dist/electron

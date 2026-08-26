@@ -43,3 +43,7 @@
 2026-08-17T07:24:38 | image | to=919812345678 | status=200 | {"success":true}
 2026-08-17T07:25:57 | text | to=919876543210 | status=201 | {"success":true}
 2026-08-17T07:26:00 | image | to=919812345678 | status=200 | {"success":true}
+2026-08-26T18:13:07 | text | to=911234567890 | status=401 | {"detail":"Invalid API token"}
+2026-08-26T18:13:36 | text | to=911234567890 | status=401 | {"detail":"Invalid API token"}
+2026-08-26T18:13:44 | text | to=919876543210 | status=201 | {"success":true}
+2026-08-26T18:13:47 | image | to=919812345678 | status=200 | {"success":true}

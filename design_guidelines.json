@@ -1,0 +1,80 @@
+{
+  "theme": "Soft Utility / High-Contrast Dashboard (Light main body, Dark sidebar)",
+  "colors": {
+    "primary": "#1f6feb",
+    "primary_hover": "#175cd3",
+    "sidebar_bg": "#0f172a",
+    "sidebar_active": "#1e293b",
+    "sidebar_text": "#f8fafc",
+    "main_bg": "#f8fafc",
+    "card_bg": "#ffffff",
+    "text_primary": "#0f172a",
+    "text_secondary": "#475569",
+    "success": "#10b981",
+    "success_bg": "#d1fae5",
+    "danger": "#ef4444",
+    "danger_bg": "#fee2e2",
+    "warning": "#f59e0b",
+    "warning_bg": "#fef3c7",
+    "border": "#e2e8f0"
+  },
+  "typography": {
+    "font_headings": "Inter, sans-serif",
+    "font_body": "Inter, sans-serif",
+    "font_mono": "IBM Plex Mono, or standard monospace for number plates/data",
+    "h1": "text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900",
+    "h2": "text-xl sm:text-2xl font-semibold tracking-tight text-slate-800",
+    "h3": "text-lg sm:text-xl font-medium text-slate-800",
+    "body": "text-base text-slate-600",
+    "small": "text-sm text-slate-500",
+    "data_number": "text-3xl sm:text-4xl font-bold tracking-tight text-slate-900"
+  },
+  "grids_and_layouts": {
+    "app_shell": "h-screen flex w-full overflow-hidden bg-[#f8fafc]",
+    "sidebar": "w-64 bg-[#0f172a] flex flex-col shrink-0 text-slate-50",
+    "main_content": "flex-1 flex flex-col h-screen overflow-hidden",
+    "top_header": "h-16 shrink-0 bg-white border-b border-slate-200 px-6 flex items-center justify-between",
+    "dashboard_scroll_area": "flex-1 overflow-y-auto p-6",
+    "dashboard_bento": "grid grid-cols-1 lg:grid-cols-12 gap-6",
+    "camera_panel": "lg:col-span-8 row-span-2 bg-[#020617] rounded-xl overflow-hidden shadow-sm relative flex flex-col",
+    "stats_panel": "lg:col-span-4 row-span-1 grid grid-cols-2 gap-4",
+    "controls_panel": "lg:col-span-4 row-span-1 bg-white rounded-xl border border-slate-200 shadow-sm p-5",
+    "events_table_panel": "lg:col-span-12 row-span-2 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col mt-6",
+    "status_bar": "h-8 bg-white border-t border-slate-200 flex items-center justify-between px-4 text-xs text-slate-500 shrink-0"
+  },
+  "component_strategy": {
+    "sidebar_nav": "Vertical pill-shaped links. Active state: bg-blue-600 text-white. Inactive: text-slate-400 hover:bg-slate-800 hover:text-slate-100. Include '9x Security' branding at top.",
+    "camera_feed_area": "Dark minimal container. Absolute positioned 'LIVE' pulsing red badge top right. Centered play/connect overlay when disconnected. Overlay canvas for 2-click entry/exit line drawing.",
+    "stat_cards": "Crisp white cards, 1px border. Icon in top right wrapped in rounded-full background (Emerald for Entry, Rose for Exit). Massive data numbers.",
+    "events_table": "Dense layout for maximum visibility. Sticky header. Use subtle striped rows (`even:bg-slate-50`). Status badges for directions: solid light bg + dark text (e.g., bg-emerald-100 text-emerald-800).",
+    "settings_layout": "Left-aligned vertical tabs (Shadcn Tabs with `orientation='vertical'`) for WhatsApp, Account, Security, Updates.",
+    "forms_and_inputs": "Shadcn UI standard inputs. Focus state must strictly highlight with the primary blue `#1f6feb` ring."
+  },
+  "visual_enhancers": {
+    "borders": "Use subtle `border-slate-200`. Avoid heavy outlines.",
+    "shadows": "`shadow-sm` on all white cards to lift them slightly off the `slate-50` background.",
+    "radius": "`rounded-xl` for large panels, `rounded-lg` for cards, `rounded-md` for interactive buttons/inputs.",
+    "empty_states": "Use subdued text and soft Lucide icons for empty lists or missing camera feeds."
+  },
+  "motion": {
+    "hover": "`transition-colors duration-200` on buttons, nav links, and table rows.",
+    "live_pulse": "`animate-pulse` on a red `#ef4444` dot to indicate active RTSP camera feed.",
+    "modal_enter": "Smooth scale/fade in for full-screen snapshot preview or test diagnostics dialog."
+  },
+  "images_and_icons": {
+    "icons_library": "lucide-react",
+    "suggested_icons": ["CCTV", "LayoutDashboard", "Settings", "LogOut", "Activity", "CarFront", "Truck", "Image as ImagePreview", "MessageCircle", "Download", "ShieldAlert"],
+    "snapshot_placeholders": [
+      "https://images.pexels.com/photos/17078606/pexels-photo-17078606.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "https://images.unsplash.com/photo-1718784492504-b57e8a88c725?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2ODl8MHwxfHNlYXJjaHwyfHxjYXIlMjBsaWNlbnNlJTIwcGxhdGV8ZW58MHx8fHwxNzg3NzY3MDAyfDA&ixlib=rb-4.1.0&q=85"
+    ]
+  },
+  "universal_guidelines": [
+    "LEGIBILITY FIRST: The user is a gate security operator. Ensure high contrast and large clickable areas. Minimum text size for data should be `text-sm`.",
+    "DATA ATTRIBUTES: You MUST add `data-testid` to all buttons, inputs, links, and table rows. E.g., `data-testid='camera-connect-btn'`, `data-testid='stat-entries-today'`.",
+    "HINGLISH SUPPORT: The status messages and diagnostic texts should accommodate Hinglish casually (e.g., 'Connecting to camera...', 'WhatsApp message sent').",
+    "THEME CONSTRAINTS: User hated the fully black theme but accepted a dark sidebar with a clean modern aesthetic. STRICTLY stick to the Slate-50 body + Slate-900 Sidebar approach.",
+    "CAMERA UX: The RTSP feed container needs an overlay element capable of capturing click coordinates to draw the virtual line.",
+    "JS ONLY: Use `.js`/`.jsx` files. Do NOT use TypeScript (`.ts`/`.tsx`)."
+  ]
+}

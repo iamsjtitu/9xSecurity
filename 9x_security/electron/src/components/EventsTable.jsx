@@ -1,0 +1,129 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import { ImageOff, X } from 'lucide-react';
+import { api, snapshotUrl } from '../api';
+
+const today = () => new Date().toISOString().slice(0, 10);
+
+export default function EventsTable({ connected }) {
+  const [date, setDate] = useState(today());
+  const [direction, setDirection] = useState('All');
+  const [rows, setRows] = useState([]);
+  const [showAll, setShowAll] = useState(false);
+  const [preview, setPreview] = useState(null);
+
+  const load = useCallback(async (all = showAll) => {
+    try {
+      const q = all ? '?all=1' : `?date=${date}&direction=${direction}`;
+      const r = await api(`/api/events${q}`);
+      setRows(r.events || []);
+    } catch (_) { /* noop */ }
+  }, [date, direction, showAll]);
+
+  useEffect(() => { load(); }, []); // eslint-disable-line
+  useEffect(() => {
+    const id = setInterval(() => load(), 5000);
+    return () => clearInterval(id);
+  }, [load]);
+
+  const Badge = ({ d }) => (
+    <span
+      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+        d === 'Entry' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'
+      }`}
+    >
+      {d}
+    </span>
+  );
+
+  return (
+    <div className="card flex flex-col" data-testid="events-panel">
+      <div className="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-slate-200">
+        <h3 className="text-base font-semibold text-slate-800 mr-auto">Entry / Exit Log</h3>
+        <input
+          type="date"
+          className="input !w-auto"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          data-testid="events-date-filter"
+        />
+        <select
+          className="input !w-auto"
+          value={direction}
+          onChange={(e) => setDirection(e.target.value)}
+          data-testid="events-direction-filter"
+        >
+          <option>All</option>
+          <option>Entry</option>
+          <option>Exit</option>
+        </select>
+        <button className="btn-primary" onClick={() => { setShowAll(false); load(false); }} data-testid="events-filter-btn">
+          Filter
+        </button>
+        <button className="btn-ghost" onClick={() => { setShowAll(true); load(true); }} data-testid="events-showall-btn">
+          Show All
+        </button>
+      </div>
+      <div className="overflow-x-auto max-h-[420px] overflow-y-auto">
+        <table className="w-full text-sm">
+          <thead className="sticky top-0 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <tr>
+              <th className="px-5 py-3">Snapshot</th>
+              <th className="px-5 py-3">Date &amp; Time</th>
+              <th className="px-5 py-3">Type</th>
+              <th className="px-5 py-3">Direction</th>
+              <th className="px-5 py-3">Plate</th>
+            </tr>
+          </thead>
+          <tbody data-testid="events-tbody">
+            {rows.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-5 py-12 text-center text-slate-400">
+                  <ImageOff size={28} className="mx-auto mb-2" strokeWidth={1.2} />
+                  Koi event nahi — {connected ? 'gaadi line cross karegi to yahan dikhega' : 'camera connect karein'}
+                </td>
+              </tr>
+            )}
+            {rows.map((r) => (
+              <tr
+                key={r.id}
+                className="even:bg-slate-50 hover:bg-blue-50/60 cursor-pointer transition-colors duration-200"
+                onClick={() => setPreview(r)}
+                data-testid={`event-row-${r.id}`}
+              >
+                <td className="px-5 py-2">
+                  <img
+                    src={snapshotUrl(r.image_path)}
+                    alt="snap"
+                    className="h-14 w-24 rounded-md object-cover bg-slate-200"
+                    loading="lazy"
+                  />
+                </td>
+                <td className="px-5 py-2 text-slate-700">{r.date} {r.time}</td>
+                <td className="px-5 py-2 font-semibold uppercase text-slate-800">{r.vehicle_type}</td>
+                <td className="px-5 py-2"><Badge d={r.direction} /></td>
+                <td className="px-5 py-2 font-mono text-slate-700">{r.plate || '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {preview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6" onClick={() => setPreview(null)} data-testid="snapshot-modal">
+          <div className="card max-w-4xl w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200">
+              <div className="text-sm font-semibold text-slate-800">
+                {preview.direction} — {preview.vehicle_type.toUpperCase()} · {preview.date} {preview.time}
+                {preview.plate ? ` · ${preview.plate}` : ''}
+              </div>
+              <button onClick={() => setPreview(null)} className="text-slate-400 hover:text-slate-700" data-testid="snapshot-modal-close">
+                <X size={18} />
+              </button>
+            </div>
+            <img src={snapshotUrl(preview.image_path)} alt="snapshot" className="w-full object-contain max-h-[70vh] bg-black" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

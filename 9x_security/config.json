@@ -1,0 +1,30 @@
+{
+  "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
+  "line": {
+    "x1": 0.046296296296296294,
+    "y1": 0.0823045267489712,
+    "x2": 0.9537037037037037,
+    "y2": 0.9168724279835391
+  },
+  "entry_direction": "neg",
+  "confidence": 0.4,
+  "detect_frame_skip": 2,
+  "enable_plate": false,
+  "vehicle_classes": [
+    "car",
+    "truck",
+    "bus"
+  ],
+  "wa_enabled": false,
+  "wa_base_url": "https://wa.9x.design",
+  "wa_api_key": "",
+  "wa_recipients": [],
+  "wa_send_image": true,
+  "wa_account_email": "",
+  "wa_account_password": "",
+  "auth_user": "admin",
+  "auth_salt": "07a9826f6147a5f6d6ea7db009faede5",
+  "auth_hash": "8784980df09550f7cc4138a718add80a35f668ed5424f8c34b2a6016a278cb90",
+  "github_repo": "",
+  "gh_token": ""
+}

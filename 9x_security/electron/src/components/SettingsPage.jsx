@@ -1,0 +1,203 @@
+import React, { useEffect, useState } from 'react';
+import { MessageCircle, User, Lock, Download, Send } from 'lucide-react';
+import { api } from '../api';
+
+const TABS = [
+  { id: 'whatsapp', label: 'WhatsApp Alerts', icon: MessageCircle },
+  { id: 'account', label: 'Account', icon: User },
+  { id: 'security', label: 'Login / Security', icon: Lock },
+  { id: 'updates', label: 'Updates', icon: Download },
+];
+
+export default function SettingsPage({ showToast }) {
+  const [tab, setTab] = useState('whatsapp');
+  const [s, setS] = useState(null);
+  const [newPass, setNewPass] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [updInfo, setUpdInfo] = useState(null);
+
+  useEffect(() => {
+    api('/api/settings').then(setS).catch((e) => showToast(e.message, 'error'));
+  }, []); // eslint-disable-line
+
+  const save = async () => {
+    setBusy(true);
+    try {
+      const body = { ...s };
+      if (newPass) body.new_password = newPass;
+      await api('/api/settings', { method: 'POST', body: JSON.stringify(body) });
+      setNewPass('');
+      showToast('Settings save ho gayi ✔', 'success');
+    } catch (e) {
+      showToast(e.message, 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const waTest = async () => {
+    setBusy(true);
+    try {
+      const r = await api('/api/whatsapp/test', { method: 'POST', body: JSON.stringify(s) });
+      showToast(r.detail, r.ok ? 'success' : 'error');
+    } catch (e) {
+      showToast(e.message, 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const checkUpdate = async () => {
+    setBusy(true);
+    setUpdInfo(null);
+    try {
+      const r = await api('/api/update/check');
+      setUpdInfo(r);
+    } catch (e) {
+      showToast(e.message, 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const applyUpdate = async () => {
+    setBusy(true);
+    try {
+      const r = await api('/api/update/apply', { method: 'POST' });
+      showToast(r.message, 'success');
+      if (r.ok && window.native?.quit) setTimeout(() => window.native.quit(), 1500);
+    } catch (e) {
+      showToast(e.message, 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!s) return <div className="text-slate-400 text-sm">Loading…</div>;
+
+  const set = (k, v) => setS({ ...s, [k]: v });
+
+  return (
+    <div className="flex gap-6 items-start" data-testid="settings-page">
+      <div className="card p-2 w-56 shrink-0">
+        {TABS.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => setTab(id)}
+            data-testid={`settings-tab-${id}`}
+            className={`w-full flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-colors duration-200 ${
+              tab === id ? 'bg-[#1f6feb] text-white' : 'text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <Icon size={15} /> {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="card p-6 flex-1 max-w-2xl">
+        {tab === 'whatsapp' && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-slate-900">WhatsApp Alerts (wa.9x.design)</h3>
+            <label className="flex items-center gap-2.5 text-sm text-slate-700 cursor-pointer">
+              <input type="checkbox" className="h-4 w-4 accent-[#1f6feb]" checked={!!s.wa_enabled}
+                onChange={(e) => set('wa_enabled', e.target.checked)} data-testid="wa-enabled-toggle" />
+              Entry/Exit par WhatsApp alert bhejo
+            </label>
+            <div>
+              <label className="label">API Key (Bearer)</label>
+              <input type="password" className="input" value={s.wa_api_key || ''} placeholder="wa9x_..."
+                onChange={(e) => set('wa_api_key', e.target.value)} data-testid="wa-api-key-input" />
+            </div>
+            <div>
+              <label className="label">Recipients (ek number per line, 91XXXXXXXXXX)</label>
+              <textarea className="input h-24 resize-none font-mono" value={(s.wa_recipients || []).join('\n')}
+                onChange={(e) => set('wa_recipients', e.target.value.split('\n').map((x) => x.trim()).filter(Boolean))}
+                data-testid="wa-recipients-input" />
+            </div>
+            <label className="flex items-center gap-2.5 text-sm text-slate-700 cursor-pointer">
+              <input type="checkbox" className="h-4 w-4 accent-[#1f6feb]" checked={s.wa_send_image !== false}
+                onChange={(e) => set('wa_send_image', e.target.checked)} data-testid="wa-send-image-toggle" />
+              Photo ke saath bhejo
+            </label>
+            <div className="flex gap-3 pt-2">
+              <button className="btn-primary" onClick={save} disabled={busy} data-testid="settings-save-btn">Save</button>
+              <button className="btn-ghost" onClick={waTest} disabled={busy} data-testid="wa-test-btn">
+                <Send size={14} /> Send Test Message
+              </button>
+            </div>
+          </div>
+        )}
+
+        {tab === 'account' && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-slate-900">wa.9x.design Account (reference)</h3>
+            <div>
+              <label className="label">Email</label>
+              <input className="input" value={s.wa_account_email || ''}
+                onChange={(e) => set('wa_account_email', e.target.value)} data-testid="wa-email-input" />
+            </div>
+            <div>
+              <label className="label">Password</label>
+              <input type="password" className="input" value={s.wa_account_password || ''}
+                onChange={(e) => set('wa_account_password', e.target.value)} data-testid="wa-password-input" />
+            </div>
+            <p className="text-xs text-slate-400">Ye sirf yaad rakhne ke liye store hota hai — sending API key se hoti hai.</p>
+            <button className="btn-primary" onClick={save} disabled={busy} data-testid="account-save-btn">Save</button>
+          </div>
+        )}
+
+        {tab === 'security' && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-slate-900">Login / Security</h3>
+            <div>
+              <label className="label">Username</label>
+              <input className="input" value={s.auth_user || 'admin'}
+                onChange={(e) => set('auth_user', e.target.value)} data-testid="auth-user-input" />
+            </div>
+            <div>
+              <label className="label">Naya Password (khaali chhoda to nahi badlega)</label>
+              <input type="password" className="input" value={newPass}
+                onChange={(e) => setNewPass(e.target.value)} data-testid="new-password-input" />
+            </div>
+            <button className="btn-primary" onClick={save} disabled={busy} data-testid="security-save-btn">Save</button>
+          </div>
+        )}
+
+        {tab === 'updates' && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-slate-900">Updates</h3>
+            <p className="text-sm text-slate-500">
+              Koi link/repo daalne ki zaroorat nahi — bas check karein. Repo PRIVATE ho to GitHub token daalein
+              (github.com/settings/tokens → Fine-grained → Contents: Read-only).
+            </p>
+            <div>
+              <label className="label">GitHub Token (sirf private repo ke liye, optional)</label>
+              <input type="password" className="input" value={s.gh_token || ''}
+                onChange={(e) => set('gh_token', e.target.value)} data-testid="gh-token-input" />
+            </div>
+            <div className="flex gap-3">
+              <button className="btn-ghost" onClick={save} disabled={busy} data-testid="updates-save-btn">Save Token</button>
+              <button className="btn-primary" onClick={checkUpdate} disabled={busy} data-testid="check-update-btn">
+                <Download size={14} /> Check for Updates
+              </button>
+            </div>
+            {updInfo && (
+              <div className={`rounded-lg border p-4 text-sm ${updInfo.available ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-slate-200 bg-slate-50 text-slate-700'}`}
+                data-testid="update-info">
+                <div className="font-semibold mb-1">
+                  Current: v{updInfo.current}{updInfo.latest ? ` · Latest: v${updInfo.latest}` : ''}
+                </div>
+                <div>{updInfo.message}</div>
+                {updInfo.available && (
+                  <button className="btn-primary mt-3" onClick={applyUpdate} disabled={busy} data-testid="apply-update-btn">
+                    Download &amp; Install Now
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

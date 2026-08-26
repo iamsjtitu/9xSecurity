@@ -296,11 +296,12 @@ def set_options(body: dict, request: Request):
 
 # ---- events -----------------------------------------------------------------
 @app.get("/api/events")
-def events(request: Request, date: str = "", direction: str = "All", all: int = 0):
+def events(request: Request, date: str = "", direction: str = "All", all: int = 0, plate: str = ""):
     _check(request)
     rows = _db.get_events(
         date_filter=None if all else (date or None),
         direction_filter=direction,
+        plate_filter=plate.strip() or None,
     )
     return {"events": rows}
 

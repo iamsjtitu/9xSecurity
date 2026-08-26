@@ -236,6 +236,14 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   roundtrip, purge removed only old event), UI E2E screenshots (filters switch rows +
   summary updates, chips render, auto-delete toggle saves). Demo data cleaned after test.
 
+## Implemented (update 2026-06 #16) — Plate Search
+- db.get_events(plate_filter): SQL LIKE %q% (case-insensitive); /api/events?plate=q
+- Events table: plate search box (debounced 400ms, mono/uppercase, clear X). Non-empty
+  query searches ALL dates (ignores date chips, shows hint line); clear restores date view.
+  Works combined with Entry/Exit direction buttons.
+- Tested (self): unit (partial/case-insensitive/none/direction-combo), API curl (hr26 -> 2
+  correct rows), UI E2E (type HR26 -> 2 rows + hint, clear -> all rows). Demo data cleaned.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

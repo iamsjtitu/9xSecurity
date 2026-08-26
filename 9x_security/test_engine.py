@@ -364,8 +364,17 @@ def test_db_purge_retention():
     # direction filters still work on remaining data
     assert len(db.get_events(direction_filter="Exit")) == 1
     assert len(db.get_events(direction_filter="Entry")) == 0
+    # plate search (partial, case-insensitive LIKE)
+    db.add_event("car", "Entry", "HR26AB1234", "/tmp/p1.jpg")
+    db.add_event("car", "Exit", "HR26AB1234", "/tmp/p2.jpg")
+    db.add_event("bus", "Entry", "MH12XY9999", "/tmp/p3.jpg")
+    assert len(db.get_events(plate_filter="HR26")) == 2
+    assert len(db.get_events(plate_filter="hr26ab1234")) == 2
+    assert len(db.get_events(plate_filter="MH12")) == 1
+    assert len(db.get_events(plate_filter="ZZ")) == 0
+    assert len(db.get_events(plate_filter="HR26", direction_filter="Exit")) == 1
     db.close()
-    print("PASS: 7-day retention purge + Entry/Exit filters")
+    print("PASS: 7-day retention purge + Entry/Exit filters + plate search")
 
 
 def test_updater_pick_asset():

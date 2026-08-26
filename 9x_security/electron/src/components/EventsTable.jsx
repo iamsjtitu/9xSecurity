@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { ImageOff, X, LogIn, LogOut as LogOutIcon } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ImageOff, X, LogIn, LogOut as LogOutIcon, Search } from 'lucide-react';
 import { api, snapshotUrl } from '../api';
 
 const iso = (d) =>
@@ -25,17 +25,21 @@ export default function EventsTable({ connected }) {
   const [rows, setRows] = useState([]);
   const [showAll, setShowAll] = useState(false);
   const [preview, setPreview] = useState(null);
+  const [plateQ, setPlateQ] = useState('');
+  const debounceRef = useRef(null);
 
   const fetchRows = useCallback(async (o = {}) => {
     const all = o.all !== undefined ? o.all : showAll;
     const d = o.date !== undefined ? o.date : date;
     const dir = o.direction !== undefined ? o.direction : direction;
+    const pq = o.plate !== undefined ? o.plate : plateQ;
     try {
-      const q = all ? `?all=1&direction=${dir}` : `?date=${d}&direction=${dir}`;
+      const base = pq.trim() ? `?all=1&direction=${dir}` : all ? `?all=1&direction=${dir}` : `?date=${d}&direction=${dir}`;
+      const q = base + (pq.trim() ? `&plate=${encodeURIComponent(pq.trim())}` : '');
       const r = await api(`/api/events${q}`);
       setRows(r.events || []);
     } catch (_) { /* noop */ }
-  }, [date, direction, showAll]);
+  }, [date, direction, showAll, plateQ]);
 
   useEffect(() => { fetchRows(); }, []); // eslint-disable-line
   useEffect(() => {
@@ -43,8 +47,14 @@ export default function EventsTable({ connected }) {
     return () => clearInterval(id);
   }, [fetchRows]);
 
-  const pickDate = (d) => { setDate(d); setShowAll(false); fetchRows({ date: d, all: false }); };
+  const pickDate = (d) => { setPlateQ(''); setDate(d); setShowAll(false); fetchRows({ date: d, all: false, plate: '' }); };
   const pickDir = (dir) => { setDirection(dir); fetchRows({ direction: dir }); };
+
+  const onPlateInput = (v) => {
+    setPlateQ(v);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchRows({ plate: v }), 400);
+  };
 
   const entries = rows.filter((r) => r.direction === 'Entry').length;
   const exits = rows.length - entries;
@@ -83,6 +93,25 @@ export default function EventsTable({ connected }) {
             <LogOutIcon size={12} /> {exits} Exit
           </span>
         </div>
+        <div className="relative">
+          <Search size={15} className="absolute left-3 top-3 text-slate-400" />
+          <input
+            className="input !w-52 pl-9 font-mono uppercase"
+            placeholder="Plate search…"
+            value={plateQ}
+            onChange={(e) => onPlateInput(e.target.value)}
+            data-testid="plate-search-input"
+          />
+          {plateQ && (
+            <button
+              onClick={() => { setPlateQ(''); fetchRows({ plate: '' }); }}
+              className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700"
+              data-testid="plate-search-clear"
+            >
+              <X size={15} />
+            </button>
+          )}
+        </div>
         <div className="inline-flex rounded-lg border border-slate-300 overflow-hidden" data-testid="direction-filters">
           <DirBtn v="All" activeCls="bg-slate-800 text-white" />
           <DirBtn v="Entry" activeCls="bg-emerald-600 text-white" />
@@ -105,21 +134,29 @@ export default function EventsTable({ connected }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-b border-slate-100 bg-slate-50/60">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 mr-1">Pichhle 7 din:</span>
-        {last7Days().map((d) => (
-          <button
-            key={d.value}
-            onClick={() => pickDate(d.value)}
-            data-testid={`day-chip-${d.value}`}
-            className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors duration-200 ${
-              !showAll && date === d.value
-                ? 'bg-[#1f6feb] text-white'
-                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            {d.label}
-          </button>
-        ))}
+        {plateQ.trim() ? (
+          <span className="text-xs font-semibold text-[#1f6feb]" data-testid="plate-search-hint">
+            Plate search: saare dino me "{plateQ.trim().toUpperCase()}" ke records dikh rahe hain
+          </span>
+        ) : (
+          <>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 mr-1">Pichhle 7 din:</span>
+            {last7Days().map((d) => (
+              <button
+                key={d.value}
+                onClick={() => pickDate(d.value)}
+                data-testid={`day-chip-${d.value}`}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors duration-200 ${
+                  !showAll && date === d.value
+                    ? 'bg-[#1f6feb] text-white'
+                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                {d.label}
+              </button>
+            ))}
+          </>
+        )}
       </div>
 
       <div className="overflow-x-auto max-h-[420px] overflow-y-auto">

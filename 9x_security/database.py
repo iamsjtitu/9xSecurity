@@ -52,7 +52,7 @@ class EventDB:
             self.conn.commit()
             return cur.lastrowid
 
-    def get_events(self, date_filter=None, direction_filter=None, limit=500):
+    def get_events(self, date_filter=None, direction_filter=None, plate_filter=None, limit=500):
         q = "SELECT * FROM events"
         clauses, params = [], []
         if date_filter:
@@ -61,6 +61,9 @@ class EventDB:
         if direction_filter and direction_filter != "All":
             clauses.append("direction = ?")
             params.append(direction_filter)
+        if plate_filter:
+            clauses.append("plate LIKE ?")
+            params.append(f"%{plate_filter}%")
         if clauses:
             q += " WHERE " + " AND ".join(clauses)
         q += " ORDER BY id DESC LIMIT ?"

@@ -138,3 +138,7 @@
 2026-08-26T18:47:49 | purge: 1 old events removed (retention 7d, cutoff 2026-08-19)
 2026-08-26T18:56:15 | svc: starting on 127.0.0.1:8971 v1.0.0
 2026-08-26T18:56:15 | purge: 0 old events removed (retention 7d, cutoff 2026-08-19)
+2026-08-26T19:02:17 | === PROBE start: notaurl
+2026-08-26T19:02:17 | === PROBE start: rtsp://admin:Admin%40123@192.0.2.1:554/stream1
+2026-08-26T19:02:20 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-26T19:02:20 | ffmpeg-pipe: starting

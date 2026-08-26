@@ -244,6 +244,16 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Tested (self): unit (partial/case-insensitive/none/direction-combo), API curl (hr26 -> 2
   correct rows), UI E2E (type HR26 -> 2 rows + hint, clear -> all rows). Demo data cleaned.
 
+## Implemented (update 2026-06 #17) — CI fix: yarn.lock cache failure
+- User's GH Actions build failed at setup-node: cache-dependency-path electron/yarn.lock
+  missing. RCA: platform auto-commit NEVER commits yarn.lock files (untracked), so it never
+  reaches GitHub. Fix: setup-node + electron cache keys now hash electron/package.json
+  (committed), plain 'yarn install' (no --frozen-lockfile), node 20 -> 22 (deprecation).
+- Verified testing agent /app/test_reports/iteration_10.json: YAML valid, zero yarn.lock
+  refs, package.json git-tracked, fresh no-lockfile yarn install simulation SUCCESS,
+  version-bake node -e works, 19/19 regression pass. Real run = user's next push.
+- LEARNING (do not repeat): never depend on yarn.lock in CI for this repo.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

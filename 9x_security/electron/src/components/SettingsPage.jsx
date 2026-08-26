@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { MessageCircle, User, Lock, Download, Send } from 'lucide-react';
+import { MessageCircle, User, Lock, Download, Send, Clock } from 'lucide-react';
 import { api } from '../api';
 
 const TABS = [
   { id: 'whatsapp', label: 'WhatsApp Alerts', icon: MessageCircle },
+  { id: 'timing', label: 'Timing', icon: Clock },
   { id: 'account', label: 'Account', icon: User },
   { id: 'security', label: 'Login / Security', icon: Lock },
   { id: 'updates', label: 'Updates', icon: Download },
@@ -125,6 +126,58 @@ export default function SettingsPage({ showToast }) {
                 <Send size={14} /> Send Test Message
               </button>
             </div>
+          </div>
+        )}
+
+        {tab === 'timing' && (
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-slate-900">Timing / Schedule</h3>
+
+            <div className="rounded-lg border border-slate-200 p-4 space-y-3">
+              <label className="flex items-center gap-2.5 text-sm font-medium text-slate-800 cursor-pointer">
+                <input type="checkbox" className="h-4 w-4 accent-[#1f6feb]" checked={!!s.wa_schedule_enabled}
+                  onChange={(e) => set('wa_schedule_enabled', e.target.checked)} data-testid="wa-schedule-toggle" />
+                WhatsApp alerts sirf schedule ke time par bhejo
+              </label>
+              <div className="flex items-center gap-3 text-sm text-slate-700">
+                <span>Se</span>
+                <input type="time" className="input !w-auto" value={s.wa_start || '18:00'}
+                  onChange={(e) => set('wa_start', e.target.value)} disabled={!s.wa_schedule_enabled}
+                  data-testid="wa-start-time" />
+                <span>Tak</span>
+                <input type="time" className="input !w-auto" value={s.wa_end || '06:00'}
+                  onChange={(e) => set('wa_end', e.target.value)} disabled={!s.wa_schedule_enabled}
+                  data-testid="wa-end-time" />
+              </div>
+              <p className="text-xs text-slate-400">
+                Raat ka window bhi chalega — jaise 18:00 se 06:00 = shaam 6 baje se subah 6 baje tak.
+                Baaki time events capture honge par WhatsApp nahi jaayega.
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-slate-200 p-4 space-y-3">
+              <label className="flex items-center gap-2.5 text-sm font-medium text-slate-800 cursor-pointer">
+                <input type="checkbox" className="h-4 w-4 accent-[#1f6feb]" checked={!!s.capture_schedule_enabled}
+                  onChange={(e) => set('capture_schedule_enabled', e.target.checked)} data-testid="capture-schedule-toggle" />
+                Capture/detection bhi sirf schedule ke time par chale
+              </label>
+              <div className="flex items-center gap-3 text-sm text-slate-700">
+                <span>Se</span>
+                <input type="time" className="input !w-auto" value={s.capture_start || '18:00'}
+                  onChange={(e) => set('capture_start', e.target.value)} disabled={!s.capture_schedule_enabled}
+                  data-testid="capture-start-time" />
+                <span>Tak</span>
+                <input type="time" className="input !w-auto" value={s.capture_end || '06:00'}
+                  onChange={(e) => set('capture_end', e.target.value)} disabled={!s.capture_schedule_enabled}
+                  data-testid="capture-end-time" />
+              </div>
+              <p className="text-xs text-slate-400">
+                OFF (default) = 24 ghante capture hota rahega. ON = window ke bahar sirf live video
+                dikhegi, snapshots/events/alerts pause rahenge.
+              </p>
+            </div>
+
+            <button className="btn-primary" onClick={save} disabled={busy} data-testid="timing-save-btn">Save</button>
           </div>
         )}
 

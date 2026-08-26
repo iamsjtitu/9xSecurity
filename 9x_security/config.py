@@ -38,6 +38,13 @@ DEFAULTS = {
     "wa_api_key": "",
     "wa_recipients": [],          # ["919876543210", ...]
     "wa_send_image": True,        # False => text-only alert
+    # ---- Timing / schedule ----
+    "wa_schedule_enabled": False,     # True => WhatsApp alerts only between wa_start-wa_end
+    "wa_start": "18:00",
+    "wa_end": "06:00",
+    "capture_schedule_enabled": False,  # True => detection/capture only in window (video always on)
+    "capture_start": "18:00",
+    "capture_end": "06:00",
     # ---- wa.9x.design account credentials (stored for reference) ----
     "wa_account_email": "",
     "wa_account_password": "",
@@ -70,6 +77,26 @@ def save_config(cfg):
         return True
     except Exception:
         return False
+
+
+def in_time_window(start, end, now=None):
+    """'HH:MM' strings. start > end means an overnight window (e.g. 18:00-06:00).
+    Equal start/end means always on."""
+    from datetime import datetime as _dt
+
+    try:
+        t = now or _dt.now()
+        cur = t.hour * 60 + t.minute
+        sh, sm = (int(x) for x in str(start).split(":"))
+        eh, em = (int(x) for x in str(end).split(":"))
+        s, e = sh * 60 + sm, eh * 60 + em
+    except Exception:
+        return True
+    if s == e:
+        return True
+    if s < e:
+        return s <= cur < e
+    return cur >= s or cur < e
 
 
 def ensure_std_streams():

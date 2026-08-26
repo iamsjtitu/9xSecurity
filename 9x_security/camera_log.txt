@@ -130,3 +130,4 @@
 2026-08-26T18:14:04 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
 2026-08-26T18:14:48 | === PROBE start: rtsp://u:p@192.0.2.1:554/s
 2026-08-26T18:14:51 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-08-26T18:25:58 | svc: starting on 127.0.0.1:8971 v1.0.0

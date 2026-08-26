@@ -212,6 +212,19 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   camera test modal, events filters, logout). Electron shell + Windows installer = user
   verification after Save to GitHub.
 
+## Implemented (update 2026-06 #14) — Timing/Schedule system (user request)
+- Settings > new "Timing" tab with 2 independent schedules (overnight windows supported,
+  e.g. 18:00 -> 06:00):
+  • WhatsApp alert window: outside it events still capture, but no WhatsApp (gated in
+    WhatsAppNotifier.allowed_now via config.in_time_window; skip logged to wa_log.txt)
+  • Capture window (default OFF = 24hr): outside it live video keeps showing but
+    detection/snapshots/events pause; status shows "capture PAUSED (schedule...)"
+- Config keys: wa_schedule_enabled/wa_start/wa_end, capture_schedule_enabled/
+  capture_start/capture_end; exposed via /api/settings
+- Tested (self): unit tests (in_time_window overnight/day/equal/invalid + notifier gating)
+  pass, /api/settings roundtrip via curl, UI e2e (Timing tab save -> toast -> persisted)
+  via playwright screenshot. Real overnight behavior = user on Windows.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

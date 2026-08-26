@@ -118,6 +118,7 @@ class Worker:
         )
         clog("svc: streaming started")
         fail = 0
+        paused = False
         while self._running:
             ok, frame = cap.read()
             if not ok:
@@ -135,7 +136,22 @@ class Worker:
                 continue
             fail = 0
             small = cv2.resize(frame, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
-            if self.engine is not None:
+            live_cfg = self.engine.cfg if self.engine else cfg
+            capture_on = (not live_cfg.get("capture_schedule_enabled")) or config.in_time_window(
+                live_cfg.get("capture_start", "18:00"), live_cfg.get("capture_end", "06:00")
+            )
+            if capture_on and paused:
+                paused = False
+                self.status = "Connected — live monitoring chalu hai"
+                clog("svc: capture resumed (schedule)")
+            elif not capture_on and not paused:
+                paused = True
+                self.status = (
+                    f"Connected — capture PAUSED (schedule {live_cfg.get('capture_start')}"
+                    f"-{live_cfg.get('capture_end')} ke bahar), video chalu hai"
+                )
+                clog("svc: capture paused (schedule)")
+            if self.engine is not None and capture_on:
                 try:
                     annotated, _ = self.engine.process_frame(small, original=frame)
                 except Exception:
@@ -308,6 +324,8 @@ def snapshot(request: Request, path: str):
 _SETTINGS_KEYS = (
     "wa_enabled", "wa_base_url", "wa_api_key", "wa_recipients", "wa_send_image",
     "wa_account_email", "wa_account_password", "gh_token",
+    "wa_schedule_enabled", "wa_start", "wa_end",
+    "capture_schedule_enabled", "capture_start", "capture_end",
 )
 
 

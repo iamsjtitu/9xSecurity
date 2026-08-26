@@ -33,10 +33,21 @@ class WhatsAppNotifier:
         self.api_key = cfg.get("wa_api_key", "").strip()
         self.recipients = [p for p in (_phone(r) for r in (cfg.get("wa_recipients", []) or [])) if p]
         self.send_image = bool(cfg.get("wa_send_image", True))
+        self.schedule_enabled = bool(cfg.get("wa_schedule_enabled", False))
+        self.wa_start = cfg.get("wa_start", "18:00")
+        self.wa_end = cfg.get("wa_end", "06:00")
+
+    def allowed_now(self, now=None):
+        if not self.schedule_enabled:
+            return True
+        return config.in_time_window(self.wa_start, self.wa_end, now=now)
 
     # ---- public -----------------------------------------------------------
     def notify(self, ev):
         if not self.enabled or not self.api_key or not self.recipients:
+            return
+        if not self.allowed_now():
+            self._log("-", "schedule-skip", "-", f"outside {self.wa_start}-{self.wa_end}")
             return
         threading.Thread(target=self._send_all, args=(dict(ev),), daemon=True).start()
 

@@ -315,6 +315,36 @@ def test_ensure_std_streams():
     print("PASS: frozen build stdout/stderr redirect -> app_log.txt (no None-print crash)")
 
 
+def test_time_window_and_wa_schedule():
+    from datetime import datetime
+
+    import config as _cfg
+    import whatsapp
+
+    T = lambda h, m=0: datetime(2026, 6, 15, h, m)
+    # overnight window 18:00-06:00
+    assert _cfg.in_time_window("18:00", "06:00", now=T(23))
+    assert _cfg.in_time_window("18:00", "06:00", now=T(5, 59))
+    assert not _cfg.in_time_window("18:00", "06:00", now=T(12))
+    assert not _cfg.in_time_window("18:00", "06:00", now=T(6, 0))
+    # day window 09:00-17:00
+    assert _cfg.in_time_window("09:00", "17:00", now=T(9))
+    assert not _cfg.in_time_window("09:00", "17:00", now=T(17))
+    # equal / invalid => always on
+    assert _cfg.in_time_window("10:00", "10:00", now=T(3))
+    assert _cfg.in_time_window("bad", "值", now=T(3))
+
+    n = whatsapp.WhatsAppNotifier({
+        "wa_enabled": True, "wa_api_key": "k", "wa_recipients": ["919812345678"],
+        "wa_schedule_enabled": True, "wa_start": "18:00", "wa_end": "06:00",
+    })
+    assert n.allowed_now(now=T(22)) and not n.allowed_now(now=T(11))
+    n2 = whatsapp.WhatsAppNotifier({"wa_enabled": True, "wa_api_key": "k",
+                                    "wa_recipients": ["919812345678"]})
+    assert n2.allowed_now(now=T(11)), "schedule off => always allowed"
+    print("PASS: time window (overnight/day) + WhatsApp schedule gating")
+
+
 def test_updater_pick_asset():
     import updater
 
@@ -388,6 +418,7 @@ if __name__ == "__main__":
     test_probe_rtsp()
     test_ffmpeg_pipe_source()
     test_ensure_std_streams()
+    test_time_window_and_wa_schedule()
     test_tracker_ids_persist()
     test_line_crossing_logs_event()
     test_auth_password()

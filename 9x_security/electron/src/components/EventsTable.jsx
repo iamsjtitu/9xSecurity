@@ -1,8 +1,23 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ImageOff, X } from 'lucide-react';
+import { ImageOff, X, LogIn, LogOut as LogOutIcon } from 'lucide-react';
 import { api, snapshotUrl } from '../api';
 
-const today = () => new Date().toISOString().slice(0, 10);
+const iso = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const today = () => iso(new Date());
+
+const last7Days = () => {
+  const out = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    out.push({
+      value: iso(d),
+      label: i === 0 ? 'Aaj' : i === 1 ? 'Kal' : d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+    });
+  }
+  return out;
+};
 
 export default function EventsTable({ connected }) {
   const [date, setDate] = useState(today());
@@ -11,19 +26,40 @@ export default function EventsTable({ connected }) {
   const [showAll, setShowAll] = useState(false);
   const [preview, setPreview] = useState(null);
 
-  const load = useCallback(async (all = showAll) => {
+  const fetchRows = useCallback(async (o = {}) => {
+    const all = o.all !== undefined ? o.all : showAll;
+    const d = o.date !== undefined ? o.date : date;
+    const dir = o.direction !== undefined ? o.direction : direction;
     try {
-      const q = all ? '?all=1' : `?date=${date}&direction=${direction}`;
+      const q = all ? `?all=1&direction=${dir}` : `?date=${d}&direction=${dir}`;
       const r = await api(`/api/events${q}`);
       setRows(r.events || []);
     } catch (_) { /* noop */ }
   }, [date, direction, showAll]);
 
-  useEffect(() => { load(); }, []); // eslint-disable-line
+  useEffect(() => { fetchRows(); }, []); // eslint-disable-line
   useEffect(() => {
-    const id = setInterval(() => load(), 5000);
+    const id = setInterval(() => fetchRows(), 5000);
     return () => clearInterval(id);
-  }, [load]);
+  }, [fetchRows]);
+
+  const pickDate = (d) => { setDate(d); setShowAll(false); fetchRows({ date: d, all: false }); };
+  const pickDir = (dir) => { setDirection(dir); fetchRows({ direction: dir }); };
+
+  const entries = rows.filter((r) => r.direction === 'Entry').length;
+  const exits = rows.length - entries;
+
+  const DirBtn = ({ v, activeCls }) => (
+    <button
+      onClick={() => pickDir(v)}
+      data-testid={`filter-${v.toLowerCase()}`}
+      className={`px-3.5 py-1.5 text-sm font-semibold transition-colors duration-200 ${
+        direction === v ? activeCls : 'bg-white text-slate-600 hover:bg-slate-50'
+      }`}
+    >
+      {v}
+    </button>
+  );
 
   const Badge = ({ d }) => (
     <span
@@ -38,31 +74,54 @@ export default function EventsTable({ connected }) {
   return (
     <div className="card flex flex-col" data-testid="events-panel">
       <div className="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-slate-200">
-        <h3 className="text-base font-semibold text-slate-800 mr-auto">Entry / Exit Log</h3>
+        <h3 className="text-base font-semibold text-slate-800">Entry / Exit Log</h3>
+        <div className="flex items-center gap-2 text-xs font-semibold mr-auto" data-testid="events-summary">
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-emerald-800">
+            <LogIn size={12} /> {entries} Entry
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2.5 py-1 text-rose-700">
+            <LogOutIcon size={12} /> {exits} Exit
+          </span>
+        </div>
+        <div className="inline-flex rounded-lg border border-slate-300 overflow-hidden" data-testid="direction-filters">
+          <DirBtn v="All" activeCls="bg-slate-800 text-white" />
+          <DirBtn v="Entry" activeCls="bg-emerald-600 text-white" />
+          <DirBtn v="Exit" activeCls="bg-rose-600 text-white" />
+        </div>
         <input
           type="date"
           className="input !w-auto"
           value={date}
-          onChange={(e) => setDate(e.target.value)}
+          onChange={(e) => pickDate(e.target.value)}
           data-testid="events-date-filter"
         />
-        <select
-          className="input !w-auto"
-          value={direction}
-          onChange={(e) => setDirection(e.target.value)}
-          data-testid="events-direction-filter"
+        <button
+          className={showAll ? 'btn-primary' : 'btn-ghost'}
+          onClick={() => { setShowAll(true); fetchRows({ all: true }); }}
+          data-testid="events-showall-btn"
         >
-          <option>All</option>
-          <option>Entry</option>
-          <option>Exit</option>
-        </select>
-        <button className="btn-primary" onClick={() => { setShowAll(false); load(false); }} data-testid="events-filter-btn">
-          Filter
-        </button>
-        <button className="btn-ghost" onClick={() => { setShowAll(true); load(true); }} data-testid="events-showall-btn">
           Show All
         </button>
       </div>
+
+      <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-b border-slate-100 bg-slate-50/60">
+        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 mr-1">Pichhle 7 din:</span>
+        {last7Days().map((d) => (
+          <button
+            key={d.value}
+            onClick={() => pickDate(d.value)}
+            data-testid={`day-chip-${d.value}`}
+            className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors duration-200 ${
+              !showAll && date === d.value
+                ? 'bg-[#1f6feb] text-white'
+                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            {d.label}
+          </button>
+        ))}
+      </div>
+
       <div className="overflow-x-auto max-h-[420px] overflow-y-auto">
         <table className="w-full text-sm">
           <thead className="sticky top-0 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">

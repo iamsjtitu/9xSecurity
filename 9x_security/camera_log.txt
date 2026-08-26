@@ -131,3 +131,8 @@
 2026-08-26T18:14:48 | === PROBE start: rtsp://u:p@192.0.2.1:554/s
 2026-08-26T18:14:51 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
 2026-08-26T18:25:58 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-08-26T18:36:28 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-08-26T18:36:28 | purge: 0 old events removed (retention 7d, cutoff 2026-08-19)
+2026-08-26T18:42:12 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-08-26T18:42:12 | purge: 1 old events removed (retention 7d, cutoff 2026-08-19)
+2026-08-26T18:47:49 | purge: 1 old events removed (retention 7d, cutoff 2026-08-19)

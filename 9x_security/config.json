@@ -26,6 +26,8 @@
   "capture_schedule_enabled": false,
   "capture_start": "18:00",
   "capture_end": "06:00",
+  "auto_delete_enabled": true,
+  "retention_days": 7,
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",

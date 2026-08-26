@@ -225,6 +225,17 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   pass, /api/settings roundtrip via curl, UI e2e (Timing tab save -> toast -> persisted)
   via playwright screenshot. Real overnight behavior = user on Windows.
 
+## Implemented (update 2026-06 #15) — 7-day retention + Auto Delete + Entry/Exit filters
+- Auto Delete (Settings > Timing > Records/Storage): toggle (default ON) + retention_days
+  (default 7, clamp 1-365). service._purge_old runs at startup + every 6h: deletes DB rows
+  older than cutoff + their snapshot files + whole old day-dirs. db.purge_older_than added.
+- Events table upgraded: All/Entry/Exit segmented filter buttons, "Pichhle 7 din" quick
+  date chips (Aaj/Kal/dates), live summary badges (N Entry / N Exit for current filter),
+  date picker applies instantly, Show All; details via existing snapshot modal.
+- Tested (self): unit (purge + direction filters), API (Entry/Exit filter results, retention
+  roundtrip, purge removed only old event), UI E2E screenshots (filters switch rows +
+  summary updates, chips render, auto-delete toggle saves). Demo data cleaned after test.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

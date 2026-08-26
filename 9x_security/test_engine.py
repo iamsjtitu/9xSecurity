@@ -345,6 +345,29 @@ def test_time_window_and_wa_schedule():
     print("PASS: time window (overnight/day) + WhatsApp schedule gating")
 
 
+def test_db_purge_retention():
+    import os
+    import tempfile
+    from datetime import datetime, timedelta
+
+    from database import EventDB
+
+    dbp = os.path.join(tempfile.mkdtemp(), "t.db")
+    db = EventDB(db_path=dbp)
+    old_ts = datetime.now() - timedelta(days=10)
+    db.add_event("car", "Entry", "", "/tmp/old_snap.jpg", ts=old_ts)
+    db.add_event("truck", "Exit", "", "/tmp/new_snap.jpg")  # today
+    removed = db.purge_older_than(7)
+    assert removed == ["/tmp/old_snap.jpg"], removed
+    left = db.get_events()
+    assert len(left) == 1 and left[0]["vehicle_type"] == "truck"
+    # direction filters still work on remaining data
+    assert len(db.get_events(direction_filter="Exit")) == 1
+    assert len(db.get_events(direction_filter="Entry")) == 0
+    db.close()
+    print("PASS: 7-day retention purge + Entry/Exit filters")
+
+
 def test_updater_pick_asset():
     import updater
 
@@ -419,6 +442,7 @@ if __name__ == "__main__":
     test_ffmpeg_pipe_source()
     test_ensure_std_streams()
     test_time_window_and_wa_schedule()
+    test_db_purge_retention()
     test_tracker_ids_persist()
     test_line_crossing_logs_event()
     test_auth_password()

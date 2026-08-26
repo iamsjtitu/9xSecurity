@@ -4,9 +4,12 @@ Runs on 127.0.0.1 only. The Electron renderer talks to it over HTTP and
 receives live video as an MJPEG stream.
 """
 import os
+import re
 import secrets
+import shutil
 import threading
 import time
+from datetime import datetime, timedelta
 
 import cv2
 import uvicorn
@@ -326,6 +329,7 @@ _SETTINGS_KEYS = (
     "wa_account_email", "wa_account_password", "gh_token",
     "wa_schedule_enabled", "wa_start", "wa_end",
     "capture_schedule_enabled", "capture_start", "capture_end",
+    "auto_delete_enabled",
 )
 
 
@@ -335,6 +339,7 @@ def get_settings(request: Request):
     cfg = _cfg()
     out = {k: cfg.get(k) for k in _SETTINGS_KEYS}
     out["auth_user"] = cfg.get("auth_user", "admin")
+    out["retention_days"] = int(cfg.get("retention_days", 7) or 7)
     return out
 
 
@@ -347,6 +352,11 @@ def save_settings(body: dict, request: Request):
             cfg[k] = body[k]
     if body.get("auth_user"):
         cfg["auth_user"] = str(body["auth_user"]).strip() or "admin"
+    if "retention_days" in body:
+        try:
+            cfg["retention_days"] = max(1, min(365, int(body["retention_days"])))
+        except Exception:
+            pass
     if body.get("new_password"):
         salt, h = auth.hash_password(str(body["new_password"]))
         cfg["auth_salt"], cfg["auth_hash"] = salt, h
@@ -369,6 +379,38 @@ def whatsapp_test(body: dict, request: Request):
     )
     ok, detail = n.test_connection()
     return {"ok": ok, "detail": detail}
+
+
+# ---- retention / auto-cleanup ------------------------------------------------
+def _purge_old():
+    try:
+        cfg = _cfg()
+        if not cfg.get("auto_delete_enabled", True):
+            return
+        days = max(1, int(cfg.get("retention_days", 7) or 7))
+        removed = _db.purge_older_than(days)
+        for p in removed:
+            try:
+                os.remove(p)
+            except Exception:
+                pass
+        cutoff = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+        base = config.SNAPSHOT_DIR
+        for name in os.listdir(base):
+            full = os.path.join(base, name)
+            if os.path.isdir(full) and re.match(r"^\d{4}-\d{2}-\d{2}$", name) and name < cutoff:
+                shutil.rmtree(full, ignore_errors=True)
+        clog(f"purge: {len(removed)} old events removed (retention {days}d, cutoff {cutoff})")
+    except Exception:
+        import traceback
+
+        clog("purge error:\n" + traceback.format_exc())
+
+
+def _purge_loop():
+    while True:
+        _purge_old()
+        time.sleep(6 * 3600)
 
 
 # ---- updates ----------------------------------------------------------------
@@ -432,6 +474,7 @@ def main():
         cfg["auth_salt"], cfg["auth_hash"] = salt, h
         config.save_config(cfg)
     clog(f"svc: starting on 127.0.0.1:{PORT} v{updater.APP_VERSION}")
+    threading.Thread(target=_purge_loop, daemon=True).start()
     uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="warning")
 
 

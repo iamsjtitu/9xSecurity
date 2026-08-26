@@ -45,6 +45,9 @@ DEFAULTS = {
     "capture_schedule_enabled": False,  # True => detection/capture only in window (video always on)
     "capture_start": "18:00",
     "capture_end": "06:00",
+    # ---- Storage ----
+    "auto_delete_enabled": True,   # auto-delete old events + snapshots
+    "retention_days": 7,   # events + snapshots older than this are auto-deleted
     # ---- wa.9x.design account credentials (stored for reference) ----
     "wa_account_email": "",
     "wa_account_password": "",

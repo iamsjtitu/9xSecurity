@@ -1,7 +1,7 @@
 """9x Security - Local SQLite storage for vehicle events."""
 import sqlite3
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import config
 
@@ -80,6 +80,17 @@ class EventDB:
         for r in rows:
             out[r["direction"]] = r["c"]
         return out
+
+    def purge_older_than(self, days):
+        """Delete events older than `days`. Returns their snapshot paths."""
+        cutoff = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+        with self._lock:
+            rows = self.conn.execute(
+                "SELECT image_path FROM events WHERE date < ?", (cutoff,)
+            ).fetchall()
+            self.conn.execute("DELETE FROM events WHERE date < ?", (cutoff,))
+            self.conn.commit()
+        return [r["image_path"] for r in rows]
 
     def close(self):
         try:

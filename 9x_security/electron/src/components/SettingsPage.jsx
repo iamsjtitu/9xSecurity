@@ -177,6 +177,27 @@ export default function SettingsPage({ showToast }) {
               </p>
             </div>
 
+            <div className="rounded-lg border border-slate-200 p-4 space-y-3">
+              <label className="flex items-center gap-2.5 text-sm font-medium text-slate-800 cursor-pointer">
+                <input type="checkbox" className="h-4 w-4 accent-[#1f6feb]" checked={s.auto_delete_enabled !== false}
+                  onChange={(e) => set('auto_delete_enabled', e.target.checked)} data-testid="auto-delete-toggle" />
+                Purane records apne aap delete karo (Auto Delete)
+              </label>
+              <div className="flex items-center gap-3 text-sm text-slate-700">
+                <span>Records rakho pichhle</span>
+                <input type="number" min="1" max="365" className="input !w-24"
+                  value={s.retention_days ?? 7}
+                  onChange={(e) => set('retention_days', e.target.value)}
+                  disabled={s.auto_delete_enabled === false}
+                  data-testid="retention-days-input" />
+                <span>din ke</span>
+              </div>
+              <p className="text-xs text-slate-400">
+                ON (default): isse purane events + snapshots apne aap delete ho jaayenge (default 7 din)
+                taaki disk kabhi full na ho. OFF: kuch delete nahi hoga.
+              </p>
+            </div>
+
             <button className="btn-primary" onClick={save} disabled={busy} data-testid="timing-save-btn">Save</button>
           </div>
         )}

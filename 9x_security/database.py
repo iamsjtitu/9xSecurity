@@ -30,6 +30,20 @@ class EventDB:
                 )
                 """
             )
+            self.conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS outbox (
+                    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                    created_at   TEXT NOT NULL,
+                    recipient    TEXT NOT NULL,
+                    caption      TEXT NOT NULL,
+                    image_path   TEXT,
+                    attempts     INTEGER NOT NULL DEFAULT 0,
+                    last_error   TEXT,
+                    last_attempt TEXT
+                )
+                """
+            )
             self.conn.commit()
 
     def add_event(self, vehicle_type, direction, plate, image_path, ts=None):
@@ -94,6 +108,48 @@ class EventDB:
             self.conn.execute("DELETE FROM events WHERE date < ?", (cutoff,))
             self.conn.commit()
         return [r["image_path"] for r in rows]
+
+    # ---- WhatsApp outbox (durable offline queue) ---------------------------
+    def outbox_add(self, recipient, caption, image_path=""):
+        with self._lock:
+            cur = self.conn.execute(
+                "INSERT INTO outbox (created_at, recipient, caption, image_path) VALUES (?, ?, ?, ?)",
+                (datetime.now().isoformat(timespec="seconds"), recipient, caption, image_path or ""),
+            )
+            self.conn.commit()
+            return cur.lastrowid
+
+    def outbox_pending(self, limit=25):
+        with self._lock:
+            rows = self.conn.execute(
+                "SELECT * FROM outbox ORDER BY id ASC LIMIT ?", (limit,)
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    def outbox_delete(self, oid):
+        with self._lock:
+            self.conn.execute("DELETE FROM outbox WHERE id=?", (oid,))
+            self.conn.commit()
+
+    def outbox_mark_failed(self, oid, error):
+        with self._lock:
+            self.conn.execute(
+                "UPDATE outbox SET attempts=attempts+1, last_error=?, last_attempt=? WHERE id=?",
+                (str(error)[:300], datetime.now().isoformat(timespec="seconds"), oid),
+            )
+            self.conn.commit()
+
+    def outbox_count(self):
+        with self._lock:
+            r = self.conn.execute("SELECT COUNT(*) c FROM outbox").fetchone()
+        return int(r["c"])
+
+    def outbox_purge_older_than(self, days):
+        cutoff = (datetime.now() - timedelta(days=days)).isoformat(timespec="seconds")
+        with self._lock:
+            cur = self.conn.execute("DELETE FROM outbox WHERE created_at < ?", (cutoff,))
+            self.conn.commit()
+        return cur.rowcount
 
     def close(self):
         try:

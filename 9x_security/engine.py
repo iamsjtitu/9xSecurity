@@ -249,7 +249,7 @@ class SecurityEngine:
 
         from whatsapp import WhatsAppNotifier
 
-        self.notifier = WhatsAppNotifier(self.cfg)
+        self.notifier = WhatsAppNotifier(self.cfg, db=self.db)
 
     # ---- line helpers (normalized <-> pixel) ------------------------------
     def line_points(self, w, h):

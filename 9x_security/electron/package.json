@@ -34,7 +34,8 @@
     "files": [
       "dist/**",
       "electron-main.js",
-      "preload.js"
+      "preload.js",
+      "assets/**"
     ],
     "extraResources": [
       {
@@ -44,6 +45,7 @@
     ],
     "win": {
       "target": "nsis",
+      "icon": "assets/icon.png",
       "artifactName": "9xSecuritySetup-v${version}.exe"
     },
     "nsis": {

@@ -1,7 +1,7 @@
 import React from 'react';
-import { LayoutDashboard, Settings, LogOut, ShieldCheck, Cctv } from 'lucide-react';
+import { LayoutDashboard, Settings, LogOut, ShieldCheck, Cctv, Inbox } from 'lucide-react';
 
-export default function Sidebar({ page, setPage, version, connected, onLogout }) {
+export default function Sidebar({ page, setPage, version, connected, outboxPending = 0, onLogout }) {
   const Item = ({ id, icon: Icon, label, testid }) => (
     <button
       onClick={() => setPage(id)}
@@ -37,6 +37,16 @@ export default function Sidebar({ page, setPage, version, connected, onLogout })
             {connected ? 'Camera LIVE' : 'Camera offline'}
           </span>
           {connected && <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />}
+        </div>
+        <div className="flex items-center gap-2 text-xs">
+          <Inbox size={14} className={outboxPending > 0 ? 'text-amber-400' : 'text-slate-500'} />
+          <span
+            className={outboxPending > 0 ? 'text-amber-400' : 'text-slate-500'}
+            data-testid="outbox-pending-count"
+            title="Internet na hone par WhatsApp alerts yahan queue hote hain aur net aate hi auto-send ho jaate hain"
+          >
+            WA Pending: {outboxPending}
+          </span>
         </div>
         <button
           onClick={onLogout}

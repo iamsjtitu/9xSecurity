@@ -46,6 +46,7 @@ export default function App() {
         setPage={setPage}
         version={state.version}
         connected={state.connected}
+        outboxPending={state.outbox_pending || 0}
         onLogout={() => { logout(); setAuthed(false); }}
       />
       <div className="flex-1 flex flex-col h-screen overflow-hidden">

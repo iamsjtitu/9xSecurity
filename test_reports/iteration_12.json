@@ -1,0 +1,25 @@
+{
+  "summary": "Verified new tray + durable WhatsApp outbox features end-to-end. Reran /app/9x_security/test_outbox.py (6/6 pass). Added /app/9x_security/tests/test_service_api_outbox.py with 12 pytest cases (12/12 pass) covering auth guards on /api/outbox|/api/state|/api/counts, response shape, outbox_pending propagation, settings save/get with secret masking, events regression, direct-DB->badge-feed reflection, and full end-to-end _outbox_loop delivery via a local mock provider (restarted service.py with OUTBOX_RETRY_SECONDS=3). Statically reviewed electron/electron-main.js (node --check passes): quitting flag, win.on('close') preventDefault+hide, createTray with Open/Exit menu, ipcMain quit-app, before-quit killEngine, window-all-closed guarded by !quitting, second-instance shows window, single-instance lock, and assets/icon.png present with package.json build.files including assets/** and win.icon. Playwright UI test against http://127.0.0.1:8971/ confirmed sidebar badge data-testid='outbox-pending-count' transitions 'WA Pending: 0' -> 'WA Pending: 1' (class text-amber-400) -> 'WA Pending: 0' within the ~3s poll after inserting/removing a row via EventDB.outbox_add. Config.json restored to defaults (wa_enabled=false, wa_base_url=https://wa.9x.design, retention_days=7) and admin password reset back to '9xsecurity' (must_change_password=true as designed for first login).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/tests/test_service_api_outbox.py",
+    "/app/9x_security/test_outbox.py",
+    "/app/test_reports/pytest/iter12_service_api.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "electron-main.js: killEngine is only wired to before-quit; on abrupt Electron crash the spawned engine child could linger. Consider engineProc.unref() + tracking pid to reap via taskkill on Windows if needed.",
+    "service.py _outbox_sender is constructed once at import with a snapshot of config; it is refreshed via .update(_cfg()) inside the loop which is correct, but any code path that reads _outbox_sender.cfg outside the loop still sees the initial snapshot. Low risk today (only used inside the loop).",
+    "config.json still stores auth_hash/auth_salt in plain JSON (fine locally). GET /api/settings correctly masks them.",
+    "No indexes on outbox(created_at) — retention_days purge scans full table; fine at expected volumes but worth an index if outbox grows."
+  ],
+  "updated_files": ["/app/9x_security/tests/test_service_api_outbox.py"],
+  "success_rate": {"backend": "100% (18/18: 6 direct + 12 pytest)", "frontend": "100% (login + force-pw + badge poll)"},
+  "test_credentials": "admin / 9xsecurity (restored to default at end; first login still triggers must_change_password screen by design)",
+  "seed_data_creation": "None persisted. Temporary outbox rows for '910000000000' / '910000000001' / '919999999999' inserted during tests and deleted in teardown. events.db outbox count verified 0 at end.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Service runs at http://127.0.0.1:8971 (not the platform preview URL). Admin default pw is '9xsecurity' but the first login forces a password change; tests set 'NxTest@2026' temporarily and restore. Full outbox retry-loop e2e test restarts service.py itself (kills existing pid via pgrep -f service.py, relaunches with OUTBOX_RETRY_SECONDS=3, then relaunches the original after). If running these tests you may briefly (~5s) see /api/health unavailable. Config.json is backed up in-memory and restored in the finally block.",
+  "rca of the issue": "No bugs found. All target functionality (tray-safe close in electron-main.js, durable SQLite outbox with retry loop, /api/outbox|state|counts outbox_pending, sidebar amber badge) works as specified."
+}

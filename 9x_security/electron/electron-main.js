@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, shell } = require('electron');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
@@ -8,6 +8,9 @@ const http = require('http');
 const PORT = process.env.ENGINE_PORT || '8971';
 let engineProc = null;
 let win = null;
+let tray = null;
+let quitting = false;
+let balloonShown = false;
 
 function startEngine() {
   if (!app.isPackaged) return; // dev mode: run `python service.py` yourself
@@ -32,6 +35,30 @@ function waitEngine(cb, tries = 0) {
   req.setTimeout(1000, () => req.destroy());
 }
 
+function appIcon() {
+  return nativeImage.createFromPath(path.join(__dirname, 'assets', 'icon.png'));
+}
+
+function showWindow() {
+  if (!win) return;
+  if (win.isMinimized()) win.restore();
+  win.show();
+  win.focus();
+}
+
+function createTray() {
+  const img = appIcon();
+  tray = new Tray(img.isEmpty() ? nativeImage.createEmpty() : img.resize({ width: 16, height: 16 }));
+  tray.setToolTip('9x Security — background me monitoring chalu hai');
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: 'Open 9x Security', click: showWindow },
+    { type: 'separator' },
+    { label: 'Exit', click: () => { quitting = true; app.quit(); } },
+  ]));
+  tray.on('click', showWindow);
+  tray.on('double-click', showWindow);
+}
+
 function createWindow() {
   win = new BrowserWindow({
     width: 1420,
@@ -41,6 +68,7 @@ function createWindow() {
     backgroundColor: '#f8fafc',
     autoHideMenuBar: true,
     title: '9x Security',
+    icon: appIcon(),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -48,17 +76,31 @@ function createWindow() {
     },
   });
   win.loadFile(path.join(__dirname, 'dist', 'index.html'));
+  // Close (X) => minimize to tray; monitoring keeps running in background.
+  win.on('close', (e) => {
+    if (quitting) return;
+    e.preventDefault();
+    win.hide();
+    if (tray && !balloonShown) {
+      balloonShown = true;
+      try {
+        tray.displayBalloon({
+          title: '9x Security chal raha hai',
+          content: 'App band nahi hua — camera monitoring background me chalu hai. Kholne ke liye tray icon par click karein. Band karne ke liye tray icon par right-click karke Exit dabayein.',
+        });
+      } catch (_) { /* balloon not supported on this OS */ }
+    }
+  });
 }
 
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
   app.quit();
 } else {
-  app.on('second-instance', () => {
-    if (win) { if (win.isMinimized()) win.restore(); win.focus(); }
-  });
+  app.on('second-instance', () => showWindow());
   app.whenReady().then(() => {
     startEngine();
+    createTray();
     waitEngine(() => createWindow());
   });
 }
@@ -77,7 +119,7 @@ ipcMain.handle('open-path', (_e, p) => {
   } catch (_) { /* noop */ }
   return 'blocked';
 });
-ipcMain.handle('quit-app', () => app.quit());
+ipcMain.handle('quit-app', () => { quitting = true; app.quit(); });
 
 function killEngine() {
   if (engineProc) {
@@ -85,5 +127,8 @@ function killEngine() {
     engineProc = null;
   }
 }
-app.on('before-quit', killEngine);
-app.on('window-all-closed', () => { killEngine(); app.quit(); });
+app.on('before-quit', () => { quitting = true; killEngine(); });
+app.on('window-all-closed', () => {
+  // Tray keeps the app alive; only exit when user chose Exit / quit-app.
+  if (quitting) { killEngine(); app.quit(); }
+});

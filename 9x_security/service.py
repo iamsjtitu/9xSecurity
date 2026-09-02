@@ -234,6 +234,7 @@ def state(request: Request):
         "entry_direction": cfg.get("entry_direction", "pos"),
         "line": cfg.get("line"),
         "snapshot_dir": config.SNAPSHOT_DIR,
+        "outbox_pending": _db.outbox_count(),
     }
 
 
@@ -330,7 +331,15 @@ def events(request: Request, date: str = "", direction: str = "All", all: int = 
 @app.get("/api/counts")
 def counts(request: Request):
     _check(request)
-    return _db.counts_today()
+    out = _db.counts_today()
+    out["outbox_pending"] = _db.outbox_count()
+    return out
+
+
+@app.get("/api/outbox")
+def outbox(request: Request):
+    _check(request)
+    return {"pending": _db.outbox_count(), "items": _db.outbox_pending(limit=50)}
 
 
 @app.get("/api/snapshot")
@@ -418,6 +427,7 @@ def _purge_old():
             return
         days = max(1, int(cfg.get("retention_days", 7) or 7))
         removed = _db.purge_older_than(days)
+        _db.outbox_purge_older_than(days)
         for p in removed:
             try:
                 os.remove(p)
@@ -440,6 +450,26 @@ def _purge_loop():
     while True:
         _purge_old()
         time.sleep(6 * 3600)
+
+
+# ---- WhatsApp outbox retry (auto-deliver when internet returns) ---------------
+_outbox_sender = WhatsAppNotifier(config.load_config(), db=_db)
+
+
+def _outbox_loop():
+    while True:
+        time.sleep(int(os.environ.get("OUTBOX_RETRY_SECONDS", "30")))
+        try:
+            if _db.outbox_count() == 0:
+                continue
+            _outbox_sender.update(_cfg())
+            n = _outbox_sender.flush_outbox()
+            if n:
+                clog(f"outbox: {n} pending WhatsApp alert(s) delivered")
+        except Exception:
+            import traceback
+
+            clog("outbox loop error:\n" + traceback.format_exc())
 
 
 # ---- updates ----------------------------------------------------------------
@@ -504,6 +534,7 @@ def main():
         config.save_config(cfg)
     clog(f"svc: starting on 127.0.0.1:{PORT} v{updater.APP_VERSION}")
     threading.Thread(target=_purge_loop, daemon=True).start()
+    threading.Thread(target=_outbox_loop, daemon=True).start()
     uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="warning")
 
 

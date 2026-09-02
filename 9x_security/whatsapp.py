@@ -3,8 +3,8 @@
 Text  : POST {base}/api/v2/sendMessage      (multipart: phonenumber, text)
 Photo : POST {base}/api/v2/sendMessageFile  (multipart: phonenumber, file, caption)
 Auth  : Authorization: Bearer <API_KEY>
-If photo sending fails, falls back to a plain text alert so notifications are
-never silently lost. All attempts are logged to wa_log.txt.
+Failed sends (no internet / provider down) are saved in a durable SQLite
+outbox and retried automatically until delivered. Logged to wa_log.txt.
 """
 import os
 import re
@@ -24,7 +24,9 @@ def _phone(num):
 
 
 class WhatsAppNotifier:
-    def __init__(self, cfg):
+    def __init__(self, cfg, db=None):
+        self.db = db
+        self._flush_lock = threading.Lock()
         self.update(cfg)
 
     def update(self, cfg):
@@ -71,7 +73,36 @@ class WhatsAppNotifier:
             all_ok = all_ok and ok
         return all_ok, "\n".join(lines)
 
+    def flush_outbox(self):
+        """Try delivering pending outbox alerts. Returns count delivered."""
+        if self.db is None or not self.enabled or not self.api_key:
+            return 0
+        if not self._flush_lock.acquire(blocking=False):
+            return 0
+        sent = 0
+        try:
+            for item in self.db.outbox_pending(limit=25):
+                ok, err = self._deliver(item["recipient"], item["caption"], item.get("image_path") or "")
+                if ok:
+                    self.db.outbox_delete(item["id"])
+                    self._log(item["recipient"], "outbox-sent", "-", f"id={item['id']}")
+                    sent += 1
+                else:
+                    self.db.outbox_mark_failed(item["id"], err)
+                    if self._is_network_error(err):
+                        break  # still offline: stop, retry next cycle
+        finally:
+            self._flush_lock.release()
+        return sent
+
     # ---- internals --------------------------------------------------------
+    @staticmethod
+    def _is_network_error(err):
+        e = str(err).lower()
+        return any(s in e for s in (
+            "connection", "timed out", "timeout", "resolve", "network",
+            "unreachable", "getaddrinfo", "refused",
+        ))
     def _caption(self, ev):
         when = str(ev.get("timestamp", "")).replace("T", " ")
         cap = (
@@ -87,11 +118,21 @@ class WhatsAppNotifier:
         caption = self._caption(ev)
         img = ev.get("image_path", "")
         for to in self.recipients:
-            ok = False
-            if self.send_image and img and os.path.exists(img):
-                ok, _ = self._send_image(to, caption, img)
-            if not ok:
-                self._send_text(to, caption)
+            ok, err = self._deliver(to, caption, img)
+            if not ok and self.db is not None:
+                oid = self.db.outbox_add(to, caption, img if self.send_image else "")
+                self._log(to, "outbox-queued", "-", f"id={oid} reason={err}")
+
+    def _deliver(self, to, caption, img):
+        """One full delivery attempt: photo first, text fallback if provider
+        rejects the photo. Returns (ok, error_detail)."""
+        if self.send_image and img and os.path.exists(img):
+            ok, err = self._send_image(to, caption, img)
+            if ok:
+                return True, ""
+            if self._is_network_error(err):
+                return False, err  # offline: queue full alert, retry later with photo
+        return self._send_text(to, caption)
 
     def _headers(self):
         return {"Authorization": f"Bearer {self.api_key}"}

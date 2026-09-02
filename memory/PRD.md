@@ -271,6 +271,25 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - NOTE (user's build error repeat): failed GH run used OLD workflow (yarn.lock/Node20) —
   user must Save to GitHub for new workflow; "Re-run failed jobs" reruns the old commit.
 
+## Implemented (update 2026-06 #19) — System tray + durable WhatsApp Outbox (verified iteration_12, 100%)
+- TRAY: closing window (X) hides to system tray instead of quitting; tray menu 'Open 9x
+  Security' / 'Exit'; only Exit (or UI quit-app IPC) sets quitting flag, kills Python engine
+  and quits; window-all-closed guarded; second-instance/tray click restores window; one-time
+  Windows balloon tip on first hide. New app icon assets/icon.png (transparent shield+camera),
+  wired as BrowserWindow icon, tray icon, and electron-builder win.icon (assets/** in files).
+- OUTBOX: SQLite `outbox` table (database.py: add/pending/delete/mark_failed/count/purge).
+  whatsapp.py: _deliver() per recipient (photo -> text fallback on provider reject; network
+  error => queue full alert with image path); failed sends enqueued; flush_outbox() delivers
+  pending, deletes only on provider 200 (duplicate-safe, lock-guarded, short-circuits batch
+  on network error). service.py: _outbox_loop retries every 30s (OUTBOX_RETRY_SECONDS env),
+  started in main(); outbox purged with retention_days; GET /api/outbox; outbox_pending in
+  /api/state and /api/counts. engine.py passes db into notifier.
+- UI: sidebar badge data-testid='outbox-pending-count' "WA Pending: X" (amber when >0),
+  polled via /api/state every 2.5s.
+- Tests: /app/9x_security/test_outbox.py (6/6), testing agent iteration_12: 18/18 backend,
+  frontend badge 0->1->0 E2E, electron-main.js static review + node --check pass. No bugs.
+- NOTE: tray behavior itself needs Windows to run — user must build/install new setup to see it.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

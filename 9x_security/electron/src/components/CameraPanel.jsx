@@ -1,6 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Cctv, Plug, Unplug, Stethoscope, X } from 'lucide-react';
-import { api, streamUrl } from '../api';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Cctv, Plug, Unplug, Stethoscope, X, ZoomIn, ZoomOut, RotateCcw, Focus } from 'lucide-react';
+import { api, BASE, getToken } from '../api';
+
+const FRAME_MS = 150;
 
 export default function CameraPanel({ state, refreshState, showToast, drawMode, setDrawMode }) {
   const [url, setUrl] = useState(state.rtsp_url || '');
@@ -8,12 +10,130 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState(null);
   const [firstPoint, setFirstPoint] = useState(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [stale, setStale] = useState(false);
+  const [ptzSupported, setPtzSupported] = useState(true);
   const boxRef = useRef(null);
+  const canvasRef = useRef(null);
   const urlTouched = useRef(false);
+  const zoomRef = useRef({ z: 1, cx: 0.5, cy: 0.5 });
+  const lastBmpRef = useRef(null);
+  const lastOkRef = useRef(0);
+  const dragRef = useRef(null);
 
   useEffect(() => {
     if (!urlTouched.current && state.rtsp_url && !url) setUrl(state.rtsp_url);
   }, [state.rtsp_url]); // eslint-disable-line
+
+  // ---- canvas drawing with digital zoom crop ----
+  const draw = useCallback((bmp) => {
+    const c = canvasRef.current;
+    if (!c || !bmp) return;
+    const ctx = c.getContext('2d');
+    const { z, cx, cy } = zoomRef.current;
+    const sw = bmp.width / z;
+    const sh = bmp.height / z;
+    const sx = Math.max(0, Math.min(bmp.width - sw, cx * bmp.width - sw / 2));
+    const sy = Math.max(0, Math.min(bmp.height - sh, cy * bmp.height - sh / 2));
+    ctx.drawImage(bmp, sx, sy, sw, sh, 0, 0, c.width, c.height);
+  }, []);
+
+  const setZoom = useCallback((nz) => {
+    nz = Math.max(1, Math.min(6, nz));
+    zoomRef.current.z = nz;
+    if (nz === 1) { zoomRef.current.cx = 0.5; zoomRef.current.cy = 0.5; }
+    setZoomLevel(nz);
+    if (lastBmpRef.current) draw(lastBmpRef.current);
+  }, [draw]);
+
+  useEffect(() => { if (drawMode) setZoom(1); }, [drawMode, setZoom]);
+
+  // ---- frame polling loop (memory-safe, replaces long-lived MJPEG <img>) ----
+  useEffect(() => {
+    if (!state.connected) {
+      setStale(false);
+      if (lastBmpRef.current) { lastBmpRef.current.close(); lastBmpRef.current = null; }
+      return undefined;
+    }
+    setPtzSupported(true);
+    let live = true;
+    let timer;
+    const tick = async () => {
+      if (!live) return;
+      try {
+        const res = await fetch(`${BASE}/api/frame?r=${Date.now()}`, {
+          headers: { 'X-Auth-Token': getToken() },
+          cache: 'no-store',
+        });
+        if (res.ok) {
+          const blob = await res.blob();
+          const bmp = await createImageBitmap(blob);
+          if (!live) { bmp.close(); return; }
+          if (lastBmpRef.current) lastBmpRef.current.close();
+          lastBmpRef.current = bmp;
+          draw(bmp);
+          lastOkRef.current = Date.now();
+        }
+      } catch (_) { /* engine busy/offline: next tick */ }
+      timer = setTimeout(tick, FRAME_MS);
+    };
+    lastOkRef.current = Date.now();
+    tick();
+    const staleTimer = setInterval(() => {
+      setStale(Date.now() - lastOkRef.current > 6000);
+    }, 2000);
+    return () => {
+      live = false;
+      clearTimeout(timer);
+      clearInterval(staleTimer);
+      if (lastBmpRef.current) { lastBmpRef.current.close(); lastBmpRef.current = null; }
+    };
+  }, [state.connected, draw]);
+
+  // ---- wheel zoom (native listener: preventDefault needs passive:false) ----
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return undefined;
+    const onWheel = (e) => {
+      if (!state.connected || drawMode) return;
+      e.preventDefault();
+      setZoom(zoomRef.current.z * (e.deltaY < 0 ? 1.2 : 1 / 1.2));
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [state.connected, drawMode, setZoom]);
+
+  // ---- drag to pan when zoomed ----
+  const onMouseDown = (e) => {
+    if (drawMode || zoomRef.current.z <= 1) return;
+    dragRef.current = { x: e.clientX, y: e.clientY, cx: zoomRef.current.cx, cy: zoomRef.current.cy };
+  };
+  const onMouseMove = (e) => {
+    const d = dragRef.current;
+    if (!d || !boxRef.current) return;
+    const rect = boxRef.current.getBoundingClientRect();
+    const { z } = zoomRef.current;
+    const half = 0.5 / z;
+    zoomRef.current.cx = Math.max(half, Math.min(1 - half, d.cx - (e.clientX - d.x) / rect.width / z));
+    zoomRef.current.cy = Math.max(half, Math.min(1 - half, d.cy - (e.clientY - d.y) / rect.height / z));
+    if (lastBmpRef.current) draw(lastBmpRef.current);
+  };
+  const endDrag = () => { dragRef.current = null; };
+
+  // ---- PTZ optical zoom (press & hold) ----
+  const ptz = async (dir, action) => {
+    try {
+      const r = await api('/api/ptz/zoom', { method: 'POST', body: JSON.stringify({ dir, action }) });
+      if (r.supported === false) {
+        setPtzSupported(false);
+        if (action === 'start') showToast(r.detail, 'info');
+      } else if (!r.ok && action === 'start') {
+        showToast(r.detail, 'error');
+      }
+    } catch (e) {
+      if (action === 'start') showToast(e.message, 'error');
+    }
+  };
 
   const connect = async () => {
     setBusy(true);
@@ -68,6 +188,8 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
     }
   };
 
+  const zoomBtn = 'h-8 w-8 flex items-center justify-center rounded-md bg-black/60 text-white hover:bg-black/80 transition-colors duration-150 disabled:opacity-40';
+
   return (
     <div className="bg-[#020617] rounded-xl overflow-hidden shadow-sm flex flex-col" data-testid="camera-panel">
       <div className="flex items-center gap-2 p-3 bg-slate-900/60">
@@ -90,14 +212,73 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
       <div
         ref={boxRef}
         onClick={onOverlayClick}
-        className={`relative w-full aspect-video bg-[#020617] ${drawMode ? 'cursor-crosshair' : ''}`}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={endDrag}
+        onMouseLeave={endDrag}
+        className={`relative w-full aspect-video bg-[#020617] select-none ${
+          drawMode ? 'cursor-crosshair' : zoomLevel > 1 ? 'cursor-move' : ''
+        }`}
         data-testid="camera-view"
       >
         {state.connected ? (
           <>
-            <img src={streamUrl()} alt="live" className="absolute inset-0 w-full h-full object-contain" draggable={false} />
+            <canvas
+              ref={canvasRef}
+              width={960}
+              height={540}
+              className="absolute inset-0 w-full h-full object-contain"
+              data-testid="video-canvas"
+            />
             <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
-              <span className="h-2 w-2 rounded-full bg-[#ef4444] animate-pulse" /> LIVE
+              <span className={`h-2 w-2 rounded-full ${stale ? 'bg-amber-400' : 'bg-[#ef4444] animate-pulse'}`} /> LIVE
+            </div>
+            {stale && (
+              <div
+                className="absolute inset-x-0 top-1/2 -translate-y-1/2 mx-auto w-fit rounded-lg bg-amber-500/95 px-4 py-2 text-sm font-semibold text-black"
+                data-testid="stale-overlay"
+              >
+                Stream ruk gaya — engine dobara connect kar raha hai…
+              </div>
+            )}
+            <div className="absolute bottom-3 right-3 flex items-center gap-1.5" data-testid="zoom-controls">
+              <button className={zoomBtn} onClick={() => setZoom(zoomRef.current.z / 1.2)} disabled={zoomLevel <= 1} title="Digital zoom out" data-testid="digital-zoom-out-btn">
+                <ZoomOut size={15} />
+              </button>
+              <span className="rounded-md bg-black/60 px-2 py-1.5 text-xs font-mono text-white min-w-[46px] text-center" data-testid="zoom-level">
+                {zoomLevel.toFixed(1)}x
+              </span>
+              <button className={zoomBtn} onClick={() => setZoom(zoomRef.current.z * 1.2)} disabled={zoomLevel >= 6} title="Digital zoom in" data-testid="digital-zoom-in-btn">
+                <ZoomIn size={15} />
+              </button>
+              <button className={zoomBtn} onClick={() => setZoom(1)} disabled={zoomLevel <= 1} title="Reset zoom" data-testid="zoom-reset-btn">
+                <RotateCcw size={15} />
+              </button>
+              {ptzSupported && (
+                <>
+                  <span className="mx-1 h-5 w-px bg-white/25" />
+                  <button
+                    className={`${zoomBtn} !w-auto px-2 gap-1 text-xs font-semibold`}
+                    onMouseDown={() => ptz('out', 'start')}
+                    onMouseUp={() => ptz('out', 'stop')}
+                    onMouseLeave={() => ptz('out', 'stop')}
+                    title="Camera optical zoom out (dabaye rakhein)"
+                    data-testid="ptz-zoom-out-btn"
+                  >
+                    <Focus size={13} /> −
+                  </button>
+                  <button
+                    className={`${zoomBtn} !w-auto px-2 gap-1 text-xs font-semibold`}
+                    onMouseDown={() => ptz('in', 'start')}
+                    onMouseUp={() => ptz('in', 'stop')}
+                    onMouseLeave={() => ptz('in', 'stop')}
+                    title="Camera optical zoom in (dabaye rakhein)"
+                    data-testid="ptz-zoom-in-btn"
+                  >
+                    <Focus size={13} /> +
+                  </button>
+                </>
+              )}
             </div>
           </>
         ) : (

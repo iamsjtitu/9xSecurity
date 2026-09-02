@@ -290,6 +290,26 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   frontend badge 0->1->0 E2E, electron-main.js static review + node --check pass. No bugs.
 - NOTE: tray behavior itself needs Windows to run — user must build/install new setup to see it.
 
+## Implemented (update 2026-06 #20) — App-hang fix + Camera Zoom (verified iteration_13, 100%)
+- HANG ROOT CAUSE: CameraPanel <img src={streamUrl()}> embedded Date.now() so every 2.5s
+  state poll opened a NEW long-lived MJPEG multipart connection -> Chromium buffer pile-up ->
+  full renderer freeze (user needed restart). FIX: canvas rendering polling GET /api/frame
+  (single JPEG, 150ms, createImageBitmap + close previous — memory-stable). 30s soak: 0
+  /api/stream calls, page responsive. /api/stream endpoint kept but unused by UI.
+- Backend watchdog: worker reconnects after 50 bad reads OR >15s without a good frame;
+  frame_age exposed in /api/state; amber 'Stream ruk gaya' overlay + amber LIVE dot when
+  frames stop >6s.
+- DIGITAL ZOOM: 1x–6x canvas crop; +/− buttons, mouse wheel, drag-pan when zoomed, reset;
+  draw-line mode force-resets to 1x so line coords stay correct. testids: video-canvas,
+  zoom-level, digital-zoom-in/out-btn, zoom-reset-btn, stale-overlay.
+- OPTICAL PTZ ZOOM: new /app/9x_security/ptz.py — hand-rolled ONVIF SOAP (WS-UsernameToken
+  digest, GetProfiles discovery on ports 2020/80/8000/8899/5000, cached; ContinuousMove/Stop
+  zoom ±0.5). POST /api/ptz/zoom {dir,action}; creds auto-parsed from RTSP URL (@ in password
+  ok); press-and-hold UI buttons; supported:false hides PTZ buttons + hint toast; cache reset
+  on camera connect. NOT validated on a real ONVIF camera (container has none) — mock-tested.
+- Tests: test_ptz.py 6/6; testing agent iteration_13: 11/11 pytest + full Playwright UI
+  (live canvas pixels, zoom steps, PTZ hide, draw-line regression, outbox badge). No bugs.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 
 import cv2
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -60,6 +60,7 @@ class Worker:
         self.engine = None
         self._jpeg = None
         self._lock = threading.Lock()
+        self.last_frame_ts = 0.0
 
     @property
     def connected(self):
@@ -129,22 +130,28 @@ class Worker:
         clog("svc: streaming started")
         fail = 0
         paused = False
+        last_ok = time.time()
+        self.last_frame_ts = last_ok
         while self._running:
             ok, frame = cap.read()
             if not ok:
                 fail += 1
-                if fail > 50:
+                # watchdog: reconnect on 50 bad reads OR >15s without a good frame
+                if fail > 50 or time.time() - last_ok > 15:
                     self.status = "Stream toota — dobara connect ho raha hai..."
-                    clog("svc: stream lost, reconnecting")
+                    clog("svc: stream lost, reconnecting (watchdog)")
                     cap.release()
                     cap = open_stream(source, lambda: self._running)
                     if cap is None:
                         break
                     self.status = "Connected — live monitoring chalu hai"
                     fail = 0
+                    last_ok = time.time()
                 time.sleep(0.02)
                 continue
             fail = 0
+            last_ok = time.time()
+            self.last_frame_ts = last_ok
             small = cv2.resize(frame, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
             live_cfg = self.engine.cfg if self.engine else cfg
             capture_on = (not live_cfg.get("capture_schedule_enabled")) or config.in_time_window(
@@ -235,6 +242,11 @@ def state(request: Request):
         "line": cfg.get("line"),
         "snapshot_dir": config.SNAPSHOT_DIR,
         "outbox_pending": _db.outbox_count(),
+        "frame_age": (
+            round(time.time() - worker.last_frame_ts, 1)
+            if worker.connected and worker.last_frame_ts
+            else None
+        ),
     }
 
 
@@ -244,6 +256,9 @@ def camera_connect(body: dict, request: Request):
     cfg = _cfg()
     cfg["rtsp_url"] = str(body.get("url", "")).strip()
     config.save_config(cfg)
+    import ptz
+
+    ptz.reset_cache()
     worker.start()
     return {"ok": True}
 
@@ -264,6 +279,28 @@ def camera_test(body: dict, request: Request):
         raise HTTPException(400, "Pehle RTSP URL daalein.")
     ok, steps = probe_rtsp(url)
     return {"ok": ok, "steps": [{"name": n, "ok": o, "detail": d} for n, o, d in steps]}
+
+
+@app.get("/api/frame")
+def frame(request: Request):
+    """Latest JPEG frame (UI polls this instead of a long-lived MJPEG stream)."""
+    _check(request)
+    j = worker.latest()
+    if j is None:
+        raise HTTPException(404, "no frame")
+    return Response(content=j, media_type="image/jpeg", headers={"Cache-Control": "no-store"})
+
+
+@app.post("/api/ptz/zoom")
+def ptz_zoom(body: dict, request: Request):
+    _check(request)
+    import ptz
+
+    cfg = _cfg()
+    direction = "out" if str(body.get("dir")) == "out" else "in"
+    action = "stop" if str(body.get("action")) == "stop" else "start"
+    ok, supported, detail = ptz.zoom(cfg.get("rtsp_url", ""), direction, action)
+    return {"ok": ok, "supported": supported, "detail": detail}
 
 
 @app.get("/api/stream")

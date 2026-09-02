@@ -161,3 +161,59 @@
 2026-09-02T13:23:57 | outbox: 1 pending WhatsApp alert(s) delivered
 2026-09-02T13:24:00 | svc: starting on 127.0.0.1:8971 v1.0.0
 2026-09-02T13:24:00 | purge: 0 old events removed (retention 7d, cutoff 2026-08-26)
+2026-09-02T13:33:12 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-02T13:33:12 | purge: 0 old events removed (retention 7d, cutoff 2026-08-26)
+2026-09-02T13:39:10 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-02T13:39:10 | purge: 0 old events removed (retention 7d, cutoff 2026-08-26)
+2026-09-02T13:39:15 | svc: loading AI model
+2026-09-02T13:39:20 | svc: AI model loaded
+2026-09-02T13:39:20 | svc: streaming started
+2026-09-02T13:40:53 | svc: stream lost, reconnecting (watchdog)
+2026-09-02T13:42:22 | svc: stream lost, reconnecting (watchdog)
+2026-09-02T13:43:55 | svc: stream lost, reconnecting (watchdog)
+2026-09-02T13:44:12 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-02T13:44:12 | purge: 0 old events removed (retention 7d, cutoff 2026-08-26)
+2026-09-02T13:44:17 | svc: loading AI model
+2026-09-02T13:44:19 | svc: AI model loaded
+2026-09-02T13:44:19 | svc: streaming started
+2026-09-02T13:45:47 | svc: stream lost, reconnecting (watchdog)
+2026-09-02T13:47:32 | svc: stream lost, reconnecting (watchdog)
+2026-09-02T13:49:16 | svc: stream lost, reconnecting (watchdog)
+2026-09-02T13:49:18 | svc: loading AI model
+2026-09-02T13:49:18 | svc: AI model loaded
+2026-09-02T13:49:18 | svc: streaming started
+2026-09-02T13:52:50 | svc: loading AI model
+2026-09-02T13:52:50 | svc: AI model loaded
+2026-09-02T13:52:50 | svc: streaming started
+2026-09-02T13:52:52 | svc: loading AI model
+2026-09-02T13:52:52 | svc: AI model loaded
+2026-09-02T13:52:52 | svc: streaming started
+2026-09-02T13:52:58 | svc: stream lost, reconnecting (watchdog)
+2026-09-02T13:53:04 | svc: stream lost, reconnecting (watchdog)
+2026-09-02T13:53:10 | svc: stream lost, reconnecting (watchdog)
+2026-09-02T13:53:13 | svc: loading AI model
+2026-09-02T13:53:13 | svc: AI model loaded
+2026-09-02T13:53:13 | svc: streaming started
+2026-09-02T13:53:31 | svc: loading AI model
+2026-09-02T13:53:31 | svc: AI model loaded
+2026-09-02T13:55:18 | svc: loading AI model
+2026-09-02T13:55:19 | svc: AI model loaded
+2026-09-02T13:55:19 | svc: streaming started
+2026-09-02T13:56:12 | svc: loading AI model
+2026-09-02T13:56:12 | svc: AI model loaded
+2026-09-02T13:56:12 | svc: streaming started
+2026-09-02T13:58:47 | svc: loading AI model
+2026-09-02T13:58:47 | svc: AI model loaded
+2026-09-02T13:58:47 | svc: streaming started
+2026-09-02T14:00:07 | svc: loading AI model
+2026-09-02T14:00:07 | svc: AI model loaded
+2026-09-02T14:00:07 | svc: streaming started
+2026-09-02T14:00:09 | svc: loading AI model
+2026-09-02T14:00:09 | svc: AI model loaded
+2026-09-02T14:00:09 | svc: streaming started
+2026-09-02T14:00:15 | svc: stream lost, reconnecting (watchdog)
+2026-09-02T14:00:21 | svc: stream lost, reconnecting (watchdog)
+2026-09-02T14:00:26 | svc: stream lost, reconnecting (watchdog)
+2026-09-02T14:00:30 | svc: loading AI model
+2026-09-02T14:00:30 | svc: AI model loaded
+2026-09-02T14:00:30 | svc: streaming started

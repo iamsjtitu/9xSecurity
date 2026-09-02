@@ -310,6 +310,28 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Tests: test_ptz.py 6/6; testing agent iteration_13: 11/11 pytest + full Playwright UI
   (live canvas pixels, zoom steps, PTZ hide, draw-line regression, outbox badge). No bugs.
 
+## Implemented (update 2026-06 #21) — 12-hour time + Plate capture overhaul (verified iteration_14, 100%)
+- 12-HOUR FORMAT everywhere user-visible: snapshot burned overlay (engine _save_snapshot
+  '%d-%m-%Y %I:%M:%S %p'), WhatsApp caption + test message (whatsapp.py), events table
+  Date&Time cell + snapshot preview modal (EventsTable.jsx fmt12 helper). DB storage stays
+  24h ISO (queries/retention unchanged).
+- PLATE CAPTURE overhaul (user: 'number plate capture nahi ho raha'):
+  - plate_reader.py rewritten: allowlist A-Z0-9, variants (full crop + lower half, upscale
+    to >=320px h, CLAHE), Indian plate regex scoring (MH12AB1234 / 22BH1234AB +1.0 bonus),
+    warmup() preload, last_error surfaced, bundled-models support (_bundled_model_dir:
+    easyocr_models next to frozen exe, download_enabled=False).
+  - engine.py: background OCR warmup thread at engine start (logs to camera_log.txt);
+    per-track BEST (largest) full-res crop kept while tracking (capped 1000px wide for
+    memory); at crossing, event saved INSTANTLY with plate='' and OCR runs in async thread
+    (crossing crop -> best crop fallback), backfills plate via db.update_event_plate and
+    THEN sends WhatsApp (alert includes plate). Frame loop never blocks (measured 7ms).
+  - workflow build-windows.yml: EasyOCR models downloaded+cached in CI and bundled via
+    PyInstaller --add-data easyocr_models -> OCR works fully OFFLINE on user machines
+    (previously models downloaded at first use = silent failure offline; likely root cause).
+- Tests: test_plate_fmt.py 5/5, test_async_ocr.py 2/2 (real+fake OCR), testing agent
+  iteration_14: 10/10 pytest + Playwright 12h/plate UI. Real night-camera accuracy is
+  user-device territory: plate needs to be visibly readable in the frame.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

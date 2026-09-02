@@ -109,6 +109,11 @@ class EventDB:
             self.conn.commit()
         return [r["image_path"] for r in rows]
 
+    def update_event_plate(self, eid, plate):
+        with self._lock:
+            self.conn.execute("UPDATE events SET plate=? WHERE id=?", (plate, eid))
+            self.conn.commit()
+
     # ---- WhatsApp outbox (durable offline queue) ---------------------------
     def outbox_add(self, recipient, caption, image_path=""):
         with self._lock:

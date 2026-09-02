@@ -61,6 +61,15 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
+      - name: Cache EasyOCR models
+        uses: actions/cache@v4
+        with:
+          path: 9x_security/easyocr_models
+          key: easyocr-models-en-v1
+
+      - name: Download EasyOCR models (bundled for offline plate reading)
+        run: python -c "import easyocr; easyocr.Reader(['en'], gpu=False, verbose=False, model_storage_directory='easyocr_models', download_enabled=True); print('models ready')"
+
       - name: Pre-build matplotlib font cache
         run: python -c "import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot; print('font cache ready')"
 
@@ -68,6 +77,7 @@ jobs:
         run: >
           pyinstaller --noconfirm --name "9xEngine"
           --add-data "yolov8n.pt;."
+          --add-data "easyocr_models;easyocr_models"
           --collect-data ultralytics
           --collect-data easyocr
           --collect-binaries imageio_ffmpeg

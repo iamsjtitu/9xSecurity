@@ -6,6 +6,15 @@ const iso = (d) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const today = () => iso(new Date());
 
+const fmt12 = (t) => {
+  const m = /^(\d{1,2}):(\d{2})(?::(\d{2}))?/.exec(t || '');
+  if (!m) return t;
+  let h = parseInt(m[1], 10);
+  const ap = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return `${h}:${m[2]}${m[3] ? `:${m[3]}` : ''} ${ap}`;
+};
+
 const last7Days = () => {
   const out = [];
   for (let i = 0; i < 7; i++) {
@@ -194,7 +203,7 @@ export default function EventsTable({ connected }) {
                     loading="lazy"
                   />
                 </td>
-                <td className="px-5 py-2 text-slate-700">{r.date} {r.time}</td>
+                <td className="px-5 py-2 text-slate-700">{r.date} {fmt12(r.time)}</td>
                 <td className="px-5 py-2 font-semibold uppercase text-slate-800">{r.vehicle_type}</td>
                 <td className="px-5 py-2"><Badge d={r.direction} /></td>
                 <td className="px-5 py-2 font-mono text-slate-700">{r.plate || '—'}</td>
@@ -209,7 +218,7 @@ export default function EventsTable({ connected }) {
           <div className="card max-w-4xl w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200">
               <div className="text-sm font-semibold text-slate-800">
-                {preview.direction} — {preview.vehicle_type.toUpperCase()} · {preview.date} {preview.time}
+                {preview.direction} — {preview.vehicle_type.toUpperCase()} · {preview.date} {fmt12(preview.time)}
                 {preview.plate ? ` · ${preview.plate}` : ''}
               </div>
               <button onClick={() => setPreview(null)} className="text-slate-400 hover:text-slate-700" data-testid="snapshot-modal-close">

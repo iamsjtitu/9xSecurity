@@ -62,7 +62,7 @@ class WhatsAppNotifier:
             return False, "Koi recipient number nahi mila. Ek number daalein (91XXXXXXXXXX)."
         text = (
             "✅ 9x Security test alert\n"
-            f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"Time: {datetime.now().strftime('%d-%m-%Y %I:%M:%S %p')}\n"
             "Agar ye message aaya hai to setup sahi hai."
         )
         lines = []
@@ -104,7 +104,11 @@ class WhatsAppNotifier:
             "unreachable", "getaddrinfo", "refused",
         ))
     def _caption(self, ev):
-        when = str(ev.get("timestamp", "")).replace("T", " ")
+        raw = str(ev.get("timestamp", ""))
+        try:
+            when = datetime.fromisoformat(raw).strftime("%d-%m-%Y %I:%M:%S %p")
+        except ValueError:
+            when = raw.replace("T", " ")
         cap = (
             f"🚨 9x Security\n"
             f"{ev.get('direction', '')} - {str(ev.get('vehicle_type', '')).upper()}\n"

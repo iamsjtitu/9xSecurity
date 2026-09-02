@@ -242,6 +242,11 @@ class SecurityEngine:
             from plate_reader import PlateReader
 
             self.plate_reader = PlateReader()
+        self._best_crops = {}
+        if self.plate_reader is not None:
+            import threading
+
+            threading.Thread(target=self._warm_plate_reader, daemon=True).start()
 
         self.frame_idx = 0
         self.last_dets = []
@@ -279,20 +284,19 @@ class SecurityEngine:
         self.frame_idx += 1
 
         crossings = self.tracker.update(self.last_dets, (a, b))
+        if self.cfg.get("enable_plate") and self.plate_reader is not None:
+            self._update_best_crops(frame, original, w, h)
 
         events = []
         for cr in crossings:
             direction = self._direction_for(cr["to_side"])
-            plate = ""
-            if self.cfg.get("enable_plate") and self.plate_reader is not None:
-                plate = self._read_plate(frame, original, cr["bbox"], w, h)
             image_path = self._save_snapshot(frame, cr, direction)
-            eid = self.db.add_event(cr["label"], direction, plate, image_path)
+            eid = self.db.add_event(cr["label"], direction, "", image_path)
             ev = {
                 "id": eid,
                 "vehicle_type": cr["label"],
                 "direction": direction,
-                "plate": plate,
+                "plate": "",
                 "image_path": image_path,
                 "timestamp": datetime.now().isoformat(timespec="seconds"),
             }
@@ -302,15 +306,89 @@ class SecurityEngine:
                     self.on_event(ev)
                 except Exception:
                     pass
-            try:
-                self.notifier.notify(ev)
-            except Exception:
-                pass
+            if self.cfg.get("enable_plate") and self.plate_reader is not None:
+                # OCR is slow on CPU: run async so the frame loop never stalls.
+                crops = []
+                c = self._plate_crop(frame, original, cr["bbox"], w, h)
+                if c is not None:
+                    crops.append(c.copy())
+                bc = self._best_crops.get(cr["track_id"])
+                if bc is not None:
+                    crops.append(bc[1])
+                clog(f"plate OCR: track {cr['track_id']} {direction} queued")
+                import threading
+
+                threading.Thread(
+                    target=self._ocr_and_notify,
+                    args=(eid, cr["track_id"], ev, crops),
+                    daemon=True,
+                ).start()
+            else:
+                try:
+                    self.notifier.notify(ev)
+                except Exception:
+                    pass
 
         annotated = self._annotate(frame, a, b)
         return annotated, events
 
-    def _read_plate(self, frame, original, bbox, w, h):
+    def _warm_plate_reader(self):
+        ok = self.plate_reader.warmup()
+        clog("plate OCR: models loaded, ready" if ok
+             else f"plate OCR: model load FAILED ({self.plate_reader.last_error})")
+
+    def _update_best_crops(self, frame, original, w, h):
+        """Keep the biggest (closest) crop per active track so OCR gets the
+        best possible view of the plate, not just the crossing frame."""
+        live = set(self.tracker.tracks.keys())
+        for tid in list(self._best_crops.keys()):
+            if tid not in live:
+                del self._best_crops[tid]
+        src, sx, sy = frame, 1.0, 1.0
+        if original is not None:
+            oh, ow = original.shape[:2]
+            sx, sy, src = ow / w, oh / h, original
+        for tid, tr in self.tracker.tracks.items():
+            if tr.counted:
+                continue
+            x1, y1, x2, y2 = tr.bbox
+            area = max(0, x2 - x1) * max(0, y2 - y1)
+            prev = self._best_crops.get(tid)
+            if prev is not None and prev[0] >= area:
+                continue
+            cx1, cy1 = max(0, int(x1 * sx)), max(0, int(y1 * sy))
+            cx2, cy2 = min(src.shape[1], int(x2 * sx)), min(src.shape[0], int(y2 * sy))
+            crop = src[cy1:cy2, cx1:cx2]
+            if crop.size:
+                if crop.shape[1] > 1000:  # bound memory for 4K sources
+                    s = 1000 / crop.shape[1]
+                    crop = cv2.resize(crop, (1000, max(1, int(crop.shape[0] * s))))
+                else:
+                    crop = crop.copy()
+                self._best_crops[tid] = (area, crop)
+
+    def _ocr_and_notify(self, eid, tid, ev, crops):
+        plate = ""
+        for c in crops:
+            try:
+                plate = self.plate_reader.read(c)
+            except Exception:
+                plate = ""
+            if plate:
+                break
+        if plate:
+            try:
+                self.db.update_event_plate(eid, plate)
+            except Exception:
+                pass
+            ev = {**ev, "plate": plate}
+        clog(f"plate OCR: track {tid} event {eid} -> '{plate or '(nahi mila)'}'")
+        try:
+            self.notifier.notify(ev)
+        except Exception:
+            pass
+
+    def _plate_crop(self, frame, original, bbox, w, h):
         x1, y1, x2, y2 = bbox
         src, sx, sy = frame, 1.0, 1.0
         if original is not None:
@@ -319,9 +397,7 @@ class SecurityEngine:
         cx1, cy1 = max(0, int(x1 * sx)), max(0, int(y1 * sy))
         cx2, cy2 = int(x2 * sx), int(y2 * sy)
         crop = src[cy1:cy2, cx1:cx2]
-        if crop.size == 0:
-            return ""
-        return self.plate_reader.read(crop)
+        return crop if crop.size else None
 
     def _save_snapshot(self, frame, cr, direction):
         ts = datetime.now()
@@ -334,7 +410,7 @@ class SecurityEngine:
         x1, y1, x2, y2 = cr["bbox"]
         color = (0, 200, 0) if direction == "Entry" else (0, 140, 255)
         cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
-        label = f"{direction} - {cr['label'].upper()}  {ts.strftime('%Y-%m-%d %H:%M:%S')}"
+        label = f"{direction} - {cr['label'].upper()}  {ts.strftime('%d-%m-%Y %I:%M:%S %p')}"
         cv2.rectangle(img, (0, 0), (img.shape[1], 28), (0, 0, 0), -1)
         cv2.putText(img, label, (8, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 1)
         cv2.imwrite(path, img)

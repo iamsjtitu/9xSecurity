@@ -217,3 +217,30 @@
 2026-09-02T14:00:30 | svc: loading AI model
 2026-09-02T14:00:30 | svc: AI model loaded
 2026-09-02T14:00:30 | svc: streaming started
+2026-09-02T14:08:49 | plate OCR: models loaded, ready
+2026-09-02T14:08:49 | plate OCR: models loaded, ready
+2026-09-02T14:16:29 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-02T14:16:29 | purge: 0 old events removed (retention 7d, cutoff 2026-08-26)
+2026-09-02T14:22:24 | plate OCR: models loaded, ready
+2026-09-02T14:22:24 | plate OCR: models loaded, ready
+2026-09-02T14:24:04 | plate OCR: models loaded, ready
+2026-09-02T14:24:04 | plate OCR: models loaded, ready
+2026-09-02T14:24:13 | plate OCR: models loaded, ready
+2026-09-02T14:25:37 | plate OCR: models loaded, ready
+2026-09-02T14:25:37 | plate OCR: models loaded, ready
+2026-09-02T14:25:47 | plate OCR: models loaded, ready
+2026-09-02T14:25:50 | plate OCR: track 1 Exit -> '(nahi mila)'
+2026-09-02T14:26:01 | plate OCR: models loaded, ready
+2026-09-02T14:26:05 | plate OCR: track 1 Exit -> '(nahi mila)'
+2026-09-02T14:26:34 | plate OCR: models loaded, ready
+2026-09-02T14:26:34 | plate OCR: models loaded, ready
+2026-09-02T14:26:43 | plate OCR: models loaded, ready
+2026-09-02T14:26:47 | plate OCR: track 1 Exit -> '(nahi mila)'
+2026-09-02T14:31:30 | plate OCR: models loaded, ready
+2026-09-02T14:31:52 | plate OCR: models loaded, ready
+2026-09-02T14:31:52 | plate OCR: track 1 Exit queued
+2026-09-02T14:31:52 | plate OCR: track 1 event 1 -> 'MH12AB1234'
+2026-09-02T14:31:53 | plate OCR: models loaded, ready
+2026-09-02T14:31:53 | plate OCR: models loaded, ready
+2026-09-02T14:32:20 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-02T14:32:20 | purge: 0 old events removed (retention 7d, cutoff 2026-08-26)

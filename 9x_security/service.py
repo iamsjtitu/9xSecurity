@@ -67,6 +67,17 @@ class Worker:
         self.ai_frames = 0        # frames processed by AI since connect
         self.ai_errors = 0
         self._last_err_log = 0.0
+        self.last_event = None    # latest captured event (for the UI capture toast)
+
+    def _on_event(self, ev):
+        self.last_event = {
+            "id": ev.get("id"),
+            "direction": ev.get("direction"),
+            "vehicle_type": ev.get("vehicle_type"),
+            "plate": ev.get("plate", ""),
+            "image_path": ev.get("image_path", ""),
+            "timestamp": ev.get("timestamp"),
+        }
 
     @property
     def connected(self):
@@ -159,6 +170,7 @@ class Worker:
         clog("svc: loading AI model")
         try:
             self.engine = SecurityEngine(cfg=cfg, db=_db)
+            self.engine.on_event = self._on_event
             clog("svc: AI model loaded")
         except Exception:
             import traceback
@@ -318,6 +330,7 @@ def state(request: Request):
         "ai_loaded": worker.engine is not None,
         "ai_error": worker.ai_error,
         "ai_ms": round(worker.ai_ms) if worker.ai_ms is not None else None,
+        "last_event": worker.last_event,
         "update_available": _update_info["available"],
         "update_latest": _update_info["latest"],
         "update_job": {"state": _update_job["state"], "percent": _update_job["percent"]},

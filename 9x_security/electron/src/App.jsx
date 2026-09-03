@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { api, getToken, setToken, logout } from './api';
 import Login from './components/Login.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import SettingsPage from './components/SettingsPage.jsx';
+import CaptureToast from './components/CaptureToast.jsx';
 
 export default function App() {
   const [authed, setAuthed] = useState(!!getToken());
@@ -11,6 +12,8 @@ export default function App() {
   const [settingsTab, setSettingsTab] = useState('whatsapp');
   const [state, setState] = useState({ connected: false, status: '', version: '' });
   const [toast, setToast] = useState(null);
+  const [capture, setCapture] = useState(null);
+  const lastEventId = useRef(undefined); // undefined = nothing seen yet (skip stale event on login)
 
   const showToast = useCallback((msg, type = 'info') => {
     setToast({ msg, type });
@@ -21,6 +24,10 @@ export default function App() {
     try {
       const s = await api('/api/state');
       setState(s);
+      const ev = s.last_event;
+      const id = ev ? ev.id : null;
+      if (lastEventId.current !== undefined && id != null && id !== lastEventId.current) setCapture(ev);
+      lastEventId.current = id;
     } catch (e) {
       if (String(e.message).includes('401')) {
         setToken('');
@@ -69,6 +76,7 @@ export default function App() {
           <span className="font-mono">v{state.version}</span>
         </div>
       </div>
+      <CaptureToast event={capture} onClose={() => setCapture(null)} />
       {toast && (
         <div
           data-testid="toast"

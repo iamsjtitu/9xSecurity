@@ -460,6 +460,17 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - USER NEXT: Save to GitHub → install new build ONCE (last re-entry of settings) → connect →
   HUD "AI: … ms" must appear; if red banner: Settings > Diagnostics > Copy sab kuch → paste.
 
+## Implemented (update 2026-06 #28) — Capture Toast (self-tested: 2 pytest + real-YOLO E2E screenshot)
+- Worker._on_event hooked to engine.on_event → worker.last_event {id, direction, vehicle_type,
+  plate, image_path, timestamp}; exposed in /api/state.last_event (no extra DB query).
+- App.jsx tracks last seen event id (skips the stale event present at login) and shows
+  CaptureToast.jsx top-right for 8s: snapshot thumbnail, "ENTRY/EXIT — CAR captured", 12h time,
+  plate if known, close button; emerald border for Entry, orange for Exit; slideIn keyframe.
+  testids: capture-toast, capture-toast-title, capture-toast-meta, capture-toast-img,
+  capture-toast-close. Works on every page (Dashboard + Settings).
+- Verified: bus video crossing → toast "EXIT — BUS CAPTURED · 11:40:45 AM" with thumbnail within
+  the 2.5s state poll; close works; no toast on fresh login.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

@@ -136,6 +136,9 @@ class WhatsAppNotifier:
                 return True, ""
             if self._is_network_error(err):
                 return False, err  # offline: queue full alert, retry later with photo
+            self._log(to, "image-rejected->text", "-", err)
+        elif self.send_image and img:
+            self._log(to, "image-missing->text", "-", img)
         return self._send_text(to, caption)
 
     def _headers(self):

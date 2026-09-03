@@ -277,6 +277,7 @@ class SecurityEngine:
         """
         h, w = frame.shape[:2]
         a, b = self.line_points(w, h)
+        self.tracker.near_band = 0.10 * h
         skip = max(1, int(self.cfg.get("detect_frame_skip", 2)))
 
         if self.frame_idx % skip == 0:
@@ -402,7 +403,6 @@ class SecurityEngine:
     def _save_snapshot(self, frame, cr, direction):
         ts = datetime.now()
         day_dir = os.path.join(config.SNAPSHOT_DIR, ts.strftime("%Y-%m-%d"))
-        os.makedirs(day_dir, exist_ok=True)
         fname = f"{direction}_{cr['label']}_{ts.strftime('%H-%M-%S-%f')[:-3]}.jpg"
         path = os.path.join(day_dir, fname)
 
@@ -413,17 +413,37 @@ class SecurityEngine:
         label = f"{direction} - {cr['label'].upper()}  {ts.strftime('%d-%m-%Y %I:%M:%S %p')}"
         cv2.rectangle(img, (0, 0), (img.shape[1], 28), (0, 0, 0), -1)
         cv2.putText(img, label, (8, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 1)
-        cv2.imwrite(path, img)
-        return path
+        try:
+            os.makedirs(day_dir, exist_ok=True)
+            # imencode + Python write: works with Unicode/Hindi paths where cv2.imwrite fails silently
+            ok, buf = cv2.imencode(".jpg", img, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+            if not ok:
+                raise RuntimeError("jpeg encode failed")
+            with open(path, "wb") as f:
+                f.write(buf.tobytes())
+            clog(f"event: {direction} {cr['label']} track {cr.get('track_id')} "
+                 f"({cr.get('via', 'cross')}) -> {path}")
+            return path
+        except Exception as e:
+            clog(f"event: {direction} {cr['label']} SNAPSHOT SAVE FAILED ({e}) path={path}")
+            return ""
 
     def _annotate(self, frame, a, b):
         img = frame
         cv2.line(img, a, b, (0, 255, 255), 2)
         for tr in self.tracker.tracks.values():
             x1, y1, x2, y2 = tr.bbox
-            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 200, 0), 2)
+            col = (160, 160, 160) if tr.counted else (0, 200, 0)
+            cv2.rectangle(img, (x1, y1), (x2, y2), col, 2)
             cv2.putText(
-                img, tr.label, (x1, max(12, y1 - 6)),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 200, 0), 1,
+                img, tr.label + (" (counted)" if tr.counted else ""), (x1, max(12, y1 - 6)),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, col, 1,
             )
+            cv2.circle(img, self.tracker.ref_point(tr.bbox), 5, (0, 0, 255), -1)
+        n = len(self.tracker.tracks)
+        hud = f"AI: {n} vehicle{'s' if n != 1 else ''} tracked"
+        cv2.putText(img, hud, (10, img.shape[0] - 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                    (0, 0, 0), 3)
+        cv2.putText(img, hud, (10, img.shape[0] - 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                    (0, 255, 0) if n else (200, 200, 200), 1)
         return img

@@ -5,17 +5,47 @@ import sys
 
 APP_NAME = "9x Security"
 if getattr(sys, "frozen", False):
-    # PyInstaller build: user data lives next to the exe (survives updates);
-    # bundled resources (model) live in _internal (sys._MEIPASS).
-    BASE_DIR = os.path.dirname(os.path.abspath(sys.executable))
-    _RES_DIR = getattr(sys, "_MEIPASS", BASE_DIR)
+    # PyInstaller build: bundled resources (model) live in _internal (sys._MEIPASS).
+    # User data lives OUTSIDE the install folder — the NSIS updater wipes the whole
+    # install dir on every update (config/events/snapshots were lost each update).
+    _EXE_DIR = os.path.dirname(os.path.abspath(sys.executable))
+    _RES_DIR = getattr(sys, "_MEIPASS", _EXE_DIR)
+    _LOCAL = os.environ.get("LOCALAPPDATA") or os.path.join(os.path.expanduser("~"), "AppData", "Local")
+    BASE_DIR = os.environ.get("NX_DATA_DIR") or os.path.join(_LOCAL, "9xSecurity")
 else:
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    _RES_DIR = BASE_DIR
+    _EXE_DIR = os.path.dirname(os.path.abspath(__file__))
+    _RES_DIR = _EXE_DIR
+    BASE_DIR = os.environ.get("NX_DATA_DIR") or _EXE_DIR
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 SNAPSHOT_DIR = os.path.join(BASE_DIR, "snapshots")
 DB_PATH = os.path.join(BASE_DIR, "events.db")
 MODEL_PATH = os.path.join(_RES_DIR, "yolov8n.pt")
+_USER_FILES = ("config.json", "events.db", "snapshots", "wa_log.txt", "camera_log.txt", "app_log.txt")
+
+
+def migrate_legacy_data(src_dir=None, dst_dir=None):
+    """One-time move of user data from the old location (next to the exe) to the
+    stable data dir. Copies only files that don't exist at the destination yet."""
+    import shutil
+
+    src_dir = src_dir or _EXE_DIR
+    dst_dir = dst_dir or BASE_DIR
+    if os.path.normcase(os.path.abspath(src_dir)) == os.path.normcase(os.path.abspath(dst_dir)):
+        return []
+    moved = []
+    for name in _USER_FILES:
+        s, d = os.path.join(src_dir, name), os.path.join(dst_dir, name)
+        if not os.path.exists(s) or os.path.exists(d):
+            continue
+        try:
+            if os.path.isdir(s):
+                shutil.copytree(s, d)
+            else:
+                shutil.copy2(s, d)
+            moved.append(name)
+        except Exception:
+            pass
+    return moved
 
 # Processing / display resolution (16:9). Detection & line are handled here.
 DISPLAY_WIDTH = 960
@@ -121,5 +151,8 @@ def ensure_std_streams():
         sys.stderr = log
 
 
+os.makedirs(BASE_DIR, exist_ok=True)
+if getattr(sys, "frozen", False):
+    migrate_legacy_data()
 ensure_std_streams()
 os.makedirs(SNAPSHOT_DIR, exist_ok=True)

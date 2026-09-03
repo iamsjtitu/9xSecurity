@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { MessageCircle, User, Lock, Download, Send, Clock } from 'lucide-react';
+import { MessageCircle, User, Lock, Download, Send, Clock, Activity } from 'lucide-react';
 import { api } from '../api';
+import DiagnosticsTab from './DiagnosticsTab.jsx';
 
 const TABS = [
   { id: 'whatsapp', label: 'WhatsApp Alerts', icon: MessageCircle },
@@ -8,6 +9,7 @@ const TABS = [
   { id: 'account', label: 'Account', icon: User },
   { id: 'security', label: 'Login / Security', icon: Lock },
   { id: 'updates', label: 'Updates', icon: Download },
+  { id: 'diagnostics', label: 'Diagnostics', icon: Activity },
 ];
 
 export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
@@ -98,7 +100,8 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
         ))}
       </div>
 
-      <div className="card p-6 flex-1 max-w-2xl">
+      <div className={`card p-6 flex-1 ${tab === 'diagnostics' ? 'max-w-4xl' : 'max-w-2xl'}`}>
+        {tab === 'diagnostics' && <DiagnosticsTab showToast={showToast} />}
         {tab === 'whatsapp' && (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-slate-900">WhatsApp Alerts (wa.9x.design)</h3>

@@ -114,6 +114,12 @@ class EventDB:
             self.conn.execute("UPDATE events SET plate=? WHERE id=?", (plate, eid))
             self.conn.commit()
 
+    def stats(self):
+        with self._lock:
+            total = self.conn.execute("SELECT COUNT(*) c FROM events").fetchone()["c"]
+            last = self.conn.execute("SELECT * FROM events ORDER BY id DESC LIMIT 1").fetchone()
+        return {"total": int(total), "last": dict(last) if last else None}
+
     # ---- WhatsApp outbox (durable offline queue) ---------------------------
     def outbox_add(self, recipient, caption, image_path=""):
         with self._lock:

@@ -477,6 +477,88 @@ def whatsapp_test(body: dict, request: Request):
     return {"ok": ok, "detail": detail}
 
 
+# ---- diagnostics (Settings > Diagnostics: user can copy-paste this) ----------
+def _tail(path, n=80):
+    try:
+        with open(path, "r", encoding="utf-8", errors="replace") as f:
+            return "".join(f.readlines()[-n:])
+    except Exception:
+        return ""
+
+
+def _snapshot_write_test():
+    try:
+        os.makedirs(config.SNAPSHOT_DIR, exist_ok=True)
+        p = os.path.join(config.SNAPSHOT_DIR, ".write_test")
+        with open(p, "wb") as f:
+            f.write(b"ok")
+        os.remove(p)
+        return True, "OK"
+    except Exception as e:
+        return False, str(e)
+
+
+@app.get("/api/diagnostics")
+def diagnostics(request: Request):
+    _check(request)
+    import whatsapp
+    from engine import CAMERA_LOG
+
+    cfg = _cfg()
+    st = _db.stats()
+    last = st["last"]
+    if last:
+        last["image_exists"] = bool(last.get("image_path")) and os.path.isfile(last["image_path"])
+    try:
+        du = shutil.disk_usage(config.BASE_DIR)
+        free_gb = round(du.free / 1e9, 1)
+    except Exception:
+        free_gb = None
+    w_ok, w_detail = _snapshot_write_test()
+    eng = worker.engine
+    return {
+        "version": updater.APP_VERSION,
+        "time_now": datetime.now().isoformat(timespec="seconds"),
+        "data_dir": config.BASE_DIR,
+        "snapshot_dir": config.SNAPSHOT_DIR,
+        "db_path": config.DB_PATH,
+        "disk_free_gb": free_gb,
+        "snapshot_write_ok": w_ok,
+        "snapshot_write_detail": w_detail,
+        "events_total": st["total"],
+        "events_today": _db.counts_today(),
+        "last_event": last,
+        "outbox_pending": _db.outbox_count(),
+        "engine": {
+            "connected": worker.connected,
+            "status": worker.status,
+            "ai_loaded": eng is not None,
+            "capture_paused": worker.capture_paused,
+            "tracks_now": len(eng.tracker.tracks) if eng else 0,
+            "detections_now": len(eng.last_dets) if eng else 0,
+            "plate_ocr": bool(eng and eng.plate_reader is not None),
+            "line": cfg.get("line"),
+            "entry_direction": cfg.get("entry_direction"),
+            "vehicle_classes": cfg.get("vehicle_classes"),
+            "confidence": cfg.get("confidence"),
+        },
+        "whatsapp": {
+            "enabled": bool(cfg.get("wa_enabled")),
+            "api_key_set": bool(cfg.get("wa_api_key")),
+            "recipients": len(cfg.get("wa_recipients") or []),
+            "send_image": bool(cfg.get("wa_send_image", True)),
+            "schedule_enabled": bool(cfg.get("wa_schedule_enabled")),
+        },
+        "capture_schedule": {
+            "enabled": bool(cfg.get("capture_schedule_enabled")),
+            "start": cfg.get("capture_start"),
+            "end": cfg.get("capture_end"),
+        },
+        "camera_log": _tail(CAMERA_LOG),
+        "wa_log": _tail(whatsapp.LOG_PATH),
+    }
+
+
 # ---- retention / auto-cleanup ------------------------------------------------
 def _purge_old():
     try:

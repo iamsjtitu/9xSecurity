@@ -376,6 +376,39 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Tests: test_update_badge.py 2/2; Playwright: badge+dot appear, click lands on Updates with
   update-info + apply button. Real GitHub check = user's installed build.
 
+## Implemented (update 2026-06 #25) — "Photo nahi gaya / capture nahi hua / dashboard khaali" fix (self-tested: 7 new + 43 regression pytest, real-YOLO E2E video, screenshots)
+- USER REPORT: real WhatsApp alert text arrived (Entry - CAR) but no photo; dashboard 0 rows.
+- ROOT CAUSE #1 (data loss): user data (config.json, events.db, snapshots, logs) lived in
+  resources\engine\ INSIDE the install dir; electron-builder NSIS runs `RMDir /r $INSTDIR`
+  on EVERY update → all events/snapshots/settings wiped each update (also why the user had to
+  re-enter token/API key each install). FIX: config.py frozen BASE_DIR = %LOCALAPPDATA%\9xSecurity
+  (env NX_DATA_DIR override); config.migrate_legacy_data() copies old files once (never
+  overwrites). NOTE: the update TO this build still wipes (old uninstaller) → user re-enters
+  settings ONE last time.
+- ROOT CAUSE #2 (silent snapshot failure): cv2.imwrite fails silently on Unicode paths /
+  unwritable dirs → image_path pointed to nothing → WhatsApp text-only. FIX: imencode + Python
+  write, try/except → clog "event: ... -> path" or "SNAPSHOT SAVE FAILED", event still logged
+  with image_path='' (UI shows 'photo save nahi hui' placeholder, testid snapshot-missing).
+  whatsapp._deliver logs 'image-missing->text' / 'image-rejected->text' in wa_log.txt.
+- DETECTION RELIABILITY (tracker.py): crossing judged on BOTTOM-CENTER (wheels) instead of
+  centroid; size-adaptive match distance max(90, 0.6*bbox); NEW occluded-gate fallback
+  near_band=10% frame height: vehicle first seen within band of the line that then moves
+  ≥2.5×band away on the same side counts as crossing (via='appeared-at-line'). Known
+  trade-off: a car parked right at the line that later drives inward may count as Entry.
+- LIVE HUD (engine._annotate): 'AI: N vehicles tracked' bottom-left, red dot at ref point,
+  counted tracks grey '(counted)'. User can now SEE whether AI detects the vehicle.
+- DIAGNOSTICS: GET /api/diagnostics (version, data_dir, disk free, snapshot write test,
+  events total/today, last_event + image_exists, outbox, engine flags/tracks/detections,
+  WhatsApp config flags, capture schedule, tail of camera_log.txt & wa_log.txt). Settings >
+  Diagnostics tab (DiagnosticsTab.jsx; testids diagnostics-tab, diag-flags, diag-copy-btn,
+  diag-camera-log, diag-wa-log) with 'Copy sab kuch' → user pastes into chat.
+- db.stats() added. Tests: test_capture_fixes.py 7/7; full suite green except pre-existing
+  stale test_service_api::test_settings_roundtrip (expects unmasked secrets; masked since #18).
+- E2E: synthetic gate video (real bus asset sliding across line) via /api/camera/connect →
+  real YOLO → 'event: Exit bus (cross)' in camera_log, snapshot file exists, row in table,
+  HUD visible in screenshot. Test data cleaned.
+- LEARNING: never `git stash` in this repo (running service rewrites log files → pop fails).
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

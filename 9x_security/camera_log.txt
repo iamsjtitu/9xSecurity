@@ -274,3 +274,5 @@
 2026-09-03T07:46:07 | ffmpeg-pipe: starting
 2026-09-03T07:47:18 | svc: starting on 127.0.0.1:8971 v1.0.0
 2026-09-03T07:47:18 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)
+2026-09-03T08:43:25 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-03T08:43:25 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)

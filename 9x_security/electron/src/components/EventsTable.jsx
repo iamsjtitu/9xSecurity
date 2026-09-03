@@ -196,12 +196,18 @@ export default function EventsTable({ connected }) {
                 data-testid={`event-row-${r.id}`}
               >
                 <td className="px-5 py-2">
-                  <img
-                    src={snapshotUrl(r.image_path)}
-                    alt="snap"
-                    className="h-14 w-24 rounded-md object-cover bg-slate-200"
-                    loading="lazy"
-                  />
+                  {r.image_path ? (
+                    <img
+                      src={snapshotUrl(r.image_path)}
+                      alt="snap"
+                      className="h-14 w-24 rounded-md object-cover bg-slate-200"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="h-14 w-24 rounded-md bg-slate-100 text-[10px] text-slate-400 flex items-center justify-center text-center px-1" data-testid="snapshot-missing">
+                      photo save nahi hui
+                    </div>
+                  )}
                 </td>
                 <td className="px-5 py-2 text-slate-700">{r.date} {fmt12(r.time)}</td>
                 <td className="px-5 py-2 font-semibold uppercase text-slate-800">{r.vehicle_type}</td>

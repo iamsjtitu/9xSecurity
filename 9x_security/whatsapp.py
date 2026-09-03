@@ -23,6 +23,21 @@ def _phone(num):
     return re.sub(r"\D", "", str(num or ""))
 
 
+def _group_id(g):
+    """Normalize a group (dict {id,name} or string) to '<digits>@g.us'; '' if invalid."""
+    if isinstance(g, dict):
+        g = g.get("id", "")
+    s = str(g or "").strip().lower()
+    if not s:
+        return ""
+    digits = re.sub(r"\D", "", s.split("@")[0])
+    return f"{digits}@g.us" if len(digits) >= 10 else ""
+
+
+def _is_group(to):
+    return str(to).endswith("@g.us")
+
+
 class WhatsAppNotifier:
     def __init__(self, cfg, db=None):
         self.db = db
@@ -33,11 +48,32 @@ class WhatsAppNotifier:
         self.enabled = bool(cfg.get("wa_enabled", False))
         self.base = (cfg.get("wa_base_url") or "https://wa.9x.design").rstrip("/")
         self.api_key = cfg.get("wa_api_key", "").strip()
-        self.recipients = [p for p in (_phone(r) for r in (cfg.get("wa_recipients", []) or [])) if p]
+        numbers = [p for p in (_phone(r) for r in (cfg.get("wa_recipients", []) or [])) if p]
+        groups = [g for g in (_group_id(x) for x in (cfg.get("wa_groups", []) or [])) if g]
+        self.recipients = numbers + groups  # groups are '<digits>@g.us' strings
         self.send_image = bool(cfg.get("wa_send_image", True))
         self.schedule_enabled = bool(cfg.get("wa_schedule_enabled", False))
         self.wa_start = cfg.get("wa_start", "18:00")
         self.wa_end = cfg.get("wa_end", "06:00")
+
+    def list_groups(self):
+        """Groups the connected WhatsApp session is a member of → (ok, groups|detail)."""
+        if not self.api_key:
+            return False, "API key khaali hai. Pehle API key daalein."
+        try:
+            r = requests.get(f"{self.base}/api/v2/groupChat/getGroupList", headers=self._headers(), timeout=20)
+        except Exception as e:
+            return False, f"Internet/connection error: {e}"
+        if not r.ok:
+            return False, self._explain(r)
+        try:
+            data = r.json()
+            groups = (data.get("data") or {}).get("groups") or data.get("groups") or []
+            out = [{"id": _group_id(g.get("id", "")), "name": g.get("name", ""), "size": g.get("size", 0)}
+                   for g in groups if _group_id(g.get("id", ""))]
+            return True, out
+        except Exception as e:
+            return False, f"Group list parse fail: {e}"
 
     def allowed_now(self, now=None):
         if not self.schedule_enabled:
@@ -59,7 +95,7 @@ class WhatsAppNotifier:
         if not self.api_key:
             return False, "API key khaali hai. Settings me API key daalein."
         if not self.recipients:
-            return False, "Koi recipient number nahi mila. Ek number daalein (91XXXXXXXXXX)."
+            return False, "Koi recipient nahi mila. Ek number (91XXXXXXXXXX) ya WhatsApp group select karein."
         text = (
             "✅ 9x Security test alert\n"
             f"Time: {datetime.now().strftime('%d-%m-%Y %I:%M:%S %p')}\n"
@@ -69,7 +105,8 @@ class WhatsAppNotifier:
         all_ok = True
         for to in self.recipients:
             ok, info = self._send_text(to, text)
-            lines.append(f"{to}: {'SENT ✅' if ok else 'FAILED ❌'} ({info})")
+            label = f"Group {to.split('@')[0]}" if _is_group(to) else to
+            lines.append(f"{label}: {'SENT ✅' if ok else 'FAILED ❌'} ({info})")
             all_ok = all_ok and ok
         return all_ok, "\n".join(lines)
 
@@ -162,14 +199,15 @@ class WhatsAppNotifier:
         return f"HTTP {r.status_code}: {hint}" + (f" [{snippet}]" if snippet else "")
 
     def _send_text(self, to, text):
+        group = _is_group(to)
         try:
             r = requests.post(
-                f"{self.base}/api/v2/sendMessage",
+                f"{self.base}/api/v2/{'sendGroup' if group else 'sendMessage'}",
                 headers=self._headers(),
-                files={"phonenumber": (None, to), "text": (None, text)},
+                files={("groupId" if group else "phonenumber"): (None, to), "text": (None, text)},
                 timeout=20,
             )
-            self._log(to, "text", r.status_code, r.text)
+            self._log(to, "group-text" if group else "text", r.status_code, r.text)
             return r.ok, self._explain(r)
         except Exception as e:
             self._log(to, "text-error", "-", str(e))
@@ -183,19 +221,20 @@ class WhatsAppNotifier:
             self._log(to, "image-read-error", "-", str(e))
             return False, str(e)
         name = os.path.basename(path)
+        group = _is_group(to)
         try:
             r = requests.post(
-                f"{self.base}/api/v2/sendMessageFile",
+                f"{self.base}/api/v2/{'sendGroupFile' if group else 'sendMessageFile'}",
                 headers=self._headers(),
-                data={"phonenumber": to, "caption": caption, "filename": name},
+                data={("groupId" if group else "phonenumber"): to, "caption": caption, "filename": name},
                 files={"file": (name, raw, "image/jpeg")},
                 timeout=45,
             )
-            self._log(to, "image", r.status_code, r.text)
+            self._log(to, "group-image" if group else "image", r.status_code, r.text)
             return r.ok, self._explain(r)
         except Exception as e:
             self._log(to, "image-error", "-", str(e))
-            return False, str(e)
+            return False, f"Internet/connection error: {e}"
 
     def _log(self, to, kind, status, body):
         try:

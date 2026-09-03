@@ -490,6 +490,23 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   "Mobile No: 7587922222" (tel link). Shown at sidebar bottom (all pages) and login left panel
   (small screens: centered under the form). BRAND constant holds designer/url/phone.
 
+## Implemented (update 2026-06 #31) — WhatsApp GROUP alerts (self-tested: 6 pytest w/ fake provider + outbox script + Playwright)
+- Provider endpoints (wa.9x.design docs): POST /api/v2/sendGroup (groupId, text), POST
+  /api/v2/sendGroupFile (groupId, file, caption, filename), GET /api/v2/groupChat/getGroupList.
+- whatsapp.py: _group_id() normalizes dict/string → '<digits>@g.us' (≥10 digits); recipients =
+  numbers + groups; _send_text/_send_image route by _is_group(to) to group endpoints; outbox
+  stores the '@g.us' recipient string so retries work unchanged; list_groups(); test message
+  labels groups 'Group <id>: SENT'.
+- config DEFAULTS wa_groups: [{id,name}]; _SETTINGS_KEYS + /api/whatsapp/test accept wa_groups;
+  NEW POST /api/whatsapp/groups {wa_api_key?, wa_base_url?} → {ok, groups[{id,name,size}]} or
+  {ok:false, detail}. Diagnostics whatsapp.groups count.
+- UI WaGroupsPicker.jsx in Settings > WhatsApp: 'Groups load karein' (wa-groups-load-btn) →
+  checkbox list (wa-group-option-<id>) → selected chips (wa-groups-selected, remove buttons) →
+  manual Group ID add (wa-group-manual-input / wa-group-manual-add-btn); summary line
+  wa-targets-summary 'Alerts jayenge: N number + M group'. Alerts go to numbers AND groups;
+  group-only = leave numbers empty (explained in UI).
+- Verified: load 2 groups → select → Save → reload persists → Send Test → 'Group …: SENT ✅'.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

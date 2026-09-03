@@ -86,3 +86,23 @@
 2026-09-03T12:17:15 | text | to=919999999999 | status=401 | {"detail":"Invalid API token"}
 2026-09-03T12:17:22 | text | to=919999999999 | status=401 | {"detail":"Invalid API token"}
 2026-09-03T12:19:12 | text | to=919999999999 | status=401 | {"detail":"Invalid API token"}
+2026-09-03T12:55:10 | text | to=919876543210 | status=201 | {"success":true}
+2026-09-03T12:55:10 | group-text | to=120363424861931093@g.us | status=201 | {"success":true}
+2026-09-03T12:55:10 | group-image | to=120363424861931093@g.us | status=200 | {"success":true}
+2026-09-03T12:55:10 | image | to=919876543210 | status=200 | {"success":true}
+2026-09-03T12:55:10 | text-error | to=120363424861931093@g.us | status=- | HTTPConnectionPool(host='127.0.0.1', port=9): Max retries exceeded with url: /api/v2/sendGroup (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=9): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-09-03T12:55:10 | outbox-queued | to=120363424861931093@g.us | status=- | id=1 reason=Internet/connection error: HTTPConnectionPool(host='127.0.0.1', port=9): Max retries exceeded with url: /api/v2/sendGroup (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=9): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-09-03T12:55:10 | group-text | to=120363424861931093@g.us | status=201 | {"success":true}
+2026-09-03T12:55:10 | outbox-sent | to=120363424861931093@g.us | status=- | id=1
+2026-09-03T12:55:10 | group-text | to=120363424861931093@g.us | status=201 | {"success":true}
+2026-09-03T12:55:14 | image-error | to=919876543210 | status=- | HTTPConnectionPool(host='127.0.0.1', port=9): Max retries exceeded with url: /api/v2/sendMessageFile (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=9): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-09-03T12:55:14 | outbox-queued | to=919876543210 | status=- | id=1 reason=Internet/connection error: HTTPConnectionPool(host='127.0.0.1', port=9): Max retries exceeded with url: /api/v2/sendMessageFile (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=9): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-09-03T12:55:14 | image-error | to=919999999999 | status=- | HTTPConnectionPool(host='127.0.0.1', port=9): Max retries exceeded with url: /api/v2/sendMessageFile (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=9): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-09-03T12:55:14 | outbox-queued | to=919999999999 | status=- | id=2 reason=Internet/connection error: HTTPConnectionPool(host='127.0.0.1', port=9): Max retries exceeded with url: /api/v2/sendMessageFile (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=9): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-09-03T12:55:14 | image-error | to=919876543210 | status=- | HTTPConnectionPool(host='127.0.0.1', port=9): Max retries exceeded with url: /api/v2/sendMessageFile (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=9): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-09-03T12:55:14 | image | to=919876543210 | status=200 | {"success":true}
+2026-09-03T12:55:14 | outbox-sent | to=919876543210 | status=- | id=1
+2026-09-03T12:55:14 | image | to=919999999999 | status=200 | {"success":true}
+2026-09-03T12:55:14 | outbox-sent | to=919999999999 | status=- | id=2
+2026-09-03T12:56:15 | text | to=919999999999 | status=201 | {"success":true}
+2026-09-03T12:56:15 | group-text | to=120363424861931093@g.us | status=201 | {"success":true}

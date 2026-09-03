@@ -3,6 +3,7 @@ import { MessageCircle, User, Lock, Download, Send, Clock, Activity, Eye, EyeOff
 import { api } from '../api';
 import DiagnosticsTab from './DiagnosticsTab.jsx';
 import UpdateProgress from './UpdateProgress.jsx';
+import WaGroupsPicker from './WaGroupsPicker.jsx';
 
 const TABS = [
   { id: 'whatsapp', label: 'WhatsApp Alerts', icon: MessageCircle },
@@ -158,11 +159,21 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
               </p>
             </div>
             <div>
-              <label className="label">Recipients (ek number per line, 91XXXXXXXXXX)</label>
+              <label className="label">Recipients — numbers (ek number per line, 91XXXXXXXXXX; group-only chahiye to khaali chhodein)</label>
               <textarea className="input h-24 resize-none font-mono" value={(s.wa_recipients || []).join('\n')}
                 onChange={(e) => set('wa_recipients', e.target.value.split('\n').map((x) => x.trim()).filter(Boolean))}
                 data-testid="wa-recipients-input" />
             </div>
+            <WaGroupsPicker
+              selected={s.wa_groups || []}
+              onChange={(g) => set('wa_groups', g)}
+              apiKey={s.wa_api_key || ''}
+              baseUrl={s.wa_base_url || ''}
+              showToast={showToast}
+            />
+            <p className="text-xs text-slate-500" data-testid="wa-targets-summary">
+              Alerts jayenge: {(s.wa_recipients || []).length} number + {(s.wa_groups || []).length} group
+            </p>
             <label className="flex items-center gap-2.5 text-sm text-slate-700 cursor-pointer">
               <input type="checkbox" className="h-4 w-4 accent-[#1f6feb]" checked={s.wa_send_image !== false}
                 onChange={(e) => set('wa_send_image', e.target.checked)} data-testid="wa-send-image-toggle" />

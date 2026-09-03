@@ -67,6 +67,7 @@ DEFAULTS = {
     "wa_base_url": "https://wa.9x.design",
     "wa_api_key": "",
     "wa_recipients": [],          # ["919876543210", ...]
+    "wa_groups": [],              # [{"id": "120363...@g.us", "name": "Gate Staff"}, ...]
     "wa_send_image": True,        # False => text-only alert
     # ---- Timing / schedule ----
     "wa_schedule_enabled": False,     # True => WhatsApp alerts only between wa_start-wa_end

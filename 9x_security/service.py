@@ -485,7 +485,7 @@ def snapshot(request: Request, path: str):
 
 # ---- settings ---------------------------------------------------------------
 _SETTINGS_KEYS = (
-    "wa_enabled", "wa_base_url", "wa_api_key", "wa_recipients", "wa_send_image",
+    "wa_enabled", "wa_base_url", "wa_api_key", "wa_recipients", "wa_groups", "wa_send_image",
     "wa_account_email", "wa_account_password", "gh_token",
     "wa_schedule_enabled", "wa_start", "wa_end",
     "capture_schedule_enabled", "capture_start", "capture_end",
@@ -550,11 +550,29 @@ def whatsapp_test(body: dict, request: Request):
             "wa_base_url": body.get("wa_base_url") or cfg.get("wa_base_url") or "https://wa.9x.design",
             "wa_api_key": (str(body.get("wa_api_key", "")).strip() or cfg.get("wa_api_key", "")),
             "wa_recipients": body.get("wa_recipients") or cfg.get("wa_recipients", []),
+            "wa_groups": body.get("wa_groups") if body.get("wa_groups") is not None else cfg.get("wa_groups", []),
             "wa_send_image": bool(body.get("wa_send_image", True)),
         }
     )
     ok, detail = n.test_connection()
     return {"ok": ok, "detail": detail}
+
+
+@app.post("/api/whatsapp/groups")
+def whatsapp_groups(body: dict, request: Request):
+    """List WhatsApp groups of the connected session (for the Settings group picker)."""
+    _check(request)
+    cfg = _cfg()
+    n = WhatsAppNotifier(
+        {
+            "wa_base_url": body.get("wa_base_url") or cfg.get("wa_base_url") or "https://wa.9x.design",
+            "wa_api_key": (str(body.get("wa_api_key", "")).strip() or cfg.get("wa_api_key", "")),
+        }
+    )
+    ok, res = n.list_groups()
+    if not ok:
+        return {"ok": False, "detail": res, "groups": []}
+    return {"ok": True, "groups": res}
 
 
 # ---- diagnostics (Settings > Diagnostics: user can copy-paste this) ----------
@@ -630,6 +648,7 @@ def diagnostics(request: Request):
             "enabled": bool(cfg.get("wa_enabled")),
             "api_key_set": bool(cfg.get("wa_api_key")),
             "recipients": len(cfg.get("wa_recipients") or []),
+            "groups": len(cfg.get("wa_groups") or []),
             "send_image": bool(cfg.get("wa_send_image", True)),
             "schedule_enabled": bool(cfg.get("wa_schedule_enabled")),
         },

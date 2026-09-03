@@ -38,7 +38,89 @@ def normalize_rtsp_url(url):
 
 CAMERA_LOG = os.path.join(config.BASE_DIR, "camera_log.txt")
 # analyzeduration/probesize: slow cameras get extra time to deliver stream info.
-FFMPEG_OPTS = "|timeout;5000000|analyzeduration;10000000|probesize;5000000|max_delay;500000"
+# discardcorrupt: drop broken frames (packet loss) instead of showing green/smeared video.
+FFMPEG_OPTS = "|timeout;5000000|analyzeduration;10000000|probesize;5000000|max_delay;500000|fflags;discardcorrupt"
+
+
+class LatestFrameReader:
+    """Decodes in a background thread and hands out only the NEWEST frame.
+    Without this, a slow AI loop stalls the decoder → the camera/ffmpeg drops
+    packets → HEVC 'Could not find ref with POC' errors, smeared frames and
+    ever-growing lag. Used for live (RTSP) sources only, not for files."""
+
+    def __init__(self, cap):
+        import threading
+
+        self.cap = cap
+        self._lock = threading.Lock()
+        self._frame = None
+        self._seq = 0
+        self._served = 0
+        self._alive = True
+        self.dropped = 0      # frames replaced before the AI consumed them
+        self.decoded = 0
+        self._t = threading.Thread(target=self._loop, daemon=True)
+        self._t.start()
+
+    def _loop(self):
+        while self._alive:
+            try:
+                ok, f = self.cap.read()
+            except Exception:
+                ok, f = False, None
+            if not ok or f is None:
+                time.sleep(0.01)
+                continue
+            with self._lock:
+                if self._seq != self._served:
+                    self.dropped += 1
+                self._frame = f
+                self._seq += 1
+                self.decoded += 1
+
+    def read(self, timeout=1.0):
+        """Newest unseen frame; (False, None) after `timeout` s without one."""
+        t0 = time.time()
+        while self._alive:
+            with self._lock:
+                if self._seq != self._served:
+                    self._served = self._seq
+                    return True, self._frame
+            if time.time() - t0 > timeout:
+                return False, None
+            time.sleep(0.004)
+        return False, None
+
+    def isOpened(self):
+        return self._alive and self.cap.isOpened()
+
+    def get(self, prop):
+        try:
+            return self.cap.get(prop)
+        except Exception:
+            return 0
+
+    def release(self):
+        self._alive = False
+        try:
+            self._t.join(timeout=2)
+        except Exception:
+            pass
+        try:
+            self.cap.release()
+        except Exception:
+            pass
+
+
+def codec_name(cap):
+    """'hevc' / 'h264' / '' from an OpenCV capture (FFmpegPipeSource → '')."""
+    try:
+        v = int(cap.get(cv2.CAP_PROP_FOURCC))
+        if v <= 0:
+            return ""
+        return "".join(chr((v >> (8 * i)) & 0xFF) for i in range(4)).strip().lower()
+    except Exception:
+        return ""
 
 
 def redact_url(url):
@@ -90,6 +172,7 @@ class FFmpegPipeSource:
             input_args = [
                 "-rtsp_transport", "tcp", "-timeout", "5000000",
                 "-analyzeduration", "10000000", "-probesize", "5000000",
+                "-fflags", "+discardcorrupt",
             ]
         cmd = [
             exe, "-nostdin", "-loglevel", "error", *input_args, "-i", url,

@@ -1,0 +1,24 @@
+{
+  "summary": "All checks green. Pytest 13/13 passed (test_live_reader.py 5, test_live_e2e.py 1, test_capture_fixes.py 7). Backend regression with an mp4 file source: /api/camera/connect returned 200, two 'bus' events with opposite directions (Entry id=33, Exit id=34) were emitted; /api/state and /api/diagnostics both exposed codec='fmp4' and frames_dropped=0 (file source is not wrapped by LatestFrameReader, as expected). UI quick check: Diagnostics tab summary (diag-summary) contains the new rows 'Camera codec' (FMP4) and 'Frames skipped (AI busy)' (0); the amber HEVC hint (diag-hevc-hint) is correctly hidden for the non-HEVC/idle source; Dashboard still renders after navigation. Cleanup completed: camera disconnected, service killed and restarted, events wiped, snapshots+temp mp4 removed, tracked files git-restored; /api/health OK and admin/9xsecurity login works.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/test_live_reader.py",
+    "/app/9x_security/test_live_e2e.py",
+    "/app/9x_security/test_capture_fixes.py",
+    "/app/test_reports/pytest/iter17.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Live HEVC/RTSP path is only validated via a paced fake camera inside test_live_e2e.py; no real RTSP is available in the container so real-world HEVC decoder-stall behavior (the original bug) cannot be reproduced end-to-end here. Recommend keeping the synthetic test but adding a note in docs.",
+    "The login API returns must_change_password=true even after POST /api/settings {new_password:'9xsecurity'} succeeds (default-seed password is flagged). Not a regression from this change, but worth clarifying UX-wise."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin / 9xsecurity (default seeded)",
+  "seed_data_creation": "Ephemeral: /app/9x_security/_gate_test.mp4 built with cv2 (bus animation, 12fps, mp4v) and 2 events in events.db. Both removed during cleanup.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Service is NOT managed by supervisor; restart with: pkill -9 -f service.py; cd /app/9x_security && nohup python service.py > /tmp/svc.log 2>&1 &. Login uses default UI form (no data-testid on username/password/submit — use input[type=text]/input[type=password] and role=button name=Login). After default-seed login, force-change modal appears with data-testid force-new-password/force-confirm-password/force-change-btn. entry_direction='neg' so labels may be swapped; test only asserts count and opposite directions. Real RTSP not available; live path validated via paced fake camera in test_live_e2e.py.",
+  "rca of the issue": "Pre-existing bug already fixed by main agent: worker read frames synchronously → YOLO 150-300ms latency blocked ffmpeg decoder → dropped packets + missing HEVC reference frames caused smearing. Fix: engine.LatestFrameReader background thread continuously decodes and hands newest frame; only applied for live RTSP (Worker._open(source, live=True)). File sources unchanged. FFMPEG_OPTS + FFmpegPipeSource now use '-fflags +discardcorrupt'. codec_name and frames_dropped exposed via /api/state and /api/diagnostics, and surfaced in Diagnostics UI (Camera codec, Frames skipped (AI busy)) with an amber HEVC hint. All validated by 13 pytest cases and by the mp4 backend regression + UI quick check."
+}

@@ -48,6 +48,13 @@ export default function DiagnosticsTab({ showToast }) {
         </div>
       </div>
       <p className="text-xs text-slate-400">Koi problem ho to "Copy sab kuch" dabakar text chat me paste karein — usse turant pata chal jata hai kya galat hai.</p>
+      {['hevc', 'hvc1', 'hev1', 'h265'].includes(e.codec) && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900" data-testid="diag-hevc-hint">
+          Camera <b>H.265 (HEVC)</b> stream bhej raha hai. Agar video har 1-2 sec me dhundli/tooti dikhe: camera ki
+          settings me video encoding <b>H.264</b> karein, ya <b>sub-stream</b> URL use karein
+          (Hikvision: <code>/Streaming/Channels/102</code>, Dahua: <code>subtype=1</code>, CP Plus: <code>subtype=1</code>).
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-2" data-testid="diag-flags">
         <Flag ok={e.connected} label={e.connected ? 'Camera connected' : 'Camera offline'} />
@@ -68,6 +75,8 @@ export default function DiagnosticsTab({ showToast }) {
           <Row k="Aaj" v={`${d.events_today?.Entry ?? 0} Entry / ${d.events_today?.Exit ?? 0} Exit`} />
           <Row k="AI status" v={e.status} />
           <Row k="AI frames / errors" v={`${e.ai_frames ?? 0} / ${e.ai_errors ?? 0}`} />
+          <Row k="Camera codec" v={e.codec ? `${e.codec.toUpperCase()}${['hevc', 'hvc1', 'hev1', 'h265'].includes(e.codec) ? ' (H.265)' : ''}` : '—'} />
+          <Row k="Frames skipped (AI busy)" v={e.frames_dropped ?? 0} />
           <Row k="Libraries" v={Object.entries(d.versions || {}).map(([k, v]) => `${k} ${v}`).join(' · ')} />
           <Row k="Vehicles tracked now" v={`${e.tracks_now} (detections: ${e.detections_now})`} />
           <Row k="Detect classes" v={(e.vehicle_classes || []).join(', ')} />

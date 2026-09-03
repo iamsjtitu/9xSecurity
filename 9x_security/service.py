@@ -22,7 +22,9 @@ import auth
 import config
 import updater
 from database import EventDB
-from engine import SecurityEngine, clog, normalize_rtsp_url, open_stream, probe_rtsp
+from engine import (
+    LatestFrameReader, SecurityEngine, clog, codec_name, normalize_rtsp_url, open_stream, probe_rtsp,
+)
 from whatsapp import WhatsAppNotifier
 
 PORT = int(os.environ.get("ENGINE_PORT", "8971"))
@@ -71,6 +73,8 @@ class Worker:
         self.ai_errors = 0
         self._last_err_log = 0.0
         self.last_event = None    # latest captured event (for the UI capture toast)
+        self.codec = ""           # stream codec (hevc/h264/...) for diagnostics
+        self.frames_dropped = 0   # live frames skipped because the AI was busy (normal, keeps lag ~0)
 
     def _on_event(self, ev):
         self.last_event = {
@@ -155,6 +159,22 @@ class Worker:
             pass
         return frame
 
+    def _open(self, source, live):
+        """open_stream + (for live RTSP) a latest-frame reader so the decoder never
+        waits for the AI. Records the stream codec for diagnostics."""
+        cap = open_stream(source, lambda: self._running)
+        if cap is None:
+            return None
+        self.codec = codec_name(cap)
+        self.frames_dropped = 0
+        if live:
+            cap = LatestFrameReader(cap)
+        clog(f"svc: source opened codec={self.codec or 'unknown'} live={live}")
+        if self.codec in ("hevc", "hvc1", "hev1", "h265"):
+            clog("svc: HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 "
+                 "ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein")
+        return cap
+
     def _ai_selftest(self):
         """Run real inferences right after model load so a broken torch/
         torchvision build shows up immediately (not silently per frame).
@@ -200,8 +220,9 @@ class Worker:
 
         url = cfg.get("rtsp_url", "").strip()
         source = normalize_rtsp_url(url) if url else 0
+        live = isinstance(source, str) and source.lower().startswith("rtsp")
         self.status = "Camera se connect ho raha hai..."
-        cap = open_stream(source, lambda: self._running)
+        cap = self._open(source, live)
         if cap is None or not cap.isOpened():
             if cap is not None:
                 cap.release()
@@ -224,7 +245,7 @@ class Worker:
                     self.status = "Stream toota — dobara connect ho raha hai..."
                     clog("svc: stream lost, reconnecting (watchdog)")
                     cap.release()
-                    cap = open_stream(source, lambda: self._running)
+                    cap = self._open(source, live)
                     if cap is None:
                         break
                     if not paused:
@@ -236,6 +257,7 @@ class Worker:
             fail = 0
             last_ok = time.time()
             self.last_frame_ts = last_ok
+            self.frames_dropped = getattr(cap, "dropped", 0)
             small = cv2.resize(frame, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
             live_cfg = self.engine.cfg if self.engine else cfg
             capture_on = (not live_cfg.get("capture_schedule_enabled")) or config.in_time_window(
@@ -345,6 +367,8 @@ def state(request: Request):
         "ai_loaded": worker.engine is not None,
         "ai_error": worker.ai_error,
         "ai_ms": round(worker.ai_ms) if worker.ai_ms is not None else None,
+        "codec": worker.codec,
+        "frames_dropped": worker.frames_dropped,
         "last_event": worker.last_event,
         "update_available": _update_info["available"],
         "update_latest": _update_info["latest"],
@@ -657,6 +681,8 @@ def diagnostics(request: Request):
             "ai_ms": round(worker.ai_ms) if worker.ai_ms is not None else None,
             "ai_frames": worker.ai_frames,
             "ai_errors": worker.ai_errors,
+            "codec": worker.codec,
+            "frames_dropped": worker.frames_dropped,
             "capture_paused": worker.capture_paused,
             "tracks_now": len(eng.tracker.tracks) if eng else 0,
             "detections_now": len(eng.last_dets) if eng else 0,

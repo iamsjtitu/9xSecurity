@@ -537,6 +537,22 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   yolov8s 134 ms, options API, UI select verified.
 - NOTE test_engine.py globally patches whatsapp.requests.post; test_wa_groups fixture restores it.
 
+## Implemented (update 2026-06 #33) — Blurry-every-2s video / HEVC decode errors (testing agent iteration_17: ALL PASS)
+- USER: pasted '[hevc] Could not find ref with POC …' + 'video har 1-2 sec me dhundla'. Also shared
+  wa_log showing group-text/group-image status 200 → WhatsApp GROUP alerts confirmed working live.
+- ROOT CAUSE: synchronous cap.read() in the worker; while YOLO ran (150-300 ms) the decoder stalled →
+  camera/ffmpeg dropped packets → missing HEVC refs → smeared frames + growing lag.
+- FIX: engine.LatestFrameReader (bg thread decodes continuously, AI gets NEWEST frame only,
+  .dropped/.decoded counters, read(timeout), get(), release joins thread). Worker._open(source,
+  live) wraps only RTSP sources (files keep every frame → E2E tests deterministic). FFMPEG_OPTS +
+  'fflags;discardcorrupt'; FFmpegPipeSource '-fflags +discardcorrupt'. codec_name(cap) via
+  CAP_PROP_FOURCC → worker.codec; frames_dropped tracked; both in /api/state + diagnostics;
+  Diagnostics rows 'Camera codec' / 'Frames skipped (AI busy)' + amber HEVC hint (diag-hevc-hint:
+  use H.264 or sub-stream /Streaming/Channels/102, subtype=1). camera_log 'source opened codec=…'.
+- Tests: test_live_reader.py 5/5; test_live_e2e.py (full Worker loop, paced 12-fps fake 'hevc'
+  cam through the reader, real YOLO: exit → wait → re-entry = 2 events, ai_error ''). iteration_17
+  green (pytest 13/13, file-source regression, Diagnostics UI). Real RTSP validation = user.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

@@ -343,6 +343,26 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Verified: paused frame has 3300+ yellow line pixels via /api/frame; chip + canvas line
   confirmed in Playwright screenshot; line set via /api/line reflects immediately.
 
+## Implemented (update 2026-06 #23) — Inbuilt (permanent) GitHub update token (self-tested: 3/3 pytest + UI screenshot)
+- User: token har install me daalna padta tha → ab CI build me bake hota hai.
+  • updater.py: DEFAULT_TOKEN = "" (sed anchor) + effective_token(cfg_token) → Settings token
+    (override) > inbuilt token > None. service update/check + update/apply use it.
+  • Workflow new step "Bake inbuilt GitHub update token": reads repo secret UPDATE_TOKEN;
+    missing → ::warning (build continues, old behavior); present → verifies against
+    api.github.com/repos/$GITHUB_REPOSITORY (non-200 → ::error, build fails with Hindi hint);
+    OK → sed-bakes into updater.py before PyInstaller. Secrets are auto-masked in logs.
+  • /api/settings returns gh_token_builtin; Settings > Updates shows green chip
+    (data-testid gh-token-builtin-chip) "token inbuilt hai" or the how-to hint
+    (gh-token-missing-hint) naming the UPDATE_TOKEN secret; token field becomes optional override.
+  • "No release" message now explains UPDATE_TOKEN secret path.
+- USER ONE-TIME SETUP: GitHub repo → Settings → Secrets and variables → Actions → New repository
+  secret → Name UPDATE_TOKEN, Value = Fine-grained PAT (Repository access: only this repo;
+  Permissions → Contents: Read-only; long expiry). Then Save to GitHub → new build → install once.
+- Security note (told user): baked token is extractable from the installer; keep it read-only,
+  single-repo scoped. Alternative chosen too (user "Dono"): making repo public needs no token.
+- Tests: test_builtin_token.py 3/3 (precedence, sed-bake simulation, service wiring + flag).
+- Quick detection ON/OFF dashboard toggle: user said "ye rehne do" — NOT built (dropped).
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

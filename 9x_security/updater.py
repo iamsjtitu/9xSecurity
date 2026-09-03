@@ -18,6 +18,12 @@ import requests
 
 APP_VERSION = "1.0.0"
 DEFAULT_REPO = ""  # baked in at CI build time (owner/name)
+DEFAULT_TOKEN = ""  # baked in at CI build time from repo secret UPDATE_TOKEN (private repo)
+
+
+def effective_token(cfg_token=None):
+    """User-entered token (Settings) overrides the build-time inbuilt token."""
+    return (cfg_token or "").strip() or DEFAULT_TOKEN.strip() or None
 
 
 def _api(url, token=None):

@@ -242,12 +242,24 @@ export default function SettingsPage({ showToast }) {
         {tab === 'updates' && (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-slate-900">Updates</h3>
-            <p className="text-sm text-slate-500">
-              Koi link/repo daalne ki zaroorat nahi — bas check karein. Repo PRIVATE ho to GitHub token daalein
-              (github.com/settings/tokens → Fine-grained → Contents: Read-only).
-            </p>
+            {s.gh_token_builtin ? (
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"
+                data-testid="gh-token-builtin-chip">
+                ✔ GitHub token software me <b>inbuilt</b> hai — kisi bhi install me token daalne ki zaroorat nahi.
+                Bas "Check for Updates" dabayein.
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500" data-testid="gh-token-missing-hint">
+                Koi link/repo daalne ki zaroorat nahi — bas check karein. Repo PRIVATE ho to token permanent
+                inbuilt karne ke liye GitHub repo → Settings → Secrets and variables → Actions me
+                <code className="mx-1 rounded bg-slate-100 px-1">UPDATE_TOKEN</code> secret add karein
+                (Fine-grained token, Contents: Read-only) aur dobara build karein. Ya neeche token daalein.
+              </p>
+            )}
             <div>
-              <label className="label">GitHub Token (sirf private repo ke liye, optional)</label>
+              <label className="label">
+                GitHub Token ({s.gh_token_builtin ? 'optional override — inbuilt token ke upar' : 'sirf private repo ke liye, optional'})
+              </label>
               <input type="password" className="input" value={s.gh_token || ''}
                 placeholder={s.gh_token_set ? '•••• saved hai — badalne ke liye naya daalein' : ''}
                 onChange={(e) => set('gh_token', e.target.value)} data-testid="gh-token-input" />

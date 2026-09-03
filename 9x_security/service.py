@@ -430,6 +430,7 @@ def get_settings(request: Request):
         out[k] = ""
     out["auth_user"] = cfg.get("auth_user", "admin")
     out["retention_days"] = int(cfg.get("retention_days", 7) or 7)
+    out["gh_token_builtin"] = bool(updater.DEFAULT_TOKEN)
     return out
 
 
@@ -533,7 +534,7 @@ def update_check(request: Request):
     _check(request)
     cfg = _cfg()
     repo = updater.DEFAULT_REPO or cfg.get("github_repo", "").strip()
-    token = (cfg.get("gh_token") or "").strip() or None
+    token = updater.effective_token(cfg.get("gh_token"))
     if not repo:
         return {"current": updater.APP_VERSION, "available": False,
                 "message": "Update source sirf installed build me set hota hai (dev mode)."}
@@ -542,9 +543,14 @@ def update_check(request: Request):
     except Exception as e:
         raise HTTPException(502, str(e))
     if not tag:
+        hint = ("Token software me inbuilt hai — GitHub par release publish hui hai ya nahi, "
+                "aur repo secret UPDATE_TOKEN ka access check karein."
+                if updater.DEFAULT_TOKEN else
+                "Repo PRIVATE ho to GitHub repo secret UPDATE_TOKEN set karke dobara build "
+                "karein (token app me inbuilt ho jayega), ya Settings > Updates me token daalein, "
+                "ya repo public karein.")
         return {"current": updater.APP_VERSION, "available": False,
-                "message": ("GitHub par koi release nahi dikh rahi. Repo PRIVATE ho to "
-                            "Settings > Updates me GitHub token daalein, ya repo public karein.")}
+                "message": "GitHub par koi release nahi dikh rahi. " + hint}
     if not updater.is_newer(tag):
         return {"current": updater.APP_VERSION, "latest": tag, "available": False,
                 "message": f"Aap latest version par hain (v{updater.APP_VERSION})."}
@@ -560,7 +566,7 @@ def update_apply(request: Request):
 
     cfg = _cfg()
     repo = updater.DEFAULT_REPO or cfg.get("github_repo", "").strip()
-    token = (cfg.get("gh_token") or "").strip() or None
+    token = updater.effective_token(cfg.get("gh_token"))
     tag, asset, _page = updater.check_latest(repo, token=token)
     if not tag or not asset:
         raise HTTPException(404, "Release/asset nahi mila.")

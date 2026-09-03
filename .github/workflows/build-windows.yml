@@ -55,6 +55,23 @@ jobs:
           grep "^APP_VERSION\|^DEFAULT_REPO" updater.py
           echo "version=$V" >> "$GITHUB_OUTPUT"
 
+      - name: Bake inbuilt GitHub update token (repo secret UPDATE_TOKEN)
+        shell: bash
+        env:
+          UPDATE_TOKEN: ${{ secrets.UPDATE_TOKEN }}
+        run: |
+          if [ -z "$UPDATE_TOKEN" ]; then
+            echo "::warning::Repo secret UPDATE_TOKEN set nahi hai — private repo par in-app updates ke liye user ko Settings > Updates me token daalna padega. Set karein: repo Settings > Secrets and variables > Actions > New repository secret > UPDATE_TOKEN"
+            exit 0
+          fi
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $UPDATE_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$GITHUB_REPOSITORY")
+          if [ "$CODE" != "200" ]; then
+            echo "::error::UPDATE_TOKEN is repo ko access nahi kar pa raha (HTTP $CODE). Fine-grained token banayein: Repository access = ye repo, Permissions > Contents: Read-only. Expiry check karein."
+            exit 1
+          fi
+          sed -i "s|^DEFAULT_TOKEN = .*|DEFAULT_TOKEN = \"$UPDATE_TOKEN\"  # baked|" updater.py
+          grep -q "^DEFAULT_TOKEN = \"$UPDATE_TOKEN\"" updater.py && echo "Inbuilt update token baked OK (verified against $GITHUB_REPOSITORY)"
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip

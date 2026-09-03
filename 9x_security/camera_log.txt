@@ -257,3 +257,11 @@
 2026-09-03T07:28:29 | svc: stream lost, reconnecting (watchdog)
 2026-09-03T07:28:41 | svc: stream lost, reconnecting (watchdog)
 2026-09-03T07:28:54 | svc: stream lost, reconnecting (watchdog)
+2026-09-03T07:39:19 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-03T07:39:19 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)
+2026-09-03T07:40:10 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-03T07:40:10 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)
+2026-09-03T07:41:44 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-03T07:41:44 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)
+2026-09-03T07:42:16 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-03T07:42:16 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)

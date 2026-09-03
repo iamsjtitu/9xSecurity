@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MessageCircle, User, Lock, Download, Send, Clock, Activity } from 'lucide-react';
+import { MessageCircle, User, Lock, Download, Send, Clock, Activity, Eye, EyeOff } from 'lucide-react';
 import { api } from '../api';
 import DiagnosticsTab from './DiagnosticsTab.jsx';
 import UpdateProgress from './UpdateProgress.jsx';
@@ -19,6 +19,7 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
   const [busy, setBusy] = useState(false);
   const [updInfo, setUpdInfo] = useState(null);
   const [job, setJob] = useState(null);
+  const [showKey, setShowKey] = useState(true); // user wants the WhatsApp key always visible
 
   useEffect(() => {
     api('/api/settings').then(setS).catch((e) => showToast(e.message, 'error'));
@@ -141,9 +142,20 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
             </label>
             <div>
               <label className="label">API Key (Bearer)</label>
-              <input type="password" className="input" value={s.wa_api_key || ''}
-                placeholder={s.wa_api_key_set ? '•••• saved hai — badalne ke liye naya daalein' : 'wa9x_...'}
-                onChange={(e) => set('wa_api_key', e.target.value)} data-testid="wa-api-key-input" />
+              <div className="flex gap-2">
+                <input type={showKey ? 'text' : 'password'} className="input font-mono flex-1" value={s.wa_api_key || ''}
+                  placeholder="wa9x_... (wa.9x.design → Dashboard → API Key)" spellCheck={false} autoComplete="off"
+                  onChange={(e) => set('wa_api_key', e.target.value)} data-testid="wa-api-key-input" />
+                <button type="button" className="btn-ghost !px-3" onClick={() => setShowKey((v) => !v)}
+                  title={showKey ? 'Hide key' : 'Show key'} data-testid="wa-api-key-toggle">
+                  {showKey ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+              <p className="mt-1 text-xs" data-testid="wa-api-key-status">
+                {s.wa_api_key_set && (s.wa_api_key || '').trim()
+                  ? <span className="text-emerald-700">✔ Key saved hai ({(s.wa_api_key || '').trim().length} characters) — upar poori key dikh rahi hai</span>
+                  : <span className="text-rose-600">Koi key saved nahi — wa.9x.design ke Dashboard se API Key copy karke yahan paste karein, phir Save</span>}
+              </p>
             </div>
             <div>
               <label className="label">Recipients (ek number per line, 91XXXXXXXXXX)</label>

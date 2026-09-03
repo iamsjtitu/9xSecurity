@@ -471,6 +471,19 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Verified: bus video crossing → toast "EXIT — BUS CAPTURED · 11:40:45 AM" with thumbnail within
   the 2.5s state poll; close works; no toast on fresh login.
 
+## Implemented (update 2026-06 #29) — WhatsApp API key always visible + actionable send errors (testing agent iteration_15: ALL PASS)
+- USER: masked key field → couldn't verify saved key → WhatsApp "failed".
+- GET /api/settings returns wa_api_key in plain text (+ wa_api_key_set); gh_token &
+  wa_account_password remain write-only (_VISIBLE_SECRETS). POST strips whitespace/newlines from
+  secrets; empty wa_api_key now really clears (visible), empty write-only secrets keep old value.
+- UI: text input visible by default + eye toggle (wa-api-key-toggle), status line
+  (wa-api-key-status) '✔ Key saved hai (N characters)' / 'Koi key saved nahi…'.
+- whatsapp._explain: 401 → 'API key galat/expire — Dashboard > API Key se copy', 403 → QR/session,
+  404/429/5xx hints + provider snippet; transport → 'Internet/connection error: …';
+  _is_network_error ignores 'HTTP …' strings (provider answered ≠ offline).
+- Verified live against wa.9x.design: bad key → 'HTTP 401: API key galat/expire hai … [{"detail":"Invalid API token"}]'.
+- Tests: test_wa_key.py 2/2; iteration_15 backend 7/7 + full UI flow green.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

@@ -1,0 +1,23 @@
+{
+  "summary": "Iteration 15 — Backend + Frontend testing of WA API Key visibility fix (Settings > WhatsApp). All 7 pytest cases passed and full UI flow (login -> force-change handling -> Settings > WhatsApp tab -> visible text field -> eye toggle -> save -> reload -> value visible -> WA test send -> clear -> reload) succeeded. Backend GET/POST /api/settings correctly returns wa_api_key in plain text with wa_api_key_set flag; gh_token & wa_account_password remain write-only. Whitespace/newlines are stripped from secrets on save. Empty POST for wa_api_key clears it (visible-secret rule); empty POST for gh_token preserves existing value (write-only rule). WhatsApp bad-key test returned Hinglish HTTP 401 explanation exactly as designed: '919999999999: FAILED ❌ (HTTP 401: API key galat/expire hai — wa.9x.design Dashboard > API Key se dobara copy karein [{\"detail\":\"Invalid API token\"}])'. UI status line correctly shows '✔ Key saved hai (16 characters) — upar poori key dikh rahi hai' when saved and 'Koi key saved nahi — ...' when empty. Regression tabs (Timing/Updates/Diagnostics) render without errors. Original config state restored at end (password=9xsecurity, wa_api_key='', gh_token='').",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_wa_key_visibility.py",
+    "/app/test_reports/pytest/wa_key_visibility.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Force-password-change UI is triggered on first login even after backend already accepts a new password via API — could cause a subtle loop where restoring password to '9xsecurity' via API immediately re-triggers force-change on next UI login. Not blocking, but worth reviewing whether the 'must_change' flag is based on password value (default seed) vs. an explicit flag.",
+    "gh_token has no explicit clear endpoint (empty POST preserves it by design). Consider a dedicated DELETE /api/settings/gh_token or an explicit null sentinel for clarity — testers currently have to edit config.json to reset it.",
+    "/app/9x_security/service.py is 904 lines — nearing the 700-line split threshold in code-review guidelines; consider extracting settings/whatsapp/updater route groups into modules."
+  ],
+  "updated_files": ["/app/backend/tests/test_wa_key_visibility.py"],
+  "success_rate": {"backend": "100% (7/7)", "frontend": "100% (all assertions passed)"},
+  "test_credentials": "admin / 9xsecurity (restored). Force-change flow used Temp123456 then restored via POST /api/settings {new_password:'9xsecurity'}.",
+  "seed_data_creation": "None. Test writes were undone: wa_api_key cleared via API; gh_token was set to 'ghp_test' during a persistence test and restored to '' via direct config.json edit followed by an API save to refresh the in-memory cfg.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Engine service runs on 127.0.0.1:8971 outside supervisor (started via `cd /app/9x_security && nohup python service.py &`). Config is at /app/9x_security/config.json. WA test to wa.9x.design succeeded in reaching the provider and got HTTP 401 with Hinglish hint — container HAS outbound internet. Force-change UI form is triggered when logging in with the default seed password; the API login itself always works. Do not edit config.json while service is running without triggering a subsequent /api/settings POST to force in-memory reload.",
+  "rca of the issue": "Original bug (user Hinglish): saved WA API key was masked/empty after save so user couldn't confirm the value → sends failed. Fix in service.py exposes wa_api_key as a visible secret (returned plain in GET), strips whitespace on save, and lets empty explicitly clear it while other secrets stay write-only. Frontend SettingsPage.jsx now uses type=text by default with an eye toggle and status line. WhatsApp notifier explains HTTP status codes in Hinglish. All verified in this iteration."
+}

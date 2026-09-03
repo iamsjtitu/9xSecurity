@@ -18,7 +18,9 @@
   "wa_enabled": false,
   "wa_base_url": "https://wa.9x.design",
   "wa_api_key": "",
-  "wa_recipients": [],
+  "wa_recipients": [
+    "919999999999"
+  ],
   "wa_send_image": true,
   "wa_schedule_enabled": false,
   "wa_start": "18:00",
@@ -31,8 +33,8 @@
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "0e7c0aa342d0d454c5cc1bbca3e41e3f",
-  "auth_hash": "289c67550a27dc23197f947c25c83bd4bbb14fcbb172a6dfe312714c75d2b42a",
+  "auth_salt": "86d04ef62ae453177ec694be2d1bef6f",
+  "auth_hash": "82081670ac80168f6f20dc1d23e2881ca72f34dc476d3ba5dd51222d69e55da8",
   "github_repo": "",
   "gh_token": ""
 }

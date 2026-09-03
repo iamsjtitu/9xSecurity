@@ -99,6 +99,8 @@ class WhatsAppNotifier:
     @staticmethod
     def _is_network_error(err):
         e = str(err).lower()
+        if e.startswith("http "):
+            return False  # provider answered: not a transport problem
         return any(s in e for s in (
             "connection", "timed out", "timeout", "resolve", "network",
             "unreachable", "getaddrinfo", "refused",
@@ -144,6 +146,21 @@ class WhatsAppNotifier:
     def _headers(self):
         return {"Authorization": f"Bearer {self.api_key}"}
 
+    @staticmethod
+    def _explain(r):
+        """Human-readable (Hinglish) reason for a provider response."""
+        if r.ok:
+            return f"HTTP {r.status_code}"
+        hints = {
+            401: "API key galat/expire hai — wa.9x.design Dashboard > API Key se dobara copy karein",
+            403: "Access denied — WhatsApp session connected nahi (dashboard me QR scan karein) ya key galat",
+            404: "Number/endpoint nahi mila — number 91XXXXXXXXXX format me hai?",
+            429: "Bahut zyada messages — thodi der baad try karein",
+        }
+        hint = hints.get(r.status_code, "Provider error — thodi der baad try karein" if r.status_code >= 500 else "")
+        snippet = " ".join(str(r.text or "")[:120].split())
+        return f"HTTP {r.status_code}: {hint}" + (f" [{snippet}]" if snippet else "")
+
     def _send_text(self, to, text):
         try:
             r = requests.post(
@@ -153,10 +170,10 @@ class WhatsAppNotifier:
                 timeout=20,
             )
             self._log(to, "text", r.status_code, r.text)
-            return r.ok, f"HTTP {r.status_code}"
+            return r.ok, self._explain(r)
         except Exception as e:
             self._log(to, "text-error", "-", str(e))
-            return False, str(e)
+            return False, f"Internet/connection error: {e}"
 
     def _send_image(self, to, caption, path):
         try:
@@ -175,7 +192,7 @@ class WhatsAppNotifier:
                 timeout=45,
             )
             self._log(to, "image", r.status_code, r.text)
-            return r.ok, f"HTTP {r.status_code}"
+            return r.ok, self._explain(r)
         except Exception as e:
             self._log(to, "image-error", "-", str(e))
             return False, str(e)

@@ -492,6 +492,9 @@ _SETTINGS_KEYS = (
     "auto_delete_enabled",
 )
 _SECRET_KEYS = ("wa_api_key", "gh_token", "wa_account_password")
+# The WhatsApp API key stays visible in Settings (user request: hidden key made it impossible
+# to verify what is saved → failed sends). Other secrets remain write-only.
+_VISIBLE_SECRETS = ("wa_api_key",)
 
 
 @app.get("/api/settings")
@@ -499,9 +502,10 @@ def get_settings(request: Request):
     _check(request)
     cfg = _cfg()
     out = {k: cfg.get(k) for k in _SETTINGS_KEYS}
-    for k in _SECRET_KEYS:  # never send stored secrets back to the UI
+    for k in _SECRET_KEYS:
         out[f"{k}_set"] = bool(cfg.get(k))
-        out[k] = ""
+        if k not in _VISIBLE_SECRETS:
+            out[k] = ""  # never send write-only secrets back to the UI
     out["auth_user"] = cfg.get("auth_user", "admin")
     out["retention_days"] = int(cfg.get("retention_days", 7) or 7)
     out["gh_token_builtin"] = bool(updater.DEFAULT_TOKEN)
@@ -514,8 +518,12 @@ def save_settings(body: dict, request: Request):
     cfg = _cfg()
     for k in _SETTINGS_KEYS:
         if k in body:
-            if k in _SECRET_KEYS and not str(body[k]).strip():
-                continue  # empty = keep existing secret
+            if k in _SECRET_KEYS:
+                val = str(body[k] or "").strip()  # pasted keys often carry spaces/newlines
+                if not val and k not in _VISIBLE_SECRETS:
+                    continue  # empty = keep existing write-only secret
+                cfg[k] = val
+                continue
             cfg[k] = body[k]
     if body.get("auth_user"):
         cfg["auth_user"] = str(body["auth_user"]).strip() or "admin"

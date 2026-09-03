@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Lock, User } from 'lucide-react';
 import { api, setToken } from '../api';
+import BrandFooter from './BrandFooter.jsx';
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('admin');
@@ -67,9 +68,10 @@ export default function Login({ onLogin }) {
             AI vehicle detection &middot; Number plate &middot; WhatsApp alerts &middot; Snapshots
           </p>
         </div>
-        <div className="text-xs text-slate-500">© {new Date().getFullYear()} 9x Security</div>
+        <BrandFooter />
       </div>
-      <div className="flex-1 flex items-center justify-center p-8">
+      <div className="flex-1 flex flex-col items-center justify-center p-8 relative">
+        <div className="lg:hidden absolute bottom-4 left-0 right-0 flex justify-center"><BrandFooter dark={false} className="text-center" /></div>
         {mustChange ? (
           <form onSubmit={changePassword} className="w-full max-w-sm" data-testid="force-change-form">
             <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Naya password set karein</h2>

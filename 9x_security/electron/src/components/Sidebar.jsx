@@ -1,5 +1,6 @@
 import React from 'react';
 import { LayoutDashboard, Settings, LogOut, ShieldCheck, Cctv, Inbox, Download } from 'lucide-react';
+import BrandFooter from './BrandFooter.jsx';
 
 export default function Sidebar({ page, setPage, version, connected, outboxPending = 0, updateLatest = '', updateJob, onUpdateClick, onLogout }) {
   const jobState = updateJob?.state;
@@ -77,6 +78,7 @@ export default function Sidebar({ page, setPage, version, connected, outboxPendi
           <LogOut size={14} /> Logout
         </button>
         <div className="text-[10px] text-slate-600 font-mono">v{version}</div>
+        <BrandFooter className="pt-2 border-t border-slate-800" />
       </div>
     </aside>
   );

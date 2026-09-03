@@ -484,6 +484,12 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Verified live against wa.9x.design: bad key → 'HTTP 401: API key galat/expire hai … [{"detail":"Invalid API token"}]'.
 - Tests: test_wa_key.py 2/2; iteration_15 backend 7/7 + full UI flow green.
 
+## Implemented (update 2026-06 #30) — Brand footer (screenshot-verified)
+- BrandFooter.jsx (testids brand-footer / brand-copyright / brand-designer / brand-phone):
+  "© <year> 9x Security. All rights reserved." · "Designed by : 9x.design" (link) ·
+  "Mobile No: 7587922222" (tel link). Shown at sidebar bottom (all pages) and login left panel
+  (small screens: centered under the form). BRAND constant holds designer/url/phone.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

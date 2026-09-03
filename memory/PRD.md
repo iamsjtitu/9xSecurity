@@ -553,6 +553,24 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   cam through the reader, real YOLO: exit → wait → re-entry = 2 events, ai_error ''). iteration_17
   green (pytest 13/13, file-source regression, Diagnostics UI). Real RTSP validation = user.
 
+## Implemented (update 2026-06 #34) — Sub-stream one-click switch + Worker restart race fix (testing agent iteration_18: ALL PASS)
+- engine.substream_url(url): Hikvision 101→102 / legacy main→sub av_stream, Dahua/CP Plus
+  realmonitor subtype=1 (add if missing), Reolink _main→_sub, Uniview video1→video2, /stream1→
+  /stream2, generic main→sub; '' when unknown or already sub. HEVC_CODECS constant.
+- /api/state: substream_url (only when connected AND codec is HEVC) + rtsp_url_main.
+  POST /api/camera/substream (saves rtsp_url_main, switches, worker.start(), ptz cache reset) /
+  POST /api/camera/mainstream (revert). camera_log 'switched to sub-stream' / 'switched back'.
+- UI CameraPanel: amber chip substream-chip + substream-switch-btn (video ke upar, bottom-left),
+  mainstream-revert-btn (bottom-right) while on sub-stream; URL input follows; toasts mask creds.
+- RACE FIX (pre-existing, found here): Worker.start() re-set _running=True before the old loop
+  noticed stop() → two capture loops (double events, camera session leak). Now _gen counter:
+  loops run while _alive(gen); start() joins the previous thread ≤3s; stale loops don't write
+  frames/status. test_worker_restart.py covers it.
+- test_live_e2e now uses detector_model 'fast' (CPU-contention flakiness seen when two YOLO
+  services ran at once).
+- Tests: test_substream.py 17/17, test_worker_restart 1/1; iteration_18 green (backend fake-HEVC
+  flow: connect→suggest→switch→400 on repeat→revert; UI chip/toast/URL/revert).
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

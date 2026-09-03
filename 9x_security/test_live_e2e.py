@@ -75,6 +75,7 @@ def test_worker_live_loop_logs_both_crossings(monkeypatch):
     tmp = tempfile.mkdtemp()
     db = EventDB(db_path=os.path.join(tmp, "e.db"))
     cfg = {**config.DEFAULTS, "rtsp_url": "rtsp://fake-cam/live", "enable_plate": False,
+           "detector_model": "fast",  # loop mechanics under test, keep CPU low for CI
            "line": {"x1": 0.05, "y1": 0.5, "x2": 0.95, "y2": 0.5}, "wa_enabled": False}
     monkeypatch.setattr(service, "_cfg", lambda: dict(cfg))
     monkeypatch.setattr(service, "_db", db)

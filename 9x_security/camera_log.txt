@@ -297,3 +297,5 @@
 2026-09-03T15:13:23 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)
 2026-09-03T15:57:14 | svc: starting on 127.0.0.1:8971 v1.0.0
 2026-09-03T15:57:14 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)
+2026-09-03T17:12:09 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-03T17:12:09 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)

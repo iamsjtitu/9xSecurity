@@ -1,0 +1,29 @@
+{
+  "summary": "Sub-stream Auto Switch feature: pytest (23/23 passed), backend live flow with fake-HEVC patched service (all steps passed), and UI flow (chip appear→switch→toast→URL /102→chip gone→revert-btn appear→revert→URL /101→chip returns) all passed. Cleanup completed: patched service killed, files reverted via git, normal service restarted, /api/health ok, admin/9xsecurity login works, events table empty (0 rows).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/9x_security/test_substream.py",
+    "/app/9x_security/test_worker_restart.py",
+    "/app/9x_security/test_live_reader.py"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Note: system currently has must_change_password=true flag set on next admin login (pre-existing, likely leftover from a prior test iteration). POST /api/settings {new_password} does not appear to clear the must_change_password flag when setting the same password; consider clearing on any password set. Not caused by this iteration but visible via /api/login response."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin / 9xsecurity (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None (events.db remains 0 rows).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Sub-stream Auto Switch feature verified end-to-end. Pytest suite: cd /app/9x_security && python -m pytest -q test_substream.py test_worker_restart.py test_live_reader.py -> 23 passed. Backend flow uses patched service (open_stream monkeypatched) at 127.0.0.1:8971. UI selectors used: rtsp-url-input, camera-connect-btn (NOT connect-btn), substream-chip, substream-switch-btn, mainstream-revert-btn, toast, login-username/password/btn, force-new-password/force-confirm-password/force-change-btn. If UI forces password change to Temp123456, restore via POST /api/settings {new_password:'9xsecurity'} using token from POST /api/login {admin, Temp123456}. Note: must_change_password flag lingers on login response even after resetting to 9xsecurity — not caused by feature under test.",
+  "rca of the issue": "N/A — all tests passed."
+}

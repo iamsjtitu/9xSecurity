@@ -123,6 +123,52 @@ def codec_name(cap):
         return ""
 
 
+HEVC_CODECS = ("hevc", "hvc1", "hev1", "h265")
+
+
+def substream_url(url):
+    """Best-effort sub-stream (lighter, usually H.264) URL for common camera brands.
+    Returns '' when the URL already looks like a sub-stream or the brand is unknown."""
+    u = (url or "").strip()
+    if not u:
+        return ""
+    lower = u.lower()
+    # Hikvision / Ezviz ISAPI: /Streaming/Channels/101 -> 102 (x01 main -> x02 sub)
+    m = re.search(r"(/streaming/channels/)(\d+?)(01)(\b|/|\?|$)", lower)
+    if m:
+        s, e = m.start(3), m.end(3)
+        return u[:s] + "02" + u[e:]
+    if re.search(r"/streaming/channels/\d*02(\b|/|\?|$)", lower):
+        return ""
+    # Hikvision legacy: /h264/ch1/main/av_stream -> /h264/ch1/sub/av_stream
+    if "/main/av_stream" in lower:
+        i = lower.index("/main/av_stream")
+        return u[:i] + "/sub/av_stream" + u[i + len("/main/av_stream"):]
+    # Dahua / CP Plus / Amcrest: cam/realmonitor?channel=1&subtype=0 -> subtype=1
+    if "realmonitor" in lower:
+        if re.search(r"subtype=1(\b|&|$)", lower):
+            return ""
+        if re.search(r"subtype=\d", lower):
+            return re.sub(r"(?i)subtype=\d", "subtype=1", u)
+        return u + ("&" if "?" in u else "?") + "subtype=1"
+    # Reolink: h264Preview_01_main -> h264Preview_01_sub
+    if "preview_" in lower and "_main" in lower:
+        return re.sub(r"(?i)_main", "_sub", u, count=1)
+    # Uniview: /media/video1 -> /media/video2
+    m = re.search(r"/media/video1(\b|/|\?|$)", lower)
+    if m:
+        return u[:m.start()] + "/media/video2" + u[m.start() + len("/media/video1"):]
+    # TP-Link Tapo / generic: /stream1 -> /stream2
+    m = re.search(r"/stream1(\b|/|\?|$)", lower)
+    if m:
+        return u[:m.start()] + "/stream2" + u[m.start() + len("/stream1"):]
+    # generic '.../main' or 'main' token
+    m = re.search(r"(?<![a-z])main(?![a-z])", lower)
+    if m and "sub" not in lower:
+        return u[:m.start()] + "sub" + u[m.end():]
+    return ""
+
+
 def redact_url(url):
     """Hide user:pass in URLs before logging."""
     return re.sub(r"//[^/@]*@", "//****@", str(url))

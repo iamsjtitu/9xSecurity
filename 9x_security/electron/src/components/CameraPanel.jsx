@@ -25,6 +25,18 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
     if (!urlTouched.current && state.rtsp_url && !url) setUrl(state.rtsp_url);
   }, [state.rtsp_url]); // eslint-disable-line
 
+  const switchStream = async (path, okMsg) => {
+    try {
+      const r = await api(path, { method: 'POST' });
+      urlTouched.current = false;
+      setUrl(r.url);
+      showToast(`${okMsg}: ${r.url.replace(/\/\/.*@/, '//***@')}`, 'success');
+      refreshState();
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  };
+
   // ---- canvas drawing with digital zoom crop ----
   const draw = useCallback((bmp) => {
     const c = canvasRef.current;
@@ -250,6 +262,31 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
                 AI detection band hai — Settings &gt; Diagnostics me wajah dekhein
                 {state.ai_error ? `: ${String(state.ai_error).slice(0, 90)}` : ''}
               </div>
+            )}
+            {!drawMode && state.substream_url && (
+              <div
+                className="absolute bottom-12 left-3 max-w-[80%] flex items-center gap-2 rounded-md bg-amber-500/95 px-3 py-1.5 text-xs font-semibold text-black"
+                data-testid="substream-chip"
+              >
+                <span>Camera H.265 (HEVC) bhej raha hai — video dhundli/lag ho to halki sub-stream par switch karein</span>
+                <button
+                  className="rounded bg-black/80 px-2 py-1 text-[11px] font-bold text-white hover:bg-black"
+                  onClick={() => switchStream('/api/camera/substream', 'Sub-stream par switch ho gaya')}
+                  data-testid="substream-switch-btn"
+                >
+                  Switch karein
+                </button>
+              </div>
+            )}
+            {!drawMode && state.rtsp_url_main && (
+              <button
+                className="absolute bottom-12 right-3 rounded-md bg-slate-900/80 px-2.5 py-1 text-[11px] font-semibold text-slate-100 hover:bg-slate-900"
+                onClick={() => switchStream('/api/camera/mainstream', 'Main stream wapas')}
+                data-testid="mainstream-revert-btn"
+                title="Sub-stream se main (HD) stream par wapas jayein"
+              >
+                Main stream wapas
+              </button>
             )}
             {stale && (
               <div

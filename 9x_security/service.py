@@ -23,7 +23,8 @@ import config
 import updater
 from database import EventDB
 from engine import (
-    LatestFrameReader, SecurityEngine, clog, codec_name, normalize_rtsp_url, open_stream, probe_rtsp,
+    HEVC_CODECS, LatestFrameReader, SecurityEngine, clog, codec_name, normalize_rtsp_url, open_stream,
+    probe_rtsp, substream_url,
 )
 from whatsapp import WhatsAppNotifier
 
@@ -60,6 +61,7 @@ AUTO_MODEL_MAX_MS = int(os.environ.get("AUTO_MODEL_MAX_MS", "350"))  # accurate 
 class Worker:
     def __init__(self):
         self._running = False
+        self._gen = 0             # run generation: a restarted loop never keeps an old thread alive
         self.thread = None
         self.status = "Idle — camera URL daal kar Connect dabayein"
         self.engine = None
@@ -92,14 +94,22 @@ class Worker:
 
     def start(self):
         self.stop()
+        old = self.thread
+        if old is not None and old.is_alive() and old is not threading.current_thread():
+            old.join(timeout=3)  # let the previous loop release the camera (session limits!)
+        self._gen += 1
         self._running = True
-        self.thread = threading.Thread(target=self._run, daemon=True)
+        self.thread = threading.Thread(target=self._run, args=(self._gen,), daemon=True)
         self.thread.start()
 
     def stop(self):
         self._running = False
+        self._gen += 1  # any older loop exits at its next iteration
         with self._lock:
             self._jpeg = None
+
+    def _alive(self, gen):
+        return self._running and gen == self._gen
 
     def latest(self):
         with self._lock:
@@ -115,15 +125,16 @@ class Worker:
             except Exception:
                 pass
 
-    def _run(self):
+    def _run(self, gen):
         try:
-            self._run_impl()
+            self._run_impl(gen)
         except Exception:
             import traceback
 
             clog("Worker CRASH:\n" + traceback.format_exc())
-            self.status = "ERROR: engine crash — camera_log.txt dekhein"
-            self._running = False
+            if gen == self._gen:
+                self.status = "ERROR: engine crash — camera_log.txt dekhein"
+                self._running = False
 
     def _live_status(self):
         s = "Connected — live monitoring chalu hai"
@@ -159,10 +170,10 @@ class Worker:
             pass
         return frame
 
-    def _open(self, source, live):
+    def _open(self, source, live, gen=None):
         """open_stream + (for live RTSP) a latest-frame reader so the decoder never
         waits for the AI. Records the stream codec for diagnostics."""
-        cap = open_stream(source, lambda: self._running)
+        cap = open_stream(source, (lambda: self._alive(gen)) if gen is not None else (lambda: self._running))
         if cap is None:
             return None
         self.codec = codec_name(cap)
@@ -170,7 +181,7 @@ class Worker:
         if live:
             cap = LatestFrameReader(cap)
         clog(f"svc: source opened codec={self.codec or 'unknown'} live={live}")
-        if self.codec in ("hevc", "hvc1", "hev1", "h265"):
+        if self.codec in HEVC_CODECS:
             clog("svc: HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 "
                  "ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein")
         return cap
@@ -189,7 +200,7 @@ class Worker:
         clog(f"svc: AI self-test OK ({getattr(self.engine.detector, 'model_name', '?')}, {ms:.0f} ms, {len(dets)} dets on blank frame)")
         return ms
 
-    def _run_impl(self):
+    def _run_impl(self, gen):
         cfg = _cfg()
         self.ai_error, self.ai_ms, self.ai_frames, self.ai_errors = "", None, 0, 0
         self.status = "AI model load ho raha hai..."
@@ -222,13 +233,13 @@ class Worker:
         source = normalize_rtsp_url(url) if url else 0
         live = isinstance(source, str) and source.lower().startswith("rtsp")
         self.status = "Camera se connect ho raha hai..."
-        cap = self._open(source, live)
+        cap = self._open(source, live, gen)
         if cap is None or not cap.isOpened():
             if cap is not None:
                 cap.release()
-            if self._running:
+            if self._alive(gen):
                 self.status = "ERROR: Camera nahi khula — 'Test' se step-by-step jaanch karein"
-            self._running = False
+                self._running = False
             return
         self.status = self._live_status()
         clog("svc: streaming started")
@@ -236,8 +247,10 @@ class Worker:
         paused = False
         last_ok = time.time()
         self.last_frame_ts = last_ok
-        while self._running:
+        while self._alive(gen):
             ok, frame = cap.read()
+            if not self._alive(gen):
+                break
             if not ok:
                 fail += 1
                 # watchdog: reconnect on 50 bad reads OR >15s without a good frame
@@ -245,7 +258,7 @@ class Worker:
                     self.status = "Stream toota — dobara connect ho raha hai..."
                     clog("svc: stream lost, reconnecting (watchdog)")
                     cap.release()
-                    cap = self._open(source, live)
+                    cap = self._open(source, live, gen)
                     if cap is None:
                         break
                     if not paused:
@@ -296,12 +309,12 @@ class Worker:
                 # paused / AI off: line phir bhi dikhni chahiye (config feedback)
                 annotated = self._draw_line_only(small, live_cfg)
             okj, buf = cv2.imencode(".jpg", annotated, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
-            if okj:
+            if okj and gen == self._gen:  # a superseded loop must not paint over the new one
                 with self._lock:
                     self._jpeg = buf.tobytes()
             time.sleep(0.01)
         cap.release()
-        if self.status.startswith("Connected") or self.status.startswith("Stream"):
+        if gen == self._gen and (self.status.startswith("Connected") or self.status.startswith("Stream")):
             self.status = "Disconnected."
 
 
@@ -369,6 +382,8 @@ def state(request: Request):
         "ai_ms": round(worker.ai_ms) if worker.ai_ms is not None else None,
         "codec": worker.codec,
         "frames_dropped": worker.frames_dropped,
+        "substream_url": _substream_suggestion(cfg),
+        "rtsp_url_main": cfg.get("rtsp_url_main", ""),
         "last_event": worker.last_event,
         "update_available": _update_info["available"],
         "update_latest": _update_info["latest"],
@@ -392,6 +407,50 @@ def camera_connect(body: dict, request: Request):
     ptz.reset_cache()
     worker.start()
     return {"ok": True}
+
+
+def _substream_suggestion(cfg):
+    """Sub-stream URL to offer when the live stream is H.265 (or '' when n/a)."""
+    if not worker.connected or worker.codec not in HEVC_CODECS:
+        return ""
+    cur = cfg.get("rtsp_url", "").strip()
+    sub = substream_url(cur)
+    return sub if sub and sub != cur else ""
+
+
+@app.post("/api/camera/substream")
+def camera_substream(request: Request):
+    """One-click switch to the camera's lighter sub-stream (keeps the main URL for revert)."""
+    _check(request)
+    cfg = _cfg()
+    cur = cfg.get("rtsp_url", "").strip()
+    sub = substream_url(cur)
+    if not sub or sub == cur:
+        raise HTTPException(400, "Is camera URL ka sub-stream pattern pata nahi — camera app se sub-stream URL lein.")
+    cfg["rtsp_url_main"] = cur
+    cfg["rtsp_url"] = sub
+    config.save_config(cfg)
+    clog(f"svc: switched to sub-stream {sub}")
+    import ptz
+
+    ptz.reset_cache()
+    worker.start()
+    return {"ok": True, "url": sub}
+
+
+@app.post("/api/camera/mainstream")
+def camera_mainstream(request: Request):
+    _check(request)
+    cfg = _cfg()
+    main = (cfg.get("rtsp_url_main") or "").strip()
+    if not main:
+        raise HTTPException(400, "Main stream URL saved nahi hai.")
+    cfg["rtsp_url"] = main
+    cfg["rtsp_url_main"] = ""
+    config.save_config(cfg)
+    clog(f"svc: switched back to main stream {main}")
+    worker.start()
+    return {"ok": True, "url": main}
 
 
 @app.post("/api/camera/disconnect")

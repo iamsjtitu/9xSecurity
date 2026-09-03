@@ -61,6 +61,7 @@ class Worker:
         self._jpeg = None
         self._lock = threading.Lock()
         self.last_frame_ts = 0.0
+        self.capture_paused = False
 
     @property
     def connected(self):
@@ -99,6 +100,18 @@ class Worker:
             clog("Worker CRASH:\n" + traceback.format_exc())
             self.status = "ERROR: engine crash — camera_log.txt dekhein"
             self._running = False
+
+    @staticmethod
+    def _draw_line_only(frame, cfg):
+        try:
+            ln = cfg.get("line") or {}
+            h, w = frame.shape[:2]
+            a = (int(float(ln.get("x1", 0.5)) * w), int(float(ln.get("y1", 0.0)) * h))
+            b = (int(float(ln.get("x2", 0.5)) * w), int(float(ln.get("y2", 1.0)) * h))
+            cv2.line(frame, a, b, (0, 255, 255), 2)
+        except Exception:
+            pass
+        return frame
 
     def _run_impl(self):
         cfg = _cfg()
@@ -144,7 +157,8 @@ class Worker:
                     cap = open_stream(source, lambda: self._running)
                     if cap is None:
                         break
-                    self.status = "Connected — live monitoring chalu hai"
+                    if not paused:
+                        self.status = "Connected — live monitoring chalu hai"
                     fail = 0
                     last_ok = time.time()
                 time.sleep(0.02)
@@ -159,10 +173,12 @@ class Worker:
             )
             if capture_on and paused:
                 paused = False
+                self.capture_paused = False
                 self.status = "Connected — live monitoring chalu hai"
                 clog("svc: capture resumed (schedule)")
             elif not capture_on and not paused:
                 paused = True
+                self.capture_paused = True
                 self.status = (
                     f"Connected — capture PAUSED (schedule {live_cfg.get('capture_start')}"
                     f"-{live_cfg.get('capture_end')} ke bahar), video chalu hai"
@@ -175,9 +191,10 @@ class Worker:
                     import traceback
 
                     clog("svc process_frame error:\n" + traceback.format_exc())
-                    annotated = small
+                    annotated = self._draw_line_only(small, live_cfg)
             else:
-                annotated = small
+                # paused / AI off: line phir bhi dikhni chahiye (config feedback)
+                annotated = self._draw_line_only(small, live_cfg)
             okj, buf = cv2.imencode(".jpg", annotated, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
             if okj:
                 with self._lock:
@@ -242,6 +259,7 @@ def state(request: Request):
         "line": cfg.get("line"),
         "snapshot_dir": config.SNAPSHOT_DIR,
         "outbox_pending": _db.outbox_count(),
+        "capture_paused": worker.capture_paused,
         "frame_age": (
             round(time.time() - worker.last_frame_ts, 1)
             if worker.connected and worker.last_frame_ts

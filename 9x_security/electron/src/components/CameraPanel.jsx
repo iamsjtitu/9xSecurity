@@ -233,6 +233,14 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
             <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
               <span className={`h-2 w-2 rounded-full ${stale ? 'bg-amber-400' : 'bg-[#ef4444] animate-pulse'}`} /> LIVE
             </div>
+            {state.capture_paused && !drawMode && (
+              <div
+                className="absolute top-3 left-3 rounded-md bg-amber-500/90 px-3 py-1.5 text-xs font-semibold text-black"
+                data-testid="detection-paused-chip"
+              >
+                Detection PAUSED — schedule time ke bahar (Settings &gt; Timing me badlein)
+              </div>
+            )}
             {stale && (
               <div
                 className="absolute inset-x-0 top-1/2 -translate-y-1/2 mx-auto w-fit rounded-lg bg-amber-500/95 px-4 py-2 text-sm font-semibold text-black"

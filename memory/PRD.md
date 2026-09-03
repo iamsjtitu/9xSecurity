@@ -332,6 +332,17 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   iteration_14: 10/10 pytest + Playwright 12h/plate UI. Real night-camera accuracy is
   user-device territory: plate needs to be visibly readable in the frame.
 
+## Implemented (update 2026-06 #22) — 'Detection line nahi kaam kar raha' fix (self-tested, verified via API pixel-check + screenshot)
+- ROOT CAUSE (user video at 07:21 AM): when capture schedule window (default 18:00-06:00)
+  is OFF-hours, or AI engine is None, worker served RAW frames — detection line was never
+  drawn and detection silently off with no visual cue.
+- FIX: Worker._draw_line_only() always burns the yellow line onto frames even when paused /
+  engine failed; /api/state exposes capture_paused; amber chip on video
+  (data-testid detection-paused-chip): 'Detection PAUSED — schedule time ke bahar
+  (Settings > Timing me badlein)'. Watchdog reconnect no longer overwrites PAUSED status.
+- Verified: paused frame has 3300+ yellow line pixels via /api/frame; chip + canvas line
+  confirmed in Playwright screenshot; line set via /api/line reflects immediately.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

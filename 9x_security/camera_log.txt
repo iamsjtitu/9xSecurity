@@ -244,3 +244,16 @@
 2026-09-02T14:31:53 | plate OCR: models loaded, ready
 2026-09-02T14:32:20 | svc: starting on 127.0.0.1:8971 v1.0.0
 2026-09-02T14:32:20 | purge: 0 old events removed (retention 7d, cutoff 2026-08-26)
+2026-09-03T07:26:55 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-03T07:26:55 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)
+2026-09-03T07:27:19 | svc: loading AI model
+2026-09-03T07:27:25 | svc: AI model loaded
+2026-09-03T07:27:25 | svc: streaming started
+2026-09-03T07:27:25 | svc: capture paused (schedule)
+2026-09-03T07:27:37 | svc: stream lost, reconnecting (watchdog)
+2026-09-03T07:27:50 | svc: stream lost, reconnecting (watchdog)
+2026-09-03T07:28:03 | svc: stream lost, reconnecting (watchdog)
+2026-09-03T07:28:16 | svc: stream lost, reconnecting (watchdog)
+2026-09-03T07:28:29 | svc: stream lost, reconnecting (watchdog)
+2026-09-03T07:28:41 | svc: stream lost, reconnecting (watchdog)
+2026-09-03T07:28:54 | svc: stream lost, reconnecting (watchdog)

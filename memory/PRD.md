@@ -426,6 +426,40 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   stop/no-total). Playwright: 15%→ stats '126 / 800 MB · 24 MB/s · ~28 sec', badge 12%,
   navigate away/back resumes, cancel → retry button.
 
+## Implemented (update 2026-06 #27) — "v1.0.8 me detection chalta tha, latest me nahi" (self-tested: 6 new + 41 regression pytest + 4 script suites, Playwright)
+- USER: v1.0.8 build captures + WhatsApp OK; v1.0.14/15: no boxes, no snapshots, no WhatsApp;
+  every update wipes settings + asks password again (data-wipe already fixed in #25).
+- ANALYSIS: engine code path unchanged between builds → most probable cause = CI dependency
+  drift: torch/torchvision/pyinstaller were UNPINNED, so later builds pulled newer versions that
+  can break inference inside the frozen exe (classic: torchvision::nms op missing) → model LOADS
+  fine but every process_frame raises → pre-#22 raw frame ("line nahi dikh raha" report), post-#22
+  line-only with no boxes (exactly this report). Status "AI OFF" hint was also overwritten by the
+  watchdog reconnect, so nothing visible told the user.
+- FIXES:
+  • requirements.txt pins torch==2.5.1 + torchvision==0.20.1 (validated in container: YOLO bus
+    detect 171 ms, all suites green); workflow pins pyinstaller==6.11.1, adds
+    --collect-binaries torchvision, prints lib versions, runs a YOLO smoke test pre-build AND a
+    **frozen-exe self-test** (NX_SELFTEST=1 → service.selftest(): real YOLO inference + EasyOCR
+    model load inside dist/9xEngine/9xEngine.exe) — build FAILS if packaged detection is broken,
+    warning if EasyOCR models missing. A broken build can no longer be released.
+  • service.Worker: _ai_selftest() right after model load (one real inference); failure →
+    engine disabled + ai_error; per-frame errors → ai_error + rate-limited traceback logging
+    (first + 1/min; previously one traceback PER FRAME could bloat camera_log.txt); _live_status()
+    keeps "(AI ERROR — Settings > Diagnostics dekhein)" sticky across watchdog reconnects;
+    ai_ms (EMA), ai_frames, ai_errors tracked; red banner burned into the video when AI is down.
+  • /api/state: ai_loaded, ai_error, ai_ms. CameraPanel red chip data-testid ai-error-chip with the
+    error text. Diagnostics: AI flag shows error/ms-per-frame, frames/errors, library versions,
+    engine_out.log + app_log.txt tails (diag-engine-log); Copy includes all.
+  • engine: OCR warmup thread at startup REMOVED (lazy on first crossing, async) — no torch
+    contention at connect; HUD shows detect ms ("AI: 1 vehicle tracked | 57 ms").
+  • electron-main.js: engine stdout/stderr → %LOCALAPPDATA%\9xSecurity\engine_out.log via fd
+    (unread pipes could block engine threads once a library printed >64KB); 5MB truncate.
+- Tests: test_ai_health.py 6/6 (self-test fail → AI disabled + red banner; ok path; rate-limit
+  1 traceback for 50 errors; state/diag fields; selftest() rc 0 real model / rc 1 broken).
+  Playwright: broken-detector run shows red chip + banner + Diagnostics flag with exact error.
+- USER NEXT: Save to GitHub → install new build ONCE (last re-entry of settings) → connect →
+  HUD "AI: … ms" must appear; if red banner: Settings > Diagnostics > Copy sab kuch → paste.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

@@ -62,6 +62,11 @@ class Worker:
         self._lock = threading.Lock()
         self.last_frame_ts = 0.0
         self.capture_paused = False
+        self.ai_error = ""        # last AI failure (self-test / per-frame), '' = healthy
+        self.ai_ms = None         # smoothed process_frame time (ms)
+        self.ai_frames = 0        # frames processed by AI since connect
+        self.ai_errors = 0
+        self._last_err_log = 0.0
 
     @property
     def connected(self):
@@ -101,20 +106,55 @@ class Worker:
             self.status = "ERROR: engine crash — camera_log.txt dekhein"
             self._running = False
 
-    @staticmethod
-    def _draw_line_only(frame, cfg):
+    def _live_status(self):
+        s = "Connected — live monitoring chalu hai"
+        if self.ai_error:
+            s += " (AI ERROR — Settings > Diagnostics dekhein)"
+        elif self.engine is None:
+            s += " (AI OFF — model load fail, Settings > Diagnostics dekhein)"
+        return s
+
+    def _note_ai_error(self, where, exc_text):
+        import traceback
+
+        self.ai_errors += 1
+        self.ai_error = f"{where}: {exc_text.strip().splitlines()[-1][:200]}"
+        now = time.time()
+        if now - self._last_err_log > 60:  # first error + at most once a minute (log size!)
+            self._last_err_log = now
+            clog(f"svc {where} error (#{self.ai_errors}):\n" + traceback.format_exc())
+
+    def _draw_line_only(self, frame, cfg):
         try:
             ln = cfg.get("line") or {}
             h, w = frame.shape[:2]
             a = (int(float(ln.get("x1", 0.5)) * w), int(float(ln.get("y1", 0.0)) * h))
             b = (int(float(ln.get("x2", 0.5)) * w), int(float(ln.get("y2", 1.0)) * h))
             cv2.line(frame, a, b, (0, 255, 255), 2)
+            if self.ai_error or self.engine is None:
+                msg = "AI ERROR - detection band hai. Settings > Diagnostics dekhein"
+                cv2.rectangle(frame, (0, h - 30), (w, h), (0, 0, 160), -1)
+                cv2.putText(frame, msg, (10, h - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.55,
+                            (255, 255, 255), 1)
         except Exception:
             pass
         return frame
 
+    def _ai_selftest(self):
+        """Run one real inference right after model load so a broken torch/
+        torchvision build shows up immediately (not silently per frame)."""
+        import numpy as np
+
+        t0 = time.time()
+        blank = np.zeros((config.DISPLAY_HEIGHT, config.DISPLAY_WIDTH, 3), dtype=np.uint8)
+        dets = self.engine.detector.detect(blank)
+        ms = (time.time() - t0) * 1000
+        clog(f"svc: AI self-test OK ({ms:.0f} ms, {len(dets)} dets on blank frame)")
+        return ms
+
     def _run_impl(self):
         cfg = _cfg()
+        self.ai_error, self.ai_ms, self.ai_frames, self.ai_errors = "", None, 0, 0
         self.status = "AI model load ho raha hai..."
         clog("svc: loading AI model")
         try:
@@ -125,6 +165,15 @@ class Worker:
 
             clog("svc: MODEL LOAD FAILED:\n" + traceback.format_exc())
             self.engine = None
+            self.ai_error = "model load: " + traceback.format_exc().strip().splitlines()[-1][:200]
+        if self.engine is not None:
+            try:
+                self.ai_ms = self._ai_selftest()
+            except Exception:
+                self._note_ai_error("AI self-test", __import__("traceback").format_exc())
+                clog("svc: AI self-test FAILED (detection disabled):\n"
+                     + __import__("traceback").format_exc())
+                self.engine = None
 
         url = cfg.get("rtsp_url", "").strip()
         source = normalize_rtsp_url(url) if url else 0
@@ -137,9 +186,7 @@ class Worker:
                 self.status = "ERROR: Camera nahi khula — 'Test' se step-by-step jaanch karein"
             self._running = False
             return
-        self.status = "Connected — live monitoring chalu hai" + (
-            "" if self.engine else " (AI OFF — model load fail, camera_log.txt bhejein)"
-        )
+        self.status = self._live_status()
         clog("svc: streaming started")
         fail = 0
         paused = False
@@ -158,7 +205,7 @@ class Worker:
                     if cap is None:
                         break
                     if not paused:
-                        self.status = "Connected — live monitoring chalu hai"
+                        self.status = self._live_status()
                     fail = 0
                     last_ok = time.time()
                 time.sleep(0.02)
@@ -174,7 +221,7 @@ class Worker:
             if capture_on and paused:
                 paused = False
                 self.capture_paused = False
-                self.status = "Connected — live monitoring chalu hai"
+                self.status = self._live_status()
                 clog("svc: capture resumed (schedule)")
             elif not capture_on and not paused:
                 paused = True
@@ -186,11 +233,19 @@ class Worker:
                 clog("svc: capture paused (schedule)")
             if self.engine is not None and capture_on:
                 try:
+                    t0 = time.time()
                     annotated, _ = self.engine.process_frame(small, original=frame)
+                    ms = (time.time() - t0) * 1000
+                    self.ai_ms = ms if self.ai_ms is None else 0.9 * self.ai_ms + 0.1 * ms
+                    self.ai_frames += 1
+                    if self.ai_error:
+                        self.ai_error = ""  # recovered
+                        self.status = self._live_status()
                 except Exception:
                     import traceback
 
-                    clog("svc process_frame error:\n" + traceback.format_exc())
+                    self._note_ai_error("process_frame", traceback.format_exc())
+                    self.status = self._live_status()
                     annotated = self._draw_line_only(small, live_cfg)
             else:
                 # paused / AI off: line phir bhi dikhni chahiye (config feedback)
@@ -260,6 +315,9 @@ def state(request: Request):
         "snapshot_dir": config.SNAPSHOT_DIR,
         "outbox_pending": _db.outbox_count(),
         "capture_paused": worker.capture_paused,
+        "ai_loaded": worker.engine is not None,
+        "ai_error": worker.ai_error,
+        "ai_ms": round(worker.ai_ms) if worker.ai_ms is not None else None,
         "update_available": _update_info["available"],
         "update_latest": _update_info["latest"],
         "update_job": {"state": _update_job["state"], "percent": _update_job["percent"]},
@@ -534,6 +592,10 @@ def diagnostics(request: Request):
             "connected": worker.connected,
             "status": worker.status,
             "ai_loaded": eng is not None,
+            "ai_error": worker.ai_error,
+            "ai_ms": round(worker.ai_ms) if worker.ai_ms is not None else None,
+            "ai_frames": worker.ai_frames,
+            "ai_errors": worker.ai_errors,
             "capture_paused": worker.capture_paused,
             "tracks_now": len(eng.tracker.tracks) if eng else 0,
             "detections_now": len(eng.last_dets) if eng else 0,
@@ -557,7 +619,21 @@ def diagnostics(request: Request):
         },
         "camera_log": _tail(CAMERA_LOG),
         "wa_log": _tail(whatsapp.LOG_PATH),
+        "engine_out_log": _tail(os.path.join(config.BASE_DIR, "engine_out.log"), 40),
+        "app_log": _tail(os.path.join(config.BASE_DIR, "app_log.txt"), 40),
+        "versions": _lib_versions(),
     }
+
+
+def _lib_versions():
+    out = {}
+    for name in ("torch", "torchvision", "ultralytics", "cv2", "easyocr", "numpy"):
+        try:
+            mod = __import__(name)
+            out[name] = str(getattr(mod, "__version__", "?"))
+        except Exception as e:
+            out[name] = f"IMPORT FAIL: {str(e)[:80]}"
+    return out
 
 
 # ---- retention / auto-cleanup ------------------------------------------------
@@ -762,7 +838,34 @@ if os.path.isdir(WEB_DIR):
     app.mount("/", StaticFiles(directory=WEB_DIR, html=True), name="web")
 
 
+def selftest():
+    """CI/packaging check: real YOLO inference + EasyOCR model load inside the
+    (frozen) engine. Exit 1 if detection is broken so a bad build never ships."""
+    import numpy as np
+
+    from detector import VehicleDetector
+    from plate_reader import PlateReader, _bundled_model_dir
+
+    rc = 0
+    try:
+        t0 = time.time()
+        VehicleDetector().detect(np.zeros((config.DISPLAY_HEIGHT, config.DISPLAY_WIDTH, 3), np.uint8))
+        print(f"SELFTEST yolo OK ({(time.time() - t0) * 1000:.0f} ms)", flush=True)
+    except Exception:
+        import traceback
+
+        print("SELFTEST yolo FAIL:\n" + traceback.format_exc(), flush=True)
+        rc = 1
+    print(f"SELFTEST easyocr models dir: {_bundled_model_dir()}", flush=True)
+    pr = PlateReader()
+    print("SELFTEST easyocr " + ("OK" if pr.warmup() else f"FAIL: {pr.last_error}"), flush=True)
+    print("SELFTEST versions: " + str(_lib_versions()), flush=True)
+    return rc
+
+
 def main():
+    if os.environ.get("NX_SELFTEST"):
+        raise SystemExit(selftest())
     cfg = _cfg()
     if not cfg.get("auth_hash"):
         salt, h = auth.hash_password("9xsecurity")

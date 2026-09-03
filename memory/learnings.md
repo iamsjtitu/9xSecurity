@@ -13,3 +13,8 @@
 - User data on Windows now lives in %LOCALAPPDATA%\9xSecurity (config.BASE_DIR); install dir is
   wiped by NSIS on every update.
 - test_service_api.py::test_settings_roundtrip is stale (secrets masked since security audit) — pre-existing failure.
+- test_outbox.py / test_async_ocr.py / test_plate_fmt.py / test_ptz.py are SCRIPT-style (no test_ functions):
+  run with `python test_x.py`, not pytest (pytest collects 0).
+- Editing 9x_security/requirements.txt triggers the platform to pip-install it into the container
+  (torch is now pinned 2.5.1 here too). Disk is tight (~3 GB free) — avoid adding big packages.
+- CI now runs the frozen exe with NX_SELFTEST=1 (service.selftest) — keep that entrypoint working.

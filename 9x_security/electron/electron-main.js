@@ -12,12 +12,29 @@ let tray = null;
 let quitting = false;
 let balloonShown = false;
 
+function engineLogFd() {
+  // Same folder the Python engine uses for user data (%LOCALAPPDATA%\9xSecurity).
+  try {
+    const dir = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), '9xSecurity');
+    fs.mkdirSync(dir, { recursive: true });
+    const p = path.join(dir, 'engine_out.log');
+    try { if (fs.statSync(p).size > 5 * 1024 * 1024) fs.truncateSync(p, 0); } catch (_) { /* new file */ }
+    return fs.openSync(p, 'a');
+  } catch (_) {
+    return 'ignore';
+  }
+}
+
 function startEngine() {
   if (!app.isPackaged) return; // dev mode: run `python service.py` yourself
   const exe = path.join(process.resourcesPath, 'engine', '9xEngine.exe');
+  const fd = engineLogFd();
+  // stdout/stderr go straight to a file: an unread pipe would fill up and block
+  // the engine's threads the moment a library prints too much.
   engineProc = spawn(exe, [], {
     cwd: path.dirname(exe),
     windowsHide: true,
+    stdio: ['ignore', fd, fd],
     env: { ...process.env, ENGINE_PORT: PORT },
   });
   engineProc.on('exit', () => { engineProc = null; });

@@ -243,13 +243,12 @@ class SecurityEngine:
 
             self.plate_reader = PlateReader()
         self._best_crops = {}
-        if self.plate_reader is not None:
-            import threading
-
-            threading.Thread(target=self._warm_plate_reader, daemon=True).start()
+        # OCR models load lazily on the first crossing (async thread) — no heavy
+        # torch work competes with YOLO right at engine start.
 
         self.frame_idx = 0
         self.last_dets = []
+        self.last_detect_ms = None
         self.on_event = None  # optional callback(event_dict) for the GUI
 
         from whatsapp import WhatsAppNotifier
@@ -281,7 +280,9 @@ class SecurityEngine:
         skip = max(1, int(self.cfg.get("detect_frame_skip", 2)))
 
         if self.frame_idx % skip == 0:
+            t0 = time.time()
             self.last_dets = self.detector.detect(frame)
+            self.last_detect_ms = (time.time() - t0) * 1000
         self.frame_idx += 1
 
         crossings = self.tracker.update(self.last_dets, (a, b))
@@ -442,6 +443,8 @@ class SecurityEngine:
             cv2.circle(img, self.tracker.ref_point(tr.bbox), 5, (0, 0, 255), -1)
         n = len(self.tracker.tracks)
         hud = f"AI: {n} vehicle{'s' if n != 1 else ''} tracked"
+        if self.last_detect_ms is not None:
+            hud += f"  |  {self.last_detect_ms:.0f} ms"
         cv2.putText(img, hud, (10, img.shape[0] - 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                     (0, 0, 0), 3)
         cv2.putText(img, hud, (10, img.shape[0] - 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5,

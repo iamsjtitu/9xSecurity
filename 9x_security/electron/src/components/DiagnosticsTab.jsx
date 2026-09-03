@@ -29,8 +29,8 @@ export default function DiagnosticsTab({ showToast }) {
 
   const copyAll = async () => {
     if (!d) return;
-    const { camera_log, wa_log, ...rest } = d;
-    const text = `=== 9x Security Diagnostics ===\n${JSON.stringify(rest, null, 2)}\n\n=== camera_log.txt ===\n${camera_log}\n=== wa_log.txt ===\n${wa_log}`;
+    const { camera_log, wa_log, engine_out_log, app_log, ...rest } = d;
+    const text = `=== 9x Security Diagnostics ===\n${JSON.stringify(rest, null, 2)}\n\n=== camera_log.txt ===\n${camera_log}\n=== wa_log.txt ===\n${wa_log}\n=== engine_out.log ===\n${engine_out_log || ''}\n=== app_log.txt ===\n${app_log || ''}`;
     try { await navigator.clipboard.writeText(text); showToast('Diagnostics copy ho gaya — chat me paste karein', 'success'); }
     catch (_) { showToast('Copy nahi hua — text select karke copy karein', 'error'); }
   };
@@ -51,7 +51,7 @@ export default function DiagnosticsTab({ showToast }) {
 
       <div className="flex flex-wrap gap-2" data-testid="diag-flags">
         <Flag ok={e.connected} label={e.connected ? 'Camera connected' : 'Camera offline'} />
-        <Flag ok={e.ai_loaded} label={e.ai_loaded ? 'AI model loaded' : 'AI model NOT loaded'} />
+        <Flag ok={e.ai_loaded && !e.ai_error} label={e.ai_error ? `AI ERROR: ${String(e.ai_error).slice(0, 80)}` : e.ai_loaded ? `AI model loaded${e.ai_ms != null ? ` · ${e.ai_ms} ms/frame` : ''}` : 'AI model NOT loaded'} />
         <Flag ok={!e.capture_paused} label={e.capture_paused ? 'Capture PAUSED (schedule)' : 'Capture active'} />
         <Flag ok={d.snapshot_write_ok} label={d.snapshot_write_ok ? 'Snapshot folder writable' : `Snapshot write FAIL: ${d.snapshot_write_detail}`} />
         <Flag ok={wa.enabled && wa.api_key_set && wa.recipients > 0} label={`WhatsApp ${wa.enabled ? 'ON' : 'OFF'} · key ${wa.api_key_set ? 'set' : 'missing'} · ${wa.recipients} number`} />
@@ -67,6 +67,8 @@ export default function DiagnosticsTab({ showToast }) {
           <Row k="Events total" v={d.events_total} />
           <Row k="Aaj" v={`${d.events_today?.Entry ?? 0} Entry / ${d.events_today?.Exit ?? 0} Exit`} />
           <Row k="AI status" v={e.status} />
+          <Row k="AI frames / errors" v={`${e.ai_frames ?? 0} / ${e.ai_errors ?? 0}`} />
+          <Row k="Libraries" v={Object.entries(d.versions || {}).map(([k, v]) => `${k} ${v}`).join(' · ')} />
           <Row k="Vehicles tracked now" v={`${e.tracks_now} (detections: ${e.detections_now})`} />
           <Row k="Detect classes" v={(e.vehicle_classes || []).join(', ')} />
           <Row k="Plate OCR" v={e.plate_ocr ? 'ON' : 'OFF'} />
@@ -84,7 +86,7 @@ export default function DiagnosticsTab({ showToast }) {
         </div>
       </div>
 
-      {[['camera_log.txt (AI / camera)', d.camera_log, 'diag-camera-log'], ['wa_log.txt (WhatsApp)', d.wa_log, 'diag-wa-log']].map(([title, body, tid]) => (
+      {[['camera_log.txt (AI / camera)', d.camera_log, 'diag-camera-log'], ['wa_log.txt (WhatsApp)', d.wa_log, 'diag-wa-log'], ['engine_out.log + app_log.txt (crash / library output)', [d.engine_out_log, d.app_log].filter(Boolean).join('\n---\n'), 'diag-engine-log']].map(([title, body, tid]) => (
         <div key={tid}>
           <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">{title}</div>
           <pre className="rounded-lg bg-slate-900 text-slate-100 text-[11px] leading-relaxed p-3 max-h-56 overflow-auto whitespace-pre-wrap" data-testid={tid}>

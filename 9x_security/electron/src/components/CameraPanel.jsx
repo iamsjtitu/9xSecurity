@@ -241,6 +241,16 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
                 Detection PAUSED — schedule time ke bahar (Settings &gt; Timing me badlein)
               </div>
             )}
+            {!state.capture_paused && !drawMode && (state.ai_error || state.ai_loaded === false) && (
+              <div
+                className="absolute top-3 left-3 max-w-[70%] rounded-md bg-rose-600/95 px-3 py-1.5 text-xs font-semibold text-white"
+                data-testid="ai-error-chip"
+                title={state.ai_error || ''}
+              >
+                AI detection band hai — Settings &gt; Diagnostics me wajah dekhein
+                {state.ai_error ? `: ${String(state.ai_error).slice(0, 90)}` : ''}
+              </div>
+            )}
             {stale && (
               <div
                 className="absolute inset-x-0 top-1/2 -translate-y-1/2 mx-auto w-fit rounded-lg bg-amber-500/95 px-4 py-2 text-sm font-semibold text-black"

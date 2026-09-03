@@ -76,7 +76,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pyinstaller
+          pip install "pyinstaller==6.11.1"
+          python -c "import torch, torchvision, ultralytics; print('torch', torch.__version__, 'torchvision', torchvision.__version__, 'ultralytics', ultralytics.__version__)"
+
+      - name: AI smoke test (real YOLO inference on build machine)
+        run: python -c "import numpy as np, sys; sys.path.insert(0,'.'); from detector import VehicleDetector; d=VehicleDetector(); d.detect(np.zeros((540,960,3),dtype=np.uint8)); print('YOLO inference OK')"
 
       - name: Cache EasyOCR models
         uses: actions/cache@v4
@@ -98,12 +102,23 @@ jobs:
           --collect-data ultralytics
           --collect-data easyocr
           --collect-binaries imageio_ffmpeg
+          --collect-binaries torchvision
           --exclude-module tkinter
           --exclude-module IPython
           --exclude-module pytest
           --exclude-module notebook
           --exclude-module PyQt5
           service.py
+
+      - name: Self-test the FROZEN engine (YOLO + EasyOCR inside the packaged exe)
+        shell: pwsh
+        env:
+          NX_SELFTEST: "1"
+        run: |
+          $out = & .\dist\9xEngine\9xEngine.exe 2>&1 | Out-String
+          Write-Host $out
+          if ($LASTEXITCODE -ne 0) { Write-Host "::error::Packaged engine cannot run YOLO detection — build rejected (see SELFTEST output above)"; exit 1 }
+          if ($out -match "easyocr FAIL") { Write-Host "::warning::EasyOCR models not working in packaged engine (plates will not be read)" }
 
       - name: Build Electron UI + NSIS installer
         working-directory: 9x_security/electron

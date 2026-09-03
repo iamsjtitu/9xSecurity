@@ -10,8 +10,7 @@ const TABS = [
   { id: 'updates', label: 'Updates', icon: Download },
 ];
 
-export default function SettingsPage({ showToast }) {
-  const [tab, setTab] = useState('whatsapp');
+export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
   const [s, setS] = useState(null);
   const [newPass, setNewPass] = useState('');
   const [busy, setBusy] = useState(false);
@@ -20,6 +19,10 @@ export default function SettingsPage({ showToast }) {
   useEffect(() => {
     api('/api/settings').then(setS).catch((e) => showToast(e.message, 'error'));
   }, []); // eslint-disable-line
+
+  useEffect(() => {
+    if (tab === 'updates' && !updInfo) checkUpdate();
+  }, [tab]); // eslint-disable-line
 
   const save = async () => {
     setBusy(true);

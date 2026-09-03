@@ -363,6 +363,19 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Tests: test_builtin_token.py 3/3 (precedence, sed-bake simulation, service wiring + flag).
 - Quick detection ON/OFF dashboard toggle: user said "ye rehne do" — NOT built (dropped).
 
+## Implemented (update 2026-06 #24) — Sidebar "New version" badge (self-tested: 2/2 pytest + 24 regression + UI E2E screenshot)
+- service.py: _update_check_loop (daemon) runs updater.check_latest 20s after start
+  (UPDATE_CHECK_DELAY env) and every 6h (UPDATE_CHECK_SECONDS env), dev mode (no repo)
+  skipped; errors logged only. Cached in _update_info; manual /api/update/check also refreshes
+  cache. /api/state now has update_available + update_latest (UI polls every 2.5s).
+- updater.is_newer: current defaults to APP_VERSION at CALL time (was bound at def time).
+- UI: Sidebar emerald pill (data-testid update-available-badge) "New version v1.0.N" + green dot
+  on Settings nav (nav-settings-update-dot); click → Settings > Updates tab (App holds
+  settingsTab; SettingsPage tab is now a controlled prop) and Updates tab auto-runs the check
+  on open so "Download & Install Now" shows immediately.
+- Tests: test_update_badge.py 2/2; Playwright: badge+dot appear, click lands on Updates with
+  update-info + apply button. Real GitHub check = user's installed build.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

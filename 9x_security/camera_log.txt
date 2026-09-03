@@ -265,3 +265,12 @@
 2026-09-03T07:41:44 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)
 2026-09-03T07:42:16 | svc: starting on 127.0.0.1:8971 v1.0.0
 2026-09-03T07:42:16 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)
+2026-09-03T07:45:28 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-03T07:45:28 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)
+2026-09-03T07:45:58 | update auto-check failed: offline
+2026-09-03T07:46:04 | === PROBE start: notaurl
+2026-09-03T07:46:04 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-09-03T07:46:07 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-03T07:46:07 | ffmpeg-pipe: starting
+2026-09-03T07:47:18 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-03T07:47:18 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)

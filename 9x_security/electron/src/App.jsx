@@ -8,6 +8,7 @@ import SettingsPage from './components/SettingsPage.jsx';
 export default function App() {
   const [authed, setAuthed] = useState(!!getToken());
   const [page, setPage] = useState('dashboard');
+  const [settingsTab, setSettingsTab] = useState('whatsapp');
   const [state, setState] = useState({ connected: false, status: '', version: '' });
   const [toast, setToast] = useState(null);
 
@@ -47,6 +48,8 @@ export default function App() {
         version={state.version}
         connected={state.connected}
         outboxPending={state.outbox_pending || 0}
+        updateLatest={state.update_available ? state.update_latest : ''}
+        onUpdateClick={() => { setSettingsTab('updates'); setPage('settings'); }}
         onLogout={() => { logout(); setAuthed(false); }}
       />
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
@@ -54,7 +57,7 @@ export default function App() {
           {page === 'dashboard' ? (
             <Dashboard state={state} refreshState={refreshState} showToast={showToast} />
           ) : (
-            <SettingsPage showToast={showToast} />
+            <SettingsPage showToast={showToast} tab={settingsTab} setTab={setSettingsTab} />
           )}
         </div>
         <div

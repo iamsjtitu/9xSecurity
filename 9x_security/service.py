@@ -260,6 +260,8 @@ def state(request: Request):
         "snapshot_dir": config.SNAPSHOT_DIR,
         "outbox_pending": _db.outbox_count(),
         "capture_paused": worker.capture_paused,
+        "update_available": _update_info["available"],
+        "update_latest": _update_info["latest"],
         "frame_age": (
             round(time.time() - worker.last_frame_ts, 1)
             if worker.connected and worker.last_frame_ts
@@ -529,6 +531,31 @@ def _outbox_loop():
 
 
 # ---- updates ----------------------------------------------------------------
+_update_info = {"available": False, "latest": "", "page": "", "checked_at": 0.0}
+
+
+def _refresh_update_info():
+    """Background check feeding the sidebar 'New version' badge (via /api/state)."""
+    cfg = _cfg()
+    repo = updater.DEFAULT_REPO or cfg.get("github_repo", "").strip()
+    if not repo:
+        return
+    try:
+        tag, _asset, page = updater.check_latest(repo, token=updater.effective_token(cfg.get("gh_token")))
+        _update_info.update(
+            available=bool(tag) and updater.is_newer(tag), latest=tag, page=page, checked_at=time.time()
+        )
+    except Exception as e:
+        clog(f"update auto-check failed: {e}")
+
+
+def _update_check_loop():
+    time.sleep(int(os.environ.get("UPDATE_CHECK_DELAY", "20")))
+    while True:
+        _refresh_update_info()
+        time.sleep(int(os.environ.get("UPDATE_CHECK_SECONDS", str(6 * 3600))))
+
+
 @app.get("/api/update/check")
 def update_check(request: Request):
     _check(request)
@@ -542,6 +569,9 @@ def update_check(request: Request):
         tag, asset, page = updater.check_latest(repo, token=token)
     except Exception as e:
         raise HTTPException(502, str(e))
+    _update_info.update(
+        available=bool(tag) and updater.is_newer(tag), latest=tag, page=page, checked_at=time.time()
+    )
     if not tag:
         hint = ("Token software me inbuilt hai — GitHub par release publish hui hai ya nahi, "
                 "aur repo secret UPDATE_TOKEN ka access check karein."
@@ -596,6 +626,7 @@ def main():
     clog(f"svc: starting on 127.0.0.1:{PORT} v{updater.APP_VERSION}")
     threading.Thread(target=_purge_loop, daemon=True).start()
     threading.Thread(target=_outbox_loop, daemon=True).start()
+    threading.Thread(target=_update_check_loop, daemon=True).start()
     uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="warning")
 
 

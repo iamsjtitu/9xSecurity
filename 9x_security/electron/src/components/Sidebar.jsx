@@ -1,8 +1,8 @@
 import React from 'react';
-import { LayoutDashboard, Settings, LogOut, ShieldCheck, Cctv, Inbox } from 'lucide-react';
+import { LayoutDashboard, Settings, LogOut, ShieldCheck, Cctv, Inbox, Download } from 'lucide-react';
 
-export default function Sidebar({ page, setPage, version, connected, outboxPending = 0, onLogout }) {
-  const Item = ({ id, icon: Icon, label, testid }) => (
+export default function Sidebar({ page, setPage, version, connected, outboxPending = 0, updateLatest = '', onUpdateClick, onLogout }) {
+  const Item = ({ id, icon: Icon, label, testid, dot }) => (
     <button
       onClick={() => setPage(id)}
       data-testid={testid}
@@ -12,6 +12,7 @@ export default function Sidebar({ page, setPage, version, connected, outboxPendi
     >
       <Icon size={18} />
       {label}
+      {dot && <span className="ml-auto h-2 w-2 rounded-full bg-emerald-400" data-testid="nav-settings-update-dot" />}
     </button>
   );
 
@@ -28,7 +29,19 @@ export default function Sidebar({ page, setPage, version, connected, outboxPendi
       </div>
       <nav className="flex-1 p-3 space-y-1.5">
         <Item id="dashboard" icon={LayoutDashboard} label="Dashboard" testid="nav-dashboard" />
-        <Item id="settings" icon={Settings} label="Settings" testid="nav-settings" />
+        <Item id="settings" icon={Settings} label="Settings" testid="nav-settings" dot={!!updateLatest} />
+        {updateLatest && (
+          <button
+            onClick={onUpdateClick}
+            data-testid="update-available-badge"
+            title="Nayi version available hai — click karke install karein"
+            className="w-full mt-3 flex items-center gap-2 rounded-lg px-3 py-2.5 text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors duration-200"
+          >
+            <Download size={14} />
+            New version v{updateLatest}
+            <span className="ml-auto h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+          </button>
+        )}
       </nav>
       <div className="p-4 border-t border-slate-800 space-y-3">
         <div className="flex items-center gap-2 text-xs">

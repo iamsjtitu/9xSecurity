@@ -76,8 +76,8 @@ def _ver(v):
     return tuple(int(x) for x in nums) if nums else (0,)
 
 
-def is_newer(latest, current=APP_VERSION):
-    return _ver(latest) > _ver(current)
+def is_newer(latest, current=None):
+    return _ver(latest) > _ver(APP_VERSION if current is None else current)
 
 
 def download(asset_url, dest, progress=None, token=None):

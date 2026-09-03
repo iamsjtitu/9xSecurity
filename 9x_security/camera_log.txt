@@ -276,3 +276,12 @@
 2026-09-03T07:47:18 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)
 2026-09-03T08:43:25 | svc: starting on 127.0.0.1:8971 v1.0.0
 2026-09-03T08:43:25 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)
+2026-09-03T09:05:46 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-09-03T09:05:46 | update: download cancelled by user
+2026-09-03T09:05:46 | update: FAILED HTTP 404 asset
+2026-09-03T09:05:46 | update auto-check failed: offline
+2026-09-03T09:06:02 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-03T09:06:02 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)
+2026-09-03T09:06:44 | update: download cancelled by user
+2026-09-03T09:07:13 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-03T09:07:13 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)

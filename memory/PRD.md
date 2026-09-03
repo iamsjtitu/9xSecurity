@@ -409,6 +409,23 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   HUD visible in screenshot. Test data cleaned.
 - LEARNING: never `git stash` in this repo (running service rewrites log files → pop fails).
 
+## Implemented (update 2026-06 #26) — Update download progress (self-tested: 4/4 pytest + Playwright with fake 800MB download)
+- USER: 'kitna download ho gaya dikha nahi raha' — apply was a blocking request with no feedback.
+- Backend: POST /api/update/apply now starts a background thread and returns immediately;
+  job state in _update_job {state: idle|checking|downloading|installing|done|cancelled|error,
+  percent, read, total, message, latest, ok}. GET /api/update/progress; POST /api/update/cancel
+  (threading.Event → updater.download(should_stop=) aborts + temp file removed). Re-clicking
+  apply during a run returns the running job (no duplicate). /api/state exposes update_job
+  {state, percent}. updater.download now reports progress even without Content-Length.
+- UI: UpdateProgress.jsx (testids update-progress, update-progress-bar, update-progress-stats,
+  update-progress-message, update-cancel-btn): bar + % + MB/total + MB/s + ETA + Cancel;
+  error/cancel → 'Dobara Download & Install' button; done+ok → toast then app quit (installer
+  relaunches). Progress resumes when returning to the Updates tab. Sidebar badge shows
+  'Downloading… N%' with fill (update-badge-progress) / 'Install ho raha hai…'.
+- Tests: test_update_progress.py 4/4 (progress→done, no-duplicate + cancel, error, updater
+  stop/no-total). Playwright: 15%→ stats '126 / 800 MB · 24 MB/s · ~28 sec', badge 12%,
+  navigate away/back resumes, cancel → retry button.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

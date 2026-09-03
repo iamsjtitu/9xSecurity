@@ -80,7 +80,9 @@ def is_newer(latest, current=None):
     return _ver(latest) > _ver(APP_VERSION if current is None else current)
 
 
-def download(asset_url, dest, progress=None, token=None):
+def download(asset_url, dest, progress=None, token=None, should_stop=None):
+    """Streams the asset to `dest`. progress(read, total) is called per chunk
+    (total may be 0 if unknown). Returns dest, or None if should_stop() became true."""
     h = {"User-Agent": "9xSecurity", "Accept": "application/octet-stream"}
     if token:
         h["Authorization"] = f"Bearer {token}"
@@ -92,9 +94,11 @@ def download(asset_url, dest, progress=None, token=None):
         read = 0
         with open(dest, "wb") as f:
             for chunk in r.iter_content(1 << 16):
+                if should_stop and should_stop():
+                    return None
                 f.write(chunk)
                 read += len(chunk)
-                if progress and total:
+                if progress:
                     progress(read, total)
     return dest
 

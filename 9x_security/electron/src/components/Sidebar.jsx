@@ -1,7 +1,12 @@
 import React from 'react';
 import { LayoutDashboard, Settings, LogOut, ShieldCheck, Cctv, Inbox, Download } from 'lucide-react';
 
-export default function Sidebar({ page, setPage, version, connected, outboxPending = 0, updateLatest = '', onUpdateClick, onLogout }) {
+export default function Sidebar({ page, setPage, version, connected, outboxPending = 0, updateLatest = '', updateJob, onUpdateClick, onLogout }) {
+  const jobState = updateJob?.state;
+  const badgeText = jobState === 'downloading' ? `Downloading… ${updateJob.percent}%`
+    : jobState === 'installing' ? 'Install ho raha hai…'
+    : jobState === 'checking' ? 'Update shuru…'
+    : updateLatest ? `New version v${updateLatest}` : '';
   const Item = ({ id, icon: Icon, label, testid, dot }) => (
     <button
       onClick={() => setPage(id)}
@@ -29,17 +34,20 @@ export default function Sidebar({ page, setPage, version, connected, outboxPendi
       </div>
       <nav className="flex-1 p-3 space-y-1.5">
         <Item id="dashboard" icon={LayoutDashboard} label="Dashboard" testid="nav-dashboard" />
-        <Item id="settings" icon={Settings} label="Settings" testid="nav-settings" dot={!!updateLatest} />
-        {updateLatest && (
+        <Item id="settings" icon={Settings} label="Settings" testid="nav-settings" dot={!!badgeText} />
+        {badgeText && (
           <button
             onClick={onUpdateClick}
             data-testid="update-available-badge"
             title="Nayi version available hai — click karke install karein"
-            className="w-full mt-3 flex items-center gap-2 rounded-lg px-3 py-2.5 text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors duration-200"
+            className="relative overflow-hidden w-full mt-3 flex items-center gap-2 rounded-lg px-3 py-2.5 text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors duration-200"
           >
-            <Download size={14} />
-            New version v{updateLatest}
-            <span className="ml-auto h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            {jobState === 'downloading' && (
+              <span className="absolute inset-y-0 left-0 bg-emerald-500/25 transition-[width] duration-500" style={{ width: `${updateJob.percent}%` }} data-testid="update-badge-progress" />
+            )}
+            <Download size={14} className="relative" />
+            <span className="relative">{badgeText}</span>
+            <span className="relative ml-auto h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
           </button>
         )}
       </nav>

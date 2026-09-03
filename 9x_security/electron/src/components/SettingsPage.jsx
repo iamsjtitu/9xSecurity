@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { MessageCircle, User, Lock, Download, Send, Clock, Activity } from 'lucide-react';
 import { api } from '../api';
 import DiagnosticsTab from './DiagnosticsTab.jsx';
+import UpdateProgress from './UpdateProgress.jsx';
 
 const TABS = [
   { id: 'whatsapp', label: 'WhatsApp Alerts', icon: MessageCircle },
@@ -17,6 +18,7 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
   const [newPass, setNewPass] = useState('');
   const [busy, setBusy] = useState(false);
   const [updInfo, setUpdInfo] = useState(null);
+  const [job, setJob] = useState(null);
 
   useEffect(() => {
     api('/api/settings').then(setS).catch((e) => showToast(e.message, 'error'));
@@ -69,15 +71,42 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
   const applyUpdate = async () => {
     setBusy(true);
     try {
-      const r = await api('/api/update/apply', { method: 'POST' });
-      showToast(r.message, 'success');
-      if (r.ok && window.native?.quit) setTimeout(() => window.native.quit(), 1500);
+      const j = await api('/api/update/apply', { method: 'POST' });
+      setJob(j);
     } catch (e) {
       showToast(e.message, 'error');
-    } finally {
       setBusy(false);
     }
   };
+
+  const cancelUpdate = async () => {
+    try { await api('/api/update/cancel', { method: 'POST' }); } catch (e) { showToast(e.message, 'error'); }
+  };
+
+  // poll download/install progress while a job is active
+  useEffect(() => {
+    if (!job || !['checking', 'downloading', 'installing'].includes(job.state)) return undefined;
+    const id = setInterval(async () => {
+      try {
+        const j = await api('/api/update/progress');
+        setJob(j);
+        if (['done', 'error', 'cancelled'].includes(j.state)) {
+          setBusy(false);
+          showToast(j.message, j.state === 'done' ? 'success' : j.state === 'error' ? 'error' : 'info');
+          if (j.state === 'done' && j.ok && window.native?.quit) setTimeout(() => window.native.quit(), 1500);
+        }
+      } catch (_) { /* engine may be restarting */ }
+    }, 1000);
+    return () => clearInterval(id);
+  }, [job?.state]); // eslint-disable-line
+
+  // resume showing progress if a download is already running (e.g. user navigated away)
+  useEffect(() => {
+    if (tab !== 'updates') return;
+    api('/api/update/progress').then((j) => {
+      if (j.state !== 'idle') { setJob(j); if (['checking', 'downloading', 'installing'].includes(j.state)) setBusy(true); }
+    }).catch(() => {});
+  }, [tab]); // eslint-disable-line
 
   if (!s) return <div className="text-slate-400 text-sm">Loading…</div>;
 
@@ -283,13 +312,14 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
                   Current: v{updInfo.current}{updInfo.latest ? ` · Latest: v${updInfo.latest}` : ''}
                 </div>
                 <div>{updInfo.message}</div>
-                {updInfo.available && (
+                {updInfo.available && !['checking', 'downloading', 'installing', 'done'].includes(job?.state) && (
                   <button className="btn-primary mt-3" onClick={applyUpdate} disabled={busy} data-testid="apply-update-btn">
-                    Download &amp; Install Now
+                    {job?.state === 'error' || job?.state === 'cancelled' ? 'Dobara Download & Install' : 'Download & Install Now'}
                   </button>
                 )}
               </div>
             )}
+            <UpdateProgress job={job} onCancel={cancelUpdate} />
           </div>
         )}
       </div>

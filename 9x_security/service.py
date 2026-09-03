@@ -262,6 +262,7 @@ def state(request: Request):
         "capture_paused": worker.capture_paused,
         "update_available": _update_info["available"],
         "update_latest": _update_info["latest"],
+        "update_job": {"state": _update_job["state"], "percent": _update_job["percent"]},
         "frame_age": (
             round(time.time() - worker.last_frame_ts, 1)
             if worker.connected and worker.last_frame_ts
@@ -671,24 +672,86 @@ def update_check(request: Request):
             "message": f"Nayi version v{tag} available hai!"}
 
 
+_UPDATE_ACTIVE = ("checking", "downloading", "installing")
+_update_job = {"state": "idle", "percent": 0, "read": 0, "total": 0, "message": "",
+               "latest": "", "ok": False, "started_at": 0.0}
+_update_cancel = threading.Event()
+
+
+def _job_set(**kw):
+    _update_job.update(kw)
+
+
+def _run_update_job(repo, token):
+    import tempfile
+
+    dest = ""
+    try:
+        _job_set(state="checking", message="Release ki jaankari li ja rahi hai...")
+        tag, asset, _page = updater.check_latest(repo, token=token)
+        if not tag or not asset:
+            raise RuntimeError("Release/asset nahi mila.")
+        ext = ".zip" if asset.lower().endswith(".zip") else ".exe"
+        dest = os.path.join(tempfile.gettempdir(), "9xSecuritySetup_new" + ext)
+        _job_set(state="downloading", latest=tag, message=f"v{tag} download ho raha hai...")
+
+        def prog(read, total):
+            _job_set(read=read, total=total, percent=int(read * 100 / total) if total else 0)
+
+        got = updater.download(asset, dest, progress=prog, token=token,
+                               should_stop=_update_cancel.is_set)
+        if got is None:
+            _job_set(state="cancelled", message="Download cancel kiya gaya.")
+            clog("update: download cancelled by user")
+            return
+        _job_set(state="installing", percent=100,
+                 message="Installer chal raha hai — app band hoke nayi version ke saath khulegi.")
+        clog(f"update: downloaded v{tag} -> {dest}, launching installer")
+        launched = updater.apply_update(dest)
+        _job_set(state="done", ok=launched,
+                 message=("Installer chal gaya — app band hoke nayi version ke saath khulegi."
+                          if launched else f"Dev mode: installer yahan save hua: {dest}"))
+    except Exception as e:
+        clog(f"update: FAILED {e}")
+        _job_set(state="error", message=f"Update fail: {e}")
+    finally:
+        if _update_job["state"] in ("cancelled", "error") and dest:
+            try:
+                os.remove(dest)
+            except Exception:
+                pass
+
+
 @app.post("/api/update/apply")
 def update_apply(request: Request):
     _check(request)
-    import tempfile
-
+    if _update_job["state"] in _UPDATE_ACTIVE:
+        return dict(_update_job)  # already running: return current progress
     cfg = _cfg()
     repo = updater.DEFAULT_REPO or cfg.get("github_repo", "").strip()
     token = updater.effective_token(cfg.get("gh_token"))
-    tag, asset, _page = updater.check_latest(repo, token=token)
-    if not tag or not asset:
-        raise HTTPException(404, "Release/asset nahi mila.")
-    ext = ".zip" if asset.lower().endswith(".zip") else ".exe"
-    dest = os.path.join(tempfile.gettempdir(), "9xSecuritySetup_new" + ext)
-    updater.download(asset, dest, token=token)
-    launched = updater.apply_update(dest)
-    return {"ok": launched, "downloaded": dest,
-            "message": ("Installer chal gaya — app band hoke nayi version ke saath khulegi."
-                        if launched else f"Dev mode: installer yahan save hua: {dest}")}
+    if not repo:
+        raise HTTPException(400, "Update source sirf installed build me set hota hai (dev mode).")
+    _update_cancel.clear()
+    _update_job.update(state="checking", percent=0, read=0, total=0, message="Shuru ho raha hai...",
+                       latest="", ok=False, started_at=time.time())
+    threading.Thread(target=_run_update_job, args=(repo, token), daemon=True).start()
+    return dict(_update_job)
+
+
+@app.get("/api/update/progress")
+def update_progress(request: Request):
+    _check(request)
+    return dict(_update_job)
+
+
+@app.post("/api/update/cancel")
+def update_cancel(request: Request):
+    _check(request)
+    if _update_job["state"] in ("checking", "downloading"):
+        _update_cancel.set()
+        return {"ok": True}
+    return {"ok": False}
 
 
 # ---- static web (container testing / optional) --------------------------------

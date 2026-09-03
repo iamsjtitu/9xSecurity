@@ -49,6 +49,7 @@ export default function App() {
         connected={state.connected}
         outboxPending={state.outbox_pending || 0}
         updateLatest={state.update_available ? state.update_latest : ''}
+        updateJob={state.update_job}
         onUpdateClick={() => { setSettingsTab('updates'); setPage('settings'); }}
         onLogout={() => { logout(); setAuthed(false); }}
       />

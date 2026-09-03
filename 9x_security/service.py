@@ -52,6 +52,9 @@ def _check(request: Request):
         raise HTTPException(401, "unauthorized")
 
 
+AUTO_MODEL_MAX_MS = int(os.environ.get("AUTO_MODEL_MAX_MS", "350"))  # accurate model budget per frame
+
+
 class Worker:
     def __init__(self):
         self._running = False
@@ -104,6 +107,7 @@ class Worker:
             try:
                 self.engine.notifier.update(cfg)
                 self.engine.detector.set_allowed(cfg.get("vehicle_classes") or ["car", "truck", "bus"])
+                self.engine.detector.conf = float(cfg.get("confidence", 0.4))
             except Exception:
                 pass
 
@@ -152,15 +156,17 @@ class Worker:
         return frame
 
     def _ai_selftest(self):
-        """Run one real inference right after model load so a broken torch/
-        torchvision build shows up immediately (not silently per frame)."""
+        """Run real inferences right after model load so a broken torch/
+        torchvision build shows up immediately (not silently per frame).
+        Returns the ms of the 2nd (warm) inference."""
         import numpy as np
 
-        t0 = time.time()
         blank = np.zeros((config.DISPLAY_HEIGHT, config.DISPLAY_WIDTH, 3), dtype=np.uint8)
+        self.engine.detector.detect(blank)  # warm-up (lazy torch init)
+        t0 = time.time()
         dets = self.engine.detector.detect(blank)
         ms = (time.time() - t0) * 1000
-        clog(f"svc: AI self-test OK ({ms:.0f} ms, {len(dets)} dets on blank frame)")
+        clog(f"svc: AI self-test OK ({getattr(self.engine.detector, 'model_name', '?')}, {ms:.0f} ms, {len(dets)} dets on blank frame)")
         return ms
 
     def _run_impl(self):
@@ -181,6 +187,11 @@ class Worker:
         if self.engine is not None:
             try:
                 self.ai_ms = self._ai_selftest()
+                if (cfg.get("detector_model", "auto") == "auto" and self.engine.model_tier == "accurate"
+                        and self.ai_ms > AUTO_MODEL_MAX_MS):
+                    name = self.engine.use_fast_model()
+                    clog(f"svc: accurate model too slow here ({self.ai_ms:.0f} ms > {AUTO_MODEL_MAX_MS}) -> {name}")
+                    self.ai_ms = self._ai_selftest()
             except Exception:
                 self._note_ai_error("AI self-test", __import__("traceback").format_exc())
                 clog("svc: AI self-test FAILED (detection disabled):\n"
@@ -322,6 +333,10 @@ def state(request: Request):
         "wa_enabled": bool(cfg.get("wa_enabled")),
         "enable_plate": bool(cfg.get("enable_plate")),
         "vehicle_classes": cfg.get("vehicle_classes", ["car", "truck", "bus"]),
+        "detector_model": cfg.get("detector_model", "auto"),
+        "confidence": cfg.get("confidence", 0.4),
+        "ai_model": worker.engine.detector.model_name if worker.engine else None,
+        "ai_tier": worker.engine.model_tier if worker.engine else None,
         "entry_direction": cfg.get("entry_direction", "pos"),
         "line": cfg.get("line"),
         "snapshot_dir": config.SNAPSHOT_DIR,
@@ -440,6 +455,13 @@ def set_options(body: dict, request: Request):
     if "vehicle_classes" in body:
         vc = [v for v in body["vehicle_classes"] if v in ("car", "truck", "bus")]
         cfg["vehicle_classes"] = vc or ["car", "truck", "bus"]
+    if body.get("detector_model") in ("auto", "fast", "accurate"):
+        cfg["detector_model"] = body["detector_model"]
+    if "confidence" in body:
+        try:
+            cfg["confidence"] = min(0.9, max(0.15, float(body["confidence"])))
+        except (TypeError, ValueError):
+            pass
     config.save_config(cfg)
     worker.apply_cfg(cfg)
     return {"ok": True}
@@ -643,6 +665,9 @@ def diagnostics(request: Request):
             "entry_direction": cfg.get("entry_direction"),
             "vehicle_classes": cfg.get("vehicle_classes"),
             "confidence": cfg.get("confidence"),
+            "detector_model": cfg.get("detector_model", "auto"),
+            "ai_model": eng.detector.model_name if eng else None,
+            "ai_tier": eng.model_tier if eng else None,
         },
         "whatsapp": {
             "enabled": bool(cfg.get("wa_enabled")),
@@ -887,15 +912,27 @@ def selftest():
     from plate_reader import PlateReader, _bundled_model_dir
 
     rc = 0
-    try:
-        t0 = time.time()
-        VehicleDetector().detect(np.zeros((config.DISPLAY_HEIGHT, config.DISPLAY_WIDTH, 3), np.uint8))
-        print(f"SELFTEST yolo OK ({(time.time() - t0) * 1000:.0f} ms)", flush=True)
-    except Exception:
-        import traceback
+    for tier in ("fast", "accurate"):
+        try:
+            from detector import resolve_model_path
 
-        print("SELFTEST yolo FAIL:\n" + traceback.format_exc(), flush=True)
-        rc = 1
+            path, got = resolve_model_path(tier)
+            if got != tier:
+                print(f"SELFTEST yolo {tier}: model file missing ({os.path.basename(path)} used instead)", flush=True)
+                if tier == "accurate":
+                    print("::warning::yolov8s.pt not bundled — accurate mode unavailable", flush=True)
+                continue
+            det = VehicleDetector(model_path=path)
+            blank = np.zeros((config.DISPLAY_HEIGHT, config.DISPLAY_WIDTH, 3), np.uint8)
+            det.detect(blank)
+            t0 = time.time()
+            det.detect(blank)
+            print(f"SELFTEST yolo {tier} ({det.model_name}) OK ({(time.time() - t0) * 1000:.0f} ms)", flush=True)
+        except Exception:
+            import traceback
+
+            print(f"SELFTEST yolo {tier} FAIL:\n" + traceback.format_exc(), flush=True)
+            rc = 1
     print(f"SELFTEST easyocr models dir: {_bundled_model_dir()}", flush=True)
     pr = PlateReader()
     print("SELFTEST easyocr " + ("OK" if pr.warmup() else f"FAIL: {pr.last_error}"), flush=True)

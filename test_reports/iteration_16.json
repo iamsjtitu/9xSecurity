@@ -1,0 +1,22 @@
+{
+  "summary": "All requested tests PASSED. (1) CORE E2E bus recross: 2 events for the SAME track id 1, opposite directions (Entry + Exit) — verifying the reported bug (only-one-count-per-track) is fixed. AI tier was 'accurate' (yolov8s.pt) at 134 ms/frame. (2) Options API: detector_model set/reject-bogus/clamp confidence all correct. (3) Pytest: 14/14 passed (test_detection_strength.py + test_capture_fixes.py). (4) UI quick check: 3 model options present, selecting 'accurate' fires toast and /api/state.detector_model=='accurate'. Confidence slider is a shadcn (non-native) slider so scripted value-set didn't move it, but backend confidence API is verified. Cleanup executed and service restored with admin/9xsecurity.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/test_detection_strength.py",
+    "/app/9x_security/test_capture_fixes.py"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Old camera_log lines showed one earlier 'SNAPSHOT SAVE FAILED ([Errno 20] Not a directory)' from a prior temp-dir run — non-blocking but suggests snapshot dir isn't ensured when config.snap_dir is a file-like temp path.",
+    "must_change_password flag re-appears after service restart even after POST /api/settings {new_password:...}; not covered by request but may confuse users on second login."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin / 9xsecurity (per /app/memory/test_credentials.md); Temp123456 used transiently in UI test and reverted.",
+  "seed_data_creation": "Built /app/9x_security/_gate_test.mp4 (bus recross scenario) — removed during cleanup.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Bug fix verified end-to-end: same track produced Entry+Exit events (~2 min 45s apart in run) with vehicle_type=='bus' both times. AI ran on yolov8s.pt (ai_tier='accurate', ai_ms=134). Options endpoint clamps confidence to [0.15,0.9] and ignores bogus detector_model values. UI dropdown 'detector-model-select' has data-testid; toast appears with data-testid 'toast'. Confidence slider is shadcn — to test in Playwright, use keyboard arrows on focused slider or dispatch pointer events, not `.value=`.",
+  "rca of the issue": "Original bug: tracker used tr.counted flag so a track that never left camera view could cross the line only once. Fix in tracker.py disarms track after crossing until bottom-center moves >= hysteresis px past line and requires >= 3s gap; label voting biases truck/bus. Verified: bus track_id=1 produced both an Entry and an Exit event in the same run."
+}

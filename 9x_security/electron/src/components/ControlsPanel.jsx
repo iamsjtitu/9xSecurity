@@ -73,6 +73,39 @@ export default function ControlsPanel({ state, refreshState, showToast, drawMode
             </label>
           ))}
         </div>
+        <div className="flex items-center gap-2 text-sm text-slate-700">
+          <span className="text-slate-500 shrink-0">AI Model:</span>
+          <select
+            className="input !py-1.5 text-sm flex-1"
+            value={state.detector_model || 'auto'}
+            onChange={(e) => { setOpts({ detector_model: e.target.value }); showToast('Model change camera dobara Connect karne par lagu hoga', 'info'); }}
+            data-testid="detector-model-select"
+          >
+            <option value="auto">Auto (accurate, slow PC par fast)</option>
+            <option value="accurate">Accurate (YOLOv8s — truck/bus sahi)</option>
+            <option value="fast">Fast (YOLOv8n — kam CPU)</option>
+          </select>
+        </div>
+        {state.ai_model && (
+          <div className="text-xs text-slate-500" data-testid="ai-model-active">
+            Abhi chal raha: <span className="font-mono text-slate-700">{state.ai_model}</span>
+            {state.ai_ms != null ? ` · ${state.ai_ms} ms/frame` : ''}
+          </div>
+        )}
+        <div className="text-sm text-slate-700">
+          <div className="flex items-center justify-between">
+            <span className="text-slate-500">Sensitivity</span>
+            <span className="font-mono text-xs text-slate-600" data-testid="confidence-value">{Math.round((state.confidence ?? 0.35) * 100)}%</span>
+          </div>
+          <input
+            type="range" min="15" max="70" step="5"
+            className="w-full accent-[#1f6feb]"
+            value={Math.round((state.confidence ?? 0.35) * 100)}
+            onChange={(e) => setOpts({ confidence: Number(e.target.value) / 100 })}
+            data-testid="confidence-slider"
+          />
+          <div className="flex justify-between text-[10px] text-slate-400"><span>Zyada pakde (false bhi)</span><span>Sirf pakka</span></div>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,9 @@
 """9x Security - Lightweight centroid tracker + line-crossing detection."""
 import math
+import time
+from collections import Counter
+
+HEAVY = ("bus", "truck")
 
 
 def _side(p, a, b):
@@ -12,28 +16,51 @@ class Track:
         self.id = tid
         self.centroid = centroid
         self.bbox = bbox
-        self.label = label
+        self.labels = Counter([label])
         self.side = side          # last known side sign (-1 / 0 / 1)
         self.start_dist = dist    # signed px distance to line when first seen
         self.disappeared = 0
-        self.counted = False      # already logged a crossing
+        self.crossings = 0
+        self.last_cross_ts = None
+        self.last_cross_to = 0
+        self.armed = True         # may count a crossing right now (hysteresis)
+
+    @property
+    def counted(self):
+        return self.crossings > 0
+
+    @property
+    def label(self):
+        """Voted label over the track's life. YOLO often calls a truck 'car' for a
+        few frames — if a heavy class shows up in >=30% of frames, trust it."""
+        total = sum(self.labels.values()) or 1
+        for heavy in ("bus", "truck"):
+            if self.labels.get(heavy, 0) / total >= 0.30:
+                return heavy
+        return self.labels.most_common(1)[0][0]
 
 
 class CentroidTracker:
     """Matches detections by centroid distance; line-crossing is judged on the
     BOTTOM-CENTER point (where the wheels touch the ground). For a gate camera
     looking down, a vehicle's centroid is already past a ground line when it
-    first becomes visible — bottom-center crosses the line reliably."""
+    first becomes visible — bottom-center crosses the line reliably.
 
-    def __init__(self, max_disappeared=20, max_distance=90, near_band=0):
+    A track can cross MORE THAN ONCE (car exits, turns, comes back in): after a
+    crossing it is disarmed until the ref point moves >= hysteresis px past the
+    line, and a new crossing needs >= min_gap_s since the last one."""
+
+    def __init__(self, max_disappeared=20, max_distance=90, near_band=0, hysteresis=None, min_gap_s=3.0):
         self.next_id = 1
         self.tracks = {}
         self.max_disappeared = max_disappeared
         self.max_distance = max_distance
         # Occluded gates: a vehicle may FIRST appear already just past the line
         # (wall hides the outside). If it appeared within near_band px of the line
-        # and then moved >= 2.5*band away on that same side, count it as a crossing.
+        # and then moved >= 1.5*band away on that same side, count it as a crossing.
         self.near_band = near_band
+        self.hysteresis = hysteresis
+        self.min_gap_s = min_gap_s
 
     @staticmethod
     def _centroid(bbox):
@@ -50,22 +77,24 @@ class CentroidTracker:
         # big (close) vehicles move many pixels per frame: scale tolerance with size
         return max(self.max_distance, 0.6 * max(x2 - x1, y2 - y1))
 
-    def update(self, detections, line):
+    def _hyst(self):
+        if self.hysteresis is not None:
+            return self.hysteresis
+        return max(20.0, 0.5 * self.near_band)
+
+    def update(self, detections, line, now=None):
         """
         detections: list of {bbox,label}
         line: (a, b) two points in same coord space as detections
-        Returns list of crossing events: {track_id, label, from_side, to_side}
+        Returns list of crossing events: {track_id, label, from_side, to_side, via}
         """
+        now = time.time() if now is None else now
         a, b = line
         line_len = math.hypot(b[0] - a[0], b[1] - a[1]) or 1.0
         crossings = []
-        inputs = []
-        for d in detections:
-            c = self._centroid(d["bbox"])
-            inputs.append((c, d))
+        inputs = [(self._centroid(d["bbox"]), d) for d in detections]
 
         used_track_ids = set()
-        # Match each detection to nearest existing track.
         for c, d in inputs:
             limit = self._allowed_dist(d["bbox"])
             best_id, best_dist = None, limit + 1
@@ -83,18 +112,25 @@ class CentroidTracker:
                 prev_sign = tr.side
                 tr.centroid = c
                 tr.bbox = d["bbox"]
-                tr.label = d["label"]
+                tr.labels[d["label"]] += 1
                 tr.disappeared = 0
                 used_track_ids.add(best_id)
+
+                # re-arm once the vehicle is clearly past the line it just crossed
+                if not tr.armed and abs(cur_dist) >= self._hyst():
+                    tr.armed = True
+
                 crossed = prev_sign != 0 and cur_sign != 0 and cur_sign != prev_sign
                 appeared_at_line = (
-                    self.near_band > 0
+                    tr.crossings == 0
+                    and self.near_band > 0
                     and cur_sign != 0
                     and abs(tr.start_dist) <= self.near_band
-                    and abs(cur_dist) >= 2.5 * self.near_band
+                    and abs(cur_dist) >= 1.5 * self.near_band
                     and self._sign(tr.start_dist) in (0, cur_sign)
                 )
-                if not tr.counted and (crossed or appeared_at_line):
+                gap_ok = tr.last_cross_ts is None or (now - tr.last_cross_ts) >= self.min_gap_s
+                if tr.armed and gap_ok and (crossed or appeared_at_line):
                     crossings.append(
                         {
                             "track_id": best_id,
@@ -103,9 +139,13 @@ class CentroidTracker:
                             "from_side": prev_sign if crossed else -cur_sign,
                             "to_side": cur_sign,
                             "via": "cross" if crossed else "appeared-at-line",
+                            "nth": tr.crossings + 1,
                         }
                     )
-                    tr.counted = True
+                    tr.crossings += 1
+                    tr.last_cross_ts = now
+                    tr.last_cross_to = cur_sign
+                    tr.armed = False
                 tr.side = cur_sign
             else:
                 tid = self.next_id
@@ -113,13 +153,12 @@ class CentroidTracker:
                 self.tracks[tid] = Track(tid, c, d["bbox"], d["label"], cur_sign, cur_dist)
                 used_track_ids.add(tid)
 
-        # Age out unmatched tracks.
+        # Age out unmatched tracks
         for tid in list(self.tracks.keys()):
             if tid not in used_track_ids:
                 self.tracks[tid].disappeared += 1
                 if self.tracks[tid].disappeared > self.max_disappeared:
                     del self.tracks[tid]
-
         return crossings
 
     @staticmethod

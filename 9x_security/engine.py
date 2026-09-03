@@ -232,10 +232,18 @@ class SecurityEngine:
     def __init__(self, cfg=None, db=None, detector=None, plate_reader=None):
         self.cfg = cfg or config.load_config()
         self.db = db or EventDB()
-        self.detector = detector or VehicleDetector(
-            conf=self.cfg.get("confidence", 0.4),
-            allowed=self.cfg.get("vehicle_classes"),
-        )
+        if detector is None:
+            from detector import resolve_model_path
+
+            path, self.model_tier = resolve_model_path(self.cfg.get("detector_model", "auto"))
+            detector = VehicleDetector(
+                model_path=path,
+                conf=self.cfg.get("confidence", 0.4),
+                allowed=self.cfg.get("vehicle_classes"),
+            )
+        else:
+            self.model_tier = "custom"
+        self.detector = detector
         self.tracker = CentroidTracker()
         self.plate_reader = plate_reader
         if self.cfg.get("enable_plate") and self.plate_reader is None:
@@ -268,6 +276,16 @@ class SecurityEngine:
         return "Entry" if to_side == entry_sign else "Exit"
 
     # ---- main per-frame pipeline ------------------------------------------
+    def use_fast_model(self):
+        """Auto mode fallback: swap to yolov8n when the accurate model is too slow here."""
+        from detector import resolve_model_path
+
+        path, self.model_tier = resolve_model_path("fast")
+        self.detector = VehicleDetector(
+            model_path=path, conf=self.cfg.get("confidence", 0.4), allowed=self.cfg.get("vehicle_classes")
+        )
+        return self.detector.model_name
+
     def process_frame(self, frame, original=None):
         """
         frame: BGR image already resized to processing/display resolution.
@@ -445,6 +463,7 @@ class SecurityEngine:
         hud = f"AI: {n} vehicle{'s' if n != 1 else ''} tracked"
         if self.last_detect_ms is not None:
             hud += f"  |  {self.last_detect_ms:.0f} ms"
+        hud += f"  |  {getattr(self.detector, 'model_name', '')}"
         cv2.putText(img, hud, (10, img.shape[0] - 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                     (0, 0, 0), 3)
         cv2.putText(img, hud, (10, img.shape[0] - 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5,

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, shell, powerSaveBlocker } = require('electron');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
@@ -116,6 +116,9 @@ if (!gotLock) {
 } else {
   app.on('second-instance', () => showWindow());
   app.whenReady().then(() => {
+    // Gate monitoring must keep running when the window is hidden in the tray:
+    // stop Windows from putting the PC to sleep (display may still turn off).
+    try { powerSaveBlocker.start('prevent-app-suspension'); } catch (_) { /* optional */ }
     startEngine();
     createTray();
     waitEngine(() => createWindow());

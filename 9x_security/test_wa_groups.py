@@ -46,6 +46,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
 @pytest.fixture(scope="module")
 def server():
+    import importlib
+
+    import whatsapp
+
+    whatsapp.requests.post = importlib.import_module("requests.api").post  # undo global patches from other test files
     srv = http.server.HTTPServer(("127.0.0.1", 0), Handler)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     yield f"http://127.0.0.1:{srv.server_port}"

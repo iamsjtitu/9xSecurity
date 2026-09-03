@@ -58,7 +58,8 @@ DEFAULTS = {
     # Which crossing direction counts as ENTRY.
     # cross product sign flips from negative->positive = "pos", positive->negative = "neg"
     "entry_direction": "pos",
-    "confidence": 0.40,
+    "confidence": 0.35,
+    "detector_model": "auto",        # auto | fast (yolov8n) | accurate (yolov8s)
     "detect_frame_skip": 2,          # run detector every N frames (CPU friendly)
     "enable_plate": True,
     "vehicle_classes": ["car", "truck", "bus"],

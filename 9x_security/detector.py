@@ -6,13 +6,32 @@ import config
 # COCO class ids that represent vehicles.
 COCO_VEHICLES = {2: "car", 3: "motorcycle", 5: "bus", 7: "truck"}
 
+MODEL_FILES = {"fast": "yolov8n.pt", "accurate": "yolov8s.pt"}
+
+
+def resolve_model_path(pref="auto"):
+    """'fast' -> yolov8n, 'accurate' -> yolov8s, 'auto' -> yolov8s if bundled else n.
+    Returns (path, tier)."""
+    res_dir = os.path.dirname(config.MODEL_PATH)
+    s_path = os.path.join(res_dir, MODEL_FILES["accurate"])
+    n_path = os.path.join(res_dir, MODEL_FILES["fast"])
+    if pref == "fast":
+        return n_path, "fast"
+    if pref == "accurate":
+        return (s_path if os.path.exists(s_path) else n_path), ("accurate" if os.path.exists(s_path) else "fast")
+    if os.path.exists(s_path):
+        return s_path, "accurate"
+    return n_path, "fast"
+
 
 class VehicleDetector:
-    def __init__(self, model_path=None, conf=0.40, allowed=None):
+    def __init__(self, model_path=None, conf=0.40, allowed=None, imgsz=640):
         self.model_path = model_path or config.MODEL_PATH
         self.conf = conf
+        self.imgsz = imgsz
         self.allowed = set(allowed or ["car", "truck", "bus"])
         self.model = None
+        self.model_name = os.path.basename(self.model_path)
         self._load()
 
     def _load(self):
@@ -20,6 +39,7 @@ class VehicleDetector:
 
         # If a local weights file exists use it, else ultralytics downloads yolov8n.
         path = self.model_path if os.path.exists(self.model_path) else "yolov8n.pt"
+        self.model_name = os.path.basename(path)
         self.model = YOLO(path)
 
     def set_allowed(self, allowed):
@@ -28,7 +48,10 @@ class VehicleDetector:
     def detect(self, frame):
         """Return list of {bbox:(x1,y1,x2,y2), label, conf}."""
         class_ids = [cid for cid, name in COCO_VEHICLES.items() if name in self.allowed]
-        results = self.model(frame, verbose=False, conf=self.conf, classes=class_ids)
+        # agnostic_nms: one vehicle must not become two boxes (car + truck) -> double count
+        results = self.model(
+            frame, verbose=False, conf=self.conf, classes=class_ids, agnostic_nms=True, imgsz=self.imgsz
+        )
         dets = []
         for r in results:
             if r.boxes is None:

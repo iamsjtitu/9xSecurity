@@ -91,6 +91,16 @@ jobs:
       - name: Download EasyOCR models (bundled for offline plate reading)
         run: python -c "import easyocr; easyocr.Reader(['en'], gpu=False, verbose=False, model_storage_directory='easyocr_models', download_enabled=True); print('models ready')"
 
+      - name: Download YOLOv8s (accurate model, bundled)
+        shell: pwsh
+        run: |
+          if (!(Test-Path yolov8s.pt)) {
+            Invoke-WebRequest -Uri "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8s.pt" -OutFile yolov8s.pt
+          }
+          $len = (Get-Item yolov8s.pt).Length
+          if ($len -lt 20000000) { Write-Host "::error::yolov8s.pt download incomplete ($len bytes)"; exit 1 }
+          Write-Host "yolov8s.pt ready ($len bytes)"
+
       - name: Pre-build matplotlib font cache
         run: python -c "import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot; print('font cache ready')"
 
@@ -98,6 +108,7 @@ jobs:
         run: >
           pyinstaller --noconfirm --name "9xEngine"
           --add-data "yolov8n.pt;."
+          --add-data "yolov8s.pt;."
           --add-data "easyocr_models;easyocr_models"
           --collect-data ultralytics
           --collect-data easyocr

@@ -507,6 +507,36 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   group-only = leave numbers empty (explained in UI).
 - Verified: load 2 groups → select → Save → reload persists → Send Test → 'Group …: SENT ✅'.
 
+## Implemented (update 2026-06 #32) — Re-crossing fix + stronger detection (testing agent iteration_16: ALL PASS)
+- USER: exit captured, re-entry 10-15s later not captured; later "minimized → exit not captured";
+  trucks labeled car; "AI strong banao".
+- ROOT CAUSE: Track.counted = True forever → a vehicle that stays in view (parked in yard /
+  waiting outside) keeps its track and every later crossing was ignored. Minimize was a
+  coincidence (engine runs independent of the window; tray mode was already background-safe).
+- tracker.py rewrite: crossings per track unlimited; after a crossing the track is DISARMED until
+  its bottom-center is >= hysteresis (max(20, 0.5*near_band)) px past the line, and next crossing
+  needs >= min_gap_s (3s); update(..., now=) for testability; crossing dict has nth + via.
+  Label VOTING per track (Counter): truck/bus win if >= 30% of frames (YOLO mislabels trucks as
+  car in some frames). appeared-at-line threshold lowered 2.5→1.5×band.
+- detector.py: agnostic_nms=True (car+truck double box → 1), imgsz param, model tiers
+  resolve_model_path('auto'|'fast'|'accurate') → yolov8s.pt (accurate) bundled in CI
+  (downloaded from ultralytics assets v8.3.0, size-checked) + local copy (gitignored);
+  auto = yolov8s, falls back to yolov8n if self-test > AUTO_MODEL_MAX_MS (350 ms env).
+  DEFAULT confidence 0.35 (was 0.40), detector_model 'auto'.
+- service: /api/options accepts detector_model + confidence (clamped 0.15..0.9; applied live to
+  detector.conf); /api/state + diagnostics expose detector_model, confidence, ai_model, ai_tier;
+  self-test does warm-up + timed inference; selftest() (CI frozen check) tests BOTH models.
+  HUD: 'AI: N vehicles tracked | 140 ms | yolov8s.pt'.
+- UI Detection Controls: AI Model select (detector-model-select: auto/accurate/fast, info toast
+  "reconnect par lagu"), active model line (ai-model-active), Sensitivity slider
+  (confidence-slider, confidence-value %).
+- Electron: powerSaveBlocker 'prevent-app-suspension' so the PC does not sleep while hidden in tray.
+- Tests: test_detection_strength.py 7/7 (recross twice, jitter, quick-bounce gap, truck voting,
+  model paths, yolov8s detects bus w/o duplicate boxes, options API); full suite 58 pytest +
+  scripts green. iteration_16: real-YOLO E2E bus exit→wait→re-entry = 2 events same track id,
+  yolov8s 134 ms, options API, UI select verified.
+- NOTE test_engine.py globally patches whatsapp.requests.post; test_wa_groups fixture restores it.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

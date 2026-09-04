@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { LogIn, LogOut, X } from 'lucide-react';
 import { snapshotUrl } from '../api';
+import PlateBadge from './PlateBadge.jsx';
 
 const fmtTime = (iso) => {
   try {
@@ -11,9 +12,10 @@ const fmtTime = (iso) => {
 export default function CaptureToast({ event, onClose }) {
   useEffect(() => {
     if (!event) return undefined;
+    // restarts when the OCR result arrives so the number stays visible for a full 8s
     const id = setTimeout(onClose, 8000);
     return () => clearTimeout(id);
-  }, [event?.id]); // eslint-disable-line
+  }, [event?.id, event?.plate_status, event?.plate]); // eslint-disable-line
 
   if (!event) return null;
   const entry = event.direction === 'Entry';
@@ -36,8 +38,14 @@ export default function CaptureToast({ event, onClose }) {
           <Icon size={15} /> {event.direction} — {event.vehicle_type} captured
         </div>
         <div className="text-xs text-slate-500 font-mono mt-0.5" data-testid="capture-toast-meta">
-          {fmtTime(event.timestamp)}{event.plate ? ` · ${event.plate}` : ''}
+          {fmtTime(event.timestamp)}
         </div>
+        {(event.plate || event.plate_status) && (
+          <div className="mt-1 flex items-center gap-1.5 text-xs">
+            <span className="text-slate-500">Number:</span>
+            <PlateBadge plate={event.plate} status={event.plate_status} source={event.plate_source} testid="capture-toast-plate" />
+          </div>
+        )}
       </div>
       <button onClick={onClose} className="text-slate-400 hover:text-slate-700 shrink-0" aria-label="close" data-testid="capture-toast-close">
         <X size={16} />

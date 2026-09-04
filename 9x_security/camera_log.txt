@@ -299,3 +299,31 @@
 2026-09-03T15:57:14 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)
 2026-09-03T17:12:09 | svc: starting on 127.0.0.1:8971 v1.0.0
 2026-09-03T17:12:09 | purge: 0 old events removed (retention 7d, cutoff 2026-08-27)
+2026-09-04T08:31:19 | event: Exit car track 1 (cross) -> /tmp/tmpycivvsy7/snaps/2026-09-04/Exit_car_08-31-19-583.jpg
+2026-09-04T08:31:21 | === PROBE start: notaurl
+2026-09-04T08:31:21 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-09-04T08:31:24 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-04T08:31:24 | ffmpeg-pipe: starting
+2026-09-04T08:31:25 | event: Exit car track 1 (cross) -> /tmp/tmpycivvsy7/snaps/2026-09-04/Exit_car_08-31-25-078.jpg
+2026-09-04T08:31:25 | plate OCR: track 1 Exit queued (2 crops)
+2026-09-04T08:31:25 | plate OCR: track 1 event 1 -> 'KA01MJ2022' (fake, 2 crops)
+2026-09-04T08:32:09 | event: Exit car track 1 (cross) -> /tmp/tmp0rromcq6/snaps/2026-09-04/Exit_car_08-32-09-285.jpg
+2026-09-04T08:32:11 | === PROBE start: notaurl
+2026-09-04T08:32:11 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-09-04T08:32:14 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-04T08:32:14 | ffmpeg-pipe: starting
+2026-09-04T08:32:14 | event: Exit car track 1 (cross) -> /tmp/tmp0rromcq6/snaps/2026-09-04/Exit_car_08-32-14-906.jpg
+2026-09-04T08:32:14 | plate OCR: track 1 Exit queued (2 crops)
+2026-09-04T08:32:15 | plate OCR: track 1 event 1 -> 'KA01MJ2022' (fake, 2 crops)
+2026-09-04T08:32:33 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-04T08:32:33 | purge: 0 old events removed (retention 7d, cutoff 2026-08-28)
+2026-09-04T08:33:13 | event: Exit car track 1 (cross) -> /tmp/tmp_hrtp75b/snaps/2026-09-04/Exit_car_08-33-13-051.jpg
+2026-09-04T08:33:15 | === PROBE start: notaurl
+2026-09-04T08:33:15 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-09-04T08:33:18 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-04T08:33:18 | ffmpeg-pipe: starting
+2026-09-04T08:33:18 | event: Exit car track 1 (cross) -> /tmp/tmp_hrtp75b/snaps/2026-09-04/Exit_car_08-33-18-766.jpg
+2026-09-04T08:33:18 | plate OCR: track 1 Exit queued (2 crops)
+2026-09-04T08:33:19 | plate OCR: track 1 event 1 -> 'KA01MJ2022' (fake, 2 crops)
+2026-09-04T08:33:19 | plate manual: event 35 -> 'MH12AB1234'
+2026-09-04T08:33:19 | plate manual: event 35 -> '(cleared)'

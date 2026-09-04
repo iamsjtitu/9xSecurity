@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ImageOff, X, LogIn, LogOut as LogOutIcon, Search } from 'lucide-react';
 import { api, snapshotUrl, poll } from '../api';
+import PlateBadge from './PlateBadge.jsx';
+import PlateEditor from './PlateEditor.jsx';
 
 const iso = (d) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -28,7 +30,7 @@ const last7Days = () => {
   return out;
 };
 
-export default function EventsTable({ connected }) {
+export default function EventsTable({ connected, showToast }) {
   const [date, setDate] = useState(today());
   const [direction, setDirection] = useState('All');
   const [rows, setRows] = useState([]);
@@ -208,7 +210,9 @@ export default function EventsTable({ connected }) {
                 <td className="px-5 py-2 text-slate-700">{r.date} {fmt12(r.time)}</td>
                 <td className="px-5 py-2 font-semibold uppercase text-slate-800">{r.vehicle_type}</td>
                 <td className="px-5 py-2"><Badge d={r.direction} /></td>
-                <td className="px-5 py-2 font-mono text-slate-700">{r.plate || '—'}</td>
+                <td className="px-5 py-2">
+                  <PlateBadge plate={r.plate} status={r.plate_status} source={r.plate_source} testid={`event-plate-${r.id}`} />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -219,15 +223,29 @@ export default function EventsTable({ connected }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6" onClick={() => setPreview(null)} data-testid="snapshot-modal">
           <div className="card max-w-4xl w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200">
-              <div className="text-sm font-semibold text-slate-800">
-                {preview.direction} — {preview.vehicle_type.toUpperCase()} · {preview.date} {fmt12(preview.time)}
-                {preview.plate ? ` · ${preview.plate}` : ''}
+              <div className="text-sm font-semibold text-slate-800 flex items-center gap-2" data-testid="snapshot-modal-title">
+                {preview.direction} — {preview.vehicle_type.toUpperCase()} · {preview.date} {fmt12(preview.time)} ·
+                <PlateBadge plate={preview.plate} status={preview.plate_status} source={preview.plate_source} testid="snapshot-modal-plate" />
               </div>
               <button onClick={() => setPreview(null)} className="text-slate-400 hover:text-slate-700" data-testid="snapshot-modal-close">
                 <X size={18} />
               </button>
             </div>
-            <img src={snapshotUrl(preview.image_path)} alt="snapshot" className="w-full object-contain max-h-[70vh] bg-black" />
+            {preview.image_path ? (
+              <img src={snapshotUrl(preview.image_path)} alt="snapshot" className="w-full object-contain max-h-[62vh] bg-black" />
+            ) : (
+              <div className="h-48 flex items-center justify-center text-slate-400 text-sm bg-slate-100" data-testid="snapshot-modal-missing">
+                <ImageOff size={22} className="mr-2" strokeWidth={1.2} /> photo save nahi hui
+              </div>
+            )}
+            <PlateEditor
+              event={preview}
+              showToast={showToast || (() => {})}
+              onSaved={(ev) => {
+                setPreview(ev);
+                setRows((rs) => rs.map((r) => (r.id === ev.id ? { ...r, ...ev } : r)));
+              }}
+            />
           </div>
         </div>
       )}

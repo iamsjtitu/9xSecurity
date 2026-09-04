@@ -106,3 +106,9 @@
 2026-09-03T12:55:14 | outbox-sent | to=919999999999 | status=- | id=2
 2026-09-03T12:56:15 | text | to=919999999999 | status=201 | {"success":true}
 2026-09-03T12:56:15 | group-text | to=120363424861931093@g.us | status=201 | {"success":true}
+2026-09-04T08:31:21 | text | to=919876543210 | status=201 | {"success":true}
+2026-09-04T08:31:25 | image | to=919812345678 | status=200 | {"success":true}
+2026-09-04T08:32:11 | text | to=919876543210 | status=201 | {"success":true}
+2026-09-04T08:32:14 | image | to=919812345678 | status=200 | {"success":true}
+2026-09-04T08:33:15 | text | to=919876543210 | status=201 | {"success":true}
+2026-09-04T08:33:18 | image | to=919812345678 | status=200 | {"success":true}

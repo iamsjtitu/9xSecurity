@@ -27,6 +27,12 @@ export default function App() {
       const ev = s.last_event;
       const id = ev ? ev.id : null;
       if (lastEventId.current !== undefined && id != null && id !== lastEventId.current) setCapture(ev);
+      else if (ev) {
+        // same event, OCR finished: refresh the number on the visible toast
+        setCapture((cur) => (cur && cur.id === id && (cur.plate !== ev.plate || cur.plate_status !== ev.plate_status)
+          ? { ...cur, plate: ev.plate, plate_status: ev.plate_status, plate_source: ev.plate_source }
+          : cur));
+      }
       lastEventId.current = id;
     } catch (e) {
       if (String(e.message).includes('401')) {

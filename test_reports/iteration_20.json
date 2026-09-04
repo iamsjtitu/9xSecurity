@@ -1,0 +1,35 @@
+{
+  "summary": "Verified plate manual-correction feature end-to-end: pytest test_plate_manual.py (3/3 passed), plate API (normalize, 400 short, 404 unknown, 401 no-token, empty-clears), UI table states (Not detected / reading… / plate no-tag / plate + manual tag), modal manual correction flow (editor disabled until valid, save toast, row + header updates, plate search across dates, hint visible, missing-image placeholder), real-engine E2E capture toast (reading… -> Not detected on same event without dismissal, /api/state shows pending -> done for same id). Regression pytest bundle: 118 passed. All backend + frontend acceptance criteria PASSED.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "N/A (test suite)", "issue": "When running regression bundle (`pytest -q -p no:cacheprovider --ignore=tests --ignore=test_plate_ocr.py --ignore=test_service_api.py`), test_plate_manual.py::test_manual_plate_api errors with AttributeError: 'R' object has no attribute 'json'. This is because an EARLIER test in the bundle monkeypatches `requests.post` globally and the patch leaks into the module-scope `token` fixture (which uses real requests). Running test_plate_manual.py alone passes 3/3. Prior guidance said 'should be ~119 passed' — we got 118 passed + 1 error due to this test-isolation leak (not a product bug). Fix suggestion: use requests.Session() inside the fixture instead of the module-level requests.post, or make the offending test's monkeypatch scoped to a fixture."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/9x_security/test_plate_manual.py",
+    "/app/9x_security/test_async_ocr.py",
+    "/app/9x_security/test_plate_fmt.py"
+  ],
+  "action_items": [
+    "(Non-blocking) Consider fixing test-isolation issue in the regression bundle where a global requests.post monkeypatch leaks into test_plate_manual.py's `token` fixture, causing 1 spurious error when the whole bundle runs (isolated run passes)."
+  ],
+  "critical_code_review_comments": [
+    "Feature implementation is clean: engine emits on_event twice (pending -> done) with same id; App.jsx refreshState updates the toast when plate/plate_status changes for the same id, so toast timer restarts and text updates in-place — verified live.",
+    "POST /api/events/{id}/plate correctly normalizes (strips non-alnum, uppercases, validates 4-12 alnum), sets plate_source='manual', plate_status='done', and empty string clears both plate + source. camera_log gets 'plate manual: event N -> ...' line as required.",
+    "DB migration idempotently adds plate_status/plate_source columns via PRAGMA table_info check — good."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin / 9xsecurity (restored at end; first UI login forces change — used Temp123456 during test, then POST /api/settings {new_password:9xsecurity} to restore)",
+  "seed_data_creation": "Seeded 4 rows directly in /app/9x_security/events.db (ids 44-47) for UI table state verification; deleted all seeded rows + created E2E-connect events (id>=40) and their snapshot files at cleanup. config.json restored via git checkout.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Feature is fully working. Password may have been left as 9xsecurity but the 'must change' flag is per config; if login shows Naya password screen again, use UI to change (or POST /api/settings). Engine service runs via nohup on port 8971 (not supervisor). Regression bundle known-1-flaky (test-isolation bleed in test_plate_manual.py::test_manual_plate_api when combined with global requests.post monkeypatch from another test).",
+  "rca of the issue": "N/A — no product bugs found. The single regression-bundle error is a pre-existing pytest fixture isolation issue (module-scope `token` fixture calls the still-monkeypatched requests.post from a prior test) and is not a functional defect."
+}

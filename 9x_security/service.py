@@ -84,6 +84,8 @@ class Worker:
             "direction": ev.get("direction"),
             "vehicle_type": ev.get("vehicle_type"),
             "plate": ev.get("plate", ""),
+            "plate_status": ev.get("plate_status", ""),
+            "plate_source": ev.get("plate_source", ""),
             "image_path": ev.get("image_path", ""),
             "timestamp": ev.get("timestamp"),
         }
@@ -560,6 +562,26 @@ def events(request: Request, date: str = "", direction: str = "All", all: int = 
         plate_filter=plate.strip() or None,
     )
     return {"events": rows}
+
+
+_PLATE_RE = re.compile(r"^[A-Z0-9]{4,12}$")
+
+
+@app.post("/api/events/{eid}/plate")
+def set_event_plate(eid: int, body: dict, request: Request):
+    """Manual plate correction (also clears with ''). Searchable like OCR plates."""
+    _check(request)
+    plate = re.sub(r"[^A-Z0-9]", "", str(body.get("plate", "")).upper())
+    if plate and not _PLATE_RE.match(plate):
+        raise HTTPException(400, "Plate 4-12 letters/digits ki honi chahiye (jaise MH12AB1234)")
+    row = _db.update_event_plate(eid, plate, source="manual", status="done")
+    if row is None:
+        raise HTTPException(404, "event nahi mila")
+    if worker.last_event and worker.last_event.get("id") == eid:
+        worker.last_event = {**worker.last_event, "plate": plate, "plate_status": "done",
+                             "plate_source": "manual" if plate else ""}
+    clog(f"plate manual: event {eid} -> '{plate or '(cleared)'}'")
+    return {"ok": True, "event": row}
 
 
 @app.get("/api/counts")

@@ -29,7 +29,7 @@ export default function Dashboard({ state, refreshState, showToast }) {
         />
       </div>
       <div className="lg:col-span-12">
-        <EventsTable connected={state.connected} />
+        <EventsTable connected={state.connected} showToast={showToast} />
       </div>
     </div>
   );

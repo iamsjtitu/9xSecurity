@@ -605,6 +605,26 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - USER NEXT: Save to GitHub → install build → Number Plate (OCR) ON → real truck/car plates check;
   agar 'Not detected' zyada aaye to Settings > Diagnostics camera_log me 'plate OCR raw reads' line paste karein.
 
+## Implemented (update 2026-06 #36) — Live plate on toast/table + manual plate correction (testing agent iteration_20: ALL PASS)
+- DB: events.plate_status ('' | 'pending' | 'done') + plate_source ('' | 'ocr' | 'manual'), idempotent
+  ALTER TABLE migration in EventDB._init; add_event(plate_status=); update_event_plate(eid, plate, source,
+  status) returns the row (None if missing).
+- Engine: crossing event saved with plate_status 'pending' when OCR on; after OCR the DB row is updated
+  (source 'ocr'/'', status 'done') and on_event fires AGAIN with the same id → Worker.last_event updated →
+  /api/state → App.jsx updates the visible capture toast in place (timer restarts so the number stays 8 s).
+- API: POST /api/events/{id}/plate {plate} — normalizes to A-Z0-9 (4-12 chars, else 400), 404 unknown id,
+  '' clears; sets plate_source 'manual'; updates worker.last_event if it is that event; camera_log
+  'plate manual: event N -> …'. Manual plates are searchable via the existing plate LIKE search.
+- UI: PlateBadge.jsx (number + amber '✎ manual' tag / italic 'reading…' / grey 'Not detected'); used in
+  table Plate column (event-plate-<id>, event-plate-<id>-manual), CaptureToast 'Number:' line
+  (capture-toast-plate) and snapshot modal header (snapshot-modal-plate). PlateEditor.jsx inside the modal
+  (plate-editor, plate-editor-current, plate-editor-input, plate-editor-save-btn; Enter saves; disabled
+  until changed/valid) → toast 'Number X save ho gaya ✔ (search me milega)', row + header update instantly.
+  Modal shows snapshot-modal-missing placeholder when the photo is missing.
+- Tests: test_plate_manual.py 3/3 (migration, pending→done events, API); iteration_20 backend+frontend 100%
+  incl. real-engine E2E toast 'reading…' → 'Not detected' on the same toast.
+- LEARNING: never `git checkout -- events.db` while service.py runs (stale inode → API reads a phantom DB).
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

@@ -445,12 +445,15 @@ class SecurityEngine:
         for cr in crossings:
             direction = self._direction_for(cr["to_side"])
             image_path = self._save_snapshot(frame, cr, direction)
-            eid = self.db.add_event(cr["label"], direction, "", image_path)
+            ocr_on = bool(self.cfg.get("enable_plate") and self.plate_reader is not None)
+            eid = self.db.add_event(cr["label"], direction, "", image_path, plate_status="pending" if ocr_on else "")
             ev = {
                 "id": eid,
                 "vehicle_type": cr["label"],
                 "direction": direction,
                 "plate": "",
+                "plate_status": "pending" if ocr_on else "",
+                "plate_source": "",
                 "image_path": image_path,
                 "timestamp": datetime.now().isoformat(timespec="seconds"),
             }
@@ -460,7 +463,7 @@ class SecurityEngine:
                     self.on_event(ev)
                 except Exception:
                     pass
-            if self.cfg.get("enable_plate") and self.plate_reader is not None:
+            if ocr_on:
                 # OCR is slow on CPU: run async so the frame loop never stalls.
                 crops = []
                 c = self._plate_crop(frame, original, cr["bbox"], w, h)
@@ -555,15 +558,19 @@ class SecurityEngine:
                 detail = "single-read"
         except Exception as e:
             detail = f"error: {e}"
-        if plate:
-            try:
-                self.db.update_event_plate(eid, plate)
-            except Exception:
-                pass
-            ev = {**ev, "plate": plate}
+        try:
+            self.db.update_event_plate(eid, plate, source="ocr", status="done")
+        except Exception:
+            pass
+        ev = {**ev, "plate": plate, "plate_status": "done", "plate_source": "ocr" if plate else ""}
         clog(f"plate OCR: track {tid} event {eid} -> '{plate or 'Not detected'}' ({detail}, {len(crops)} crops)")
         if not plate and getattr(self.plate_reader, "last_trace", None):
             clog("plate OCR raw reads: " + " | ".join(self.plate_reader.last_trace)[:400])
+        if self.on_event:
+            try:
+                self.on_event(ev)  # same id: UI updates the capture toast with the number
+            except Exception:
+                pass
         try:
             self.notifier.notify(ev)
         except Exception:

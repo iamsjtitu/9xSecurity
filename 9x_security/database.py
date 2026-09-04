@@ -45,14 +45,20 @@ class EventDB:
                 """
             )
             self.conn.commit()
+            cols = {r["name"] for r in self.conn.execute("PRAGMA table_info(events)").fetchall()}
+            if "plate_status" not in cols:  # '' | 'pending' (OCR running) | 'done'
+                self.conn.execute("ALTER TABLE events ADD COLUMN plate_status TEXT NOT NULL DEFAULT ''")
+            if "plate_source" not in cols:  # '' | 'ocr' | 'manual'
+                self.conn.execute("ALTER TABLE events ADD COLUMN plate_source TEXT NOT NULL DEFAULT ''")
+            self.conn.commit()
 
-    def add_event(self, vehicle_type, direction, plate, image_path, ts=None):
+    def add_event(self, vehicle_type, direction, plate, image_path, ts=None, plate_status=""):
         ts = ts or datetime.now()
         with self._lock:
             cur = self.conn.execute(
                 """INSERT INTO events
-                   (timestamp, date, time, vehicle_type, direction, plate, image_path)
-                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                   (timestamp, date, time, vehicle_type, direction, plate, image_path, plate_status, plate_source)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     ts.isoformat(timespec="seconds"),
                     ts.strftime("%Y-%m-%d"),
@@ -61,6 +67,8 @@ class EventDB:
                     direction,
                     plate or "",
                     image_path,
+                    plate_status,
+                    "ocr" if plate else "",
                 ),
             )
             self.conn.commit()
@@ -109,10 +117,19 @@ class EventDB:
             self.conn.commit()
         return [r["image_path"] for r in rows]
 
-    def update_event_plate(self, eid, plate):
+    def update_event_plate(self, eid, plate, source="ocr", status="done"):
+        """Set the plate of an event (OCR result or manual correction). Returns the row or None."""
+        plate = plate or ""
         with self._lock:
-            self.conn.execute("UPDATE events SET plate=? WHERE id=?", (plate, eid))
+            cur = self.conn.execute(
+                "UPDATE events SET plate=?, plate_source=?, plate_status=? WHERE id=?",
+                (plate, source if plate else "", status, eid),
+            )
             self.conn.commit()
+            if cur.rowcount == 0:
+                return None
+            row = self.conn.execute("SELECT * FROM events WHERE id=?", (eid,)).fetchone()
+        return dict(row) if row else None
 
     def stats(self):
         with self._lock:

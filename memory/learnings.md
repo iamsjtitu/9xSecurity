@@ -25,3 +25,6 @@
 - UI pollers must be sequential (api.js poll()) and every api() call has a timeout; setInterval + slow
   engine = request pile-up (6 sockets/host) = Settings 'Loading…' forever.
 - Full pytest in one session: run test_service_api.py separately (test_engine.py leaks a requests.post patch).
+- NEVER `git checkout -- events.db` while service.py is running: the service keeps the old inode open and
+  reads/writes a phantom DB (API shows [] while the file has rows). Clean rows with sqlite DELETE instead;
+  if you did checkout, restart the service.

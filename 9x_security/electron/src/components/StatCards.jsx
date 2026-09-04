@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { LogIn, LogOut } from 'lucide-react';
-import { api } from '../api';
+import { api, poll } from '../api';
 
 export default function StatCards() {
   const [counts, setCounts] = useState({ Entry: 0, Exit: 0 });
@@ -13,9 +13,8 @@ export default function StatCards() {
         if (live) setCounts(c);
       } catch (_) { /* noop */ }
     };
-    load();
-    const id = setInterval(load, 3000);
-    return () => { live = false; clearInterval(id); };
+    const stop = poll(load, 3000);
+    return () => { live = false; stop(); };
   }, []);
 
   const Card = ({ title, value, Icon, iconBg, iconColor, testid }) => (

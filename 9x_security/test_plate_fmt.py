@@ -10,7 +10,9 @@ n = WhatsAppNotifier({"wa_enabled": False})
 cap = n._caption({"vehicle_type": "car", "direction": "Entry",
                   "timestamp": "2026-09-02T19:19:57", "plate": "MH12AB1234"})
 assert "02-09-2026 07:19:57 PM" in cap, cap
-assert "Plate: MH12AB1234" in cap
+assert "Number: MH12AB1234" in cap
+cap2 = n._caption({"vehicle_type": "truck", "direction": "Exit", "timestamp": "2026-09-02T19:19:57", "plate": ""})
+assert "Number: Not detected" in cap2, cap2
 print("PASS 1: WhatsApp caption 12-hour format:", cap.splitlines()[2])
 
 # ---- 2. snapshot overlay 12-hour format ----
@@ -44,13 +46,14 @@ big = np.zeros((1080, 1920, 3), np.uint8)
 from tracker import Track
 e2.tracker.tracks[7] = Track(7, (200, 200), (100, 100, 200, 200), "car", -1)
 e2._update_best_crops(small, big, 960, 540)
-a1 = e2._best_crops[7][0]
+a1 = e2._best_crops[7][0][0]
 e2.tracker.tracks[7].bbox = (50, 50, 400, 400)  # closer/larger
+import time as _t; _t.sleep(0.45)
 e2._update_best_crops(small, big, 960, 540)
-a2, crop = e2._best_crops[7]
-assert a2 > a1
+a2, crop, _ts = e2._best_crops[7][0]  # list sorted biggest first
+assert a2 > a1 and len(e2._best_crops[7]) == 2
 assert crop.shape[0] == 700 and crop.shape[1] == 700, crop.shape  # (400-50)*2 scale from original
-print("PASS 3: best crop upgraded to larger bbox at full-res (700x700 from original)")
+print("PASS 3: best crops (top-3 list) upgraded to larger bbox at full-res (700x700 from original)")
 
 # track removed -> crop cleaned
 del e2.tracker.tracks[7]
@@ -60,10 +63,13 @@ print("PASS 4: best crop cleaned when track dies")
 
 # ---- 5. plate pattern scoring ----
 import plate_reader as pr
-assert pr._PLATE_PATTERNS[0].match("MH12AB1234")
-assert pr._PLATE_PATTERNS[0].match("HR26A4321")
-assert pr._PLATE_PATTERNS[1].match("22BH1234AB")
-assert not pr._PLATE_PATTERNS[0].match("HELLO")
-print("PASS 5: Indian plate regex patterns ok")
+assert pr.repair_plate("MH12AB1234") == ("MH12AB1234", 0)
+assert pr.repair_plate("HR26A4321") == ("HR26A4321", 0)
+assert pr.repair_plate("22BH1234AB") == ("22BH1234AB", 0)
+assert pr.repair_plate("MH 12 AB 1234")[0] == "MH12AB1234"
+assert pr.repair_plate("MHI2AB I234")[0] == "MH12AB1234"   # I->1 fixes
+assert pr.repair_plate("HELLO") == ("", 0)
+assert pr.repair_plate("TATAMOTORS") == ("", 0)
+print("PASS 5: strict Indian plate repair/validation ok")
 
 print("ALL FORMAT/CROP TESTS PASSED")

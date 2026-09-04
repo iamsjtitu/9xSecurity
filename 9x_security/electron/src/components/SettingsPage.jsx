@@ -21,10 +21,14 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
   const [updInfo, setUpdInfo] = useState(null);
   const [job, setJob] = useState(null);
   const [showKey, setShowKey] = useState(true); // user wants the WhatsApp key always visible
+  const [loadErr, setLoadErr] = useState('');
 
-  useEffect(() => {
-    api('/api/settings').then(setS).catch((e) => showToast(e.message, 'error'));
-  }, []); // eslint-disable-line
+  const loadSettings = () => {
+    setLoadErr('');
+    api('/api/settings').then(setS).catch((e) => { setLoadErr(e.message); showToast(e.message, 'error'); });
+  };
+
+  useEffect(() => { loadSettings(); }, []); // eslint-disable-line
 
   useEffect(() => {
     if (tab === 'updates' && !updInfo) checkUpdate();
@@ -48,7 +52,7 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
   const waTest = async () => {
     setBusy(true);
     try {
-      const r = await api('/api/whatsapp/test', { method: 'POST', body: JSON.stringify(s) });
+      const r = await api('/api/whatsapp/test', { method: 'POST', body: JSON.stringify(s), timeout: 120000 });
       showToast(r.detail, r.ok ? 'success' : 'error');
     } catch (e) {
       showToast(e.message, 'error');
@@ -61,7 +65,7 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
     setBusy(true);
     setUpdInfo(null);
     try {
-      const r = await api('/api/update/check');
+      const r = await api('/api/update/check', { timeout: 60000 });
       setUpdInfo(r);
     } catch (e) {
       showToast(e.message, 'error');
@@ -110,7 +114,19 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
     }).catch(() => {});
   }, [tab]); // eslint-disable-line
 
-  if (!s) return <div className="text-slate-400 text-sm">Loading…</div>;
+  if (!s) {
+    if (loadErr) {
+      return (
+        <div className="card p-5 max-w-lg" data-testid="settings-load-error">
+          <div className="text-sm font-semibold text-rose-600">Settings load nahi hui</div>
+          <div className="text-xs text-slate-500 mt-1">{loadErr}</div>
+          <button type="button" onClick={loadSettings} data-testid="settings-retry-btn"
+            className="btn-primary mt-3 text-sm">Dobara try karein</button>
+        </div>
+      );
+    }
+    return <div className="text-slate-400 text-sm" data-testid="settings-loading">Loading…</div>;
+  }
 
   const set = (k, v) => setS({ ...s, [k]: v });
 

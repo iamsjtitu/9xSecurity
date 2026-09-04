@@ -8,14 +8,27 @@ export const setToken = (t) => {
 export const getToken = () => token;
 
 export async function api(path, opts = {}) {
-  const res = await fetch(`${BASE}${path}`, {
-    ...opts,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Auth-Token': token,
-      ...(opts.headers || {}),
-    },
-  });
+  // Every call has a deadline: a busy engine must never leave the UI "Loading…" forever.
+  const { timeout = 15000, ...init } = opts;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeout);
+  let res;
+  try {
+    res = await fetch(`${BASE}${path}`, {
+      ...init,
+      signal: ctrl.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Auth-Token': token,
+        ...(init.headers || {}),
+      },
+    });
+  } catch (e) {
+    clearTimeout(timer);
+    if (e && e.name === 'AbortError') throw new Error('Engine respond nahi kar raha (timeout) — kuch second baad dobara try karein');
+    throw e;
+  }
+  clearTimeout(timer);
   if (!res.ok) {
     let msg = `HTTP ${res.status}`;
     try {
@@ -25,6 +38,20 @@ export async function api(path, opts = {}) {
     throw new Error(msg);
   }
   return res.json();
+}
+
+// Sequential polling: the next request starts only after the previous one finished,
+// so a slow engine can never pile up dozens of pending requests (browser has ~6 sockets/host).
+export function poll(fn, ms) {
+  let live = true;
+  let timer;
+  const loop = async () => {
+    if (!live) return;
+    try { await fn(); } catch (_) { /* caller handles */ }
+    if (live) timer = setTimeout(loop, ms);
+  };
+  loop();
+  return () => { live = false; clearTimeout(timer); };
 }
 
 export const streamUrl = () => `${BASE}/api/stream?t=${token}&r=${Date.now()}`;

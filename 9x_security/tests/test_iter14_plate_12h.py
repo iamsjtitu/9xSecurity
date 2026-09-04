@@ -26,6 +26,7 @@ import requests
 import yaml
 
 sys.path.insert(0, "/app/9x_security")
+sys.path.insert(0, "/app/9x_security/tests")
 
 BASE = "http://127.0.0.1:8971"
 WF = "/app/.github/workflows/build-windows.yml"
@@ -71,10 +72,11 @@ def real_plate_reader():
     return pr
 
 
-def _synth_plate_img(text="MH12AB1234", w=520, h=180):
-    img = np.full((h, w, 3), 255, np.uint8)
-    cv2.putText(img, text, (25, 130), cv2.FONT_HERSHEY_SIMPLEX, 3.2, (0, 0, 0), 10)
-    return img
+def _synth_plate_img(text="MH12AB1234", cut=1.0, w=None, h=None):
+    from synth_plate import plate_img  # real TTF font (Hershey strokes are misread by any OCR)
+    p = plate_img([text], size=72)
+    p = p[:, : int(p.shape[1] * cut)]
+    return cv2.resize(p, (w, h), interpolation=cv2.INTER_AREA) if w and h else p
 
 
 def test_plate_reader_warmup(real_plate_reader):
@@ -83,17 +85,17 @@ def test_plate_reader_warmup(real_plate_reader):
 
 
 def test_plate_reader_reads_synthetic_plate(real_plate_reader):
-    """Real EasyOCR read of a painted plate. Synthetic OpenCV putText fonts
-    are notoriously poor for OCR — accept any non-empty read that starts
-    with 'MH' (state code) as pipeline proof. Real-plate accuracy is user-
-    device territory per review request."""
+    """Real EasyOCR read of a painted plate: the strict reader must return the
+    exact plate (fp32 recognizer; int8 quantized one returned garbage)."""
     img = _synth_plate_img("MH12AB1234")
     got = real_plate_reader.read(img)
-    assert got, "OCR returned empty string on synthetic plate"
-    # Pipeline sanity: allowlist filtered to A-Z0-9 (no punctuation)
-    assert re.match(r"^[A-Z0-9]+$", got), f"unexpected chars in {got!r}"
-    # State-code leading letters should survive OCR on this size
-    assert got.startswith("MH") or "MH" in got, f"got={got!r}"
+    assert got == "MH12AB1234", f"got={got!r} trace={real_plate_reader.last_trace}"
+
+
+def test_plate_reader_truncated_plate_is_not_detected(real_plate_reader):
+    """A cut-off plate (only 'MH12AB12..' visible) must NOT be guessed into a number."""
+    img = _synth_plate_img("MH12AB1234", cut=0.8)
+    assert real_plate_reader.read(img) == ""
 
 
 # ---------------- Engine E2E ----------------

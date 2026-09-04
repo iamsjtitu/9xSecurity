@@ -72,10 +72,13 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
     let timer;
     const tick = async () => {
       if (!live) return;
+      const ctrl = new AbortController();
+      const kill = setTimeout(() => ctrl.abort(), 4000); // a stalled request must not freeze the loop
       try {
         const res = await fetch(`${BASE}/api/frame?r=${Date.now()}`, {
           headers: { 'X-Auth-Token': getToken() },
           cache: 'no-store',
+          signal: ctrl.signal,
         });
         if (res.ok) {
           const blob = await res.blob();
@@ -87,7 +90,9 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
           lastOkRef.current = Date.now();
         }
       } catch (_) { /* engine busy/offline: next tick */ }
-      timer = setTimeout(tick, FRAME_MS);
+      clearTimeout(kill);
+      // hidden/minimized window: slow down (nobody is watching, engine keeps working)
+      timer = setTimeout(tick, document.hidden ? 1000 : FRAME_MS);
     };
     lastOkRef.current = Date.now();
     tick();
@@ -169,7 +174,7 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
     if (!url.trim()) { showToast('Pehle RTSP URL daalein', 'error'); return; }
     setTesting(true);
     try {
-      const r = await api('/api/camera/test', { method: 'POST', body: JSON.stringify({ url }) });
+      const r = await api('/api/camera/test', { method: 'POST', body: JSON.stringify({ url }), timeout: 180000 });
       setTestResult(r);
     } catch (e) {
       showToast(e.message, 'error');

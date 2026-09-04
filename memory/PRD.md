@@ -571,6 +571,40 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Tests: test_substream.py 17/17, test_worker_restart 1/1; iteration_18 green (backend fake-HEVC
   flow: connect→suggest→switch→400 on repeat→revert; UI chip/toast/URL/revert).
 
+## Implemented (update 2026-06 #35) — WhatsApp "Number:" line + strict/strong plate OCR + UI hang fix (testing agent iteration_19: ALL PASS)
+- USER: caption me 'Number: <plate>' ya 'Number: Not detected' chahiye, galat number kabhi nahi, OCR strong
+  (truck plates). Plus: 'minimize se open kiya to 2 min hang, Settings sirf Loading…, restart se theek'.
+- ROOT CAUSE #1 (OCR garbage/wrong plates): EasyOCR default `quantize=True` (int8 dynamic-quantized
+  recognizer LSTM) returns garbage ('LELELD', conf 0.00) on CPU depending on torch thread count /
+  input width (torch 2.5 bug). Same image: 8 threads OK, 7 or 1 threads garbage. FIX: Reader(quantize=False)
+  → exact + stable + same speed. This very likely explains "number plate detect nahi ho raha" on Windows.
+- ROOT CAUSE #2 (hang): one candidates() call took 19-28 s (4 variants × mag_ratio 1.5 on 1000px crops),
+  budget only checked between crops, and EVERY crossing spawned its own OCR thread → several torch jobs
+  saturating all cores for minutes → HTTP/UI starved. UI pollers (setInterval ×4, no timeouts) piled
+  up requests (Chromium 6 sockets/host) → Settings 'Loading…' forever until restart.
+- plate_reader.py rewrite: _prep (gray+CLAHE, ≤640px, upscale ≤4x), candidates(): plate zone (lower 60%)
+  → zoom re-read of ≤2 biggest text boxes (padded; recognizer needs whitespace) → full-crop fallback only
+  when no clean read; hard deadline checked before EVERY OCR call; last_trace (raw reads) logged to
+  camera_log on Not detected. repair_plate: district '0' rejected, layout cost (1-digit district +0.5,
+  3-letter series +1.0) so MHIZAB1254 → MH12AB1254 not MH1ZAB1254. read_many acceptance: votes≥2 in
+  different crops, OR 0 fixes & conf≥0.45, OR ≤2 slot-constrained fixes & conf≥0.60; two equally scored
+  different candidates → ambiguous → ''. Typical read now 1-3 s/crop (was 19-28 s).
+- engine.py: ONE OCR worker thread + queue (_queue_ocr/_ocr_worker); job waiting >20 s
+  (OCR_MAX_QUEUE_WAIT_S) is skipped → WhatsApp still sent as 'Not detected'. detector.py: torch threads =
+  cpu_count-1 (NX_TORCH_THREADS) so decoder/UI/HTTP keep a core.
+- whatsapp._caption: 4th line 'Number: <plate>' / 'Number: Not detected'.
+- UI: api() has AbortController timeout (default 15 s; 60-180 s for camera test / WA test / groups /
+  update check); poll() helper = sequential polling (App state, StatCards, EventsTable); CameraPanel frame
+  fetch 4 s abort + 1 fps when window hidden; SettingsPage shows settings-load-error + settings-retry-btn
+  instead of infinite Loading.
+- Tests: test_plate_ocr.py 12 (TTF-rendered plates via tests/synth_plate.py: one/two-row, small/big/blur,
+  truck text → '', cut-off plate → '', acceptance rules, single OCR worker); tests/test_iter14 fixed
+  (old fixture painted text wider than the image). iteration_19: backend 100% (22 + 116 pytest + scripts),
+  frontend 100% (sequential /api/state, hang-fix retry flow, all tabs, regression).
+- LEARNING: never test OCR with OpenCV Hershey fonts (3→5, 2→Z, 1→I misreads are the font's fault).
+- USER NEXT: Save to GitHub → install build → Number Plate (OCR) ON → real truck/car plates check;
+  agar 'Not detected' zyada aaye to Settings > Diagnostics camera_log me 'plate OCR raw reads' line paste karein.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

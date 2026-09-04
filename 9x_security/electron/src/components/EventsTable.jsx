@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ImageOff, X, LogIn, LogOut as LogOutIcon, Search } from 'lucide-react';
-import { api, snapshotUrl } from '../api';
+import { api, snapshotUrl, poll } from '../api';
 
 const iso = (d) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -50,11 +50,7 @@ export default function EventsTable({ connected }) {
     } catch (_) { /* noop */ }
   }, [date, direction, showAll, plateQ]);
 
-  useEffect(() => { fetchRows(); }, []); // eslint-disable-line
-  useEffect(() => {
-    const id = setInterval(() => fetchRows(), 5000);
-    return () => clearInterval(id);
-  }, [fetchRows]);
+  useEffect(() => poll(() => fetchRows(), 5000), [fetchRows]);
 
   const pickDate = (d) => { setPlateQ(''); setDate(d); setShowAll(false); fetchRows({ date: d, all: false, plate: '' }); };
   const pickDir = (dir) => { setDirection(dir); fetchRows({ direction: dir }); };

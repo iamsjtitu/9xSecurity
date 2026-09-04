@@ -18,3 +18,10 @@
 - Editing 9x_security/requirements.txt triggers the platform to pip-install it into the container
   (torch is now pinned 2.5.1 here too). Disk is tight (~3 GB free) — avoid adding big packages.
 - CI now runs the frozen exe with NX_SELFTEST=1 (service.selftest) — keep that entrypoint working.
+- EasyOCR: ALWAYS Reader(quantize=False). Default int8 quantized LSTM gives garbage ('LELELD', conf 0.00)
+  on CPU depending on torch thread count / input width. Never test OCR with cv2 Hershey fonts — use
+  tests/synth_plate.py (TTF). OCR must have a hard deadline before every readtext (one call = 1-3 s at 640px).
+- Only ONE OCR job at a time (engine._ocr_worker queue); parallel torch jobs starve UI/HTTP for minutes.
+- UI pollers must be sequential (api.js poll()) and every api() call has a timeout; setInterval + slow
+  engine = request pile-up (6 sockets/host) = Settings 'Loading…' forever.
+- Full pytest in one session: run test_service_api.py separately (test_engine.py leaks a requests.post patch).

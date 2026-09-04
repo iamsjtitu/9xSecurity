@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { api, getToken, setToken, logout } from './api';
+import { api, getToken, setToken, logout, poll } from './api';
 import Login from './components/Login.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import Dashboard from './components/Dashboard.jsx';
@@ -37,10 +37,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!authed) return;
-    refreshState();
-    const id = setInterval(refreshState, 2500);
-    return () => clearInterval(id);
+    if (!authed) return undefined;
+    return poll(refreshState, 2500);
   }, [authed, refreshState]);
 
   if (!authed) {

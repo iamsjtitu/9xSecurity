@@ -4,7 +4,9 @@ Ties together detection, tracking, line-crossing, snapshot saving and DB logging
 The GUI (main.py) feeds frames into `process_frame` and renders `annotated`.
 """
 import os
+import queue
 import re
+import threading
 import time
 from datetime import datetime
 from urllib.parse import quote, unquote
@@ -16,6 +18,8 @@ import config
 from database import EventDB
 from detector import VehicleDetector
 from tracker import CentroidTracker
+
+OCR_MAX_QUEUE_WAIT_S = float(os.environ.get("OCR_MAX_QUEUE_WAIT_S", "20"))
 
 
 def normalize_rtsp_url(url):
@@ -380,6 +384,7 @@ class SecurityEngine:
 
             self.plate_reader = PlateReader()
         self._best_crops = {}
+        self._ocr_q = None  # single OCR worker queue (created on first crossing)
         # OCR models load lazily on the first crossing (async thread) — no heavy
         # torch work competes with YOLO right at engine start.
 
@@ -461,17 +466,10 @@ class SecurityEngine:
                 c = self._plate_crop(frame, original, cr["bbox"], w, h)
                 if c is not None:
                     crops.append(c.copy())
-                bc = self._best_crops.get(cr["track_id"])
-                if bc is not None:
-                    crops.append(bc[1])
-                clog(f"plate OCR: track {cr['track_id']} {direction} queued")
-                import threading
-
-                threading.Thread(
-                    target=self._ocr_and_notify,
-                    args=(eid, cr["track_id"], ev, crops),
-                    daemon=True,
-                ).start()
+                for _area, bc, _ts in self._best_crops.pop(cr["track_id"], []):
+                    crops.append(bc)  # fresh crops for the next crossing of this track
+                clog(f"plate OCR: track {cr['track_id']} {direction} queued ({len(crops)} crops)")
+                self._queue_ocr(eid, cr["track_id"], ev, crops)
             else:
                 try:
                     self.notifier.notify(ev)
@@ -481,14 +479,36 @@ class SecurityEngine:
         annotated = self._annotate(frame, a, b)
         return annotated, events
 
+    def _queue_ocr(self, eid, tid, ev, crops):
+        """ONE OCR worker for the whole engine: several vehicles crossing together
+        must not start several torch jobs at once (that saturates the CPU and the
+        UI/HTTP server stalls for minutes)."""
+        if self._ocr_q is None:
+            self._ocr_q = queue.Queue()
+            threading.Thread(target=self._ocr_worker, daemon=True).start()
+        self._ocr_q.put((time.time(), eid, tid, ev, crops))
+
+    def _ocr_worker(self):
+        while True:
+            queued, eid, tid, ev, crops = self._ocr_q.get()
+            wait = time.time() - queued
+            if wait > OCR_MAX_QUEUE_WAIT_S:
+                # alert must not wait behind a long OCR backlog: send it as "Not detected"
+                clog(f"plate OCR: track {tid} event {eid} skipped (waited {wait:.0f}s in queue)")
+                crops = []
+            try:
+                self._ocr_and_notify(eid, tid, ev, crops)
+            except Exception as e:
+                clog(f"plate OCR: worker error {e}")
+
     def _warm_plate_reader(self):
         ok = self.plate_reader.warmup()
         clog("plate OCR: models loaded, ready" if ok
              else f"plate OCR: model load FAILED ({self.plate_reader.last_error})")
 
     def _update_best_crops(self, frame, original, w, h):
-        """Keep the biggest (closest) crop per active track so OCR gets the
-        best possible view of the plate, not just the crossing frame."""
+        """Keep the 3 biggest (closest) crops per active track, spaced >=0.4s apart,
+        so OCR can vote across several views of the plate."""
         live = set(self.tracker.tracks.keys())
         for tid in list(self._best_crops.keys()):
             if tid not in live:
@@ -497,41 +517,53 @@ class SecurityEngine:
         if original is not None:
             oh, ow = original.shape[:2]
             sx, sy, src = ow / w, oh / h, original
+        now = time.time()
         for tid, tr in self.tracker.tracks.items():
-            if tr.counted:
-                continue
             x1, y1, x2, y2 = tr.bbox
             area = max(0, x2 - x1) * max(0, y2 - y1)
-            prev = self._best_crops.get(tid)
-            if prev is not None and prev[0] >= area:
+            if area < 40 * 40:
+                continue
+            lst = self._best_crops.setdefault(tid, [])
+            if lst and now - lst[-1][2] < 0.4:
+                continue
+            if len(lst) >= 3 and area <= min(e[0] for e in lst):
                 continue
             cx1, cy1 = max(0, int(x1 * sx)), max(0, int(y1 * sy))
             cx2, cy2 = min(src.shape[1], int(x2 * sx)), min(src.shape[0], int(y2 * sy))
             crop = src[cy1:cy2, cx1:cx2]
-            if crop.size:
-                if crop.shape[1] > 1000:  # bound memory for 4K sources
-                    s = 1000 / crop.shape[1]
-                    crop = cv2.resize(crop, (1000, max(1, int(crop.shape[0] * s))))
-                else:
-                    crop = crop.copy()
-                self._best_crops[tid] = (area, crop)
+            if not crop.size:
+                continue
+            if crop.shape[1] > 1000:  # bound memory for 4K sources
+                s = 1000 / crop.shape[1]
+                crop = cv2.resize(crop, (1000, max(1, int(crop.shape[0] * s))))
+            else:
+                crop = crop.copy()
+            lst.append((area, crop, now))
+            lst.sort(key=lambda e: -e[0])
+            del lst[3:]
 
     def _ocr_and_notify(self, eid, tid, ev, crops):
-        plate = ""
-        for c in crops:
-            try:
-                plate = self.plate_reader.read(c)
-            except Exception:
-                plate = ""
-            if plate:
-                break
+        plate, detail = "", "OCR unavailable"
+        try:
+            if hasattr(self.plate_reader, "read_many"):
+                plate, detail = self.plate_reader.read_many(crops, budget_s=float(self.cfg.get("ocr_budget_s", 8)))
+            else:  # simple readers (tests/plugins): first non-empty wins
+                for c in crops:
+                    plate = self.plate_reader.read(c) or ""
+                    if plate:
+                        break
+                detail = "single-read"
+        except Exception as e:
+            detail = f"error: {e}"
         if plate:
             try:
                 self.db.update_event_plate(eid, plate)
             except Exception:
                 pass
             ev = {**ev, "plate": plate}
-        clog(f"plate OCR: track {tid} event {eid} -> '{plate or '(nahi mila)'}'")
+        clog(f"plate OCR: track {tid} event {eid} -> '{plate or 'Not detected'}' ({detail}, {len(crops)} crops)")
+        if not plate and getattr(self.plate_reader, "last_trace", None):
+            clog("plate OCR raw reads: " + " | ".join(self.plate_reader.last_trace)[:400])
         try:
             self.notifier.notify(ev)
         except Exception:

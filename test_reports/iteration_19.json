@@ -1,0 +1,26 @@
+{
+  "summary": "Iteration 19 (Plate OCR strictness + WhatsApp Number line + UI hang-fix) — ALL GREEN. Backend: test_plate_ocr.py + tests/test_iter14_plate_12h.py => 22 passed in 64s (real EasyOCR, quantize=False). Broader suite `pytest --ignore=tests --ignore=test_plate_ocr.py --ignore=test_service_api.py` => 116 passed in 52s. Script tests test_async_ocr.py / test_plate_fmt.py / test_outbox.py all print ALL ... PASSED. Manual /tmp/verify_iter19.py checks repair_plate strict rules (MH12AB1234=>ok, XX12AB1234=>'', TATAMOTORS=>'', OL07CD5678=>DL07CD5678 fixes=1, MHIZAB1254=>MH12AB1254 fixes=2, DL0ZCD5678=>DL02CD5678 fixes=1) all pass, and WhatsAppNotifier._caption contains 'Number: MH12AB1234' when plate present, 'Number: Not detected' when plate empty; caption has 4 lines: '🚨 9x Security', '<direction> - <TYPE>', 'Time: ...', 'Number: ...'. Frontend (http://127.0.0.1:8971 served UI): dashboard renders, /api/state polling is sequential (peak concurrent = 1 across 10s window, 8 request/response events), no console errors. Settings page renders all 6 tabs (WhatsApp Alerts / Timing / Account / Login-Security / Updates / Diagnostics). HANG FIX verified via page.route abort of /api/settings: data-testid='settings-load-error' + 'settings-retry-btn' appeared; after un-route + retry click the Settings page rendered normally (no infinite settings-loading). Regression: wrong-password /api/login => 401; /api/state /api/counts /api/events /api/settings /api/health => 200 with X-Auth-Token. Password restored to 9xsecurity (Temp123456 => 401 after restore).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/test_plate_ocr.py",
+    "/app/9x_security/tests/test_iter14_plate_12h.py",
+    "/app/9x_security/test_async_ocr.py",
+    "/app/9x_security/test_plate_fmt.py",
+    "/app/9x_security/test_outbox.py",
+    "/app/test_reports/pytest/iter19_plate.xml",
+    "/app/test_reports/pytest/iter19_all.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Pre-existing (already flagged iter17/18): POST /api/settings {new_password:'9xsecurity'} succeeds but subsequent /api/login response still returns must_change_password=true because the default-seed value is flagged. Not a regression from iter19 changes; consider clearing must_change_password whenever password is set via API to match UX expectation."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin / 9xsecurity (restored at end of test run; Temp123456 no longer valid)",
+  "seed_data_creation": "None — events.db untouched; no test rows inserted by this iteration.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "9x_security engine service NOT under supervisor; started via `nohup python service.py` in /app/9x_security on 127.0.0.1:8971. UI built into /app/9x_security/electron/dist and served by the engine itself. Do not use /app/frontend or REACT_APP_BACKEND_URL (which points to preview.emergentagent.com and does not proxy 9x). Use http://127.0.0.1:8971 for both API and UI. UI selectors: login uses plain inputs (no testids) — use `page.locator('input').nth(0)` for username and `input[type=\"password\"]` for password + role=button name=Login. Force-change modal testids: force-new-password, force-confirm-password, force-change-btn. Settings hang testids: settings-loading, settings-load-error, settings-retry-btn. To simulate hang, use page.route to abort /api/settings then unroute + click retry. Real EasyOCR model loads ~3s; each read ~5-10s so full plate suite is ~60-90s. Ignore known stale failures test_service_api.py::test_settings_roundtrip and tests/test_security_iter11.py::test_settings_secrets_masked. Restore password with POST /api/settings {new_password:'9xsecurity'} after any UI login (which forces Temp123456).",
+  "rca of the issue": "N/A — no failures. All requested behaviours (plate strictness, WhatsApp Number line with 'Not detected' fallback, single OCR worker, UI hang fix with 15s timeout + retry, sequential /api/state polling) verified end-to-end."
+}

@@ -37,6 +37,12 @@ class VehicleDetector:
     def _load(self):
         from ultralytics import YOLO
 
+        try:  # leave one core for the video decoder / UI / HTTP server
+            import torch
+
+            torch.set_num_threads(int(os.environ.get("NX_TORCH_THREADS") or max(1, (os.cpu_count() or 2) - 1)))
+        except Exception:
+            pass
         # If a local weights file exists use it, else ultralytics downloads yolov8n.
         path = self.model_path if os.path.exists(self.model_path) else "yolov8n.pt"
         self.model_name = os.path.basename(path)

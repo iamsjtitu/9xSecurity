@@ -151,10 +151,9 @@ class WhatsAppNotifier:
         cap = (
             f"🚨 9x Security\n"
             f"{ev.get('direction', '')} - {str(ev.get('vehicle_type', '')).upper()}\n"
-            f"Time: {when}"
+            f"Time: {when}\n"
+            f"Number: {ev.get('plate') or 'Not detected'}"
         )
-        if ev.get("plate"):
-            cap += f"\nPlate: {ev['plate']}"
         return cap
 
     def _send_all(self, ev):

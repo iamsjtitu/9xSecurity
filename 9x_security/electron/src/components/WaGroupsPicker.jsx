@@ -16,7 +16,7 @@ export default function WaGroupsPicker({ selected = [], onChange, apiKey, baseUr
   const load = async () => {
     setBusy(true);
     try {
-      const r = await api('/api/whatsapp/groups', { method: 'POST', body: JSON.stringify({ wa_api_key: apiKey, wa_base_url: baseUrl }) });
+      const r = await api('/api/whatsapp/groups', { method: 'POST', body: JSON.stringify({ wa_api_key: apiKey, wa_base_url: baseUrl }), timeout: 60000 });
       if (!r.ok) { showToast(r.detail || 'Group list nahi mili', 'error'); setAvailable([]); return; }
       setAvailable(r.groups);
       if (!r.groups.length) showToast('Is WhatsApp number ka koi group nahi mila', 'info');

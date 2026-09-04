@@ -35,6 +35,34 @@ def test_repair_plate_confusions_and_rejections():
     assert repair_plate("DL0ZCD5678") == ("DL02CD5678", 1)     # district '0' impossible -> 2-digit layout
 
 
+def test_plate_localizer_finds_real_gate_plates():
+    """User's real gate snapshots (tests/real/*_crop.png): the localizer must propose
+    the plate rectangle among its candidates (known plate positions)."""
+    from plate_reader import find_plate_regions, _iou
+    real = os.path.join(os.path.dirname(__file__), "tests", "real")
+    expected = {  # crop file -> approximate plate box (x1, y1, x2, y2)
+        "wa1_crop.png": (276, 557, 389, 592),   # Bolero, yellow single-row
+        "wa3_crop.png": (185, 603, 325, 650),   # Eicher, yellow, tilted
+        "wa4_crop.png": (25, 575, 85, 643),     # Tata, yellow two-row
+    }
+    for name, box in expected.items():
+        img = cv2.imread(os.path.join(real, name))
+        regs = find_plate_regions(img)
+        assert any(_iou(r, box) > 0.3 for r in regs), (name, regs)
+
+
+def test_read_many_respects_budget_on_real_crop():
+    pr = PlateReader()
+    assert pr.warmup(), pr.last_error
+    img = cv2.imread(os.path.join(os.path.dirname(__file__), "tests", "real", "wa3_crop.png"))
+    import time
+    t0 = time.time()
+    plate, detail = pr.read_many([img, img, img], budget_s=6)
+    took = time.time() - t0
+    assert took < 14, took                      # budget + at most one heavy pass
+    assert plate in ("", "OD08U5777"), (plate, detail)  # never a wrong number
+
+
 def test_group_lines_merges_two_row_plate():
     res = [
         ([[0, 0], [100, 0], [100, 30], [0, 30]], "MH12", 0.9),
@@ -55,17 +83,21 @@ def test_read_many_acceptance_rules(monkeypatch):
         it = iter(seq)
         monkeypatch.setattr(pr, "candidates", lambda crop, deadline=None: next(it))
 
-    fake([[("MH12AB1234", 0.5, 0)]])
-    assert pr.read_many([dummy])[0] == "MH12AB1234"            # clean read, decent conf
-    fake([[("MH12AB1234", 0.5, 1)]])
-    assert pr.read_many([dummy])[0] == ""                      # 1 fix + medium conf -> doubt
-    fake([[("MH12AB1234", 0.7, 2)]])
-    assert pr.read_many([dummy])[0] == "MH12AB1234"            # slot-constrained fixes, confident
+    fake([[("MH12AB1234", 0.8, 0)]])
+    assert pr.read_many([dummy])[0] == "MH12AB1234"            # clean, confident read
+    fake([[("MH12AB1234", 0.6, 0)]])
+    assert pr.read_many([dummy])[0] == ""                      # clean but low-res confidence -> doubt
+    fake([[("MH12AB1234", 0.7, 1)]])
+    assert pr.read_many([dummy])[0] == ""                      # 1 fix + medium conf -> doubt (OD68.. case)
+    fake([[("MH12AB1234", 0.9, 2)]])
+    assert pr.read_many([dummy])[0] == "MH12AB1234"            # slot-constrained fixes, very confident
     fake([[("MH12AB1234", 0.9, 3)]])
     assert pr.read_many([dummy])[0] == ""                      # 3 fixes, single crop -> doubt
-    fake([[("MH12AB1234", 0.4, 2)], [("MH12AB1234", 0.35, 1)]])
+    fake([[("MH12AB1234", 0.4, 2)], [("MH12AB1234", 0.6, 1)]])
     plate, detail = pr.read_many([dummy, dummy])
     assert plate == "MH12AB1234" and "votes=2" in detail       # two crops agree
+    fake([[("MH12AB1234", 0.4, 2)], [("MH12AB1234", 0.4, 1)]])
+    assert pr.read_many([dummy, dummy])[0] == ""               # two crops agree but both very weak
     fake([[("MH12AB1234", 0.6, 0), ("MH12AB1284", 0.6, 0)]])
     plate, detail = pr.read_many([dummy])
     assert plate == "" and "ambiguous" in detail               # two equally good candidates
@@ -140,8 +172,10 @@ def test_easyocr_handles_small_big_and_blurred_crops():
     small = _vehicle_with_plate(_plate_img(["HR26DK8337"]), size=(320, 240), plate_scale=0.45)
     big = cv2.resize(_vehicle_with_plate(_plate_img(["UP32BH3311"])), (1000, 740))
     blur = cv2.GaussianBlur(_vehicle_with_plate(_plate_img(["GJ05RT2398"], yellow=True)), (0, 0), 1.5)
-    for img, exp in ((small, "HR26DK8337"), (big, "UP32BH3311"), (blur, "GJ05RT2398")):
-        plate, detail = pr.read_many([img], budget_s=30)
+    # a small far-away plate reads with medium confidence: production always has several
+    # crops of the same vehicle, so two agreeing reads are what makes it acceptable
+    for crops, exp in (([small, small], "HR26DK8337"), ([big], "UP32BH3311"), ([blur], "GJ05RT2398")):
+        plate, detail = pr.read_many(crops, budget_s=30)
         assert plate == exp, (plate, detail, pr.last_trace)
 
 

@@ -649,6 +649,24 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   NOT verifiable here: Windows taskkill/WaitForSingleObject, PyInstaller scipy bundle → user must confirm
   with the next build (Diagnostics → 'Number plate reader OK').
 
+## Implemented (update 2026-06 #38) — Plate localizer on REAL gate snapshots; honest resolution limit
+- USER sent 5 real snapshots (VIGI C340, 1080p HEVC, wide yard view): plates 60-130 camera-px wide.
+  Ran the pipeline on them (tests/real/wa*.jpg + *_crop.png, tests/real/run_real.py): old pipeline
+  downscaled the whole vehicle → plate ~50px → garbage, and once ACCEPTED a wrong 'OD68U5777' for
+  'OD 08 U 5777' (conf 0.63, 1 fix).
+- plate_reader.find_plate_regions(): no-ML localizer (yellow/white rectangles, text-stroke edge density,
+  low-on-vehicle prior, two-row ~1:1 allowed, tilted plates fill≥0.35) → each plate rect read at 4x
+  (PLATE_W 480, padded) as stage 0 before the zone/zoom/full passes; heavy passes skipped when < 3 s of
+  budget remain (real crops now 5.5-8 s within budget 8 s, was 10-30 s). Stricter acceptance:
+  clean ≥0.70, fixed ≥0.85, voted(2 crops) ≥0.55 → wrong 'OD68..' now rejected. Best-crop cap 1600px
+  (was 1000: shrank plates). last_plate_px + camera_log hint when plate < 160px ('camera gate ke paas/
+  zoom karein ya main stream 2560x1440').
+- Result on the 5 real crops: 0 wrong numbers, 0 reads — the plates are physically too small
+  (need ≥160-200px). Localizer finds the plate in 3/3 checkable images (test). Tests: test_plate_ocr 13,
+  iter14 + manual + async + fmt 14, engine/capture/detection 33 — all pass.
+- USER GUIDANCE (told): set VIGI main stream 2560x1440, or mount/zoom a camera near the gate at plate
+  height so the plate spans ≥200px; use the manual plate editor meanwhile.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

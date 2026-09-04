@@ -20,10 +20,13 @@ _BH_RE = re.compile(r"^\d{2}BH\d{4}[A-Z]{1,2}$")
 ALLOW = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 MIN_CONF = 0.30   # mean OCR confidence a candidate must reach
 MAX_FIXES = 3     # at most this many confusion substitutions
-MAX_W = 640       # OCR input width cap: CRAFT cost grows ~quadratically with pixels
+MAX_W = 640       # OCR input width cap for the whole plate zone (CRAFT cost grows ~quadratically)
 REFINE_W = 560    # zoomed re-read width for each detected text box
-ACCEPT_CLEAN = 0.45   # single crop, 0 fixes: min confidence
-ACCEPT_FIXED = 0.60   # single crop, 1-2 slot-constrained fixes (I->1, O->0): min confidence
+PLATE_W = 480     # localized plate rectangles are upscaled to this width (<=4x; recognizer works at 64px rows)
+HEAVY_PASS_S = 3.0    # a whole-zone/whole-crop OCR pass needs about this long on a slow CPU
+ACCEPT_CLEAN = 0.70   # single crop, 0 fixes: min confidence (a 0.63 read was OD68.. for OD08..)
+ACCEPT_FIXED = 0.85   # single crop, 1-2 slot-constrained fixes (I->1, O->0): min confidence
+ACCEPT_VOTED = 0.55   # seen in 2 crops: min confidence
 
 _TO_DIGIT = {"O": "0", "Q": "0", "D": "0", "U": "0", "I": "1", "L": "1", "Z": "2", "S": "5",
              "B": "8", "G": "6", "T": "7", "A": "4"}
@@ -177,6 +180,64 @@ def _group_lines(results):
     return cands
 
 
+def find_plate_regions(crop, max_regions=4):
+    """Cheap plate localizer (no ML): yellow or white rectangles with dense vertical
+    edges (text strokes) in the lower 65% of the vehicle crop. Lets OCR work on a
+    4x-upscaled plate instead of a downscaled whole vehicle — at 1080p a gate
+    plate is only ~130 px wide. Returns [(x1, y1, x2, y2)] in crop coords, best first."""
+    h, w = crop.shape[:2]
+    if h < 40 or w < 40:
+        return []
+    y0 = int(h * 0.35)
+    zone = crop[y0:]
+    hsv = cv2.cvtColor(zone, cv2.COLOR_BGR2HSV)
+    masks = (
+        cv2.inRange(hsv, (12, 70, 90), (40, 255, 255)),     # yellow (commercial plates)
+        cv2.inRange(hsv, (0, 0, 140), (180, 70, 255)),      # white (private plates)
+    )
+    close_k = cv2.getStructuringElement(cv2.MORPH_RECT, (max(5, w // 70), 3))
+    found = []
+    for mask in masks:
+        m = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, close_k)
+        cnts, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for c in cnts:
+            x, y, bw, bh = cv2.boundingRect(c)
+            ar = bw / max(1, bh)
+            if bw < 0.05 * w or bw > 0.7 * w or bh < 8 or bh > 0.3 * h or not (0.8 <= ar <= 7.5):
+                continue  # two-row truck plates are nearly square (ar ~1)
+            fill = cv2.contourArea(c) / float(bw * bh)
+            if fill < 0.35:
+                continue  # tilted plates fill their bounding box only partly
+            sub = cv2.cvtColor(zone[y:y + bh, x:x + bw], cv2.COLOR_BGR2GRAY)
+            gx = cv2.Sobel(sub, cv2.CV_16S, 1, 0, ksize=3)
+            density = float((np.abs(gx) > 80).mean())
+            if density < 0.06:
+                continue  # plain panel / sticker without text strokes
+            yc = (y0 + y + bh / 2.0) / h                  # plates sit low on the vehicle
+            shape = 1.0 if 1.5 <= ar <= 5.5 else 0.7      # single-row plates are ~2-4:1; two-row ~1:1
+            found.append((density * fill * min(1.0, bw / (0.12 * w)) * (0.4 + yc) * shape,
+                          (x, y0 + y, x + bw, y0 + y + bh)))
+    found.sort(key=lambda t: -t[0])
+    out = []
+    for _s, box in found:
+        if any(_iou(box, b) > 0.3 for b in out):
+            continue
+        out.append(box)
+        if len(out) >= max_regions:
+            break
+    return out
+
+
+def _iou(a, b):
+    ix = max(0, min(a[2], b[2]) - max(a[0], b[0]))
+    iy = max(0, min(a[3], b[3]) - max(a[1], b[1]))
+    inter = ix * iy
+    if inter == 0:
+        return 0.0
+    ua = (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - inter
+    return inter / float(ua)
+
+
 def _score(conf, fixes):
     return conf - 0.15 * fixes + (0.25 if fixes == 0 else 0.0)
 
@@ -195,6 +256,7 @@ class PlateReader:
         self._lock = threading.Lock()
         self.last_error = ""
         self.last_trace = []  # raw OCR reads of the last candidates() call (diagnostics)
+        self.last_plate_px = 0
 
     def _ensure(self):
         with self._lock:
@@ -268,6 +330,7 @@ class PlateReader:
         deadline = deadline or (time.time() + 30)
         found = {}
         trace = self.last_trace = []
+        self.last_plate_px = 0  # widest localized plate (camera pixels): tells if the camera is too far
 
         def add(text, conf):
             plate, fixes = repair_plate(text)
@@ -277,6 +340,22 @@ class PlateReader:
                     found[plate] = (conf, fixes)
 
         zone = crop[int(crop.shape[0] * 0.4):, :]
+        # stage 0: localized plate rectangles, read at 4x — the decisive step for small gate plates
+        for (x1, y1, x2, y2) in find_plate_regions(crop):
+            if time.time() > deadline:
+                break
+            self.last_plate_px = max(self.last_plate_px, x2 - x1)
+            m = max(4, int(0.15 * (y2 - y1)))
+            sub = crop[max(0, y1 - m):min(crop.shape[0], y2 + m), max(0, x1 - m):min(crop.shape[1], x2 + m)]
+            if sub.size == 0:
+                continue
+            sub_img, _ = self._prep(sub, PLATE_W, min_w=PLATE_W)
+            res = self._read(reader, self._pad(sub_img))
+            trace.append(f"plate@{x1},{y1} {x2 - x1}x{y2 - y1}: " + ", ".join(f"{t}({float(c):.2f})" for _, t, c in res))
+            for text, conf in _group_lines(res):
+                add(text, conf)
+        if any(f == 0 and c >= 0.6 for c, f in found.values()) or time.time() > deadline - HEAVY_PASS_S:
+            return sorted(((p, c, f) for p, (c, f) in found.items()), key=lambda t: -_score(t[1], t[2]))
         img, s = self._prep(zone, MAX_W)
         results = self._read(reader, img)
         trace.append("zone: " + ", ".join(f"{t}({float(c):.2f})" for _, t, c in results))
@@ -318,7 +397,7 @@ class PlateReader:
             for text, conf in _group_lines(items):
                 add(text, conf)
         clean = any(f == 0 and c >= 0.6 for c, f in found.values())
-        if not clean and time.time() < deadline:
+        if not clean and time.time() < deadline - HEAVY_PASS_S:
             # no clean read in the plate zone: the plate may sit higher (cabin plate,
             # cut-off bbox) or the zone cut through it
             full, _ = self._prep(crop, MAX_W)
@@ -354,7 +433,7 @@ class PlateReader:
             p2, v2 = ranked[1]
             if v2["n"] == v["n"] and abs(_score(v2["conf"], v2["fixes"]) - _score(v["conf"], v["fixes"])) < 0.05:
                 return "", f"ambiguous: {plate} vs {p2} ({detail})"
-        if (v["n"] >= 2 or (v["fixes"] == 0 and v["conf"] >= ACCEPT_CLEAN)
+        if ((v["n"] >= 2 and v["conf"] >= ACCEPT_VOTED) or (v["fixes"] == 0 and v["conf"] >= ACCEPT_CLEAN)
                 or (v["fixes"] <= 2 and v["conf"] >= ACCEPT_FIXED)):
             return plate, detail
         return "", f"low confidence: {plate} ({detail})"

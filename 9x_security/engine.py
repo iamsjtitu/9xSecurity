@@ -20,6 +20,7 @@ from detector import VehicleDetector
 from tracker import CentroidTracker
 
 OCR_MAX_QUEUE_WAIT_S = float(os.environ.get("OCR_MAX_QUEUE_WAIT_S", "20"))
+MIN_PLATE_PX = 160  # below this plate width (camera px) OCR is guesswork: user's gate plates were 60-130px
 
 
 def normalize_rtsp_url(url):
@@ -536,9 +537,9 @@ class SecurityEngine:
             crop = src[cy1:cy2, cx1:cx2]
             if not crop.size:
                 continue
-            if crop.shape[1] > 1000:  # bound memory for 4K sources
-                s = 1000 / crop.shape[1]
-                crop = cv2.resize(crop, (1000, max(1, int(crop.shape[0] * s))))
+            if crop.shape[1] > 1600:  # bound memory for 4K sources (never shrink 1080p/1440p plates)
+                s = 1600 / crop.shape[1]
+                crop = cv2.resize(crop, (1600, max(1, int(crop.shape[0] * s))))
             else:
                 crop = crop.copy()
             lst.append((area, crop, now))
@@ -566,6 +567,10 @@ class SecurityEngine:
         clog(f"plate OCR: track {tid} event {eid} -> '{plate or 'Not detected'}' ({detail}, {len(crops)} crops)")
         if not plate and getattr(self.plate_reader, "last_trace", None):
             clog("plate OCR raw reads: " + " | ".join(self.plate_reader.last_trace)[:400])
+            px = getattr(self.plate_reader, "last_plate_px", 0)
+            if 0 < px < MIN_PLATE_PX:
+                clog(f"plate OCR hint: plate sirf ~{px}px chaudi hai (chahiye >= {MIN_PLATE_PX}px) — camera gate ke "
+                     "aur paas/zoom karein ya camera ka main stream 2560x1440 par set karein")
         if self.on_event:
             try:
                 self.on_event(ev)  # same id: UI updates the capture toast with the number

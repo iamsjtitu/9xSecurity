@@ -22,10 +22,16 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
   const [job, setJob] = useState(null);
   const [showKey, setShowKey] = useState(true); // user wants the WhatsApp key always visible
   const [loadErr, setLoadErr] = useState('');
+  const [recText, setRecText] = useState('');
+
+  // one number per line OR comma/semicolon separated — both must work
+  const parseRecipients = (txt) => txt.split(/[\n,;/]+/).map((x) => x.trim()).filter(Boolean);
+  const badRecipients = (s?.wa_recipients || []).filter((x) => { const d = x.replace(/\D/g, ''); return d.length < 10 || d.length > 15; });
 
   const loadSettings = () => {
     setLoadErr('');
-    api('/api/settings').then(setS).catch((e) => { setLoadErr(e.message); showToast(e.message, 'error'); });
+    api('/api/settings').then((d) => { setS(d); setRecText((d.wa_recipients || []).join('\n')); })
+      .catch((e) => { setLoadErr(e.message); showToast(e.message, 'error'); });
   };
 
   useEffect(() => { loadSettings(); }, []); // eslint-disable-line
@@ -42,6 +48,7 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
       await api('/api/settings', { method: 'POST', body: JSON.stringify(body) });
       setNewPass('');
       showToast('Settings save ho gayi ✔', 'success');
+      loadSettings(); // show the normalized numbers (comma-separated input -> one per line)
     } catch (e) {
       showToast(e.message, 'error');
     } finally {
@@ -175,10 +182,16 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
               </p>
             </div>
             <div>
-              <label className="label">Recipients — numbers (ek number per line, 91XXXXXXXXXX; group-only chahiye to khaali chhodein)</label>
-              <textarea className="input h-24 resize-none font-mono" value={(s.wa_recipients || []).join('\n')}
-                onChange={(e) => set('wa_recipients', e.target.value.split('\n').map((x) => x.trim()).filter(Boolean))}
+              <label className="label">Recipients — numbers (ek number per line ya comma se alag, 91XXXXXXXXXX; group-only chahiye to khaali chhodein)</label>
+              <textarea className="input h-24 resize-none font-mono" value={recText}
+                placeholder={'918598800000\n919166175477'}
+                onChange={(e) => { setRecText(e.target.value); set('wa_recipients', parseRecipients(e.target.value)); }}
                 data-testid="wa-recipients-input" />
+              {badRecipients.length > 0 && (
+                <p className="text-xs text-rose-600 mt-1" data-testid="wa-recipients-error">
+                  Galat number: {badRecipients.join(', ')} — har number 10-15 digit ka hona chahiye
+                </p>
+              )}
             </div>
             <WaGroupsPicker
               selected={s.wa_groups || []}
@@ -188,7 +201,7 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
               showToast={showToast}
             />
             <p className="text-xs text-slate-500" data-testid="wa-targets-summary">
-              Alerts jayenge: {(s.wa_recipients || []).length} number + {(s.wa_groups || []).length} group
+              Alerts jayenge: {(s.wa_recipients || []).length - badRecipients.length} number + {(s.wa_groups || []).length} group
             </p>
             <label className="flex items-center gap-2.5 text-sm text-slate-700 cursor-pointer">
               <input type="checkbox" className="h-4 w-4 accent-[#1f6feb]" checked={s.wa_send_image !== false}

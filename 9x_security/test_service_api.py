@@ -127,8 +127,8 @@ def test_settings_roundtrip(hdr):
     assert r.status_code == 200
     got = requests.get(f"{BASE}/api/settings", headers=hdr, timeout=5).json()
     assert got["wa_api_key"] == "TEST_KEY_ABC"
-    assert got["wa_recipients"] == ["+911234567890", "+919876543210"]
-    assert got["gh_token"] == "TEST_GH"
+    assert got["wa_recipients"] == ["911234567890", "919876543210"]  # normalized to digits
+    assert got["gh_token"] == "" and got["gh_token_set"] is True  # write-only secret
     # restore
     restore = {k: orig.get(k) for k in ("wa_api_key", "wa_recipients", "gh_token")}
     restore["auth_user"] = orig.get("auth_user", "admin")

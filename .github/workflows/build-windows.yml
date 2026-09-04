@@ -112,6 +112,7 @@ jobs:
           --add-data "easyocr_models;easyocr_models"
           --collect-data ultralytics
           --collect-data easyocr
+          --collect-all scipy
           --collect-binaries imageio_ffmpeg
           --collect-binaries torchvision
           --exclude-module tkinter
@@ -128,8 +129,7 @@ jobs:
         run: |
           $out = & .\dist\9xEngine\9xEngine.exe 2>&1 | Out-String
           Write-Host $out
-          if ($LASTEXITCODE -ne 0) { Write-Host "::error::Packaged engine cannot run YOLO detection — build rejected (see SELFTEST output above)"; exit 1 }
-          if ($out -match "easyocr FAIL") { Write-Host "::warning::EasyOCR models not working in packaged engine (plates will not be read)" }
+          if ($LASTEXITCODE -ne 0) { Write-Host "::error::Packaged engine cannot run YOLO detection or EasyOCR (scipy/skimage not bundled?) — build rejected (see SELFTEST output above)"; exit 1 }
 
       - name: Build Electron UI + NSIS installer
         working-directory: 9x_security/electron

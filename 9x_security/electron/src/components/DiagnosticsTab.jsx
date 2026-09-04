@@ -63,6 +63,7 @@ export default function DiagnosticsTab({ showToast }) {
         <Flag ok={d.snapshot_write_ok} label={d.snapshot_write_ok ? 'Snapshot folder writable' : `Snapshot write FAIL: ${d.snapshot_write_detail}`} />
         <Flag ok={wa.enabled && wa.api_key_set && wa.recipients > 0} label={`WhatsApp ${wa.enabled ? 'ON' : 'OFF'} · key ${wa.api_key_set ? 'set' : 'missing'} · ${wa.recipients} number`} />
         <Flag ok={d.outbox_pending === 0} label={`WA pending: ${d.outbox_pending}`} />
+        <Flag ok={!String(d.versions?.easyocr || '').startsWith('IMPORT FAIL')} label={String(d.versions?.easyocr || '').startsWith('IMPORT FAIL') ? 'Number plate reader (EasyOCR) is build me load NAHI hua — Settings > Updates se naya version install karein' : `Number plate reader OK (easyocr ${d.versions?.easyocr || '?'})`} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

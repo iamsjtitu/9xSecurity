@@ -2,7 +2,7 @@ const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, shell, powerSaveBl
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 const http = require('http');
 
 const PORT = process.env.ENGINE_PORT || '8971';
@@ -28,6 +28,12 @@ function engineLogFd() {
 function startEngine() {
   if (!app.isPackaged) return; // dev mode: run `python service.py` yourself
   const exe = path.join(process.resourcesPath, 'engine', '9xEngine.exe');
+  if (process.platform === 'win32') {
+    // We hold the single-instance lock, so any 9xEngine.exe alive now is an orphan
+    // (app killed by the installer / Task Manager). It would keep port 8971 + the
+    // camera and the UI would talk to the OLD engine.
+    try { spawnSync('taskkill', ['/F', '/T', '/IM', '9xEngine.exe'], { windowsHide: true, timeout: 8000 }); } catch (_) { /* none running */ }
+  }
   const fd = engineLogFd();
   // stdout/stderr go straight to a file: an unread pipe would fill up and block
   // the engine's threads the moment a library prints too much.
@@ -35,7 +41,7 @@ function startEngine() {
     cwd: path.dirname(exe),
     windowsHide: true,
     stdio: ['ignore', fd, fd],
-    env: { ...process.env, ENGINE_PORT: PORT },
+    env: { ...process.env, ENGINE_PORT: PORT, NX_PARENT_PID: String(process.pid) },
   });
   engineProc.on('exit', () => { engineProc = null; });
 }

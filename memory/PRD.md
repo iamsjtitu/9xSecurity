@@ -625,6 +625,30 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   incl. real-engine E2E toast 'reading…' → 'Not detected' on the same toast.
 - LEARNING: never `git checkout -- events.db` while service.py runs (stale inode → API reads a phantom DB).
 
+## Implemented (update 2026-06 #37) — Comma-separated WhatsApp numbers, EasyOCR missing in Windows build, orphan double-engine (self-tested; testing agent timed out)
+- USER (Windows v1.0.22 diagnostics): 'comma se ek aur number dalne par msg nahi jaata'. wa_log showed
+  to=85988000009166175477 — two numbers GLUED. Root cause: recipients textarea split only on '\n' and Enter
+  never created a new line (controlled value re-joined and dropped the trailing newline), so users typed
+  commas; _phone() then stripped the comma → one 20-digit number (provider even returned 201).
+  FIX: whatsapp.parse_recipients() splits on , ; / newline, strips to digits, dedupes, flags entries not
+  10-15 digits; used by WhatsAppNotifier and by POST /api/settings (400 with Hinglish message on bad
+  numbers, list normalized). UI: textarea has its own text state (Enter works), comma input parsed live,
+  wa-recipients-error line, summary counts only valid numbers, reload after save shows one-per-line.
+- Diagnostics showed easyocr 'IMPORT FAIL: scipy broken' in the Windows exe → plates could never be read on
+  Windows. FIX: PyInstaller `--collect-all scipy`; frozen selftest now performs a real OCR read and returns
+  rc=1 on EasyOCR failure → the GitHub build FAILS instead of shipping a plate-less exe. Diagnostics tab
+  shows a red flag when EasyOCR failed to load. (Needs a new build: Save to GitHub → Actions.)
+- engine_out.log '[Errno 10048] bind 8971': a second engine started while an orphan (killed app/installer)
+  still held the port → new engine streamed the camera without HTTP, UI talked to the OLD engine.
+  FIX: electron startEngine() taskkills orphan 9xEngine.exe first and passes NX_PARENT_PID; engine has a
+  parent watchdog (WaitForSingleObject on Windows / ppid on Linux → os._exit(0)), waits ≤15 s for a busy
+  port (connect probe, TIME_WAIT-safe) then exits with code 3, and os._exit(0) after uvicorn stops (no zombie).
+- Verified here: parse tests + API 400/normalize (test_wa_recipients.py 3/3, test_service_api 20/20 —
+  stale roundtrip test fixed), second-instance exit code 3 + log, parent watchdog exit, immediate restart,
+  NX_SELFTEST rc=0 with 'easyocr OK (read path works)', UI textarea/summary/error via screenshot.
+  NOT verifiable here: Windows taskkill/WaitForSingleObject, PyInstaller scipy bundle → user must confirm
+  with the next build (Diagnostics → 'Number plate reader OK').
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

@@ -7,6 +7,8 @@ import os
 import re
 import secrets
 import shutil
+import socket
+import sys
 import threading
 import time
 from datetime import datetime, timedelta
@@ -26,7 +28,7 @@ from engine import (
     HEVC_CODECS, LatestFrameReader, SecurityEngine, clog, codec_name, normalize_rtsp_url, open_stream,
     probe_rtsp, substream_url,
 )
-from whatsapp import WhatsAppNotifier
+from whatsapp import WhatsAppNotifier, parse_recipients
 
 PORT = int(os.environ.get("ENGINE_PORT", "8971"))
 app = FastAPI(title="9x Security Engine")
@@ -643,6 +645,13 @@ def get_settings(request: Request):
 def save_settings(body: dict, request: Request):
     _check(request)
     cfg = _cfg()
+    if "wa_recipients" in body:
+        # '8598800000, 9166175477' typed on one line must become two numbers, never one 20-digit one
+        numbers, bad = parse_recipients(body["wa_recipients"])
+        if bad:
+            raise HTTPException(400, "WhatsApp number galat hai: " + ", ".join(bad[:3])
+                                + " — har number 10-15 digit ka, alag line ya comma se likhein")
+        body = {**body, "wa_recipients": numbers}
     for k in _SETTINGS_KEYS:
         if k in body:
             if k in _SECRET_KEYS:
@@ -1042,9 +1051,50 @@ def selftest():
             rc = 1
     print(f"SELFTEST easyocr models dir: {_bundled_model_dir()}", flush=True)
     pr = PlateReader()
-    print("SELFTEST easyocr " + ("OK" if pr.warmup() else f"FAIL: {pr.last_error}"), flush=True)
+    if pr.warmup():
+        try:  # exercise the real read path (scipy/skimage/torch extensions inside the bundle)
+            img = np.full((120, 420, 3), 245, np.uint8)
+            cv2.putText(img, "MH12AB1234", (14, 84), cv2.FONT_HERSHEY_SIMPLEX, 2.0, (10, 10, 10), 5, cv2.LINE_AA)
+            pr.candidates(img)
+            print("SELFTEST easyocr OK (read path works: " + " | ".join(pr.last_trace)[:160] + ")", flush=True)
+        except Exception as e:
+            print(f"SELFTEST easyocr FAIL (read): {e}", flush=True)
+            rc = 1
+    else:
+        print(f"SELFTEST easyocr FAIL: {pr.last_error}", flush=True)
+        rc = 1  # plates are a core feature: a build without working OCR must not ship
     print("SELFTEST versions: " + str(_lib_versions()), flush=True)
     return rc
+
+
+def _port_free(port):
+    """True when nobody is LISTENING on the port (bind-probing would be fooled by
+    TIME_WAIT connections of the previous engine and report 'busy' for a minute)."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(0.5)
+        return s.connect_ex(("127.0.0.1", port)) != 0
+
+
+def _parent_watchdog(ppid):
+    """Exit together with the Electron app. An orphan engine (app killed by the
+    installer / Task Manager / crash) keeps the camera and port busy, and the next
+    app start ends up with two engines — the UI talking to the OLD one."""
+    try:
+        if sys.platform == "win32":
+            import ctypes
+
+            k32 = ctypes.windll.kernel32
+            h = k32.OpenProcess(0x00100000, False, int(ppid))  # SYNCHRONIZE
+            if not h:
+                return
+            k32.WaitForSingleObject(h, 0xFFFFFFFF)  # returns when the parent exits
+        else:
+            while os.getppid() == int(ppid):
+                time.sleep(2)
+    except Exception:
+        return
+    clog("svc: parent app exited — engine shutting down")
+    os._exit(0)
 
 
 def main():
@@ -1056,10 +1106,23 @@ def main():
         cfg["auth_salt"], cfg["auth_hash"] = salt, h
         config.save_config(cfg)
     clog(f"svc: starting on 127.0.0.1:{PORT} v{updater.APP_VERSION}")
+    if os.environ.get("NX_PARENT_PID"):
+        threading.Thread(target=_parent_watchdog, args=(os.environ["NX_PARENT_PID"],), daemon=True).start()
+    for i in range(30):  # an old engine may still be closing after an update/restart
+        if _port_free(PORT):
+            break
+        if i == 0:
+            clog(f"svc: port {PORT} busy — purana engine band hone ka wait (15s)")
+        time.sleep(0.5)
+    else:
+        clog(f"svc: port {PORT} still busy — dusra engine chal raha hai, ye instance exit kar raha hai")
+        os._exit(3)
     threading.Thread(target=_purge_loop, daemon=True).start()
     threading.Thread(target=_outbox_loop, daemon=True).start()
     threading.Thread(target=_update_check_loop, daemon=True).start()
     uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="warning")
+    clog("svc: http server stopped — exiting")
+    os._exit(0)  # never linger as a camera-holding zombie without HTTP
 
 
 if __name__ == "__main__":

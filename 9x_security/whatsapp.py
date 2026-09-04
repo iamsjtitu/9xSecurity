@@ -23,6 +23,27 @@ def _phone(num):
     return re.sub(r"\D", "", str(num or ""))
 
 
+def parse_recipients(items):
+    """Flatten user input into clean numbers: entries may hold several numbers
+    separated by comma / semicolon / slash / newline ('8598800000, 9166175477').
+    Returns (numbers, bad) — bad = entries that are not a 10-15 digit number."""
+    if isinstance(items, str):
+        items = [items]
+    numbers, bad = [], []
+    for item in items or []:
+        for part in re.split(r"[,;/\n]+", str(item or "")):
+            part = part.strip()
+            if not part:
+                continue
+            p = _phone(part)
+            if 10 <= len(p) <= 15:
+                if p not in numbers:
+                    numbers.append(p)
+            else:
+                bad.append(part)
+    return numbers, bad
+
+
 def _group_id(g):
     """Normalize a group (dict {id,name} or string) to '<digits>@g.us'; '' if invalid."""
     if isinstance(g, dict):
@@ -48,7 +69,7 @@ class WhatsAppNotifier:
         self.enabled = bool(cfg.get("wa_enabled", False))
         self.base = (cfg.get("wa_base_url") or "https://wa.9x.design").rstrip("/")
         self.api_key = cfg.get("wa_api_key", "").strip()
-        numbers = [p for p in (_phone(r) for r in (cfg.get("wa_recipients", []) or [])) if p]
+        numbers, _bad = parse_recipients(cfg.get("wa_recipients", []) or [])
         groups = [g for g in (_group_id(x) for x in (cfg.get("wa_groups", []) or [])) if g]
         self.recipients = numbers + groups  # groups are '<digits>@g.us' strings
         self.send_image = bool(cfg.get("wa_send_image", True))

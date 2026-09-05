@@ -23,6 +23,12 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
   const [showKey, setShowKey] = useState(true); // user wants the WhatsApp key always visible
   const [loadErr, setLoadErr] = useState('');
   const [recText, setRecText] = useState('');
+  const [autoStart, setAutoStart] = useState(null);
+
+  useEffect(() => {
+    if (window.native?.getAutoStart) window.native.getAutoStart().then(setAutoStart).catch(() => setAutoStart({ supported: false }));
+    else setAutoStart({ supported: false, enabled: false });
+  }, []);
 
   // one number per line OR comma/semicolon separated — both must work
   const parseRecipients = (txt) => txt.split(/[\n,;/]+/).map((x) => x.trim()).filter(Boolean);
@@ -284,6 +290,24 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
                 ON (default): isse purane events + snapshots apne aap delete ho jaayenge (default 7 din)
                 taaki disk kabhi full na ho. OFF: kuch delete nahi hoga.
               </p>
+            </div>
+
+            <div className="rounded-lg border border-slate-200 p-4 space-y-3" data-testid="startup-card">
+              <div className="text-sm font-medium text-slate-800">Computer restart ke baad</div>
+              <label className="flex items-center gap-3 text-sm text-slate-700 cursor-pointer">
+                <input type="checkbox" checked={s.auto_connect !== false}
+                  onChange={(e) => set('auto_connect', e.target.checked)} data-testid="auto-connect-toggle" />
+                Camera automatic connect (saved URL se; camera der se on ho to baar-baar try karega)
+              </label>
+              <label className={`flex items-center gap-3 text-sm cursor-pointer ${autoStart?.supported ? 'text-slate-700' : 'text-slate-400'}`}>
+                <input type="checkbox" checked={!!autoStart?.enabled} disabled={!autoStart?.supported}
+                  onChange={async (e) => {
+                    try { const r = await window.native.setAutoStart(e.target.checked); setAutoStart({ supported: true, enabled: r.enabled }); showToast(r.enabled ? 'Windows start hone par software automatic chalu hoga ✔' : 'Auto-start band', 'success'); }
+                    catch (err) { showToast(err.message, 'error'); }
+                  }} data-testid="auto-start-toggle" />
+                Windows start hone par software automatic chalu {autoStart?.supported ? '' : '(sirf installed Windows app me)'}
+              </label>
+              <p className="text-xs text-slate-400">Dono ON = bijli/computer band hone ke baad wapas on hote hi monitoring apne aap shuru.</p>
             </div>
 
             <div className="rounded-lg border border-slate-200 p-4 space-y-2">

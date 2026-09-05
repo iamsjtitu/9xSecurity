@@ -122,6 +122,7 @@ if (!gotLock) {
 } else {
   app.on('second-instance', () => showWindow());
   app.whenReady().then(() => {
+    applyAutoStart(readPrefs().autoStart !== false); // PC reboot -> app + engine + camera come back by themselves
     // Gate monitoring must keep running when the window is hidden in the tray:
     // stop Windows from putting the PC to sleep (display may still turn off).
     try { powerSaveBlocker.start('prevent-app-suspension'); } catch (_) { /* optional */ }
@@ -146,6 +147,25 @@ ipcMain.handle('open-path', (_e, p) => {
   return 'blocked';
 });
 ipcMain.handle('quit-app', () => { quitting = true; app.quit(); });
+
+// ---- start with Windows (registry Run key via Electron); default ON for the packaged app ----
+const prefsPath = () => path.join(app.getPath('userData'), 'prefs.json');
+function readPrefs() { try { return JSON.parse(fs.readFileSync(prefsPath(), 'utf8')); } catch (_) { return {}; } }
+function writePrefs(p) { try { fs.writeFileSync(prefsPath(), JSON.stringify(p)); } catch (_) { /* noop */ } }
+function applyAutoStart(on) {
+  if (!app.isPackaged) return;
+  try { app.setLoginItemSettings({ openAtLogin: !!on, path: process.execPath, args: [] }); } catch (_) { /* noop */ }
+}
+ipcMain.handle('get-auto-start', () => {
+  if (!app.isPackaged) return { supported: false, enabled: false };
+  const p = readPrefs();
+  return { supported: true, enabled: p.autoStart !== false };
+});
+ipcMain.handle('set-auto-start', (_e, on) => {
+  writePrefs({ ...readPrefs(), autoStart: !!on });
+  applyAutoStart(on);
+  return { ok: true, enabled: !!on };
+});
 
 function killEngine() {
   if (engineProc) {

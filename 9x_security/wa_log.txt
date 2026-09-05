@@ -144,3 +144,4 @@
 2026-09-05T06:56:00 | text | to=919876543210 | status=201 | {"success":true}
 2026-09-05T06:56:03 | image | to=919812345678 | status=200 | {"success":true}
 2026-09-05T06:59:06 | text | to=911234567890 | status=401 | {"detail":"Invalid API token"}
+2026-09-05T07:45:44 | text | to=911234567890 | status=401 | {"detail":"Invalid API token"}

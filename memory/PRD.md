@@ -727,3 +727,15 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   ('Ek khadi gaadi (truck) line ke upar hai — Ignore Zone se cover karein').
 - Tests: test_tracker_false_crossings.py +2 (zone blocks counting; edge + parked-vehicle hints); API/e2e/
   service suites pass; UI flow verified (draw zone via 2 clicks → count badge, clear).
+
+## Implemented (update 2026-06 #43) — Auto-start with Windows + camera auto-connect after reboot (self-tested)
+- Engine: `_auto_connect_loop` thread — when cfg.auto_connect (default True) and rtsp_url is saved and the
+  user did not press Disconnect (worker.user_stopped), it calls worker.start() at boot (+4 s) and retries
+  every ~40 s until connected (camera/network often come up after the PC). Logged 'svc: auto-connect —
+  saved camera se connect kar raha hai' (max once/5 min). Setting exposed in GET/POST /api/settings.
+- Electron: app.setLoginItemSettings (Windows Run key) applied at whenReady from userData/prefs.json
+  (default ON for the packaged app); IPC get-auto-start/set-auto-start via preload window.native.
+- UI: Settings > Timing → 'Computer restart ke baad' card (startup-card): auto-connect-toggle (saved with
+  Save) + auto-start-toggle (applies immediately; disabled outside the installed Windows app).
+- Verified: engine auto-connect fires at start and retries (unreachable test URL), manual Disconnect stops
+  retries, settings round-trip, UI card renders. Windows Run-key behaviour needs the user's build.

@@ -378,3 +378,44 @@
 2026-09-05T06:59:12 | event: Exit bus track 1 (cross) -> /tmp/tmpvln9ya1_/snaps/2026-09-05/Exit_bus_06-59-12-325.jpg
 2026-09-05T06:59:20 | event: Entry bus track 1 (cross) -> /tmp/tmpvln9ya1_/snaps/2026-09-05/Entry_bus_06-59-20-129.jpg
 2026-09-05T06:59:21 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpmaaaiu0h/snaps/2026-09-05') path=/tmp/tmpmaaaiu0h/snaps/2026-09-05/Exit_car_06-59-21-217.jpg
+2026-09-05T07:45:26 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-09-05T07:45:29 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-05T07:45:29 | svc: loading AI model
+2026-09-05T07:45:29 | svc: AI model loaded
+2026-09-05T07:45:29 | svc: AI self-test OK (yolov8s.pt, 311 ms, 0 dets on blank frame)
+2026-09-05T07:45:29 | open_stream: transport=tcp
+2026-09-05T07:45:34 | open_stream: transport=udp
+2026-09-05T07:45:39 | open_stream: trying FFmpeg engine fallback
+2026-09-05T07:45:39 | ffmpeg-pipe: starting
+2026-09-05T07:45:44 | svc: loading AI model
+2026-09-05T07:45:44 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 214, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-05T07:45:44 | svc: source opened codec=unknown live=True
+2026-09-05T07:45:44 | svc: streaming started
+2026-09-05T07:45:46 | svc: loading AI model
+2026-09-05T07:45:46 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 214, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-05T07:45:46 | svc: source opened codec=unknown live=True
+2026-09-05T07:45:46 | svc: streaming started
+2026-09-05T07:45:48 | svc: switched to sub-stream rtsp://u:p@cam/Streaming/Channels/102
+2026-09-05T07:45:48 | svc: switched back to main stream rtsp://u:p@cam/Streaming/Channels/101

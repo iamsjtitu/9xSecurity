@@ -63,6 +63,7 @@ AUTO_MODEL_MAX_MS = int(os.environ.get("AUTO_MODEL_MAX_MS", "350"))  # accurate 
 class Worker:
     def __init__(self):
         self._running = False
+        self.user_stopped = False  # set by Disconnect: auto-connect stays quiet until Connect
         self._gen = 0             # run generation: a restarted loop never keeps an old thread alive
         self.thread = None
         self.status = "Idle — camera URL daal kar Connect dabayein"
@@ -416,6 +417,7 @@ def state(request: Request):
 @app.post("/api/camera/connect")
 def camera_connect(body: dict, request: Request):
     _check(request)
+    worker.user_stopped = False
     cfg = _cfg()
     cfg["rtsp_url"] = str(body.get("url", "")).strip()
     config.save_config(cfg)
@@ -473,6 +475,7 @@ def camera_mainstream(request: Request):
 @app.post("/api/camera/disconnect")
 def camera_disconnect(request: Request):
     _check(request)
+    worker.user_stopped = True  # auto-connect must not fight a manual Disconnect
     worker.stop()
     worker.status = "Disconnected."
     return {"ok": True}
@@ -672,6 +675,7 @@ def get_settings(request: Request):
     out["auth_user"] = cfg.get("auth_user", "admin")
     out["retention_days"] = int(cfg.get("retention_days", 7) or 7)
     out["auto_lock_minutes"] = int(cfg.get("auto_lock_minutes", 10) or 0)
+    out["auto_connect"] = bool(cfg.get("auto_connect", True))
     out["gh_token_builtin"] = bool(updater.DEFAULT_TOKEN)
     return out
 
@@ -698,6 +702,8 @@ def save_settings(body: dict, request: Request):
             cfg[k] = body[k]
     if body.get("auth_user"):
         cfg["auth_user"] = str(body["auth_user"]).strip() or "admin"
+    if "auto_connect" in body:
+        cfg["auto_connect"] = bool(body["auto_connect"])
     if "auto_lock_minutes" in body:
         try:
             cfg["auto_lock_minutes"] = max(0, min(720, int(body["auto_lock_minutes"])))
@@ -1115,6 +1121,28 @@ def _port_free(port):
         return s.connect_ex(("127.0.0.1", port)) != 0
 
 
+def _auto_connect_loop():
+    """After a PC reboot the app starts with Windows: connect the saved camera by itself
+    and keep retrying (camera/network often come up minutes after the PC)."""
+    time.sleep(4)  # let uvicorn come up first
+    last_log = 0.0
+    while True:
+        try:
+            cfg = _cfg()
+            url = str(cfg.get("rtsp_url", "")).strip()
+            if (cfg.get("auto_connect", True) and url and not worker.user_stopped
+                    and not worker.connected and not worker._running):
+                if time.time() - last_log > 300:
+                    clog("svc: auto-connect — saved camera se connect kar raha hai")
+                    last_log = time.time()
+                worker.status = "Auto-connect: camera se connect ho raha hai..."
+                worker.start()
+                time.sleep(25)  # give the open/AI-load a chance before judging
+        except Exception as e:
+            clog(f"svc: auto-connect error {e}")
+        time.sleep(15)
+
+
 def _parent_watchdog(ppid):
     """Exit together with the Electron app. An orphan engine (app killed by the
     installer / Task Manager / crash) keeps the camera and port busy, and the next
@@ -1160,6 +1188,7 @@ def main():
     threading.Thread(target=_purge_loop, daemon=True).start()
     threading.Thread(target=_outbox_loop, daemon=True).start()
     threading.Thread(target=_update_check_loop, daemon=True).start()
+    threading.Thread(target=_auto_connect_loop, daemon=True).start()
     uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="warning")
     clog("svc: http server stopped — exiting")
     os._exit(0)  # never linger as a camera-holding zombie without HTTP

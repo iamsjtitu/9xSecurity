@@ -29,6 +29,13 @@ export async function api(path, opts = {}) {
     throw e;
   }
   clearTimeout(timer);
+  if (res.status === 401) {
+    // engine restarted (update/reboot) or session expired: tokens live in engine memory.
+    // Go straight back to the login screen instead of 'unauthorized' errors everywhere.
+    setToken('');
+    window.dispatchEvent(new CustomEvent('nx-unauthorized'));
+    throw new Error('Session khatam — dobara login karein');
+  }
   if (!res.ok) {
     let msg = `HTTP ${res.status}`;
     try {

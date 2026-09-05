@@ -667,6 +667,22 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - USER GUIDANCE (told): set VIGI main stream 2560x1440, or mount/zoom a camera near the gate at plate
   height so the plate spans ≥200px; use the manual plate editor meanwhile.
 
+## Implemented (update 2026-06 #39) — 'Unauthorized' on open fixed, Software Lock + Auto-lock (self-tested)
+- USER: app open karne par 'unauthorized' dikha (gaadiyan capture hui — engine theek chal raha tha).
+  Root cause: session tokens engine memory me hain; engine restart/update ke baad sessionStorage ka
+  purana token 401 'unauthorized' deta hai, aur App.jsx `includes('401')` check kabhi match nahi hota tha
+  (detail text 'unauthorized' hai) → dashboard par har call fail, 'unauthorized' errors. FIX: api.js 401 →
+  token clear + 'nx-unauthorized' event → App login screen with amber notice (login-notice):
+  'Session khatam ho gaya (engine restart/update) — dobara login karein. Monitoring background me chalti rahi.'
+- Software Lock: Sidebar 'Lock' button (lock-btn) + auto-lock after idle N minutes — setting
+  auto_lock_minutes (config default 10, 0 = never; Settings > Timing card, auto-lock-minutes-input;
+  validated 0-720 in POST /api/settings; exposed in /api/state + /api/settings). Idle tracking via
+  mouse/keyboard/wheel events, 15 s tick; lock = POST /api/logout + login screen with notice; engine,
+  capture, WhatsApp continue. Verified: lock button, forced-401 route, real 1-minute auto-lock.
+- WhatsApp 'Waiting for this message. This may take a while' = WhatsApp E2E key not delivered because the
+  PROVIDER's (wa.9x.design) linked phone/session is offline/stale — not an app issue; told the user to
+  check the provider's phone is online / re-link the device.
+
 ## Backlog / Next
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line

@@ -327,3 +327,15 @@
 2026-09-04T08:33:19 | plate OCR: track 1 event 1 -> 'KA01MJ2022' (fake, 2 crops)
 2026-09-04T08:33:19 | plate manual: event 35 -> 'MH12AB1234'
 2026-09-04T08:33:19 | plate manual: event 35 -> '(cleared)'
+2026-09-05T04:40:13 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-09-05T04:40:16 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-05T04:40:16 | svc: loading AI model
+2026-09-05T04:40:20 | svc: AI model loaded
+2026-09-05T04:40:23 | svc: AI self-test OK (yolov8s.pt, 309 ms, 0 dets on blank frame)
+2026-09-05T04:40:23 | open_stream: transport=tcp
+2026-09-05T04:40:28 | open_stream: transport=udp
+2026-09-05T04:40:32 | event: Exit car track 1 (cross) -> /app/9x_security/snapshots/2026-09-05/Exit_car_04-40-32-607.jpg
+2026-09-05T04:40:32 | plate OCR: track 1 Exit queued (2 crops)
+2026-09-05T04:40:32 | plate OCR: track 1 event 1 -> 'KA01MJ2022' (fake, 2 crops)
+2026-09-05T04:40:32 | plate manual: event 38 -> 'MH12AB1234'
+2026-09-05T04:40:32 | plate manual: event 38 -> '(cleared)'

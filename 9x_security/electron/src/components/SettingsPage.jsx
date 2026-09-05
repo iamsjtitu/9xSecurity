@@ -286,6 +286,22 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
               </p>
             </div>
 
+            <div className="rounded-lg border border-slate-200 p-4 space-y-2">
+              <div className="text-sm font-medium text-slate-800">Software Auto-Lock</div>
+              <div className="flex items-center gap-3 text-sm text-slate-700">
+                <span>Koi activity na ho to</span>
+                <input type="number" min="0" max="720" className="input !w-24"
+                  value={s.auto_lock_minutes ?? 10}
+                  onChange={(e) => set('auto_lock_minutes', e.target.value)}
+                  data-testid="auto-lock-minutes-input" />
+                <span>minute baad lock (0 = kabhi nahi)</span>
+              </div>
+              <p className="text-xs text-slate-400">
+                Lock hone par login screen aata hai — camera monitoring, capture aur WhatsApp alerts background me chalte rehte hain.
+                Sidebar ke "Lock" button se turant bhi lock kar sakte hain.
+              </p>
+            </div>
+
             <button className="btn-primary" onClick={save} disabled={busy} data-testid="timing-save-btn">Save</button>
           </div>
         )}

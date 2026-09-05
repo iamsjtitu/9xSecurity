@@ -1,8 +1,8 @@
 import React from 'react';
-import { LayoutDashboard, Settings, LogOut, ShieldCheck, Cctv, Inbox, Download } from 'lucide-react';
+import { LayoutDashboard, Settings, LogOut, ShieldCheck, Cctv, Inbox, Download, Lock } from 'lucide-react';
 import BrandFooter from './BrandFooter.jsx';
 
-export default function Sidebar({ page, setPage, version, connected, outboxPending = 0, updateLatest = '', updateJob, onUpdateClick, onLogout }) {
+export default function Sidebar({ page, setPage, version, connected, outboxPending = 0, updateLatest = '', updateJob, onUpdateClick, onLock, onLogout }) {
   const jobState = updateJob?.state;
   const badgeText = jobState === 'downloading' ? `Downloading… ${updateJob.percent}%`
     : jobState === 'installing' ? 'Install ho raha hai…'
@@ -70,6 +70,14 @@ export default function Sidebar({ page, setPage, version, connected, outboxPendi
             WA Pending: {outboxPending}
           </span>
         </div>
+        <button
+          onClick={onLock}
+          data-testid="lock-btn"
+          title="Screen lock: password ke bina koi settings nahi badal sakta; camera + WhatsApp alerts chalte rahenge"
+          className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-colors duration-200"
+        >
+          <Lock size={14} /> Lock
+        </button>
         <button
           onClick={onLogout}
           data-testid="logout-btn"

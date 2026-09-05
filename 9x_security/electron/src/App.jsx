@@ -13,6 +13,8 @@ export default function App() {
   const [state, setState] = useState({ connected: false, status: '', version: '' });
   const [toast, setToast] = useState(null);
   const [capture, setCapture] = useState(null);
+  const [lockNotice, setLockNotice] = useState('');
+  const lastActivity = useRef(Date.now());
   const lastEventId = useRef(undefined); // undefined = nothing seen yet (skip stale event on login)
 
   const showToast = useCallback((msg, type = 'info') => {
@@ -47,8 +49,36 @@ export default function App() {
     return poll(refreshState, 2500);
   }, [authed, refreshState]);
 
+  // any 401 anywhere (engine restarted after update/reboot, session expired) -> login screen
+  useEffect(() => {
+    const onUnauth = () => { setAuthed(false); setLockNotice('Session khatam ho gaya (engine restart/update) — dobara login karein. Monitoring background me chalti rahi.'); };
+    window.addEventListener('nx-unauthorized', onUnauth);
+    return () => window.removeEventListener('nx-unauthorized', onUnauth);
+  }, []);
+
+  const lock = useCallback((why) => {
+    logout();
+    setAuthed(false);
+    setLockNotice(why);
+  }, []);
+
+  // auto-lock after N idle minutes (setting auto_lock_minutes, 0 = off); camera + alerts keep running
+  useEffect(() => {
+    if (!authed) return undefined;
+    const mins = Number(state.auto_lock_minutes ?? 10);
+    if (!mins) return undefined;
+    const bump = () => { lastActivity.current = Date.now(); };
+    const evs = ['mousemove', 'mousedown', 'keydown', 'wheel', 'touchstart'];
+    evs.forEach((e) => window.addEventListener(e, bump, { passive: true }));
+    bump();
+    const id = setInterval(() => {
+      if (Date.now() - lastActivity.current >= mins * 60 * 1000) lock(`Auto-lock: ${mins} min se koi activity nahi thi. Password daal kar kholein — monitoring chalti rahi.`);
+    }, 15000);
+    return () => { clearInterval(id); evs.forEach((e) => window.removeEventListener(e, bump)); };
+  }, [authed, state.auto_lock_minutes, lock]);
+
   if (!authed) {
-    return <Login onLogin={() => { setAuthed(true); }} />;
+    return <Login onLogin={() => { setLockNotice(''); setAuthed(true); }} notice={lockNotice} />;
   }
 
   return (
@@ -62,6 +92,7 @@ export default function App() {
         updateLatest={state.update_available ? state.update_latest : ''}
         updateJob={state.update_job}
         onUpdateClick={() => { setSettingsTab('updates'); setPage('settings'); }}
+        onLock={() => lock('Software lock ho gaya — password daal kar kholein. Monitoring chalti rahegi.')}
         onLogout={() => { logout(); setAuthed(false); }}
       />
       <div className="flex-1 flex flex-col h-screen overflow-hidden">

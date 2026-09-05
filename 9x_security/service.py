@@ -380,6 +380,7 @@ def state(request: Request):
         "line": cfg.get("line"),
         "snapshot_dir": config.SNAPSHOT_DIR,
         "outbox_pending": _db.outbox_count(),
+        "auto_lock_minutes": int(cfg.get("auto_lock_minutes", 10) or 0),
         "capture_paused": worker.capture_paused,
         "ai_loaded": worker.engine is not None,
         "ai_error": worker.ai_error,
@@ -637,6 +638,7 @@ def get_settings(request: Request):
             out[k] = ""  # never send write-only secrets back to the UI
     out["auth_user"] = cfg.get("auth_user", "admin")
     out["retention_days"] = int(cfg.get("retention_days", 7) or 7)
+    out["auto_lock_minutes"] = int(cfg.get("auto_lock_minutes", 10) or 0)
     out["gh_token_builtin"] = bool(updater.DEFAULT_TOKEN)
     return out
 
@@ -663,6 +665,11 @@ def save_settings(body: dict, request: Request):
             cfg[k] = body[k]
     if body.get("auth_user"):
         cfg["auth_user"] = str(body["auth_user"]).strip() or "admin"
+    if "auto_lock_minutes" in body:
+        try:
+            cfg["auto_lock_minutes"] = max(0, min(720, int(body["auto_lock_minutes"])))
+        except (TypeError, ValueError):
+            raise HTTPException(400, "auto_lock_minutes must be a number (0 = off)")
     if "retention_days" in body:
         try:
             cfg["retention_days"] = max(1, min(365, int(body["retention_days"])))

@@ -1,13 +1,14 @@
 {
-  "rtsp_url": "",
+  "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
   "line": {
-    "x1": 0.05555555555555555,
-    "y1": 0.09876543209876543,
-    "x2": 0.9444444444444444,
-    "y2": 0.9004115226337449
+    "x1": 0.1,
+    "y1": 0.2,
+    "x2": 0.9,
+    "y2": 0.8
   },
   "entry_direction": "neg",
   "confidence": 0.4,
+  "detector_model": "auto",
   "detect_frame_skip": 2,
   "enable_plate": false,
   "vehicle_classes": [
@@ -29,11 +30,12 @@
   "capture_end": "06:00",
   "auto_delete_enabled": true,
   "retention_days": 7,
+  "auto_lock_minutes": 10,
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "129af17c3aff93e050986c297ffdc667",
-  "auth_hash": "4dde63cdf70fbfa3d6273a61a5d05fdec36f30816b18a1113348cdc07c1429ac",
+  "auth_salt": "bea0bdcbf778d4bfa4c17b671b3ac2d6",
+  "auth_hash": "96f0246af15c181e226158c6bb62741793f1c03f9bd2c7b9ab8eed47e95e34ee",
   "github_repo": "",
-  "gh_token": ""
+  "gh_token": "TEST_GH"
 }

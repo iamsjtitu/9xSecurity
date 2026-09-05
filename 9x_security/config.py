@@ -80,6 +80,7 @@ DEFAULTS = {
     # ---- Storage ----
     "auto_delete_enabled": True,   # auto-delete old events + snapshots
     "retention_days": 7,   # events + snapshots older than this are auto-deleted
+    "auto_lock_minutes": 10,  # UI locks (login screen) after this idle time; 0 = never. Engine keeps running.
     # ---- wa.9x.design account credentials (stored for reference) ----
     "wa_account_email": "",
     "wa_account_password": "",

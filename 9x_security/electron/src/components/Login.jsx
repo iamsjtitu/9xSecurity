@@ -3,7 +3,7 @@ import { ShieldCheck, Lock, User } from 'lucide-react';
 import { api, setToken } from '../api';
 import BrandFooter from './BrandFooter.jsx';
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, notice = '' }) {
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
@@ -93,6 +93,9 @@ export default function Login({ onLogin }) {
         <form onSubmit={submit} className="w-full max-w-sm" data-testid="login-form">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Sign in</h2>
           <p className="text-sm text-slate-500 mt-1 mb-8">Apna username aur password daalein</p>
+          {notice && (
+            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800" data-testid="login-notice">{notice}</div>
+          )}
           <label className="label">Username</label>
           <div className="relative mb-4">
             <User size={16} className="absolute left-3 top-3 text-slate-400" />

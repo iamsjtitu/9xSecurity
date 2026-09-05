@@ -388,6 +388,8 @@ def state(request: Request):
         "ai_tier": worker.engine.model_tier if worker.engine else None,
         "entry_direction": cfg.get("entry_direction", "pos"),
         "line": cfg.get("line"),
+        "ignore_zones": cfg.get("ignore_zones") or [],
+        "line_hints": list(getattr(worker.engine, "line_hints", []) or []) if worker.engine else [],
         "snapshot_dir": config.SNAPSHOT_DIR,
         "outbox_pending": _db.outbox_count(),
         "auto_lock_minutes": int(cfg.get("auto_lock_minutes", 10) or 0),
@@ -522,6 +524,27 @@ def stream(request: Request):
             time.sleep(0.05)
 
     return StreamingResponse(gen(), media_type="multipart/x-mixed-replace; boundary=frame")
+
+
+@app.post("/api/ignore_zones")
+def set_ignore_zones(body: dict, request: Request):
+    """Replace the parking/ignore zones: {zones:[{x1,y1,x2,y2}]} normalized 0-1 (max 6)."""
+    _check(request)
+    zones = []
+    for z in (body.get("zones") or [])[:6]:
+        try:
+            r = {k: min(1.0, max(0.0, float(z[k]))) for k in ("x1", "y1", "x2", "y2")}
+        except (KeyError, TypeError, ValueError):
+            raise HTTPException(400, "zone me x1,y1,x2,y2 (0-1) chahiye")
+        if abs(r["x2"] - r["x1"]) < 0.02 or abs(r["y2"] - r["y1"]) < 0.02:
+            raise HTTPException(400, "zone bahut chhota hai")
+        zones.append(r)
+    cfg = _cfg()
+    cfg["ignore_zones"] = zones
+    config.save_config(cfg)
+    worker.apply_cfg(cfg)
+    clog(f"ignore zones set: {len(zones)}")
+    return {"ok": True, "ignore_zones": zones}
 
 
 @app.post("/api/line")

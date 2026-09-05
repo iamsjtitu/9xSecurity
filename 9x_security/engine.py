@@ -3,6 +3,7 @@
 Ties together detection, tracking, line-crossing, snapshot saving and DB logging.
 The GUI (main.py) feeds frames into `process_frame` and renders `annotated`.
 """
+import math
 import os
 import queue
 import re
@@ -21,7 +22,17 @@ from tracker import CentroidTracker, _iou as _box_iou
 
 OCR_MAX_QUEUE_WAIT_S = float(os.environ.get("OCR_MAX_QUEUE_WAIT_S", "20"))
 DEDUPE_S = float(os.environ.get("CROSS_DEDUPE_S", "20"))  # same direction + same spot within this = one vehicle
-MIN_PLATE_PX = 160  # below this plate width (camera px) OCR is guesswork: user's gate plates were 60-130px
+MIN_PLATE_PX = 160
+
+
+def _segment_hits_box(a, b, box):
+    """Does line segment a-b pass through (or touch) the bbox?"""
+    x1, y1, x2, y2 = box
+    if x1 <= a[0] <= x2 and y1 <= a[1] <= y2 or x1 <= b[0] <= x2 and y1 <= b[1] <= y2:
+        return True
+    from tracker import _hits_segment
+    corners = [((x1, y1), (x2, y1)), ((x2, y1), (x2, y2)), ((x2, y2), (x1, y2)), ((x1, y2), (x1, y1))]
+    return any(_hits_segment(p, q, a, b, margin=0.0) for p, q in corners)  # below this plate width (camera px) OCR is guesswork: user's gate plates were 60-130px
 
 
 def normalize_rtsp_url(url):
@@ -388,6 +399,7 @@ class SecurityEngine:
         self._best_crops = {}
         self._ocr_q = None  # single OCR worker queue (created on first crossing)
         self._recent_cross = []  # (ts, to_side, bbox) of counted crossings for de-duplication
+        self.line_hints = []
         # OCR models load lazily on the first crossing (async thread) — no heavy
         # torch work competes with YOLO right at engine start.
 
@@ -423,6 +435,53 @@ class SecurityEngine:
         )
         return self.detector.model_name
 
+    def _zones_px(self, w, h):
+        out = []
+        for z in self.cfg.get("ignore_zones") or []:
+            try:
+                x1, x2 = sorted((float(z["x1"]) * w, float(z["x2"]) * w))
+                y1, y2 = sorted((float(z["y1"]) * h, float(z["y2"]) * h))
+                out.append((int(x1), int(y1), int(x2), int(y2)))
+            except (KeyError, TypeError, ValueError):
+                continue
+        return out
+
+    def _drop_ignored(self, dets, w, h):
+        """Ignore zones (parking): a detection whose bottom-centre lies inside a zone is
+        not tracked at all — parked vehicles there can never produce Entry/Exit."""
+        zones = self._zones_px(w, h)
+        if not zones or not dets:
+            return dets
+        keep = []
+        for d in dets:
+            x1, y1, x2, y2 = d["bbox"]
+            px, py = (x1 + x2) // 2, y2
+            if any(zx1 <= px <= zx2 and zy1 <= py <= zy2 for zx1, zy1, zx2, zy2 in zones):
+                continue
+            keep.append(d)
+        return keep
+
+    def _update_line_hints(self, a, b, w, h):
+        """Live placement advice for the yellow line (shown under 'Draw Detection Line')."""
+        hints = []
+        m = 0.04
+        if any(not (m * w <= p[0] <= (1 - m) * w and m * h <= p[1] <= (1 - m) * h) for p in (a, b)):
+            hints.append("Line frame ke kinare ko chhoo rahi hai — kinare par aadhi dikhne wali/khadi gaadiyan galat alert de sakti hain; line ko thoda andar rakhein")
+        if math.hypot(b[0] - a[0], b[1] - a[1]) < 0.12 * w:
+            hints.append("Line bahut chhoti hai — gate ki poori chaudai par khichein taaki har gaadi ise kaate")
+        now = time.time()
+        for tr in self.tracker.tracks.values():
+            x1, y1, x2, y2 = tr.bbox
+            still = getattr(tr, "_first_seen", None)
+            if still is None:
+                tr._first_seen, tr._first_bbox = now, tr.bbox
+                continue
+            moved = abs((x1 + x2) // 2 - (tr._first_bbox[0] + tr._first_bbox[2]) // 2) + abs(y2 - tr._first_bbox[3])
+            if now - still > 8 and moved < 0.1 * max(x2 - x1, y2 - y1) and _segment_hits_box(a, b, tr.bbox):
+                hints.append(f"Ek khadi gaadi ({tr.label}) line ke upar hai — use Ignore Zone se cover karein ya line hatayein")
+                break
+        self.line_hints = hints[:2]
+
     def _dedupe_crossings(self, crossings):
         """One photo per vehicle: a crossing in the same direction, at (almost) the same
         place, within DEDUPE_S of a counted one is the same vehicle seen by a new track
@@ -456,8 +515,10 @@ class SecurityEngine:
             self.last_detect_ms = (time.time() - t0) * 1000
         self.frame_idx += 1
 
+        self.last_dets = self._drop_ignored(self.last_dets, w, h)
         crossings = self.tracker.update(self.last_dets, (a, b))
         crossings = self._dedupe_crossings(crossings)
+        self._update_line_hints(a, b, w, h)
         if self.cfg.get("enable_plate") and self.plate_reader is not None:
             self._update_best_crops(frame, original, w, h)
 
@@ -641,6 +702,12 @@ class SecurityEngine:
 
     def _annotate(self, frame, a, b):
         img = frame
+        for zx1, zy1, zx2, zy2 in self._zones_px(img.shape[1], img.shape[0]):
+            ov = img[zy1:zy2, zx1:zx2]
+            if ov.size:
+                ov[:] = cv2.addWeighted(ov, 0.7, np.full_like(ov, (60, 60, 220)), 0.3, 0)
+            cv2.rectangle(img, (zx1, zy1), (zx2, zy2), (80, 80, 230), 2)
+            cv2.putText(img, "IGNORE", (zx1 + 6, zy1 + 18), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (80, 80, 230), 1, cv2.LINE_AA)
         cv2.line(img, a, b, (0, 255, 255), 2)
         for tr in self.tracker.tracks.values():
             x1, y1, x2, y2 = tr.bbox

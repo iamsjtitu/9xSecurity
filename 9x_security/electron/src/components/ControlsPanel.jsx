@@ -1,8 +1,16 @@
 import React from 'react';
-import { PenLine, ArrowLeftRight, FolderOpen } from 'lucide-react';
+import { PenLine, ArrowLeftRight, FolderOpen, Ban, Trash2, AlertTriangle } from 'lucide-react';
 import { api } from '../api';
 
 export default function ControlsPanel({ state, refreshState, showToast, drawMode, setDrawMode }) {
+  const clearZones = async () => {
+    try {
+      await api('/api/ignore_zones', { method: 'POST', body: JSON.stringify({ zones: [] }) });
+      showToast('Ignore zones hata diye', 'success');
+      refreshState();
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+
   const swap = async () => {
     try {
       const r = await api('/api/swap', { method: 'POST' });
@@ -34,12 +42,30 @@ export default function ControlsPanel({ state, refreshState, showToast, drawMode
       <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-4">Detection Controls</h3>
       <div className="grid grid-cols-1 gap-2.5">
         <button
-          className={drawMode ? 'btn-primary justify-center' : 'btn-ghost justify-center'}
-          onClick={() => setDrawMode(!drawMode)}
+          className={drawMode === 'line' ? 'btn-primary justify-center' : 'btn-ghost justify-center'}
+          onClick={() => setDrawMode(drawMode === 'line' ? false : 'line')}
           data-testid="draw-line-btn"
         >
-          <PenLine size={15} /> {drawMode ? 'Video par 2 click karein…' : 'Draw Detection Line'}
+          <PenLine size={15} /> {drawMode === 'line' ? 'Video par 2 click karein…' : 'Draw Detection Line'}
         </button>
+        {(state.line_hints || []).length > 0 && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 space-y-1" data-testid="line-hints">
+            {state.line_hints.map((h) => <div key={h} className="flex gap-1.5"><AlertTriangle size={13} className="shrink-0 mt-0.5" /><span>{h}</span></div>)}
+          </div>
+        )}
+        <button
+          className={drawMode === 'zone' ? 'btn-primary justify-center' : 'btn-ghost justify-center'}
+          onClick={() => setDrawMode(drawMode === 'zone' ? false : 'zone')}
+          data-testid="draw-zone-btn"
+          title="Parking / khadi gaadiyon ka area: yahan ki gaadiyan kabhi count nahi hongi"
+        >
+          <Ban size={15} /> {drawMode === 'zone' ? 'Zone ke 2 kone click karein…' : `Draw Ignore Zone${(state.ignore_zones || []).length ? ` (${state.ignore_zones.length})` : ''}`}
+        </button>
+        {(state.ignore_zones || []).length > 0 && (
+          <button className="btn-ghost justify-center text-rose-600" onClick={clearZones} data-testid="clear-zones-btn">
+            <Trash2 size={15} /> Clear Ignore Zones
+          </button>
+        )}
         <button className="btn-ghost justify-center" onClick={swap} data-testid="swap-direction-btn">
           <ArrowLeftRight size={15} /> Swap Entry/Exit
         </button>

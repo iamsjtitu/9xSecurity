@@ -30,12 +30,13 @@
   "capture_end": "06:00",
   "auto_delete_enabled": true,
   "retention_days": 7,
+  "ignore_zones": [],
   "auto_lock_minutes": 10,
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "d0c4cbf89f3f366b8486c3029e68e981",
-  "auth_hash": "61014c3d9fb052b1a5ca1b9f48bdc6370987b61c1475a8702e926990c4fb500c",
+  "auth_salt": "9a79b6499db990b9f17cac73f36e240d",
+  "auth_hash": "d93437357389ba078e2816dba380308e4f81c9f624a38a99f0cc09422115af5d",
   "github_repo": "",
   "gh_token": "TEST_GH"
 }

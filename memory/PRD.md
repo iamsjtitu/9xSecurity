@@ -713,3 +713,17 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Tests: test_tracker_false_crossings.py (6: steal, real crossing once, infinite-line-not-segment ignored,
   same-direction twice = 1, geometry, engine dedupe) + engine/detection/capture/e2e/service suites pass.
   test_engine whatsapp payload assertion updated (no plate line in caption).
+
+## Implemented (update 2026-06 #42) — Ignore Zones (parking) + Line Placement Guide (self-tested)
+- Ignore Zones: config `ignore_zones` [{x1,y1,x2,y2} normalized, max 6]; POST /api/ignore_zones {zones}
+  (validates size ≥2%, replaces list); engine._drop_ignored removes detections whose bottom-centre is in a
+  zone BEFORE tracking (parked vehicles there can never count); zones drawn on the annotated frame as red
+  translucent 'IGNORE' boxes. UI: Detection Controls → 'Draw Ignore Zone (n)' (draw-zone-btn) — same 2-click
+  flow as the line (drawMode 'line' | 'zone', red hint draw-hint), 'Clear Ignore Zones' (clear-zones-btn);
+  /api/state exposes ignore_zones.
+- Line Placement Guide: engine._update_line_hints each frame → /api/state.line_hints (≤2) shown live under
+  'Draw Detection Line' (line-hints, amber): line endpoint within 4% of the frame edge; line shorter than
+  12% of width; a track that has not moved for >8 s and whose bbox intersects the line segment
+  ('Ek khadi gaadi (truck) line ke upar hai — Ignore Zone se cover karein').
+- Tests: test_tracker_false_crossings.py +2 (zone blocks counting; edge + parked-vehicle hints); API/e2e/
+  service suites pass; UI flow verified (draw zone via 2 clicks → count badge, clear).

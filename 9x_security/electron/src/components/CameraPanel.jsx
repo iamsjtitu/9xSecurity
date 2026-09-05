@@ -192,11 +192,18 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
       setFirstPoint({ x: nx, y: ny });
     } else {
       try {
-        await api('/api/line', {
-          method: 'POST',
-          body: JSON.stringify({ x1: firstPoint.x, y1: firstPoint.y, x2: nx, y2: ny }),
-        });
-        showToast('Detection line set ho gayi ✔', 'success');
+        if (drawMode === 'zone') {
+          const zones = [...(state.ignore_zones || []), { x1: firstPoint.x, y1: firstPoint.y, x2: nx, y2: ny }];
+          await api('/api/ignore_zones', { method: 'POST', body: JSON.stringify({ zones }) });
+          showToast('Ignore zone set ho gaya ✔ — is area ki gaadiyan count nahi hongi', 'success');
+        } else {
+          await api('/api/line', {
+            method: 'POST',
+            body: JSON.stringify({ x1: firstPoint.x, y1: firstPoint.y, x2: nx, y2: ny }),
+          });
+          showToast('Detection line set ho gayi ✔', 'success');
+        }
+        refreshState();
       } catch (ex) {
         showToast(ex.message, 'error');
       }
@@ -348,8 +355,10 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
           </div>
         )}
         {drawMode && (
-          <div className="absolute top-3 left-3 rounded-md bg-amber-500/90 px-3 py-1.5 text-xs font-semibold text-black">
-            {firstPoint ? 'Ab END point par click karein' : 'Line ka START point click karein'}
+          <div className={`absolute top-3 left-3 rounded-md px-3 py-1.5 text-xs font-semibold ${drawMode === 'zone' ? 'bg-rose-500/90 text-white' : 'bg-amber-500/90 text-black'}`} data-testid="draw-hint">
+            {drawMode === 'zone'
+              ? (firstPoint ? 'Ab zone ka DUSRA kona click karein' : 'Ignore zone: parking area ka PEHLA kona click karein')
+              : (firstPoint ? 'Ab END point par click karein' : 'Line ka START point click karein')}
           </div>
         )}
         {firstPoint && (

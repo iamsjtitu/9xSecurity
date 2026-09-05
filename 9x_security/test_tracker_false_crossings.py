@@ -99,3 +99,63 @@ def test_engine_drops_recreated_track_duplicate(tmp_path):
     for ev in events:
         if os.path.exists(ev["image_path"]):
             os.remove(ev["image_path"])
+
+
+def _engine(tmp_path, det, **over):
+    import config
+    import database
+    import engine as eng
+    db = database.EventDB(db_path=str(tmp_path / "z.db"))
+    cfg = {**config.DEFAULTS, "enable_plate": False, "detect_frame_skip": 1,
+           "line": {"x1": 700 / 960, "y1": 119 / 540, "x2": 850 / 960, "y2": 143 / 540}, **over}
+    e = eng.SecurityEngine(cfg=cfg, db=db, detector=det, plate_reader=None)
+    e.notifier.enabled = False
+    return e
+
+
+def test_ignore_zone_blocks_counting_and_hint_flags_parked_vehicle(tmp_path):
+    import numpy as np
+
+    class Det:
+        def __init__(self):
+            self.i = 0
+
+        def detect(self, f):
+            self.i += 1
+            y = 60 + min(self.i, 50) * 6
+            return [{"bbox": (720, y - 40, 840, y + 40), "label": "truck"}]
+
+    frame = np.zeros((540, 960, 3), np.uint8)
+    # zone covering the whole right part where this truck drives -> nothing counted
+    e = _engine(tmp_path, Det(), ignore_zones=[{"x1": 0.7, "y1": 0.0, "x2": 1.0, "y2": 1.0}])
+    events = []
+    for _ in range(60):
+        events += e.process_frame(frame)[1]
+    assert events == [] and e.tracker.tracks == {}
+    # without the zone the same motion counts once
+    e2 = _engine(tmp_path, Det())
+    events = []
+    for _ in range(60):
+        events += e2.process_frame(frame)[1]
+    assert len(events) == 1
+    for ev in events:
+        if os.path.exists(ev["image_path"]):
+            os.remove(ev["image_path"])
+
+
+def test_line_hints_edge_and_parked_vehicle(tmp_path, monkeypatch):
+    import numpy as np
+    import time as _t
+
+    class Parked:
+        def detect(self, f):
+            return [{"bbox": (700, 80, 900, 300), "label": "truck"}]   # sits right on the line
+
+    frame = np.zeros((540, 960, 3), np.uint8)
+    e = _engine(tmp_path, Parked(), line={"x1": 0.6, "y1": 0.2, "x2": 0.99, "y2": 0.25})  # touches right edge
+    e.process_frame(frame)
+    assert any("kinare" in h for h in e.line_hints), e.line_hints
+    t0 = _t.time()
+    monkeypatch.setattr(_t, "time", lambda: t0 + 20)     # 20 s later, still not moved
+    e.process_frame(frame)
+    assert any("khadi gaadi" in h for h in e.line_hints), e.line_hints

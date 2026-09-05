@@ -360,3 +360,21 @@
 2026-09-05T06:50:10 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-05/Entry_truck_06-50-10-467.jpg
 2026-09-05T06:50:10 | crossing ignored: duplicate of a vehicle counted <20s ago (track 2)
 2026-09-05T06:50:10 | crossing ignored: duplicate of a vehicle counted <20s ago (track 3)
+2026-09-05T06:58:47 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-09-05T06:58:50 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-05T06:58:50 | svc: loading AI model
+2026-09-05T06:58:52 | svc: AI model loaded
+2026-09-05T06:58:53 | svc: AI self-test OK (yolov8s.pt, 315 ms, 0 dets on blank frame)
+2026-09-05T06:58:53 | open_stream: transport=tcp
+2026-09-05T06:58:58 | open_stream: transport=udp
+2026-09-05T06:59:03 | open_stream: trying FFmpeg engine fallback
+2026-09-05T06:59:03 | ffmpeg-pipe: starting
+2026-09-05T06:59:06 | svc: loading AI model
+2026-09-05T06:59:08 | svc: AI model loaded
+2026-09-05T06:59:08 | svc: AI self-test OK (yolov8n.pt, 196 ms, 0 dets on blank frame)
+2026-09-05T06:59:08 | svc: source opened codec=hevc live=True
+2026-09-05T06:59:08 | svc: HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein
+2026-09-05T06:59:08 | svc: streaming started
+2026-09-05T06:59:12 | event: Exit bus track 1 (cross) -> /tmp/tmpvln9ya1_/snaps/2026-09-05/Exit_bus_06-59-12-325.jpg
+2026-09-05T06:59:20 | event: Entry bus track 1 (cross) -> /tmp/tmpvln9ya1_/snaps/2026-09-05/Entry_bus_06-59-20-129.jpg
+2026-09-05T06:59:21 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpmaaaiu0h/snaps/2026-09-05') path=/tmp/tmpmaaaiu0h/snaps/2026-09-05/Exit_car_06-59-21-217.jpg

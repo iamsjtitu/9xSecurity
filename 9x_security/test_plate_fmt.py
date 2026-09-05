@@ -10,9 +10,9 @@ n = WhatsAppNotifier({"wa_enabled": False})
 cap = n._caption({"vehicle_type": "car", "direction": "Entry",
                   "timestamp": "2026-09-02T19:19:57", "plate": "MH12AB1234"})
 assert "02-09-2026 07:19:57 PM" in cap, cap
-assert "Number: MH12AB1234" in cap
+assert "Number" not in cap and cap.count("\n") == 2, cap  # user: no 'Number:' line in WhatsApp text
 cap2 = n._caption({"vehicle_type": "truck", "direction": "Exit", "timestamp": "2026-09-02T19:19:57", "plate": ""})
-assert "Number: Not detected" in cap2, cap2
+assert "Number" not in cap2 and "Exit - TRUCK" in cap2, cap2
 print("PASS 1: WhatsApp caption 12-hour format:", cap.splitlines()[2])
 
 # ---- 2. snapshot overlay 12-hour format ----

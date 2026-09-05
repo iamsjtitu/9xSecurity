@@ -339,3 +339,4 @@
 2026-09-05T04:40:32 | plate OCR: track 1 event 1 -> 'KA01MJ2022' (fake, 2 crops)
 2026-09-05T04:40:32 | plate manual: event 38 -> 'MH12AB1234'
 2026-09-05T04:40:32 | plate manual: event 38 -> '(cleared)'
+2026-09-05T05:08:23 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-09-05/Entry_car_05-08-23-430.jpg

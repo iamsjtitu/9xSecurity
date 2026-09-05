@@ -592,7 +592,7 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - engine.py: ONE OCR worker thread + queue (_queue_ocr/_ocr_worker); job waiting >20 s
   (OCR_MAX_QUEUE_WAIT_S) is skipped → WhatsApp still sent as 'Not detected'. detector.py: torch threads =
   cpu_count-1 (NX_TORCH_THREADS) so decoder/UI/HTTP keep a core.
-- whatsapp._caption: 4th line 'Number: <plate>' / 'Number: Not detected'.
+- whatsapp._caption: 4th line Number: was added here, REMOVED again in #40 on user request (2026-06)
 - UI: api() has AbortController timeout (default 15 s; 60-180 s for camera test / WA test / groups /
   update check); poll() helper = sequential polling (App state, StatCards, EventsTable); CameraPanel frame
   fetch 4 s abort + 1 fps when window hidden; SettingsPage shows settings-load-error + settings-retry-btn
@@ -690,3 +690,7 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - P2: Multi-camera support (separate entry/exit cams)
 - P2: Plate-based search + email/Telegram alert on entry
 - P2: Auto-delete snapshots older than N days
+
+## Implemented (update 2026-06 #40) — WhatsApp text: 'Number:' line removed (user request)
+- Caption is back to 3 lines: '🚨 9x Security' / '<Direction> - <TYPE>' / 'Time: dd-mm-yyyy hh:mm:ss AM/PM'.
+  Plate stays visible in the app (toast, table, modal); test_plate_fmt.py asserts no 'Number' in caption.

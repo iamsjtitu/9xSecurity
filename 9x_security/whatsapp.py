@@ -172,8 +172,7 @@ class WhatsAppNotifier:
         cap = (
             f"🚨 9x Security\n"
             f"{ev.get('direction', '')} - {str(ev.get('vehicle_type', '')).upper()}\n"
-            f"Time: {when}\n"
-            f"Number: {ev.get('plate') or 'Not detected'}"
+            f"Time: {when}"
         )
         return cap
 

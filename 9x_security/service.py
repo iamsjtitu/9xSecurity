@@ -331,6 +331,16 @@ def health():
     return {"ok": True, "version": updater.APP_VERSION}
 
 
+@app.get("/api/public/status")
+def public_status():
+    """Lock/login screen proof that monitoring keeps running (no secrets)."""
+    return {
+        "connected": worker.connected,
+        "events_today": _db.counts_today(),
+        "last_event_time": (worker.last_event or {}).get("timestamp"),
+    }
+
+
 DEFAULT_PASSWORD = "9xsecurity"
 
 

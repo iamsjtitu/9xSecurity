@@ -340,3 +340,23 @@
 2026-09-05T04:40:32 | plate manual: event 38 -> 'MH12AB1234'
 2026-09-05T04:40:32 | plate manual: event 38 -> '(cleared)'
 2026-09-05T05:08:23 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-09-05/Entry_car_05-08-23-430.jpg
+2026-09-05T06:49:37 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-09-05T06:49:40 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-05T06:49:40 | svc: loading AI model
+2026-09-05T06:49:41 | svc: AI model loaded
+2026-09-05T06:49:42 | svc: AI self-test OK (yolov8s.pt, 308 ms, 0 dets on blank frame)
+2026-09-05T06:49:42 | open_stream: transport=tcp
+2026-09-05T06:49:47 | open_stream: transport=udp
+2026-09-05T06:49:52 | open_stream: trying FFmpeg engine fallback
+2026-09-05T06:49:52 | ffmpeg-pipe: starting
+2026-09-05T06:49:55 | svc: loading AI model
+2026-09-05T06:49:57 | svc: AI model loaded
+2026-09-05T06:49:58 | svc: AI self-test OK (yolov8n.pt, 190 ms, 0 dets on blank frame)
+2026-09-05T06:49:58 | svc: source opened codec=hevc live=True
+2026-09-05T06:49:58 | svc: HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein
+2026-09-05T06:49:58 | svc: streaming started
+2026-09-05T06:50:01 | event: Exit bus track 1 (cross) -> /tmp/tmpglkl9pwk/snaps/2026-09-05/Exit_bus_06-50-01-731.jpg
+2026-09-05T06:50:09 | event: Entry bus track 1 (cross) -> /tmp/tmpglkl9pwk/snaps/2026-09-05/Entry_bus_06-50-09-534.jpg
+2026-09-05T06:50:10 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-05/Entry_truck_06-50-10-467.jpg
+2026-09-05T06:50:10 | crossing ignored: duplicate of a vehicle counted <20s ago (track 2)
+2026-09-05T06:50:10 | crossing ignored: duplicate of a vehicle counted <20s ago (track 3)

@@ -694,3 +694,22 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 ## Implemented (update 2026-06 #40) — WhatsApp text: 'Number:' line removed (user request)
 - Caption is back to 3 lines: '🚨 9x Security' / '<Direction> - <TYPE>' / 'Time: dd-mm-yyyy hh:mm:ss AM/PM'.
   Plate stays visible in the app (toast, table, modal); test_plate_fmt.py asserts no 'Number' in caption.
+
+## Implemented (update 2026-06 #41) — False Entry/Exit from parked truck, duplicate photos, "count only ON the yellow line" (self-tested)
+- USER (05-09 screenshots): parked truck at right edge gave 15-20 Entry/Exit alerts with an empty road;
+  one Eicher gave 2-3 photos; 'jab gaadi meri yellow line par aaye tab hi, ek hi baar'.
+- ROOT CAUSE (reproduced in test): greedy centroid matching with tolerance 0.6×bbox let a small far-away
+  vehicle above the line (255px away) STEAL the parked truck's track → side flip → 'crossing'; detection
+  order swapped identities each frame → alternating Entry/Exit with the parked truck's bbox.
+- tracker.py: global greedy assignment with cost = 1-IoU (IoU≥0.25) else distance, and a size-ratio
+  guard (0.4-2.5×) so far/small boxes cannot take a big track; `steady` guard (ref jump > 0.8×bbox = teleport,
+  no crossing, side unchanged); crossings count ONLY when the movement segment intersects the DRAWN line
+  segment (±15%) via _hits_segment; appeared-at-line needs the start point projected onto the segment;
+  `repeat` rule: same track cannot produce two crossings in the same direction without crossing back.
+- engine.py: _dedupe_crossings — same direction + IoU>0.25 within CROSS_DEDUPE_S (20 s) = same vehicle
+  seen by a re-created track / second YOLO box → dropped (logged 'crossing ignored: duplicate').
+- Lock screen: new public GET /api/public/status (connected, events_today) → Login shows
+  'Monitoring chal rahi hai — aaj Entry N / Exit M' (login-live-status) so users see the engine runs while locked.
+- Tests: test_tracker_false_crossings.py (6: steal, real crossing once, infinite-line-not-segment ignored,
+  same-direction twice = 1, geometry, engine dedupe) + engine/detection/capture/e2e/service suites pass.
+  test_engine whatsapp payload assertion updated (no plate line in caption).

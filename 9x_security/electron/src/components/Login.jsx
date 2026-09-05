@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ShieldCheck, Lock, User } from 'lucide-react';
-import { api, setToken } from '../api';
+import { api, setToken, poll } from '../api';
 import BrandFooter from './BrandFooter.jsx';
 
 export default function Login({ onLogin, notice = '' }) {
@@ -8,6 +8,12 @@ export default function Login({ onLogin, notice = '' }) {
   const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [live, setLive] = useState(null);
+
+  // lock/login screen: show that the engine keeps monitoring behind the lock
+  useEffect(() => poll(async () => {
+    try { setLive(await api('/api/public/status', { timeout: 5000 })); } catch (_) { setLive(null); }
+  }, 5000), []);
   const [mustChange, setMustChange] = useState(false);
   const [np1, setNp1] = useState('');
   const [np2, setNp2] = useState('');
@@ -95,6 +101,14 @@ export default function Login({ onLogin, notice = '' }) {
           <p className="text-sm text-slate-500 mt-1 mb-8">Apna username aur password daalein</p>
           {notice && (
             <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800" data-testid="login-notice">{notice}</div>
+          )}
+          {live && (
+            <div className={`mb-4 flex items-center gap-2 rounded-lg border px-3 py-2 text-xs ${live.connected ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-slate-200 bg-slate-50 text-slate-600'}`} data-testid="login-live-status">
+              <span className={`h-2 w-2 rounded-full ${live.connected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+              {live.connected
+                ? `Monitoring chal rahi hai — aaj Entry ${live.events_today?.Entry ?? 0} / Exit ${live.events_today?.Exit ?? 0}`
+                : 'Camera connected nahi hai — login karke Connect karein'}
+            </div>
           )}
           <label className="label">Username</label>
           <div className="relative mb-4">

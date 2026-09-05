@@ -17,9 +17,10 @@ import numpy as np
 import config
 from database import EventDB
 from detector import VehicleDetector
-from tracker import CentroidTracker
+from tracker import CentroidTracker, _iou as _box_iou
 
 OCR_MAX_QUEUE_WAIT_S = float(os.environ.get("OCR_MAX_QUEUE_WAIT_S", "20"))
+DEDUPE_S = float(os.environ.get("CROSS_DEDUPE_S", "20"))  # same direction + same spot within this = one vehicle
 MIN_PLATE_PX = 160  # below this plate width (camera px) OCR is guesswork: user's gate plates were 60-130px
 
 
@@ -386,6 +387,7 @@ class SecurityEngine:
             self.plate_reader = PlateReader()
         self._best_crops = {}
         self._ocr_q = None  # single OCR worker queue (created on first crossing)
+        self._recent_cross = []  # (ts, to_side, bbox) of counted crossings for de-duplication
         # OCR models load lazily on the first crossing (async thread) — no heavy
         # torch work competes with YOLO right at engine start.
 
@@ -421,6 +423,22 @@ class SecurityEngine:
         )
         return self.detector.model_name
 
+    def _dedupe_crossings(self, crossings):
+        """One photo per vehicle: a crossing in the same direction, at (almost) the same
+        place, within DEDUPE_S of a counted one is the same vehicle seen by a new track
+        (lost/re-created track, or two YOLO boxes on one truck) -> dropped."""
+        now = time.time()
+        self._recent_cross = [r for r in self._recent_cross if now - r[0] < DEDUPE_S]
+        out = []
+        for cr in crossings:
+            dup = any(r[1] == cr["to_side"] and _box_iou(r[2], cr["bbox"]) > 0.25 for r in self._recent_cross)
+            if dup:
+                clog(f"crossing ignored: duplicate of a vehicle counted <{DEDUPE_S:.0f}s ago (track {cr['track_id']})")
+                continue
+            self._recent_cross.append((now, cr["to_side"], cr["bbox"]))
+            out.append(cr)
+        return out
+
     def process_frame(self, frame, original=None):
         """
         frame: BGR image already resized to processing/display resolution.
@@ -439,6 +457,7 @@ class SecurityEngine:
         self.frame_idx += 1
 
         crossings = self.tracker.update(self.last_dets, (a, b))
+        crossings = self._dedupe_crossings(crossings)
         if self.cfg.get("enable_plate") and self.plate_reader is not None:
             self._update_best_crops(frame, original, w, h)
 

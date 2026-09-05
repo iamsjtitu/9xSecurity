@@ -144,7 +144,7 @@ def test_whatsapp_payload(monkeypatch=None):
     assert captured["headers"]["Authorization"] == "Bearer wa9x_test"
     assert captured["files"]["phonenumber"] == (None, "919876543210")
     text = captured["files"]["text"][1]
-    assert "Entry" in text and "TRUCK" in text and "HR26AB1234" in text
+    assert "Entry" in text and "TRUCK" in text and "HR26AB1234" not in text  # plate line removed (user)
     print("PASS: WhatsApp v2 sendMessage payload ->", text.replace(chr(10), " | "))
 
 

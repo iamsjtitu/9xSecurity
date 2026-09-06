@@ -482,3 +482,31 @@ RuntimeError: no AI in test
 2026-09-06T08:28:20 | ffmpeg-pipe: starting
 2026-09-06T08:28:25 | open_stream: falling back to default backend
 2026-09-06T08:28:30 | svc: source opened codec=unknown live=True
+2026-09-06T08:28:49 | svc: loading AI model
+2026-09-06T08:28:49 | svc: AI model loaded
+2026-09-06T08:28:50 | svc: AI self-test OK (yolov8s.pt, 309 ms, 0 dets on blank frame)
+2026-09-06T08:28:50 | open_stream: transport=tcp
+2026-09-06T08:28:55 | open_stream: transport=udp
+2026-09-06T08:29:00 | open_stream: trying FFmpeg engine fallback
+2026-09-06T08:29:00 | ffmpeg-pipe: starting
+2026-09-06T08:29:05 | open_stream: falling back to default backend
+2026-09-06T08:29:10 | svc: source opened codec=unknown live=True
+2026-09-06T08:29:29 | svc: loading AI model
+2026-09-06T08:29:29 | svc: AI model loaded
+2026-09-06T08:29:30 | svc: AI self-test OK (yolov8s.pt, 301 ms, 0 dets on blank frame)
+2026-09-06T08:29:30 | open_stream: transport=tcp
+2026-09-06T08:29:35 | open_stream: transport=udp
+2026-09-06T08:29:40 | open_stream: trying FFmpeg engine fallback
+2026-09-06T08:29:40 | ffmpeg-pipe: starting
+2026-09-06T08:29:45 | open_stream: falling back to default backend
+2026-09-06T08:29:50 | svc: source opened codec=unknown live=True
+2026-09-06T08:30:09 | svc: auto-connect — saved camera se connect kar raha hai
+2026-09-06T08:30:09 | svc: loading AI model
+2026-09-06T08:30:09 | svc: AI model loaded
+2026-09-06T08:30:10 | svc: AI self-test OK (yolov8s.pt, 309 ms, 0 dets on blank frame)
+2026-09-06T08:30:10 | open_stream: transport=tcp
+2026-09-06T08:30:15 | open_stream: transport=udp
+2026-09-06T08:30:20 | open_stream: trying FFmpeg engine fallback
+2026-09-06T08:30:20 | ffmpeg-pipe: starting
+2026-09-06T08:30:25 | open_stream: falling back to default backend
+2026-09-06T08:30:30 | svc: source opened codec=unknown live=True

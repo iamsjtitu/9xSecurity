@@ -1189,8 +1189,15 @@ def main():
     threading.Thread(target=_outbox_loop, daemon=True).start()
     threading.Thread(target=_update_check_loop, daemon=True).start()
     threading.Thread(target=_auto_connect_loop, daemon=True).start()
-    uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="warning")
-    clog("svc: http server stopped — exiting")
+    # any crash must leave a trace in camera_log (the UI only sees 'fetch failed')
+    sys.excepthook = lambda et, ev, tb: clog(f"svc: UNHANDLED {et.__name__}: {ev}")
+    threading.excepthook = lambda a: clog(f"svc: THREAD {a.thread.name} died: {a.exc_type.__name__}: {a.exc_value}")
+    try:
+        uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="warning")
+        clog("svc: http server stopped — exiting")
+    except Exception as e:
+        clog(f"svc: http server CRASHED: {e!r} — exiting so the app can restart the engine")
+        os._exit(2)
     os._exit(0)  # never linger as a camera-holding zombie without HTTP
 
 

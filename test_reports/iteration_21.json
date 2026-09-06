@@ -1,0 +1,25 @@
+{
+  "summary": "Verified engine-supervisor / engine-down UI banner fix end-to-end. FRONTEND (Playwright at http://127.0.0.1:8971/): engine reachable -> data-testid='login-live-status' visible, 'login-engine-down' hidden. page.route('**/api/**', abort) -> within ~5s red banner data-testid='login-engine-down' appears with exact Hinglish 'Engine se connection nahi — engine start/restart ho raha hai, 20-30 sec me apne aap theek ho jayega'. Clicking Login shows friendly error 'Engine se connection nahi (fetch failed) — engine restart ho raha hai, 20-30 sec baad dobara Login dabayein' (not the raw browser 'Failed to fetch'). Un-route -> within ~5s banner disappears and login-live-status returns. Login (admin / 9xsecurity) -> force-change-form -> Temp123456 -> Dashboard + Settings load correctly. Password restored to 9xsecurity via POST /api/settings. BACKEND: GET /api/health = 200 (no auth), GET /api/public/status = 200 (no auth). service.py main() has sys.excepthook + threading.excepthook writing 'svc: UNHANDLED ...' / 'svc: THREAD ... died' to camera_log.txt, try/except around uvicorn.run with os._exit(2) on crash. Second-instance run: exit code 3 within ~15s with 'svc: port 8971 still busy ...' line in camera_log.txt (verified). PYTEST: test_service_api.py + test_tracker_false_crossings.py + test_engine.py = 47/47 passed.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/test_reports/pytest/iter21.xml",
+    "/app/9x_security/test_service_api.py",
+    "/app/9x_security/test_engine.py",
+    "/app/9x_security/test_tracker_false_crossings.py"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "electron-main.js supervisor logic reviewed: scheduleEngineRestart guards on quitting + existing restartTimer (no double-start); restart backoff 3s -> 60s after 5 restarts/10min is correct; setInterval health watchdog respects 3-min post-spawn grace and 6 consecutive fails (~120s) before kill; 'exit' handler nulls engineProc then schedules restart; before-quit sets quitting=true and killEngine() so the ensuing 'exit' is a no-op via the quitting guard. No TDZ issue (engineStartedAt is a module-level let assigned before whenReady triggers startEngine). Minor cosmetic: supLog comment says 'no /api/health for 80s' but 6*20s = 120s — update the log text for accuracy.",
+    "service.py excepthooks + uvicorn try/except with os._exit(2) are correctly installed AFTER background threads start, so any subsequent thread crash is captured to camera_log.txt and uvicorn crash triggers a supervisor-visible non-zero exit. Port-busy path exits 3 (verified live).",
+    "Login.jsx: engineDown polled every 5s via /api/public/status with 5s fetch timeout; banner text matches spec exactly. Friendly error message uses regex /fetch|network|timeout/i on ex.message and prefixes with 'Engine se connection nahi'. Note: current friendly text still includes '(fetch failed)' as a parenthetical hint — this is by design in the source; if product wants zero occurrence of the phrase in the UI, drop the '(fetch failed)' fragment. Functionally correct as per spec (no raw 'Failed to fetch' surfaced)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin / 9xsecurity (force-change on first UI login -> used Temp123456; restored to 9xsecurity via POST /api/settings before finishing)",
+  "seed_data_creation": "None. events.db untouched. Second-instance run created a few ffmpeg-fallback synthetic events during its ~15s wait before exiting with code 3 — appended to camera_log.txt only, no DB writes because that instance never bound the port.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Engine is running via nohup on 127.0.0.1:8971 (NOT supervisor). Password is 9xsecurity (must_change flag still true because it matches default — that is normal). Windows-only Electron supervisor logic (scheduleEngineRestart/checkHealth) cannot be exercised at runtime in this Linux container — only code-reviewed. UI banner + friendly-error flow verified via page.route abort trick.",
+  "rca of the issue": "Original bug: overnight the Python engine died/hung; Electron kept running and the login page showed a raw browser 'fetch failed'. Fix layers verified: (a) engine now os._exit(2) on uvicorn crash and os._exit(3) on port conflict so the packaged supervisor sees a real exit; (b) unhandled thread/main exceptions land in camera_log.txt with 'svc: UNHANDLED ...' / 'svc: THREAD ... died' for post-mortem; (c) Electron supervisor spawns/restarts (3s -> 60s backoff) and health-watchdogs every 20s (kill after 6 fails past a 3-min grace) — code reviewed only; (d) Login screen polls /api/public/status every 5s and swaps in a Hinglish red banner + friendly login-error message so the user is no longer confused by 'fetch failed'."
+}

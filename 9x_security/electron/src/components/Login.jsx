@@ -11,8 +11,10 @@ export default function Login({ onLogin, notice = '' }) {
   const [live, setLive] = useState(null);
 
   // lock/login screen: show that the engine keeps monitoring behind the lock
+  const [engineDown, setEngineDown] = useState(false);
   useEffect(() => poll(async () => {
-    try { setLive(await api('/api/public/status', { timeout: 5000 })); } catch (_) { setLive(null); }
+    try { setLive(await api('/api/public/status', { timeout: 5000 })); setEngineDown(false); }
+    catch (_) { setLive(null); setEngineDown(true); }
   }, 5000), []);
   const [mustChange, setMustChange] = useState(false);
   const [np1, setNp1] = useState('');
@@ -31,7 +33,8 @@ export default function Login({ onLogin, notice = '' }) {
         onLogin();
       }
     } catch (ex) {
-      setErr(ex.message || 'Login fail');
+      const m = String(ex.message || '');
+      setErr(/fetch|network|timeout/i.test(m) ? 'Engine se connection nahi (fetch failed) — engine restart ho raha hai, 20-30 sec baad dobara Login dabayein' : (m || 'Login fail'));
     } finally {
       setBusy(false);
     }
@@ -101,6 +104,12 @@ export default function Login({ onLogin, notice = '' }) {
           <p className="text-sm text-slate-500 mt-1 mb-8">Apna username aur password daalein</p>
           {notice && (
             <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800" data-testid="login-notice">{notice}</div>
+          )}
+          {engineDown && (
+            <div className="mb-4 flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800" data-testid="login-engine-down">
+              <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+              Engine se connection nahi — engine start/restart ho raha hai, 20-30 sec me apne aap theek ho jayega
+            </div>
           )}
           {live && (
             <div className={`mb-4 flex items-center gap-2 rounded-lg border px-3 py-2 text-xs ${live.connected ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-slate-200 bg-slate-50 text-slate-600'}`} data-testid="login-live-status">

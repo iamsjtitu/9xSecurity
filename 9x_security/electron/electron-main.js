@@ -43,8 +43,57 @@ function startEngine() {
     stdio: ['ignore', fd, fd],
     env: { ...process.env, ENGINE_PORT: PORT, NX_PARENT_PID: String(process.pid) },
   });
-  engineProc.on('exit', () => { engineProc = null; });
+  engineStartedAt = Date.now();
+  engineProc.on('exit', (code, signal) => {
+    engineProc = null;
+    supLog(`engine exited code=${code} signal=${signal}`);
+    scheduleEngineRestart();
+  });
 }
+
+// ---- engine supervisor: the engine must never stay dead/hung while the app is open ----
+// (user: 'login par fetch failed' next morning; exit + reopen fixed it = engine was gone)
+let restartTimes = [];
+let restartTimer = null;
+let healthFails = 0;
+let engineStartedAt = 0;
+function supLog(msg) {
+  try {
+    const dir = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), '9xSecurity');
+    fs.appendFileSync(path.join(dir, 'engine_out.log'), `${new Date().toISOString()} | supervisor: ${msg}\n`);
+  } catch (_) { /* noop */ }
+}
+function scheduleEngineRestart() {
+  if (quitting || !app.isPackaged || restartTimer) return;
+  const now = Date.now();
+  restartTimes = restartTimes.filter((t) => now - t < 10 * 60 * 1000);
+  restartTimes.push(now);
+  const delay = restartTimes.length > 5 ? 60000 : 3000; // crash loop -> slow down, but never give up
+  supLog(`restarting engine in ${delay / 1000}s (${restartTimes.length} restarts in last 10 min)`);
+  restartTimer = setTimeout(() => { restartTimer = null; if (!quitting) startEngine(); }, delay);
+}
+function checkHealth(cb) {
+  const req = http.get(`http://127.0.0.1:${PORT}/api/health`, (res) => { res.resume(); cb(res.statusCode === 200); });
+  req.on('error', () => cb(false));
+  req.setTimeout(5000, () => { req.destroy(); });
+}
+setInterval(() => {
+  if (quitting || !app.isPackaged) return;
+  if (engineProc && Date.now() - engineStartedAt < 180000) return; // model load on a slow PC: give it 3 min
+  checkHealth((ok) => {
+    if (ok) { healthFails = 0; return; }
+    healthFails += 1;
+    if (healthFails < 6) return; // ~2 min unresponsive
+    healthFails = 0;
+    if (engineProc) {
+      supLog('engine unresponsive (no /api/health for 2 min) -> kill + restart');
+      try { engineProc.kill(); } catch (_) { /* exit handler restarts */ }
+    } else if (!restartTimer) {
+      supLog('engine process missing -> start');
+      startEngine();
+    }
+  });
+}, 20000);
 
 function waitEngine(cb, tries = 0) {
   const req = http.get(`http://127.0.0.1:${PORT}/api/health`, (res) => {

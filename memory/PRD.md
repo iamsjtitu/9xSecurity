@@ -739,3 +739,16 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   Save) + auto-start-toggle (applies immediately; disabled outside the installed Windows app).
 - Verified: engine auto-connect fires at start and retries (unreachable test URL), manual Disconnect stops
   retries, settings round-trip, UI card renders. Windows Run-key behaviour needs the user's build.
+
+## Implemented (update 2026-06 #44) — Engine supervisor: 'login par fetch failed' next morning (testing agent iteration_21: ALL PASS)
+- USER: after a day, opening the app gave 'fetch failed' at login; exit + reopen fixed it → the engine
+  process had died/hung overnight while Electron kept running; Electron never restarted it.
+- electron-main.js: engine 'exit' → scheduleEngineRestart (3 s; 60 s backoff after >5 restarts/10 min,
+  never gives up); health watchdog every 20 s → after 6 failed /api/health (2 min, and ≥3 min after spawn)
+  kill → exit handler restarts; 'supervisor: …' lines in engine_out.log.
+- service.py: sys/threading excepthooks log 'svc: UNHANDLED/THREAD died' to camera_log; uvicorn crash →
+  os._exit(2) so the supervisor restarts (Windows). Port-busy still exit 3.
+- Login.jsx: red 'login-engine-down' banner while /api/public/status unreachable; fetch/network/timeout
+  login errors show a Hinglish 'Engine se connection nahi … 20-30 sec baad dobara Login' message.
+- Root cause of the overnight death itself is unknown (no engine_out.log received) — ask for Diagnostics if
+  it recurs; the excepthook lines will now show it.

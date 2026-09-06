@@ -28,6 +28,13 @@ def _along(p, a, b):
     return ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / n if n else 0.0
 
 
+def _touches_edge(bbox, frame_size, margin=3):
+    if not frame_size:
+        return False
+    w = frame_size[0]
+    return bbox[0] <= margin or bbox[2] >= w - margin
+
+
 def _size(bbox):
     return max(1.0, float((bbox[2] - bbox[0]) * (bbox[3] - bbox[1])))
 
@@ -55,6 +62,7 @@ class Track:
         self.side = side          # last known side sign (-1 / 0 / 1)
         self.start_dist = dist    # signed px distance to line when first seen
         self.start_ref = ((bbox[0] + bbox[2]) // 2, bbox[3])  # ref point when first seen
+        self.start_edge = False   # first seen touching the left/right picture edge
         self.disappeared = 0
         self.crossings = 0
         self.last_cross_ts = None
@@ -118,7 +126,7 @@ class CentroidTracker:
             return self.hysteresis
         return max(20.0, 0.5 * self.near_band)
 
-    def update(self, detections, line, now=None):
+    def update(self, detections, line, now=None, frame_size=None):
         """
         detections: list of {bbox,label}
         line: (a, b) two points in same coord space as detections
@@ -166,13 +174,16 @@ class CentroidTracker:
                 jump = math.hypot(cur_ref[0] - prev_ref[0], cur_ref[1] - prev_ref[1])
                 x1, y1, x2, y2 = d["bbox"]
                 steady = jump <= 0.8 * max(x2 - x1, y2 - y1, 20)  # one-frame teleport = not a real move
+                if _touches_edge(d["bbox"], frame_size):
+                    steady = False  # partly outside the picture: its bottom-centre is not where the vehicle is
                 tr.centroid = c
                 tr.bbox = d["bbox"]
                 tr.labels[d["label"]] += 1
                 tr.disappeared = 0
 
-                # re-arm once the vehicle is clearly past the line it just crossed
-                if not tr.armed and abs(cur_dist) >= self._hyst():
+                # re-arm only once the vehicle is clearly past the line it just crossed:
+                # at least 15% of its own height (a Bolero stopping at the gate jitters +-20px)
+                if not tr.armed and abs(cur_dist) >= max(self._hyst(), 0.15 * (y2 - y1)):
                     tr.armed = True
 
                 crossed = (prev_sign != 0 and cur_sign != 0 and cur_sign != prev_sign
@@ -185,6 +196,7 @@ class CentroidTracker:
                     and abs(cur_dist) >= 1.5 * self.near_band
                     and self._sign(tr.start_dist) in (0, cur_sign)
                     and steady
+                    and not tr.start_edge  # came into view from the picture edge, not 'at the line'
                     and -0.15 <= _along(tr.start_ref, a, b) <= 1.15  # appeared ON the drawn segment
                 )
                 gap_ok = tr.last_cross_ts is None or (now - tr.last_cross_ts) >= self.min_gap_s
@@ -213,6 +225,7 @@ class CentroidTracker:
                 tid = self.next_id
                 self.next_id += 1
                 self.tracks[tid] = Track(tid, c, d["bbox"], d["label"], cur_sign, cur_dist)
+                self.tracks[tid].start_edge = _touches_edge(d["bbox"], frame_size)
                 used_track_ids.add(tid)
 
         # Age out unmatched tracks

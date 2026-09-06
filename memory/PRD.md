@@ -752,3 +752,20 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   login errors show a Hinglish 'Engine se connection nahi … 20-30 sec baad dobara Login' message.
 - Root cause of the overnight death itself is unknown (no engine_out.log received) — ask for Diagnostics if
   it recurs; the excepthook lines will now show it.
+
+## Implemented (update 2026-06 #45) — Gate jitter double-count + edge-glued phantom Entry (testing agent iteration_22: ALL PASS)
+- USER (06-09, camera repositioned): a Bolero standing at the gate gave Entry then Exit 78 s later; a truck
+  half outside the right picture edge gave a blank 'Entry'.
+- tracker.py: re-arm after a crossing needs |dist| ≥ max(hysteresis, 15% of bbox height) (jitter ±20 px can
+  no longer flip); detections touching the left/right picture edge (x1≤3 or x2≥w-3, frame_size from engine)
+  are unsteady → no crossing, side frozen; a track first seen at the edge cannot use 'appeared-at-line'.
+  min_gap_s stays 3 s (real exit→re-entry 9-10 s later must still count — earlier user request).
+- Tests: test_tracker_false_crossings.py 10 + test_custom_scenarios.py (agent) + detection/engine/capture/
+  live-e2e/service suites pass.
+- AWAITING USER: real-camera check (1 crossing = 1 alert; side vehicle = none; exit→re-entry = 2).
+
+## Verified (2026-06 #46) — Lock/auto-lock does NOT stop monitoring (self-tested, live)
+- USER doubt: 'sayad software jab lock ho raha hai chal nahi raha'. Live check: connected file source →
+  POST /api/logout (= lock) → engine kept streaming (public/status connected=true) and logged a new
+  crossing 'event: Exit bus' 12 s AFTER the lock; old token correctly 401. Lock only revokes the UI token;
+  Worker/auto-connect/WhatsApp untouched (service.logout pops _tokens only). Test data cleaned.

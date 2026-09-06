@@ -159,3 +159,41 @@ def test_line_hints_edge_and_parked_vehicle(tmp_path, monkeypatch):
     monkeypatch.setattr(_t, "time", lambda: t0 + 20)     # 20 s later, still not moved
     e.process_frame(frame)
     assert any("khadi gaadi" in h for h in e.line_hints), e.line_hints
+
+
+# ---- 06-09 report: one Bolero gave Entry + Exit while standing at the gate; a truck that
+# ---- was only half inside the picture (right edge) gave a blank 'Entry'.
+LINE_MID = ((50, 380), (900, 380))   # horizontal line across the gate, 960x540
+
+
+def _run_mid(frames, frame_size=(960, 540)):
+    tr = CentroidTracker()
+    tr.near_band = 54
+    out = []
+    for i, dets in enumerate(frames):
+        out += [(i, c["to_side"], c["via"]) for c in tr.update(dets, LINE_MID, now=i * 0.15, frame_size=frame_size)]
+    return out
+
+
+def test_vehicle_stopping_at_gate_with_jitter_counts_once():
+    import random
+    random.seed(7)
+    frames = []
+    for i in range(40):                                # drives in: bottom edge 250 -> 410 (crosses y=380)
+        bot = 250 + i * 4
+        frames.append([{"bbox": (350, bot - 300, 650, bot), "label": "truck"}])
+    for _ in range(400):                               # stands at the gate ~60 s, box jitters +-20 px
+        bot = 410 + random.randint(-20, 20)
+        frames.append([{"bbox": (350, bot - 300, 650, bot), "label": "truck"}])
+    ev = _run_mid(frames)
+    assert len(ev) == 1, ev
+
+
+def test_vehicle_entering_from_picture_edge_is_not_counted():
+    frames = []
+    for i in range(30):                                # appears half outside the right edge, grows into view
+        x1 = 960 - 40 - i * 8
+        frames.append([{"bbox": (x1, 175, 960, 520), "label": "truck"}])  # bottom already below the line
+    for i in range(30):                                # fully inside now, driving left along the road
+        frames.append([{"bbox": (700 - i * 6, 175, 960 - 5 - i * 6, 520), "label": "truck"}])
+    assert _run_mid(frames) == []

@@ -516,7 +516,7 @@ class SecurityEngine:
         self.frame_idx += 1
 
         self.last_dets = self._drop_ignored(self.last_dets, w, h)
-        crossings = self.tracker.update(self.last_dets, (a, b))
+        crossings = self.tracker.update(self.last_dets, (a, b), frame_size=(w, h))
         crossings = self._dedupe_crossings(crossings)
         self._update_line_hints(a, b, w, h)
         if self.cfg.get("enable_plate") and self.plate_reader is not None:

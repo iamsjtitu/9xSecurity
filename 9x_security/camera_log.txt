@@ -419,3 +419,9 @@ RuntimeError: no AI in test
 2026-09-05T07:45:46 | svc: streaming started
 2026-09-05T07:45:48 | svc: switched to sub-stream rtsp://u:p@cam/Streaming/Channels/102
 2026-09-05T07:45:48 | svc: switched back to main stream rtsp://u:p@cam/Streaming/Channels/101
+2026-09-06T07:39:44 | svc: loading AI model
+2026-09-06T07:39:44 | svc: AI model loaded
+2026-09-06T07:39:45 | svc: AI self-test OK (yolov8s.pt, 311 ms, 0 dets on blank frame)
+2026-09-06T07:39:45 | svc: source opened codec=fmp4 live=False
+2026-09-06T07:39:45 | svc: streaming started
+2026-09-06T07:40:09 | event: Exit bus track 1 (appeared-at-line) -> /app/9x_security/snapshots/2026-09-06/Exit_bus_07-40-09-627.jpg

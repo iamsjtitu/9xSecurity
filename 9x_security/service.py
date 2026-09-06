@@ -733,7 +733,7 @@ def whatsapp_test(body: dict, request: Request):
             "wa_api_key": (str(body.get("wa_api_key", "")).strip() or cfg.get("wa_api_key", "")),
             "wa_recipients": body.get("wa_recipients") or cfg.get("wa_recipients", []),
             "wa_groups": body.get("wa_groups") if body.get("wa_groups") is not None else cfg.get("wa_groups", []),
-            "wa_send_image": bool(body.get("wa_send_image", True)),
+            "wa_send_image": bool(body.get("wa_send_image", cfg.get("wa_send_image", True))),
         }
     )
     ok, detail = n.test_connection()

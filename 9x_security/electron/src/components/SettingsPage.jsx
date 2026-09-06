@@ -62,12 +62,17 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
     }
   };
 
+  const [waResult, setWaResult] = useState('');
+
   const waTest = async () => {
     setBusy(true);
+    setWaResult('Test chal raha hai… (text + photo bhej rahe hain, 10-20 sec)');
     try {
       const r = await api('/api/whatsapp/test', { method: 'POST', body: JSON.stringify(s), timeout: 120000 });
-      showToast(r.detail, r.ok ? 'success' : 'error');
+      setWaResult(r.detail);
+      showToast(r.ok ? 'Test message + photo SENT ✅ — neeche result dekhein' : 'Test me kuch FAILED ❌ — neeche result dekhein', r.ok ? 'success' : 'error');
     } catch (e) {
+      setWaResult(`Error: ${e.message}`);
       showToast(e.message, 'error');
     } finally {
       setBusy(false);
@@ -220,6 +225,18 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
                 <Send size={14} /> Send Test Message
               </button>
             </div>
+            {waResult && (
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3" data-testid="wa-test-result">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-semibold text-slate-700">Test result (text + photo)</span>
+                  <button type="button" className="text-xs text-[#1f6feb] hover:underline" data-testid="wa-test-copy-btn"
+                    onClick={() => navigator.clipboard?.writeText(waResult).then(() => showToast('Result copy ho gaya ✔', 'success'))}>
+                    Copy
+                  </button>
+                </div>
+                <pre className="text-xs text-slate-700 whitespace-pre-wrap break-all font-mono leading-relaxed" data-testid="wa-test-result-text">{waResult}</pre>
+              </div>
+            )}
           </div>
         )}
 

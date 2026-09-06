@@ -769,3 +769,17 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   POST /api/logout (= lock) → engine kept streaming (public/status connected=true) and logged a new
   crossing 'event: Exit bus' 12 s AFTER the lock; old token correctly 401. Lock only revokes the UI token;
   Worker/auto-connect/WhatsApp untouched (service.logout pops _tokens only). Test data cleaned.
+
+## Implemented (update 2026-06 #47) — 'WhatsApp par photo nahi aa raha': Send Test now proves the PHOTO channel (self-tested)
+- USER: sirf text aa raha hai, photo nahi; wants to know if it is the API's fault to report to wa.9x.design.
+- whatsapp.test_connection(): sends TEXT and (when 'Photo ke saath bhejo' ON) a generated TEST PHOTO
+  (wa_test_photo.jpg in data dir) via POST /api/v2/sendMessageFile per recipient, then GET
+  /api/v2/message/status?id=<messageId> (3 s later) → result lines '<to> TEXT: SENT/FAILED (HTTP …)',
+  '<to> PHOTO: SENT/FAILED (HTTP … [provider body] id=…)', '   provider status: OK / statusInfo / delivery'.
+  self.last_response captured in _send_text/_send_image. /api/whatsapp/test honours wa_send_image from body/config.
+- UI Settings > WhatsApp: persistent result box (wa-test-result / wa-test-result-text) with Copy button
+  (wa-test-copy-btn) instead of a 4.5 s toast → user pastes it to the provider.
+- Verified: test_wa_phototest.py 3/3 (fake provider: text+photo+status, photo 500 reported with body,
+  send_image off → no photo call); live wa.9x.design with fake key → both channels reach the endpoints
+  (401 on both). Real-key result awaits user; wa_log.txt lines 'image | status=…' or 'image-rejected->text'
+  or 'image-missing->text' tell provider-vs-app fault.

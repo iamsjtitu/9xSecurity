@@ -425,3 +425,60 @@ RuntimeError: no AI in test
 2026-09-06T07:39:45 | svc: source opened codec=fmp4 live=False
 2026-09-06T07:39:45 | svc: streaming started
 2026-09-06T07:40:09 | event: Exit bus track 1 (appeared-at-line) -> /app/9x_security/snapshots/2026-09-06/Exit_bus_07-40-09-627.jpg
+2026-09-06T08:24:45 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-06T08:24:45 | purge: 0 old events removed (retention 7d, cutoff 2026-08-30)
+2026-09-06T08:24:49 | svc: auto-connect — saved camera se connect kar raha hai
+2026-09-06T08:24:49 | svc: loading AI model
+2026-09-06T08:24:50 | svc: AI model loaded
+2026-09-06T08:24:51 | svc: AI self-test OK (yolov8s.pt, 313 ms, 0 dets on blank frame)
+2026-09-06T08:24:51 | open_stream: transport=tcp
+2026-09-06T08:24:56 | open_stream: transport=udp
+2026-09-06T08:25:01 | open_stream: trying FFmpeg engine fallback
+2026-09-06T08:25:01 | ffmpeg-pipe: starting
+2026-09-06T08:25:06 | open_stream: falling back to default backend
+2026-09-06T08:25:11 | svc: source opened codec=unknown live=True
+2026-09-06T08:25:29 | svc: loading AI model
+2026-09-06T08:25:29 | svc: AI model loaded
+2026-09-06T08:25:30 | svc: AI self-test OK (yolov8s.pt, 300 ms, 0 dets on blank frame)
+2026-09-06T08:25:30 | open_stream: transport=tcp
+2026-09-06T08:25:35 | open_stream: transport=udp
+2026-09-06T08:25:40 | open_stream: trying FFmpeg engine fallback
+2026-09-06T08:25:40 | ffmpeg-pipe: starting
+2026-09-06T08:25:45 | open_stream: falling back to default backend
+2026-09-06T08:25:50 | svc: source opened codec=unknown live=True
+2026-09-06T08:26:09 | svc: loading AI model
+2026-09-06T08:26:09 | svc: AI model loaded
+2026-09-06T08:26:10 | svc: AI self-test OK (yolov8s.pt, 307 ms, 0 dets on blank frame)
+2026-09-06T08:26:10 | open_stream: transport=tcp
+2026-09-06T08:26:15 | open_stream: transport=udp
+2026-09-06T08:26:20 | open_stream: trying FFmpeg engine fallback
+2026-09-06T08:26:20 | ffmpeg-pipe: starting
+2026-09-06T08:26:25 | open_stream: falling back to default backend
+2026-09-06T08:26:30 | svc: source opened codec=unknown live=True
+2026-09-06T08:26:49 | svc: loading AI model
+2026-09-06T08:26:49 | svc: AI model loaded
+2026-09-06T08:26:50 | svc: AI self-test OK (yolov8s.pt, 311 ms, 0 dets on blank frame)
+2026-09-06T08:26:50 | open_stream: transport=tcp
+2026-09-06T08:26:55 | open_stream: transport=udp
+2026-09-06T08:27:00 | open_stream: trying FFmpeg engine fallback
+2026-09-06T08:27:00 | ffmpeg-pipe: starting
+2026-09-06T08:27:05 | open_stream: falling back to default backend
+2026-09-06T08:27:10 | svc: source opened codec=unknown live=True
+2026-09-06T08:27:29 | svc: loading AI model
+2026-09-06T08:27:29 | svc: AI model loaded
+2026-09-06T08:27:30 | svc: AI self-test OK (yolov8s.pt, 310 ms, 0 dets on blank frame)
+2026-09-06T08:27:30 | open_stream: transport=tcp
+2026-09-06T08:27:35 | open_stream: transport=udp
+2026-09-06T08:27:40 | open_stream: trying FFmpeg engine fallback
+2026-09-06T08:27:40 | ffmpeg-pipe: starting
+2026-09-06T08:27:45 | open_stream: falling back to default backend
+2026-09-06T08:27:50 | svc: source opened codec=unknown live=True
+2026-09-06T08:28:09 | svc: loading AI model
+2026-09-06T08:28:09 | svc: AI model loaded
+2026-09-06T08:28:10 | svc: AI self-test OK (yolov8s.pt, 324 ms, 0 dets on blank frame)
+2026-09-06T08:28:10 | open_stream: transport=tcp
+2026-09-06T08:28:15 | open_stream: transport=udp
+2026-09-06T08:28:20 | open_stream: trying FFmpeg engine fallback
+2026-09-06T08:28:20 | ffmpeg-pipe: starting
+2026-09-06T08:28:25 | open_stream: falling back to default backend
+2026-09-06T08:28:30 | svc: source opened codec=unknown live=True

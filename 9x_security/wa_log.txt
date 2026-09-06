@@ -145,3 +145,24 @@
 2026-09-05T06:56:03 | image | to=919812345678 | status=200 | {"success":true}
 2026-09-05T06:59:06 | text | to=911234567890 | status=401 | {"detail":"Invalid API token"}
 2026-09-05T07:45:44 | text | to=911234567890 | status=401 | {"detail":"Invalid API token"}
+2026-09-06T08:24:29 | text | to=919876543210 | status=201 | {"success": true, "data": {"id": "txt-1"}}
+2026-09-06T08:24:29 | image | to=919876543210 | status=200 | {"success": true, "data": {"messageId": "pic-77", "fileType": "jpg"}}
+2026-09-06T08:24:29 | status | to=- | status=200 | {"success": true, "result": {"status": "OK", "statusInfo": "message successfully sent.", "delivery": "device"}}
+2026-09-06T08:24:29 | text | to=919876543210 | status=201 | {"success": true, "data": {"id": "txt-1"}}
+2026-09-06T08:24:29 | image | to=919876543210 | status=500 | {"success": false, "error": "media upload failed"}
+2026-09-06T08:24:29 | text | to=919876543210 | status=201 | {"success": true, "data": {"id": "txt-1"}}
+2026-09-06T08:24:30 | image-error | to=919876543210 | status=- | HTTPConnectionPool(host='127.0.0.1', port=9): Max retries exceeded with url: /api/v2/sendMessageFile (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=9): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-09-06T08:24:30 | outbox-queued | to=919876543210 | status=- | id=1 reason=Internet/connection error: HTTPConnectionPool(host='127.0.0.1', port=9): Max retries exceeded with url: /api/v2/sendMessageFile (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=9): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-09-06T08:24:30 | image-error | to=919999999999 | status=- | HTTPConnectionPool(host='127.0.0.1', port=9): Max retries exceeded with url: /api/v2/sendMessageFile (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=9): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-09-06T08:24:30 | outbox-queued | to=919999999999 | status=- | id=2 reason=Internet/connection error: HTTPConnectionPool(host='127.0.0.1', port=9): Max retries exceeded with url: /api/v2/sendMessageFile (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=9): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-09-06T08:24:30 | image-error | to=919876543210 | status=- | HTTPConnectionPool(host='127.0.0.1', port=9): Max retries exceeded with url: /api/v2/sendMessageFile (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=9): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-09-06T08:24:30 | image | to=919876543210 | status=200 | {"success":true}
+2026-09-06T08:24:30 | outbox-sent | to=919876543210 | status=- | id=1
+2026-09-06T08:24:30 | image | to=919999999999 | status=200 | {"success":true}
+2026-09-06T08:24:30 | outbox-sent | to=919999999999 | status=- | id=2
+2026-09-06T08:26:41 | text | to=919876543210 | status=401 | {"detail":"Invalid API token"}
+2026-09-06T08:26:42 | image | to=919876543210 | status=401 | {"detail":"Invalid API token"}
+2026-09-06T08:26:55 | text | to=919876543210 | status=401 | {"detail":"Invalid API token"}
+2026-09-06T08:26:56 | image | to=919876543210 | status=401 | {"detail":"Invalid API token"}
+2026-09-06T08:27:14 | text | to=919876543210 | status=401 | {"detail":"Invalid API token"}
+2026-09-06T08:27:15 | image | to=919876543210 | status=401 | {"detail":"Invalid API token"}

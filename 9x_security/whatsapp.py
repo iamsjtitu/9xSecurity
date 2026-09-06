@@ -62,6 +62,7 @@ def _is_group(to):
 class WhatsAppNotifier:
     def __init__(self, cfg, db=None):
         self.db = db
+        self.last_response = ""
         self._flush_lock = threading.Lock()
         self.update(cfg)
 
@@ -117,19 +118,75 @@ class WhatsAppNotifier:
             return False, "API key khaali hai. Settings me API key daalein."
         if not self.recipients:
             return False, "Koi recipient nahi mila. Ek number (91XXXXXXXXXX) ya WhatsApp group select karein."
+        now = datetime.now().strftime('%d-%m-%Y %I:%M:%S %p')
         text = (
             "✅ 9x Security test alert\n"
-            f"Time: {datetime.now().strftime('%d-%m-%Y %I:%M:%S %p')}\n"
+            f"Time: {now}\n"
             "Agar ye message aaya hai to setup sahi hai."
         )
+        photo = self._test_photo(now) if self.send_image else ""
         lines = []
         all_ok = True
         for to in self.recipients:
-            ok, info = self._send_text(to, text)
             label = f"Group {to.split('@')[0]}" if _is_group(to) else to
-            lines.append(f"{label}: {'SENT ✅' if ok else 'FAILED ❌'} ({info})")
+            ok, info = self._send_text(to, text)
+            lines.append(f"{label} TEXT: {'SENT ✅' if ok else 'FAILED ❌'} ({info})")
             all_ok = all_ok and ok
+            if photo:
+                pok, pinfo = self._send_image(to, "📷 9x Security test photo\n" + f"Time: {now}", photo)
+                mid = self._last_message_id()
+                extra = f" id={mid}" if mid else ""
+                lines.append(f"{label} PHOTO: {'SENT ✅' if pok else 'FAILED ❌'} ({pinfo}{extra})")
+                if pok and mid:
+                    lines.append(f"   provider status: {self._message_status(mid)}")
+                all_ok = all_ok and pok
+        if photo:
+            lines.append("Agar PHOTO 'SENT' hai par WhatsApp par photo nahi aaya → wa.9x.design ko upar wali id + status line bhejein.")
         return all_ok, "\n".join(lines)
+
+    def _test_photo(self, when):
+        """Small JPEG saved next to the log; lets the test prove the photo channel."""
+        try:
+            import cv2
+            import numpy as np
+            img = np.full((360, 640, 3), (40, 30, 15), np.uint8)
+            cv2.putText(img, "9x Security", (40, 150), cv2.FONT_HERSHEY_SIMPLEX, 2.2, (235, 190, 60), 5)
+            cv2.putText(img, "TEST PHOTO", (40, 230), cv2.FONT_HERSHEY_SIMPLEX, 1.6, (255, 255, 255), 3)
+            cv2.putText(img, when, (40, 310), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (200, 200, 200), 2)
+            path = os.path.join(config.BASE_DIR, "wa_test_photo.jpg")
+            ok, buf = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 85])
+            if not ok:
+                return ""
+            with open(path, "wb") as f:
+                f.write(buf.tobytes())
+            return path
+        except Exception as e:
+            self._log("-", "test-photo-error", "-", str(e))
+            return ""
+
+    def _last_message_id(self):
+        try:
+            import json
+            d = json.loads(self.last_response or "{}")
+            data = d.get("data") or d.get("result") or {}
+            return str(data.get("messageId") or data.get("id") or d.get("message_id") or "")
+        except Exception:
+            return ""
+
+    def _message_status(self, mid, wait_s=3):
+        """GET /api/v2/message/status?id= → compact 'status / statusInfo / delivery' string."""
+        import time
+        time.sleep(wait_s)
+        try:
+            r = requests.get(f"{self.base}/api/v2/message/status", params={"id": mid},
+                             headers=self._headers(), timeout=20)
+            self._log("-", "status", r.status_code, r.text)
+            if not r.ok:
+                return f"HTTP {r.status_code} {' '.join(str(r.text or '')[:120].split())}"
+            res = (r.json() or {}).get("result") or {}
+            return " / ".join(str(res.get(k, "")) for k in ("status", "statusInfo", "delivery") if res.get(k)) or r.text[:160]
+        except Exception as e:
+            return f"status check error: {e}"
 
     def flush_outbox(self):
         """Try delivering pending outbox alerts. Returns count delivered."""
@@ -227,6 +284,7 @@ class WhatsAppNotifier:
                 timeout=20,
             )
             self._log(to, "group-text" if group else "text", r.status_code, r.text)
+            self.last_response = r.text
             return r.ok, self._explain(r)
         except Exception as e:
             self._log(to, "text-error", "-", str(e))
@@ -250,6 +308,7 @@ class WhatsAppNotifier:
                 timeout=45,
             )
             self._log(to, "group-image" if group else "image", r.status_code, r.text)
+            self.last_response = r.text
             return r.ok, self._explain(r)
         except Exception as e:
             self._log(to, "image-error", "-", str(e))

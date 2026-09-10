@@ -1,0 +1,36 @@
+{
+  "summary": "Backend regression for 9x Security engine de-dup fix (user bug: 'car ka Entry aaya, uske baad JCB/agli car ka nahi aaya - continuity nahi hai'). Ran the two pytest groups specified in the review, reviewed the 3 new engine tests in test_tracker_false_crossings.py, and added 3 new custom scenarios in test_custom_scenarios.py using the shared _engine/_ScriptDet/_Clock/_drive helpers. All tests pass (53 + 21 = 74). Engine service is up on 127.0.0.1:8971.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/test_tracker_false_crossings.py",
+    "/app/9x_security/test_custom_scenarios.py",
+    "/app/test_reports/pytest/iter23_group1.xml",
+    "/app/test_reports/pytest/iter23_group2.xml"
+  ],
+  "test_results": {
+    "group1 (test_tracker_false_crossings + test_detection_strength + test_engine + test_capture_fixes + test_custom_scenarios + test_live_e2e)": "53/53 passed in 19.41s (was 50 in iter22; +3 new custom scenarios test_e/test_f/test_g)",
+    "group2 (test_service_api + test_worker_restart, needs engine on :8971)": "21/21 passed in 24.24s",
+    "review of the 3 new engine dedupe tests": "test_engine_drops_recreated_track_duplicate (uses tracker.lost path via 25 empty frames > max_disappeared=20; stopped bbox y=224 outside near_band so appeared-at-line does not re-fire), test_engine_counts_following_vehicles_through_the_same_gate (exercises both live-track-deeper and lost-far-away not-a-duplicate branches with 3 vehicles), test_engine_second_box_on_same_truck_is_one_event (two overlapping YOLO boxes on one long truck -> live-overlap dedup branch). All three deterministically monkeypatch engine.time.time via _Clock. Correctly cover the intended scenarios.",
+    "new custom scenarios (test_custom_scenarios.py::test_e/test_f/test_g)": "test_e: v1 crosses and stays visible deeper in yard (track never lost); v2 crosses ~5s later at same spot -> 2 Entry events (same direction, dedupe correctly bypassed by live-track-elsewhere branch). test_f: same vehicle crosses, stops at bottom=224 (past line ~132), detector drops for 25 frames (>max_disappeared=20), re-detected at same spot, drives on -> 1 event (tracker.lost path). test_g: Entry then a different vehicle Exits ~6s later at the same spot -> 2 events with different directions (dedupe is same-direction only)."
+  },
+  "action_items": [],
+  "critical_code_review_comments": [
+    "engine.py:507 _duplicate_reason pre-filters with `_box_iou(box, cr['bbox']) <= 0.25` where `box` is the ORIGINAL crossing's bbox (captured near the line). For the 'track re-created at the same spot' branch this can miss legitimate duplicates when a vehicle stops inside near_band (~54px of line): the recreated track's appeared-at-line fires with a bbox further past the line that no longer overlaps the on-line crossing bbox. Reproducer: cross with _cross_frames(60,220), stop at bbox (720,98,840,178) (bottom=178, 46px past line, within near_band), drop 25 frames, re-detect at same spot, move to bottom>=214 -> a spurious 2nd Entry fires because the IoU pre-filter short-circuits before the tracker.lost IoU check. Consider ORing the pre-filter with `iou(self.tracker.lost.get(tid,(None,))[0] or box, cr['bbox']) > 0.25` so the lost bbox (which is where the vehicle actually stopped) participates in the initial gate. Current test in test_tracker_false_crossings.py hides this because it stops at bottom=224 (91px past line, outside near_band, so appeared-at-line never re-fires).",
+    "engine.py:494 self._recent_cross is trimmed by DEDUPE_S (20s) but appends grow inside the loop. For very high-crossing scenes list stays small (bounded by 20s window) - acceptable but consider a deque with maxlen.",
+    "tracker.py:239 self.lost is trimmed by 120s TTL - engines can accumulate entries between trims if update() is not called; benign, mention only for completeness."
+  ],
+  "updated_files": [
+    "/app/9x_security/test_custom_scenarios.py (added test_e/test_f/test_g using _engine/_ScriptDet/_Clock/_drive helpers)"
+  ],
+  "success_rate": {"backend": "100% (74/74)", "frontend": "N/A (skipped per request)"},
+  "test_credentials": "admin / 9xsecurity (POST /api/login -> token; header X-Auth-Token)",
+  "seed_data_creation": "None. All engine tests use tmp_path DB; snapshots removed via _cleanup helper.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Engine started via nohup, not supervisor. Restart: cd /app/9x_security && nohup python service.py > /tmp/service_out.log 2>&1 &. Auth header X-Auth-Token (NOT Bearer). Do NOT run all test_*.py together in one pytest command - test_service_api.py has a fixture named 'R' that collides with unrelated tests when combined; run in two groups as per the review spec. New scenarios live in test_custom_scenarios.py and import _engine/_ScriptDet/_Clock/_drive from test_tracker_false_crossings.py.",
+  "rca of the issue": "User bug: after car Entry, following JCB and car at same gate spot did not alert. Root cause was engine._dedupe_crossings dropping ANY same-direction crossing whose bbox overlapped a recent counted crossing (IoU>0.25) within DEDUPE_S=20s - so consecutive vehicles at the same gate spot were mis-classified as duplicates. Fix in this iteration adds DEDUPE_FAST_S=2.5 for flicker/second-box, requires the earlier track to still be alive and IoU>0.3 with current live bbox to treat as 'second box on same truck', or an aged-out track (tracker.lost) with IoU>0.25 to treat as 'track re-created at the same spot'. Otherwise the new crossing counts. Verified end-to-end in test_e (following vehicle while first still tracked deeper -> 2 events) and test_engine_counts_following_vehicles_through_the_same_gate (car -> JCB -> car all count)."
+}

@@ -71,34 +71,110 @@ def test_hits_segment_geometry():
     assert _hits_segment((860, 100), (860, 170), A, B)          # within the 15% end margin
 
 
-def test_engine_drops_recreated_track_duplicate(tmp_path):
+class _Clock:
+    """Deterministic time for engine de-dup tests (process_frame uses time.time())."""
+
+    def __init__(self):
+        self.t = 1000.0
+
+    def __call__(self):
+        return self.t
+
+
+def _cross_frames(y_from, y_to, step=6):
+    return [{"bbox": (720, y - 40, 840, y + 40), "label": "truck"} for y in range(y_from, y_to, step)]
+
+
+def _drive(e, clock, dets_per_frame, fps=8.0):
     import numpy as np
-    import config
-    import database
-    import engine as eng
-
-    class Det:
-        def __init__(self):
-            self.i = 0
-
-        def detect(self, f):
-            self.i += 1
-            y = 60 + (self.i % 45) * 6            # the same truck "re-appears" as a new track every 45 frames
-            return [{"bbox": (720, y - 40, 840, y + 40), "label": "truck"}] if (self.i % 45) else []
-
-    db = database.EventDB(db_path=str(tmp_path / "e.db"))
-    cfg = {**config.DEFAULTS, "enable_plate": False, "detect_frame_skip": 1,
-           "line": {"x1": 700 / 960, "y1": 119 / 540, "x2": 850 / 960, "y2": 143 / 540}}
-    e = eng.SecurityEngine(cfg=cfg, db=db, detector=Det(), plate_reader=None)
-    e.notifier.enabled = False
     frame = np.zeros((540, 960, 3), np.uint8)
     events = []
-    for _ in range(135):                      # three passes of the same motion within a few seconds
+    for dets in dets_per_frame:
+        e.detector.dets = dets
+        clock.t += 1.0 / fps
         events += e.process_frame(frame)[1]
-    assert len(events) == 1, [(ev["direction"], ev["id"]) for ev in events]
+    return events
+
+
+class _ScriptDet:
+    dets = []
+
+    def detect(self, f):
+        return list(self.dets)
+
+
+def _cleanup(events):
     for ev in events:
         if os.path.exists(ev["image_path"]):
             os.remove(ev["image_path"])
+
+
+def test_engine_drops_recreated_track_duplicate(tmp_path, monkeypatch):
+    """Truck crosses, stops just past the line, detection drops for 3 s (track aged out),
+    re-detected at the SAME spot and moves on -> appeared-at-line on a new track = same
+    vehicle -> one event only."""
+    import engine as eng
+    clock = _Clock()
+    monkeypatch.setattr(eng.time, "time", clock)
+    e = _engine(tmp_path, _ScriptDet())
+    script = [[d] for d in _cross_frames(60, 190)]          # crosses the line (~y 130) and stops at y=184
+    script += [[{"bbox": (720, 144, 840, 224), "label": "truck"}]] * 5
+    script += [[]] * 25                                      # lost (max_disappeared 20)
+    script += [[{"bbox": (720, 144, 840, 224), "label": "truck"}]] * 3   # re-created right there
+    script += [[d] for d in _cross_frames(190, 330)]        # drives on into the yard
+    events = _drive(e, clock, script)
+    assert len(events) == 1, [(ev["direction"], ev["id"]) for ev in events]
+    _cleanup(events)
+
+
+def test_engine_counts_following_vehicles_through_the_same_gate(tmp_path, monkeypatch):
+    """USER (06-09): car Entry sent, then a JCB and another car 8-12 s later got NO alert.
+    Old rule: any same-direction crossing at the same spot within 20 s = duplicate. A
+    following vehicle must count when the earlier one drove away (track lost far from the
+    gate) or is still tracked deeper in the yard."""
+    import engine as eng
+    clock = _Clock()
+    monkeypatch.setattr(eng.time, "time", clock)
+    e = _engine(tmp_path, _ScriptDet())
+    car1 = [[d] for d in _cross_frames(60, 420)]            # crosses and drives out of view (60 frames = 7.5 s)
+    gap = [[]] * 24                                          # 3 s empty gate -> car1 track aged out far away
+    jcb = [[{**d, "label": "truck"}] for d in _cross_frames(60, 250)]   # JCB crosses ~11 s after car1
+    jcb_parked = [[{"bbox": (720, 204, 840, 284), "label": "truck"}]]  # JCB waits in the yard, still tracked
+    car2 = [[jcb_parked[0][0], d] for d in _cross_frames(60, 190)]     # car2 crosses while JCB is visible
+    events = _drive(e, clock, car1 + gap + jcb + jcb_parked * 16 + car2)
+    dirs = [ev["direction"] for ev in events]
+    assert len(events) == 3 and len(set(dirs)) == 1, [(ev["direction"], ev["vehicle_type"]) for ev in events]
+    _cleanup(events)
+
+
+def test_engine_recreated_track_inside_near_band_is_one_event(tmp_path, monkeypatch):
+    """Reviewer reproducer (iteration 23): vehicle stops INSIDE the near band just past the line,
+    detection drops, the re-created track's 'appeared-at-line' fires with a bbox that no longer
+    overlaps the on-line crossing bbox -> must still be recognised as the same vehicle."""
+    import engine as eng
+    clock = _Clock()
+    monkeypatch.setattr(eng.time, "time", clock)
+    e = _engine(tmp_path, _ScriptDet())
+    script = [[d] for d in _cross_frames(60, 184)]                        # crosses, stops at bottom=178 (46px past)
+    script += [[{"bbox": (720, 98, 840, 178), "label": "truck"}]] * 5
+    script += [[]] * 25                                                   # lost
+    script += [[{"bbox": (720, 98, 840, 178), "label": "truck"}]] * 3    # re-created at the same spot
+    script += [[d] for d in _cross_frames(184, 330)]                      # moves on -> appeared-at-line would fire
+    events = _drive(e, clock, script)
+    assert len(events) == 1, [(ev["direction"], ev["id"]) for ev in events]
+    _cleanup(events)
+
+
+def test_engine_second_box_on_same_truck_is_one_event(tmp_path, monkeypatch):
+    import engine as eng
+    clock = _Clock()
+    monkeypatch.setattr(eng.time, "time", clock)
+    e = _engine(tmp_path, _ScriptDet())
+    # a long truck: YOLO gives two overlapping boxes (cab + body) crossing together
+    script = [[d, {"bbox": (730, d["bbox"][1] + 30, 850, d["bbox"][3] + 30), "label": "truck"}] for d in _cross_frames(60, 330)]
+    events = _drive(e, clock, script)
+    assert len(events) == 1, [(ev["direction"], ev["id"]) for ev in events]
+    _cleanup(events)
 
 
 def _engine(tmp_path, det, **over):

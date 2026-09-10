@@ -22,6 +22,13 @@ from tracker import CentroidTracker, _iou as _box_iou
 
 OCR_MAX_QUEUE_WAIT_S = float(os.environ.get("OCR_MAX_QUEUE_WAIT_S", "20"))
 DEDUPE_S = float(os.environ.get("CROSS_DEDUPE_S", "20"))  # same direction + same spot within this = one vehicle
+DEDUPE_FAST_S = 2.5  # within this any overlapping same-direction crossing is a second box / flicker
+
+
+def _point_in_box(pt, box, grow=0.0):
+    x1, y1, x2, y2 = box
+    gx, gy = grow * (x2 - x1), grow * (y2 - y1)
+    return x1 - gx <= pt[0] <= x2 + gx and y1 - gy <= pt[1] <= y2 + gy
 MIN_PLATE_PX = 160
 
 
@@ -483,20 +490,47 @@ class SecurityEngine:
         self.line_hints = hints[:2]
 
     def _dedupe_crossings(self, crossings):
-        """One photo per vehicle: a crossing in the same direction, at (almost) the same
-        place, within DEDUPE_S of a counted one is the same vehicle seen by a new track
-        (lost/re-created track, or two YOLO boxes on one truck) -> dropped."""
+        """One photo per vehicle — but never swallow the NEXT vehicle. A same-direction
+        crossing at the same spot within DEDUPE_S is dropped only when it is the same
+        physical vehicle: a second box/flicker within DEDUPE_FAST_S, another live track
+        still overlapping it (two boxes on one truck), or a track that was lost right
+        here and re-created. A vehicle that drove on (track alive elsewhere, or lost far
+        from this spot) must not block the car/JCB following it through the gate."""
         now = time.time()
         self._recent_cross = [r for r in self._recent_cross if now - r[0] < DEDUPE_S]
         out = []
         for cr in crossings:
-            dup = any(r[1] == cr["to_side"] and _box_iou(r[2], cr["bbox"]) > 0.25 for r in self._recent_cross)
-            if dup:
-                clog(f"crossing ignored: duplicate of a vehicle counted <{DEDUPE_S:.0f}s ago (track {cr['track_id']})")
+            why = self._duplicate_reason(cr, now)
+            if why:
+                clog(f"crossing ignored: duplicate ({why}) of a vehicle counted <{DEDUPE_S:.0f}s ago (track {cr['track_id']})")
                 continue
-            self._recent_cross.append((now, cr["to_side"], cr["bbox"]))
+            self._recent_cross.append((now, cr["to_side"], cr["bbox"], cr["track_id"]))
             out.append(cr)
         return out
+
+    def _duplicate_reason(self, cr, now):
+        for ts, side, box, tid in self._recent_cross:
+            if side != cr["to_side"] or tid == cr["track_id"]:
+                continue
+            overlap = _box_iou(box, cr["bbox"]) > 0.25
+            if overlap and now - ts < DEDUPE_FAST_S:
+                return "second box/flicker"
+            live = self.tracker.tracks.get(tid)
+            if live is not None:
+                if _box_iou(live.bbox, cr["bbox"]) > 0.3:
+                    return "second box on the same vehicle"
+                continue  # the earlier vehicle is still tracked elsewhere -> this is the next vehicle
+            lost = self.tracker.lost.get(tid)
+            if lost is None:
+                continue
+            if overlap and _box_iou(lost[0], cr["bbox"]) > 0.25:
+                return "track re-created at the same spot"
+            # vehicle stopped just past the line, detection dropped, new track born where the old
+            # one vanished and then 'appeared-at-line' fired further on: same vehicle
+            newtr = self.tracker.tracks.get(cr["track_id"])
+            if cr.get("via") == "appeared-at-line" and newtr is not None and _point_in_box(newtr.start_ref, lost[0], 0.25):
+                return "track re-created where the last one was lost"
+        return ""
 
     def process_frame(self, frame, original=None):
         """

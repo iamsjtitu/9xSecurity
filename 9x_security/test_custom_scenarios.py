@@ -103,3 +103,89 @@ def test_d_first_seen_at_left_edge_moving_away_not_counted():
         total += len(ev)
         t += 0.1
     assert total == 0, f"first-at-edge should not use appeared-at-line, got {total} events"
+
+
+# ---------------------------------------------------------------------------
+# Iteration 23: engine-level dedupe scenarios (fix for user's "car Entry aaya,
+# uske baad JCB/car ka nahi aaya - continuity nahi hai"). These reuse the
+# _engine/_ScriptDet/_Clock/_drive helpers from test_tracker_false_crossings.
+# Line goes ~(700,119)->(850,143) in a 960x540 frame; the bottom-centre lives
+# at x=780 where the line is at y~=131.8, so bottom_y in {100,106,...,130,136}
+# from _cross_frames(...,step=6) never lands on the line.
+# ---------------------------------------------------------------------------
+from test_tracker_false_crossings import (
+    _Clock, _ScriptDet, _cleanup, _cross_frames, _drive, _engine,
+)
+
+
+def test_e_following_vehicle_while_first_still_visible_counts(tmp_path, monkeypatch):
+    """Two DIFFERENT vehicles cross the same spot ~5 s apart while the first
+    is still tracked deeper in the yard (its track never ages out). The second
+    must not be swallowed by de-dup."""
+    import engine as eng
+    clock = _Clock()
+    monkeypatch.setattr(eng.time, "time", clock)
+    e = _engine(tmp_path, _ScriptDet())
+    # v1 crosses down (bottom 100 -> 290) and drives deeper (bottom 290 -> 410)
+    v1_cross = [[d] for d in _cross_frames(60, 250)]                              # ~24 frames
+    v1_deep = [[{"bbox": (720, 210, 840, 290), "label": "truck"}]] * 32           # stays alive ~4 s
+    v1_deeper = [[{"bbox": (720, 320 + i * 2, 840, 400 + i * 2), "label": "truck"}] for i in range(8)]
+    # v2 appears at the same gate spot while v1 is still visible below
+    def combo(v1_box, v2_dets):
+        return [v1_box] + v2_dets
+    v2_frames = _cross_frames(60, 250)
+    combo_frames = []
+    for i, v2 in enumerate(v2_frames):
+        v1_box = {"bbox": (720, 380 + i * 2, 840, 460 + i * 2), "label": "truck"}
+        combo_frames.append(combo(v1_box, [v2]))
+    events = _drive(e, clock, v1_cross + v1_deep + v1_deeper + combo_frames)
+    dirs = [ev["direction"] for ev in events]
+    assert len(events) == 2 and len(set(dirs)) == 1, [
+        (ev["direction"], ev["vehicle_type"], ev["id"]) for ev in events
+    ]
+    _cleanup(events)
+
+
+def test_f_same_vehicle_track_recreated_at_gate_is_one_event(tmp_path, monkeypatch):
+    """Same physical vehicle: crosses down, stops just past the line, detector
+    misses it for >20 frames (track aged out), YOLO re-detects it exactly
+    there, it moves on into the yard. Must remain a single Entry event."""
+    import engine as eng
+    clock = _Clock()
+    monkeypatch.setattr(eng.time, "time", clock)
+    e = _engine(tmp_path, _ScriptDet())
+    # cross down and stop with bottom at y=224 (clearly past line ~132, outside near_band)
+    script = [[d] for d in _cross_frames(60, 190)]
+    stopped = {"bbox": (720, 144, 840, 224), "label": "truck"}
+    script += [[stopped]] * 4                                     # sits past the gate
+    script += [[]] * 25                                            # detector drops it >max_disappeared(20)
+    script += [[stopped]] * 3                                      # re-detected at the SAME spot
+    # now drives further in (bottom 224 -> 400)
+    script += [[{"bbox": (720, y - 80, 840, y), "label": "truck"}] for y in range(236, 410, 12)]
+    events = _drive(e, clock, script)
+    assert len(events) == 1, [(ev["direction"], ev["id"]) for ev in events]
+    _cleanup(events)
+
+
+def test_g_opposite_direction_after_entry_is_not_deduped(tmp_path, monkeypatch):
+    """Entry (down through gate), then a DIFFERENT vehicle exits (up through
+    the same spot) ~6 s later. De-dup is same-direction only, so both count
+    and the two events have different directions."""
+    import engine as eng
+    clock = _Clock()
+    monkeypatch.setattr(eng.time, "time", clock)
+    e = _engine(tmp_path, _ScriptDet())
+    # entering vehicle: bottom 100 -> 290 (crosses line ~131 downward = Entry)
+    entry = [[d] for d in _cross_frames(60, 250)]
+    # entering vehicle drives out of view; empty gap ~6 s -> track aged out far away
+    gap = [[]] * 48
+    # different vehicle exits: bottom starts far past the line (y=290) and moves
+    # UP through the line to y=100 -> to_side flips the other way
+    exit_ys = list(range(250, 50, -6))
+    exit_frames = [[{"bbox": (720, y - 40, 840, y + 40), "label": "car"}] for y in exit_ys]
+    events = _drive(e, clock, entry + gap + exit_frames)
+    dirs = {ev["direction"] for ev in events}
+    assert len(events) == 2 and dirs == {"Entry", "Exit"}, [
+        (ev["direction"], ev["vehicle_type"], ev["id"]) for ev in events
+    ]
+    _cleanup(events)

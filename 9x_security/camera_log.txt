@@ -1679,3 +1679,377 @@ RuntimeError: no AI in test
 2026-09-06T11:37:02 | svc: stream lost, reconnecting (watchdog)
 2026-09-06T11:37:02 | svc: source opened codec=fmp4 live=False
 2026-09-06T11:37:09 | event: Entry bus track 1 (cross) -> /app/9x_security/snapshots/2026-09-06/Entry_bus_11-37-09-932.jpg
+2026-09-10T07:15:51 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-15-51-354.jpg
+2026-09-10T07:15:51 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-15-51-403.jpg
+2026-09-10T07:15:51 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-15-51-414.jpg
+2026-09-10T07:15:51 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-15-51-424.jpg
+2026-09-10T07:15:51 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-15-51-441.jpg
+2026-09-10T07:15:51 | crossing ignored: duplicate (second box/flicker) of a vehicle counted <20s ago (track 1)
+2026-09-10T07:15:51 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-15-51-517.jpg
+2026-09-10T07:16:07 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-16-07-373.jpg
+2026-09-10T07:16:07 | crossing ignored: duplicate (second box/flicker) of a vehicle counted <20s ago (track 2)
+2026-09-10T07:16:07 | crossing ignored: duplicate (second box/flicker) of a vehicle counted <20s ago (track 3)
+2026-09-10T07:16:19 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-16-19-478.jpg
+2026-09-10T07:16:19 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-16-19-510.jpg
+2026-09-10T07:16:19 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-16-19-521.jpg
+2026-09-10T07:16:19 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-16-19-529.jpg
+2026-09-10T07:16:19 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-16-19-548.jpg
+2026-09-10T07:16:19 | crossing ignored: duplicate (second box/flicker) of a vehicle counted <20s ago (track 1)
+2026-09-10T07:16:19 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-16-19-627.jpg
+2026-09-10T07:16:25 | event: Exit car track 1 (cross) -> /tmp/tmp1d34m2rm/snaps/2026-09-10/Exit_car_07-16-25-499.jpg
+2026-09-10T07:16:26 | === PROBE start: notaurl
+2026-09-10T07:16:26 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-09-10T07:16:29 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-10T07:16:29 | ffmpeg-pipe: starting
+2026-09-10T07:16:29 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpo6v_5g39/snaps/2026-09-10') path=/tmp/tmpo6v_5g39/snaps/2026-09-10/Exit_car_07-16-29-171.jpg
+2026-09-10T07:16:29 | svc: loading AI model
+2026-09-10T07:16:29 | svc: AI model loaded
+2026-09-10T07:16:29 | svc: AI self-test OK (yolov8n.pt, 102 ms, 0 dets on blank frame)
+2026-09-10T07:16:29 | svc: source opened codec=hevc live=True
+2026-09-10T07:16:29 | svc: HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein
+2026-09-10T07:16:29 | svc: streaming started
+2026-09-10T07:16:33 | event: Exit bus track 1 (cross) -> /tmp/tmpvihj0iwe/snaps/2026-09-10/Exit_bus_07-16-33-340.jpg
+2026-09-10T07:16:41 | event: Entry bus track 1 (cross) -> /tmp/tmpvihj0iwe/snaps/2026-09-10/Entry_bus_07-16-41-171.jpg
+2026-09-10T07:16:57 | svc: loading AI model
+2026-09-10T07:16:57 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 214, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-10T07:16:57 | svc: source opened codec=unknown live=True
+2026-09-10T07:16:57 | svc: streaming started
+2026-09-10T07:16:58 | svc: loading AI model
+2026-09-10T07:16:58 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 214, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-10T07:16:58 | svc: source opened codec=unknown live=True
+2026-09-10T07:16:58 | svc: streaming started
+2026-09-10T07:17:02 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-10T07:17:02 | purge: 0 old events removed (retention 7d, cutoff 2026-09-03)
+2026-09-10T07:17:06 | svc: auto-connect — saved camera se connect kar raha hai
+2026-09-10T07:17:06 | svc: loading AI model
+2026-09-10T07:17:07 | svc: AI model loaded
+2026-09-10T07:17:08 | svc: AI self-test OK (yolov8s.pt, 281 ms, 0 dets on blank frame)
+2026-09-10T07:17:08 | open_stream: transport=tcp
+2026-09-10T07:17:13 | open_stream: transport=udp
+2026-09-10T07:17:18 | open_stream: trying FFmpeg engine fallback
+2026-09-10T07:17:18 | ffmpeg-pipe: starting
+2026-09-10T07:17:23 | open_stream: falling back to default backend
+2026-09-10T07:17:28 | svc: source opened codec=unknown live=True
+2026-09-10T07:17:43 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-09-10T07:17:46 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-10T07:17:46 | svc: loading AI model
+2026-09-10T07:17:46 | svc: AI model loaded
+2026-09-10T07:17:47 | svc: AI self-test OK (yolov8s.pt, 413 ms, 0 dets on blank frame)
+2026-09-10T07:17:47 | svc: accurate model too slow here (413 ms > 350) -> yolov8n.pt
+2026-09-10T07:17:47 | svc: AI self-test OK (yolov8n.pt, 203 ms, 0 dets on blank frame)
+2026-09-10T07:17:47 | open_stream: transport=tcp
+2026-09-10T07:17:52 | open_stream: transport=udp
+2026-09-10T07:17:57 | open_stream: trying FFmpeg engine fallback
+2026-09-10T07:17:57 | ffmpeg-pipe: starting
+2026-09-10T07:18:02 | svc: loading AI model
+2026-09-10T07:18:02 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 214, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-10T07:18:02 | svc: source opened codec=unknown live=True
+2026-09-10T07:18:02 | svc: streaming started
+2026-09-10T07:18:03 | svc: loading AI model
+2026-09-10T07:18:03 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 214, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-10T07:18:03 | svc: source opened codec=unknown live=True
+2026-09-10T07:18:03 | svc: streaming started
+2026-09-10T07:19:17 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-19-17-409.jpg
+2026-09-10T07:19:17 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-19-17-437.jpg
+2026-09-10T07:19:17 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-19-17-450.jpg
+2026-09-10T07:19:17 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-19-17-460.jpg
+2026-09-10T07:19:17 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-19-17-483.jpg
+2026-09-10T07:19:17 | crossing ignored: duplicate (second box/flicker) of a vehicle counted <20s ago (track 1)
+2026-09-10T07:19:17 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-19-17-561.jpg
+2026-09-10T07:19:19 | event: Exit car track 1 (cross) -> /tmp/tmpvgjgg0v7/snaps/2026-09-10/Exit_car_07-19-19-890.jpg
+2026-09-10T07:19:20 | === PROBE start: notaurl
+2026-09-10T07:19:20 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-09-10T07:19:23 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-10T07:19:23 | ffmpeg-pipe: starting
+2026-09-10T07:19:23 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpt83ckim3/snaps/2026-09-10') path=/tmp/tmpt83ckim3/snaps/2026-09-10/Exit_car_07-19-23-634.jpg
+2026-09-10T07:19:23 | svc: loading AI model
+2026-09-10T07:19:23 | svc: AI model loaded
+2026-09-10T07:19:24 | svc: AI self-test OK (yolov8n.pt, 107 ms, 0 dets on blank frame)
+2026-09-10T07:19:24 | svc: source opened codec=hevc live=True
+2026-09-10T07:19:24 | svc: HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein
+2026-09-10T07:19:24 | svc: streaming started
+2026-09-10T07:19:27 | event: Exit bus track 1 (cross) -> /tmp/tmp40huzex2/snaps/2026-09-10/Exit_bus_07-19-27-561.jpg
+2026-09-10T07:19:35 | event: Entry bus track 1 (cross) -> /tmp/tmp40huzex2/snaps/2026-09-10/Entry_bus_07-19-35-392.jpg
+2026-09-10T07:19:52 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-09-10T07:19:55 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-10T07:19:55 | svc: loading AI model
+2026-09-10T07:19:55 | svc: AI model loaded
+2026-09-10T07:19:56 | svc: AI self-test OK (yolov8s.pt, 295 ms, 0 dets on blank frame)
+2026-09-10T07:19:56 | open_stream: transport=tcp
+2026-09-10T07:20:01 | open_stream: transport=udp
+2026-09-10T07:20:06 | open_stream: trying FFmpeg engine fallback
+2026-09-10T07:20:06 | ffmpeg-pipe: starting
+2026-09-10T07:20:12 | svc: loading AI model
+2026-09-10T07:20:12 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 214, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-10T07:20:12 | svc: source opened codec=unknown live=True
+2026-09-10T07:20:12 | svc: streaming started
+2026-09-10T07:20:14 | svc: loading AI model
+2026-09-10T07:20:14 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 214, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-10T07:20:14 | svc: source opened codec=unknown live=True
+2026-09-10T07:20:14 | svc: streaming started
+2026-09-10T07:21:34 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-21-34-610.jpg
+2026-09-10T07:21:34 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-21-34-621.jpg
+2026-09-10T07:21:34 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-21-34-642.jpg
+2026-09-10T07:21:34 | event: Entry truck track 2 (appeared-at-line) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-21-34-651.jpg
+2026-09-10T07:21:34 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-21-34-689.jpg
+2026-09-10T07:21:34 | event: Exit car track 2 (cross) -> /app/9x_security/snapshots/2026-09-10/Exit_car_07-21-34-701.jpg
+2026-09-10T07:23:18 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-23-18-812.jpg
+2026-09-10T07:23:18 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-23-18-823.jpg
+2026-09-10T07:23:18 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-23-18-845.jpg
+2026-09-10T07:23:18 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-23-18-869.jpg
+2026-09-10T07:23:18 | event: Exit car track 2 (cross) -> /app/9x_security/snapshots/2026-09-10/Exit_car_07-23-18-881.jpg
+2026-09-10T07:23:27 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-23-27-547.jpg
+2026-09-10T07:23:27 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-23-27-574.jpg
+2026-09-10T07:23:27 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-23-27-585.jpg
+2026-09-10T07:23:27 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-23-27-593.jpg
+2026-09-10T07:23:27 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-23-27-612.jpg
+2026-09-10T07:23:27 | crossing ignored: duplicate (second box/flicker) of a vehicle counted <20s ago (track 1)
+2026-09-10T07:23:27 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-23-27-694.jpg
+2026-09-10T07:23:30 | event: Exit car track 1 (cross) -> /tmp/tmprgs147f0/snaps/2026-09-10/Exit_car_07-23-30-071.jpg
+2026-09-10T07:23:30 | === PROBE start: notaurl
+2026-09-10T07:23:30 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-09-10T07:23:33 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-10T07:23:33 | ffmpeg-pipe: starting
+2026-09-10T07:23:33 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpp6zx_4z8/snaps/2026-09-10') path=/tmp/tmpp6zx_4z8/snaps/2026-09-10/Exit_car_07-23-33-738.jpg
+2026-09-10T07:23:33 | event: Entry truck track 1 (cross) -> /tmp/tmprgs147f0/snaps/2026-09-10/Entry_truck_07-23-33-897.jpg
+2026-09-10T07:23:33 | event: Entry truck track 3 (cross) -> /tmp/tmprgs147f0/snaps/2026-09-10/Entry_truck_07-23-33-907.jpg
+2026-09-10T07:23:33 | event: Entry truck track 1 (cross) -> /tmp/tmprgs147f0/snaps/2026-09-10/Entry_truck_07-23-33-927.jpg
+2026-09-10T07:23:33 | event: Entry truck track 1 (cross) -> /tmp/tmprgs147f0/snaps/2026-09-10/Entry_truck_07-23-33-950.jpg
+2026-09-10T07:23:33 | event: Exit car track 2 (cross) -> /tmp/tmprgs147f0/snaps/2026-09-10/Exit_car_07-23-33-962.jpg
+2026-09-10T07:23:34 | svc: loading AI model
+2026-09-10T07:23:34 | svc: AI model loaded
+2026-09-10T07:23:34 | svc: AI self-test OK (yolov8n.pt, 105 ms, 0 dets on blank frame)
+2026-09-10T07:23:34 | svc: source opened codec=hevc live=True
+2026-09-10T07:23:34 | svc: HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein
+2026-09-10T07:23:34 | svc: streaming started
+2026-09-10T07:23:37 | event: Exit bus track 1 (cross) -> /tmp/tmp7du3j16e/snaps/2026-09-10/Exit_bus_07-23-37-738.jpg
+2026-09-10T07:23:45 | event: Entry bus track 1 (cross) -> /tmp/tmp7du3j16e/snaps/2026-09-10/Entry_bus_07-23-45-571.jpg
+2026-09-10T07:23:46 | svc: loading AI model
+2026-09-10T07:23:46 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 214, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-10T07:23:46 | svc: source opened codec=unknown live=True
+2026-09-10T07:23:46 | svc: streaming started
+2026-09-10T07:23:48 | svc: loading AI model
+2026-09-10T07:23:48 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 214, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-10T07:23:48 | svc: source opened codec=unknown live=True
+2026-09-10T07:23:48 | svc: streaming started
+2026-09-10T07:23:58 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-09-10T07:24:01 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-10T07:24:01 | svc: loading AI model
+2026-09-10T07:24:01 | svc: AI model loaded
+2026-09-10T07:24:02 | svc: AI self-test OK (yolov8s.pt, 310 ms, 0 dets on blank frame)
+2026-09-10T07:24:02 | open_stream: transport=tcp
+2026-09-10T07:24:07 | open_stream: transport=udp
+2026-09-10T07:24:12 | open_stream: trying FFmpeg engine fallback
+2026-09-10T07:24:12 | ffmpeg-pipe: starting
+2026-09-10T07:24:30 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-24-30-495.jpg
+2026-09-10T07:24:30 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-24-30-519.jpg
+2026-09-10T07:24:30 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-24-30-533.jpg
+2026-09-10T07:24:30 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-24-30-542.jpg
+2026-09-10T07:24:30 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-24-30-562.jpg
+2026-09-10T07:24:30 | crossing ignored: duplicate (second box/flicker) of a vehicle counted <20s ago (track 1)
+2026-09-10T07:24:30 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-24-30-648.jpg
+2026-09-10T07:24:32 | event: Exit car track 1 (cross) -> /tmp/tmp2j6m6f_y/snaps/2026-09-10/Exit_car_07-24-32-892.jpg
+2026-09-10T07:24:33 | === PROBE start: notaurl
+2026-09-10T07:24:33 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-09-10T07:24:36 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-10T07:24:36 | ffmpeg-pipe: starting
+2026-09-10T07:24:36 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpx9d9af_5/snaps/2026-09-10') path=/tmp/tmpx9d9af_5/snaps/2026-09-10/Exit_car_07-24-36-626.jpg
+2026-09-10T07:24:36 | event: Entry truck track 1 (cross) -> /tmp/tmp2j6m6f_y/snaps/2026-09-10/Entry_truck_07-24-36-782.jpg
+2026-09-10T07:24:36 | event: Entry truck track 3 (cross) -> /tmp/tmp2j6m6f_y/snaps/2026-09-10/Entry_truck_07-24-36-793.jpg
+2026-09-10T07:24:36 | event: Entry truck track 1 (cross) -> /tmp/tmp2j6m6f_y/snaps/2026-09-10/Entry_truck_07-24-36-814.jpg
+2026-09-10T07:24:36 | event: Entry truck track 1 (cross) -> /tmp/tmp2j6m6f_y/snaps/2026-09-10/Entry_truck_07-24-36-843.jpg
+2026-09-10T07:24:36 | event: Exit car track 2 (cross) -> /tmp/tmp2j6m6f_y/snaps/2026-09-10/Exit_car_07-24-36-856.jpg
+2026-09-10T07:24:36 | svc: loading AI model
+2026-09-10T07:24:36 | svc: AI model loaded
+2026-09-10T07:24:37 | svc: AI self-test OK (yolov8n.pt, 104 ms, 0 dets on blank frame)
+2026-09-10T07:24:37 | svc: source opened codec=hevc live=True
+2026-09-10T07:24:37 | svc: HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein
+2026-09-10T07:24:37 | svc: streaming started
+2026-09-10T07:24:40 | event: Exit bus track 1 (cross) -> /tmp/tmp4kb1usg6/snaps/2026-09-10/Exit_bus_07-24-40-627.jpg
+2026-09-10T07:24:48 | event: Entry bus track 1 (cross) -> /tmp/tmp4kb1usg6/snaps/2026-09-10/Entry_bus_07-24-48-462.jpg
+2026-09-10T07:24:51 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-09-10T07:24:54 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-10T07:24:54 | svc: loading AI model
+2026-09-10T07:24:54 | svc: AI model loaded
+2026-09-10T07:24:55 | svc: AI self-test OK (yolov8s.pt, 300 ms, 0 dets on blank frame)
+2026-09-10T07:24:55 | open_stream: transport=tcp
+2026-09-10T07:25:00 | open_stream: transport=udp
+2026-09-10T07:25:05 | open_stream: trying FFmpeg engine fallback
+2026-09-10T07:25:05 | ffmpeg-pipe: starting
+2026-09-10T07:25:10 | svc: loading AI model
+2026-09-10T07:25:10 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 214, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-10T07:25:10 | svc: source opened codec=unknown live=True
+2026-09-10T07:25:10 | svc: streaming started
+2026-09-10T07:25:12 | svc: loading AI model
+2026-09-10T07:25:12 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 214, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-10T07:25:12 | svc: source opened codec=unknown live=True
+2026-09-10T07:25:12 | svc: streaming started
+2026-09-10T07:28:18 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-28-18-874.jpg
+2026-09-10T07:28:18 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-28-18-938.jpg
+2026-09-10T07:28:18 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-28-18-949.jpg
+2026-09-10T07:28:18 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-28-18-957.jpg
+2026-09-10T07:28:18 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-28-18-979.jpg
+2026-09-10T07:28:18 | crossing ignored: duplicate (track re-created where the last one was lost) of a vehicle counted <20s ago (track 2)
+2026-09-10T07:28:19 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-28-19-009.jpg
+2026-09-10T07:28:19 | crossing ignored: duplicate (second box/flicker) of a vehicle counted <20s ago (track 1)
+2026-09-10T07:28:19 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-28-19-090.jpg
+2026-09-10T07:28:19 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-28-19-133.jpg
+2026-09-10T07:28:19 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-28-19-143.jpg
+2026-09-10T07:28:19 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-28-19-167.jpg
+2026-09-10T07:28:19 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-28-19-190.jpg
+2026-09-10T07:28:19 | event: Exit car track 2 (cross) -> /app/9x_security/snapshots/2026-09-10/Exit_car_07-28-19-201.jpg
+2026-09-10T07:28:21 | event: Exit car track 1 (cross) -> /tmp/tmpnc4w6qhl/snaps/2026-09-10/Exit_car_07-28-21-515.jpg
+2026-09-10T07:28:22 | === PROBE start: notaurl
+2026-09-10T07:28:22 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-09-10T07:28:25 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-10T07:28:25 | ffmpeg-pipe: starting
+2026-09-10T07:28:25 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpt2e2gc77/snaps/2026-09-10') path=/tmp/tmpt2e2gc77/snaps/2026-09-10/Exit_car_07-28-25-212.jpg
+2026-09-10T07:28:25 | svc: loading AI model
+2026-09-10T07:28:25 | svc: AI model loaded
+2026-09-10T07:28:25 | svc: AI self-test OK (yolov8n.pt, 103 ms, 0 dets on blank frame)
+2026-09-10T07:28:25 | svc: source opened codec=hevc live=True
+2026-09-10T07:28:25 | svc: HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein
+2026-09-10T07:28:25 | svc: streaming started
+2026-09-10T07:28:29 | event: Exit bus track 1 (cross) -> /tmp/tmpu45husqp/snaps/2026-09-10/Exit_bus_07-28-29-113.jpg
+2026-09-10T07:28:36 | event: Entry bus track 1 (cross) -> /tmp/tmpu45husqp/snaps/2026-09-10/Entry_bus_07-28-36-943.jpg
+2026-09-10T07:28:53 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-28-53-402.jpg
+2026-09-10T07:28:53 | event: Entry truck track 2 (appeared-at-line) -> /app/9x_security/snapshots/2026-09-10/Entry_truck_07-28-53-411.jpg
+2026-09-10T07:28:54 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-10T07:28:54 | purge: 0 old events removed (retention 7d, cutoff 2026-09-03)
+2026-09-10T07:28:58 | svc: auto-connect — saved camera se connect kar raha hai
+2026-09-10T07:28:58 | svc: loading AI model
+2026-09-10T07:29:00 | svc: AI model loaded
+2026-09-10T07:29:01 | svc: AI self-test OK (yolov8s.pt, 308 ms, 0 dets on blank frame)
+2026-09-10T07:29:01 | open_stream: transport=tcp
+2026-09-10T07:29:06 | open_stream: transport=udp
+2026-09-10T07:29:11 | open_stream: trying FFmpeg engine fallback
+2026-09-10T07:29:11 | ffmpeg-pipe: starting
+2026-09-10T07:29:16 | open_stream: falling back to default backend
+2026-09-10T07:29:21 | svc: source opened codec=unknown live=True
+2026-09-10T07:29:38 | svc: loading AI model
+2026-09-10T07:29:38 | svc: AI model loaded
+2026-09-10T07:29:39 | svc: AI self-test OK (yolov8s.pt, 324 ms, 0 dets on blank frame)
+2026-09-10T07:29:39 | open_stream: transport=tcp
+2026-09-10T07:29:44 | open_stream: transport=udp
+2026-09-10T07:29:49 | open_stream: trying FFmpeg engine fallback
+2026-09-10T07:29:49 | ffmpeg-pipe: starting
+2026-09-10T07:29:54 | open_stream: falling back to default backend
+2026-09-10T07:29:59 | svc: source opened codec=unknown live=True
+2026-09-10T07:30:18 | svc: loading AI model
+2026-09-10T07:30:18 | svc: AI model loaded
+2026-09-10T07:30:19 | svc: AI self-test OK (yolov8s.pt, 315 ms, 0 dets on blank frame)
+2026-09-10T07:30:19 | open_stream: transport=tcp
+2026-09-10T07:30:24 | open_stream: transport=udp
+2026-09-10T07:30:29 | open_stream: trying FFmpeg engine fallback
+2026-09-10T07:30:29 | ffmpeg-pipe: starting
+2026-09-10T07:30:34 | open_stream: falling back to default backend

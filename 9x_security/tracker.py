@@ -105,6 +105,7 @@ class CentroidTracker:
         self.near_band = near_band
         self.hysteresis = hysteresis
         self.min_gap_s = min_gap_s
+        self.lost = {}  # tid -> (last bbox, ts) of aged-out tracks (engine de-dup: "lost right here?")
 
     @staticmethod
     def _centroid(bbox):
@@ -233,7 +234,9 @@ class CentroidTracker:
             if tid not in used_track_ids:
                 self.tracks[tid].disappeared += 1
                 if self.tracks[tid].disappeared > self.max_disappeared:
+                    self.lost[tid] = (self.tracks[tid].bbox, now)
                     del self.tracks[tid]
+        self.lost = {k: v for k, v in self.lost.items() if now - v[1] < 120}
         return crossings
 
     @staticmethod

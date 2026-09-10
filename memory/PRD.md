@@ -783,3 +783,19 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   send_image off → no photo call); live wa.9x.design with fake key → both channels reach the endpoints
   (401 on both). Real-key result awaits user; wa_log.txt lines 'image | status=…' or 'image-rejected->text'
   or 'image-missing->text' tell provider-vs-app fault.
+
+## Implemented (update 2026-06 #48) — Following vehicles were swallowed as "duplicates" (testing agent iteration_23: ALL PASS)
+- USER: car Entry alert aaya, phir JCB aur agli car ka photo nahi aaya, uske baad wali ka aaya — 'continuity nahi hai'.
+- ROOT CAUSE (reproduced in test): engine._dedupe_crossings dropped ANY same-direction crossing whose bbox
+  overlapped (IoU>0.25) a crossing counted in the last 20 s → every vehicle following another through the
+  same gate spot within 20 s was treated as the first one re-detected. camera_log shows
+  'crossing ignored: duplicate …' for each swallowed vehicle.
+- FIX engine._duplicate_reason: a same-direction/same-spot crossing is a duplicate ONLY when it is the same
+  physical vehicle — (a) within DEDUPE_FAST_S 2.5 s (second YOLO box / flicker), (b) the earlier track is
+  still alive AND its current bbox overlaps the new crossing (IoU>0.3, two boxes on one truck), (c) the earlier
+  track was aged out at this spot (tracker.lost[tid]=(bbox,ts), IoU>0.25), or (d) via 'appeared-at-line' from a
+  track born inside the lost bbox (+25%) — vehicle stopped in the near band, detection dropped, re-created.
+  Otherwise (earlier vehicle drove away / still tracked deeper in the yard) the crossing COUNTS.
+- Tests: test_tracker_false_crossings.py 13 (new: following vehicles = 3 events, re-created track = 1,
+  in-band re-creation = 1, second box on one truck = 1), test_custom_scenarios test_e/f/g (agent), full
+  engine/detection/capture/live-e2e/service suites green (54 + 21).

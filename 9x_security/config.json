@@ -36,8 +36,8 @@
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "4fc5074897cd6bb44c3c26d4f14659b9",
-  "auth_hash": "d9189a4a4aacfd82f10ff25425014bfd6544c43a6c219966ff3ffd7b933addc3",
+  "auth_salt": "997cd285fdef88cfc73ca7c7dec658f2",
+  "auth_hash": "cf0fd83a1b83ed2d3781e02f7c7ff825575bcadff085659ff8ecf9a24e729456",
   "github_repo": "",
   "gh_token": "TEST_GH"
 }

@@ -205,11 +205,11 @@ def test_probe_rtsp():
     from engine import probe_rtsp
 
     # invalid URL -> first step fails fast
-    ok, steps = probe_rtsp("notaurl")
+    ok, steps, _u = probe_rtsp("notaurl")
     assert not ok and steps[0][1] is False
 
     # user's URL shape with unreachable TEST-NET host -> URL fixed, network step fails
-    ok, steps = probe_rtsp("rtsp://admin:Admin@123@192.0.2.1:554/stream1")
+    ok, steps, _u = probe_rtsp("rtsp://admin:Admin@123@192.0.2.1:554/stream1")
     assert not ok
     assert "Admin%40123" in steps[0][2]
     assert any("192.0.2.1:554" in name for name, _o, _d in steps)

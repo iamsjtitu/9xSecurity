@@ -22,7 +22,10 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
   const dragRef = useRef(null);
 
   useEffect(() => {
-    if (!urlTouched.current && state.rtsp_url && !url) setUrl(state.rtsp_url);
+    if (!urlTouched.current && state.rtsp_url && state.rtsp_url !== url) {
+      if (url && url !== state.rtsp_url) showToast('Camera ka asli stream path mil gaya — URL update ho gaya', 'success');
+      setUrl(state.rtsp_url);
+    }
   }, [state.rtsp_url]); // eslint-disable-line
 
   const switchStream = async (path, okMsg) => {
@@ -160,6 +163,7 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
         showToast('Camera disconnect ho gaya', 'info');
       } else {
         await api('/api/camera/connect', { method: 'POST', body: JSON.stringify({ url }) });
+        urlTouched.current = false; // engine may auto-fix the stream path -> follow state.rtsp_url
         showToast('Connect ho raha hai…', 'info');
       }
       await refreshState();
@@ -176,6 +180,11 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
     try {
       const r = await api('/api/camera/test', { method: 'POST', body: JSON.stringify({ url }), timeout: 180000 });
       setTestResult(r);
+      if (r.url) {
+        urlTouched.current = true;
+        setUrl(r.url);
+        showToast('Camera ka asli stream path mil gaya — URL update ho gaya, ab Connect dabayein', 'success');
+      }
     } catch (e) {
       showToast(e.message, 'error');
     } finally {

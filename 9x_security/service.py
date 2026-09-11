@@ -25,8 +25,8 @@ import config
 import updater
 from database import EventDB
 from engine import (
-    HEVC_CODECS, LatestFrameReader, SecurityEngine, clog, codec_name, normalize_rtsp_url, open_stream,
-    probe_rtsp, substream_url,
+    HEVC_CODECS, LatestFrameReader, SecurityEngine, auto_fix_stream_url, clog, codec_name, normalize_rtsp_url,
+    open_stream, probe_rtsp, substream_url,
 )
 from whatsapp import WhatsAppNotifier, parse_recipients
 
@@ -64,6 +64,8 @@ class Worker:
     def __init__(self):
         self._running = False
         self.user_stopped = False  # set by Disconnect: auto-connect stays quiet until Connect
+        self._fix_attempts = {}   # source url -> ts of last stream-path discovery attempt
+        self.open_error = ""      # why the last live open failed: '' | auth | none | no-answer | path-ok
         self._gen = 0             # run generation: a restarted loop never keeps an old thread alive
         self.thread = None
         self.status = "Idle — camera URL daal kar Connect dabayein"
@@ -191,6 +193,38 @@ class Worker:
                  "ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein")
         return cap
 
+    def _auto_fix_source(self, source):
+        """Live RTSP open failed: ask the camera why (DESCRIBE) and, for a wrong/missing stream
+        path, discover the real one and save it as the camera URL. Re-tried per URL every 10 min."""
+        now = time.time()
+        last = self._fix_attempts.get(source)
+        if last and now - last < 600:
+            return ""
+        self._fix_attempts[source] = now
+        self.status = "Camera ka stream path dhundh raha hai (ONVIF / vendor paths)..."
+        try:
+            fixed, why = auto_fix_stream_url(source)
+        except Exception as e:
+            clog(f"svc: stream path discovery error: {e}")
+            return ""
+        self.open_error = why
+        if not fixed:
+            return ""
+        cfg = _cfg()
+        cfg["rtsp_url"] = fixed
+        config.save_config(cfg)
+        self._fix_attempts.pop(source, None)
+        return fixed
+
+    def _open_error_status(self):
+        why = getattr(self, "open_error", "")
+        if why == "auth":
+            return "ERROR: Camera ka username/password galat hai (camera ne 401 diya) — URL check karein"
+        if why == "none":
+            return ("ERROR: Camera par ye stream path nahi hai aur auto-detect nahi hua — camera ke brand ka "
+                    "RTSP path lagayein (Test dabakar hints dekhein)")
+        return "ERROR: Camera nahi khula — 'Test' se step-by-step jaanch karein"
+
     def _ai_selftest(self):
         """Run real inferences right after model load so a broken torch/
         torchvision build shows up immediately (not silently per frame).
@@ -239,11 +273,19 @@ class Worker:
         live = isinstance(source, str) and source.lower().startswith("rtsp")
         self.status = "Camera se connect ho raha hai..."
         cap = self._open(source, live, gen)
+        if (cap is None or not cap.isOpened()) and live and self._alive(gen):
+            fixed = self._auto_fix_source(source)
+            if fixed:
+                if cap is not None:
+                    cap.release()
+                source = fixed
+                self.status = "Stream path mil gaya — dobara connect ho raha hai..."
+                cap = self._open(source, live, gen)
         if cap is None or not cap.isOpened():
             if cap is not None:
                 cap.release()
             if self._alive(gen):
-                self.status = "ERROR: Camera nahi khula — 'Test' se step-by-step jaanch karein"
+                self.status = self._open_error_status()
                 self._running = False
             return
         self.status = self._live_status()
@@ -487,8 +529,13 @@ def camera_test(body: dict, request: Request):
     url = str(body.get("url", "")).strip()
     if not url:
         raise HTTPException(400, "Pehle RTSP URL daalein.")
-    ok, steps = probe_rtsp(url)
-    return {"ok": ok, "steps": [{"name": n, "ok": o, "detail": d} for n, o, d in steps]}
+    ok, steps, effective = probe_rtsp(url)
+    fixed = effective if effective != normalize_rtsp_url(url) else ""
+    if fixed:
+        cfg = _cfg()
+        cfg["rtsp_url"] = fixed
+        config.save_config(cfg)
+    return {"ok": ok, "steps": [{"name": n, "ok": o, "detail": d} for n, o, d in steps], "url": fixed}
 
 
 @app.get("/api/frame")

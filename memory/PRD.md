@@ -799,3 +799,23 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Tests: test_tracker_false_crossings.py 13 (new: following vehicles = 3 events, re-created track = 1,
   in-band re-creation = 1, second box on one truck = 1), test_custom_scenarios test_e/f/g (agent), full
   engine/detection/capture/live-e2e/service suites green (54 + 21).
+
+## Implemented (update 2026-06 #49) — RTSP stream-path auto-discovery: 'rtsp://user:pw@ip:554/ doosre software me chalta hai, yahan nahi' (self-tested: 8 pytest + live service API/UI)
+- USER diagnostics (camera 192.168.1.28): engine_out.log 'method DESCRIBE failed: 404 Not Found' — the camera has no
+  stream at '/', so every backend failed instantly; the other software discovers the path itself (ONVIF/vendor default).
+  User also asked why 'Admin%40123' appears — explained: '@' in the password must be percent-encoded ('%40') in a URL.
+- NEW rtsp_discover.py: rtsp_describe(url) = raw RTSP DESCRIBE with Basic/Digest auth (ms, no decoder) → 200 path OK /
+  401 wrong password / 404 no such path; onvif_stream_uris() = GetProfiles + GetStreamUri via ptz._soap (ports
+  2020/80/8000/8899/5000); COMMON_PATHS (Hikvision/Prama, Dahua/CP Plus, TP-Link, Reolink, Uniview, XMEye …) each
+  verified with DESCRIBE; discover_stream_url() → (url, 'onvif'|'common-path'|'auth'|'none'), 25 s budget, stops on 401.
+- engine.probe_rtsp (Test button) now: URL check → network → **RTSP handshake** (401 = 'username/password galat',
+  404 = 'ye stream path nahi hai') → **Stream path auto-detect** (found URL shown, 'URL apne aap update kar diya') →
+  TCP/UDP/FFmpeg. Returns (ok, steps, effective_url); /api/camera/test saves the fixed URL to config and returns
+  {url}; CameraPanel puts it in the URL box + toast. engine.auto_fix_stream_url() used by Worker._run_impl when a live
+  open fails: DESCRIBE → discovery → saves cfg rtsp_url → re-opens; per-URL retry at most every 10 min; status shows
+  'username/password galat (401)' or 'stream path nahi mila' precisely. UI URL box follows state.rtsp_url after Connect.
+- Tests: test_rtsp_discover.py 8/8 with an in-process fake RTSP camera (Digest auth, 404 on '/', 200 on
+  /Streaming/Channels/101): describe codes, discovery via vendor path & via ONVIF (creds re-injected, '@' encoded),
+  stop on wrong password, probe steps + fixed URL, worker helper. Live service: /api/camera/test auto-fixed the URL in
+  0.0 s; Connect with root URL → cfg saved with found path; wrong password → clear 401 status. test_iter6 tail check
+  fixed (byte offsets). Real camera brand unknown → user must confirm on the new build.

@@ -65,7 +65,7 @@ def test_probe_writes_start_and_unreachable():
     marker = f"MARKER_{int(time.time()*1000)}"
     engine.clog(marker)
     t0 = time.time()
-    ok, steps = engine.probe_rtsp("rtsp://admin:pw@192.0.2.1:554/stream1", wait=1.0)
+    ok, steps, _u = engine.probe_rtsp("rtsp://admin:pw@192.0.2.1:554/stream1", wait=1.0)
     elapsed = time.time() - t0
     assert ok is False
     assert elapsed < 6.0, f"probe too slow on unreachable host: {elapsed:.1f}s"

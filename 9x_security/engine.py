@@ -338,8 +338,11 @@ def open_stream(source, is_running=lambda: True):
 
 def probe_rtsp(url, wait=10.0):
     """Step-by-step camera connection diagnosis for the Test button.
-    Returns (ok, [(step_name, step_ok, detail), ...])."""
+    Returns (ok, [(step_name, step_ok, detail), ...], effective_url) — effective_url differs
+    from the input when the stream path was auto-detected."""
     import socket
+
+    from rtsp_discover import discover_stream_url, rtsp_describe
 
     steps = []
     fixed = normalize_rtsp_url(url)
@@ -350,7 +353,7 @@ def probe_rtsp(url, wait=10.0):
     m = re.match(r"^rtsps?://(?:[^/]*@)?([^:/?#]+)(?::(\d+))?", fixed, re.IGNORECASE)
     if not m:
         steps[-1] = ("URL check", False, "URL 'rtsp://' se shuru hona chahiye")
-        return False, steps
+        return False, steps, fixed
     host, port = m.group(1), int(m.group(2) or 554)
     try:
         socket.create_connection((host, port), timeout=3).close()
@@ -361,24 +364,79 @@ def probe_rtsp(url, wait=10.0):
         steps.append((f"Camera network ({host}:{port})", False,
                       "Camera tak pahunch nahi paa rahe. Check: IP sahi hai? Camera on hai? "
                       f"PC aur camera same network/WiFi par hain? ({e})"))
-        return False, steps
+        return False, steps, fixed
+
+    # RTSP handshake: tells apart wrong password (401) from wrong stream path (404) in ms
+    code, first = rtsp_describe(fixed)
+    clog(f"probe: DESCRIBE -> {code} {first}")
+    if code == 200:
+        steps.append(("RTSP handshake", True, "Camera ne username/password aur stream path accept kiya (200 OK)"))
+    elif code == 401:
+        steps.append(("RTSP handshake", False,
+                      "Username/password galat — camera ne reject kiya (401 Unauthorized). "
+                      "Camera ke web page par yahi user/password se login karke check karein."))
+        return False, steps, fixed
+    elif code:
+        steps.append(("RTSP handshake", False,
+                      f"Camera par ye stream path nahi hai ({first.strip()}) — camera ka asli stream path chahiye"))
+        found, why = discover_stream_url(fixed, log=clog)
+        if found:
+            clog(f"probe: stream path auto-detected via {why}: {redact_url(found)}")
+            steps.append(("Stream path auto-detect", True,
+                          f"Camera se asli stream path mil gaya ({'ONVIF' if why == 'onvif' else 'known vendor path'}):\n"
+                          f"    {found}\nURL apne aap update kar diya — Connect dabayein."))
+            fixed = found
+        elif why == "auth":
+            steps.append(("Stream path auto-detect", False, "Username/password galat (camera ne 401 diya)"))
+            return False, steps, fixed
+        else:
+            steps.append(("Stream path auto-detect", False,
+                          "Camera ka stream path nahi mil paya (ONVIF band hai ya unknown brand). Camera ke "
+                          "web page/manual me 'RTSP URL' dekh kar path lagayein — e.g. Hikvision/Prama: "
+                          "/Streaming/Channels/101, Dahua/CP Plus: /cam/realmonitor?channel=1&subtype=0, "
+                          "TP-Link: /stream1, Reolink: /h264Preview_01_main"))
+            return False, steps, fixed
+    else:
+        steps.append(("RTSP handshake", False,
+                      f"Camera ne RTSP jawab nahi diya ({first}) — camera settings me RTSP enable hai? "
+                      "Port 554 sahi hai? Fir bhi video try kar rahe hain..."))
+
     ok, detail = _try_capture(fixed, "tcp", wait)
     steps.append(("Video stream (TCP)", ok, detail))
     if ok:
-        return True, steps
+        return True, steps, fixed
     ok, detail = _try_capture(fixed, "udp", wait)
     steps.append(("Video stream (UDP)", ok, detail))
     if ok:
-        return True, steps
+        return True, steps, fixed
     ok, detail = _try_ffmpeg_pipe(fixed)
     steps.append(("Video stream (FFmpeg engine)", ok, detail))
     if ok:
-        return True, steps
+        return True, steps, fixed
     steps.append(("Hint", False,
                   "Camera network par hai par video nahi mila — zyada tar username/password "
                   "ya stream path (stream1 vs stream2) galat hota hai. Yahi URL VLC me "
                   "(Media > Open Network Stream) test karein."))
-    return False, steps
+    return False, steps, fixed
+
+
+def auto_fix_stream_url(source, log=clog):
+    """Called when a live RTSP open failed: if the camera says 404 for this path, find the real
+    stream URL (ONVIF / vendor paths). -> (fixed_url or '', reason)."""
+    from rtsp_discover import discover_stream_url, rtsp_describe
+
+    code, first = rtsp_describe(source)
+    log(f"svc: RTSP DESCRIBE -> {code} {first}")
+    if code == 200:
+        return "", "path-ok"
+    if code == 401:
+        return "", "auth"
+    if code == 0:
+        return "", "no-answer"
+    found, why = discover_stream_url(source, log=log)
+    if found:
+        log(f"svc: stream path auto-detected via {why}: {redact_url(found)}")
+    return found, why
 
 
 class SecurityEngine:

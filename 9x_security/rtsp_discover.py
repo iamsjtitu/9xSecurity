@@ -1,0 +1,180 @@
+"""Find the real RTSP stream path when the user only knows rtsp://user:pw@host:554/
+(camera answers DESCRIBE 404) — what NVR / 'entry system' software does silently.
+
+1. rtsp_describe(url): raw RTSP DESCRIBE (Basic/Digest auth) -> status code. 200 = path OK,
+   401 = wrong credentials, 404 = path missing. Milliseconds, no decoder involved.
+2. onvif_stream_uris(host, user, pw): GetProfiles + GetStreamUri via ONVIF (ptz._soap).
+3. COMMON_PATHS: vendor defaults, each verified with rtsp_describe.
+"""
+import base64
+import hashlib
+import re
+import socket
+import time
+from urllib.parse import quote, unquote, urlparse, urlunparse
+
+COMMON_PATHS = [
+    "/Streaming/Channels/101",                    # Hikvision, Prama, many OEM NVR/cams
+    "/cam/realmonitor?channel=1&subtype=0",       # Dahua, CP Plus
+    "/stream1",                                   # TP-Link Tapo / VIGI
+    "/h264Preview_01_main",                       # Reolink
+    "/media/video1",                              # Uniview
+    "/live/ch00_0",                               # generic Chinese OEM (Zebronics etc.)
+    "/h264/ch1/main/av_stream",                   # legacy Hikvision
+    "/onvif1",                                    # cheap wifi cams
+    "/live", "/live/main", "/video1", "/videoMain", "/11", "/ch0_0.h264", "/live.sdp",
+    "/axis-media/media.amp", "/MediaInput/h264", "/1", "/0", "/ch01.264", "/av0_0", "/profile1",
+    "/user={user}_password={pw}_channel=1_stream=0.sdp?real_stream",  # XMEye (Godrej/Zicom clones)
+]
+
+
+def split_url(url):
+    """-> (host, port, user, pw, path_with_query) from a normalized rtsp URL."""
+    u = urlparse(url)
+    path = u.path or ""
+    if u.query:
+        path += "?" + u.query
+    return u.hostname or "", u.port or 554, unquote(u.username or ""), unquote(u.password or ""), path
+
+
+def with_path(url, path):
+    """Same host/creds, different stream path (path may include ?query)."""
+    u = urlparse(url)
+    p, _, q = path.partition("?")
+    return urlunparse((u.scheme, u.netloc, p, "", q, ""))
+
+
+def with_creds(uri, user, pw, host=None, port=None):
+    """Inject user/pw (percent-encoded) into a bare rtsp URI returned by ONVIF; optionally force host/port."""
+    u = urlparse(uri)
+    h = host or u.hostname or ""
+    prt = port or u.port or 554
+    netloc = f"{h}:{prt}"
+    if user:
+        netloc = f"{quote(user, safe='')}:{quote(pw, safe='')}@{netloc}"
+    return urlunparse(("rtsp", netloc, u.path, "", u.query, ""))
+
+
+def has_stream_path(url):
+    _h, _p, _u, _pw, path = split_url(url)
+    return path not in ("", "/")
+
+
+def _digest(user, pw, realm, nonce, method, uri, qop=None, cnonce="9x9x9x9x", nc="00000001"):
+    ha1 = hashlib.md5(f"{user}:{realm}:{pw}".encode()).hexdigest()
+    ha2 = hashlib.md5(f"{method}:{uri}".encode()).hexdigest()
+    if qop:
+        resp = hashlib.md5(f"{ha1}:{nonce}:{nc}:{cnonce}:{qop}:{ha2}".encode()).hexdigest()
+        return (f'Digest username="{user}", realm="{realm}", nonce="{nonce}", uri="{uri}", '
+                f'response="{resp}", qop={qop}, nc={nc}, cnonce="{cnonce}"')
+    resp = hashlib.md5(f"{ha1}:{nonce}:{ha2}".encode()).hexdigest()
+    return f'Digest username="{user}", realm="{realm}", nonce="{nonce}", uri="{uri}", response="{resp}"'
+
+
+def _rtsp_request(host, port, uri, auth=None, cseq=1, timeout=3.0):
+    """One DESCRIBE round-trip. -> (status_code, headers_text)."""
+    req = (f"DESCRIBE {uri} RTSP/1.0\r\nCSeq: {cseq}\r\nUser-Agent: 9xSecurity\r\n"
+           f"Accept: application/sdp\r\n" + (f"Authorization: {auth}\r\n" if auth else "") + "\r\n")
+    with socket.create_connection((host, port), timeout=timeout) as s:
+        s.settimeout(timeout)
+        s.sendall(req.encode())
+        data = b""
+        while b"\r\n\r\n" not in data and len(data) < 65536:
+            chunk = s.recv(4096)
+            if not chunk:
+                break
+            data += chunk
+    text = data.decode("latin-1", "replace")
+    m = re.match(r"RTSP/1\.\d\s+(\d{3})", text)
+    return (int(m.group(1)) if m else 0), text
+
+
+def rtsp_describe(url, timeout=3.0):
+    """-> (status_code, detail). 200 = stream path OK, 401 = bad user/password,
+    404 = no such path, 0 = no/invalid RTSP answer (socket error text in detail)."""
+    host, port, user, pw, path = split_url(url)
+    uri = f"rtsp://{host}:{port}{path or '/'}"
+    try:
+        code, text = _rtsp_request(host, port, uri, timeout=timeout)
+        if code == 401 and user:
+            m = re.search(r'WWW-Authenticate:\s*Digest\s+([^\r\n]+)', text, re.I)
+            if m:
+                params = dict(re.findall(r'(\w+)="?([^",]*)"?', m.group(1)))
+                qop = "auth" if "auth" in params.get("qop", "") else None
+                auth = _digest(user, pw, params.get("realm", ""), params.get("nonce", ""), "DESCRIBE", uri, qop)
+            else:
+                auth = "Basic " + base64.b64encode(f"{user}:{pw}".encode()).decode()
+            code, text = _rtsp_request(host, port, uri, auth=auth, cseq=2, timeout=timeout)
+        return code, text.splitlines()[0] if text else ""
+    except Exception as e:
+        return 0, str(e)
+
+
+def onvif_stream_uris(host, user, pw, timeout=4):
+    """RTSP URIs of the camera's media profiles (main first), or [] when ONVIF is unavailable."""
+    import ptz
+
+    profiles = '<GetProfiles xmlns="http://www.onvif.org/ver10/media/wsdl"/>'
+    out = []
+    for port in ptz._PORTS:
+        for path in ptz._PATHS:
+            svc = f"http://{host}:{port}/onvif/{path}"
+            try:
+                r = ptz._soap(svc, user, pw, profiles, timeout=timeout)
+            except Exception:
+                break  # port unreachable: skip remaining paths on it
+            tokens = re.findall(r'Profiles[^>]*token="([^"]+)"', r.text)
+            if not tokens:
+                continue
+            for tok in tokens[:2]:
+                body = ('<GetStreamUri xmlns="http://www.onvif.org/ver10/media/wsdl">'
+                        '<StreamSetup><Stream xmlns="http://www.onvif.org/ver10/schema">RTP-Unicast</Stream>'
+                        '<Transport xmlns="http://www.onvif.org/ver10/schema"><Protocol>RTSP</Protocol></Transport>'
+                        f'</StreamSetup><ProfileToken>{tok}</ProfileToken></GetStreamUri>')
+                try:
+                    r2 = ptz._soap(svc, user, pw, body, timeout=timeout)
+                except Exception:
+                    continue
+                m = re.search(r"<[^>]*\bUri>\s*(rtsp://[^<\s]+)", r2.text)
+                if m:
+                    out.append(m.group(1).replace("&amp;", "&"))
+            if out:
+                return out
+    return out
+
+
+def discover_stream_url(url, log=lambda m: None, budget_s=25.0):
+    """Try to turn a path-less/404 RTSP URL into a working one.
+    -> (found_url or '', reason). reason: 'onvif' | 'common-path' | 'auth' (bad password) | 'none'."""
+    t0 = time.time()
+    host, port, user, pw, _path = split_url(url)
+    # 1) ONVIF: the camera tells us its own stream URI (most reliable)
+    try:
+        uris = onvif_stream_uris(host, user, pw)
+    except Exception as e:
+        uris = []
+        log(f"discover: onvif error {e}")
+    for uri in uris:
+        cand = with_creds(uri, user, pw, host=host, port=urlparse(uri).port or port)
+        code, _ = rtsp_describe(cand)
+        log(f"discover: onvif uri {urlparse(uri).path} -> {code}")
+        if code == 200:
+            return cand, "onvif"
+        if code == 401:
+            return "", "auth"
+    # 2) common vendor paths, verified with a real DESCRIBE
+    for p in COMMON_PATHS:
+        if time.time() - t0 > budget_s:
+            log("discover: time budget over")
+            break
+        p = p.format(user=user, pw=pw)
+        cand = with_path(url, p)
+        code, _ = rtsp_describe(cand, timeout=2.5)
+        log(f"discover: try {p} -> {code}")
+        if code == 200:
+            return cand, "common-path"
+        if code == 401:
+            return "", "auth"
+        if code == 0:
+            break  # camera stopped answering: do not hammer it
+    return "", "none"

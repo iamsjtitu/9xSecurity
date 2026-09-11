@@ -73,9 +73,9 @@ def test_ffmpeg_err_and_camera_log_written():
 
     assert os.path.exists(err_path), "ffmpeg_err.txt not created"
     assert os.path.getsize(err_path) >= err_before  # file exists / appended
-    with open(log_path, "r", encoding="utf-8") as f:
+    with open(log_path, "rb") as f:
         content = f.read()
-    tail = content[log_before:]
+    tail = content[log_before:].decode("utf-8", "replace")  # byte offsets (log has unicode dashes)
     assert "ffmpeg-pipe: starting" in tail
     assert "OK first frame" in tail
     print("PASS: ffmpeg_err.txt exists; camera_log has start + OK first frame")
@@ -106,7 +106,7 @@ def test_probe_rtsp_source_has_ffmpeg_step():
 
 def test_probe_rtsp_unreachable_still_early_returns():
     # TEST-NET-1: network step must fail and early-return, skipping ffmpeg step
-    ok, steps = probe_rtsp("rtsp://u:p@192.0.2.1:554/s", wait=1.0)
+    ok, steps, _u = probe_rtsp("rtsp://u:p@192.0.2.1:554/s", wait=1.0)
     assert ok is False
     step_names = [s[0] for s in steps]
     assert not any("FFmpeg engine" in n for n in step_names), step_names

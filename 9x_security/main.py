@@ -234,7 +234,7 @@ class ProbeThread(QtCore.QThread):
 
     def run(self):
         from engine import probe_rtsp
-        ok, steps = probe_rtsp(self.url)
+        ok, steps, _u = probe_rtsp(self.url)
         self.done.emit(ok, steps)
 
 

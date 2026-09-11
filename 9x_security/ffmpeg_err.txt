@@ -1573,3 +1573,43 @@ Error opening input files: Connection timed out
 [in#0 @ 0xbb86960] Error opening input: Connection timed out
 Error opening input file rtsp://u:p@192.0.2.1:554/s.
 Error opening input files: Connection timed out
+[in#0 @ 0x54e6960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:53819/Streaming/Channels/101.
+Error opening input files: Invalid data found when processing input
+[tcp @ 0x448d6740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x448d3960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x14054740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x14051960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x27ce1740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x27cde960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x30257740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x30254960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[in#0 @ 0x1f588960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:38487/Streaming/Channels/101.
+Error opening input files: Invalid data found when processing input
+[tcp @ 0x32da1740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x32d9e960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x5a08740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x5a05960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0xdc51740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0xdc4e960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[in#0 @ 0x1e81d960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:51723/Streaming/Channels/101.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0x699f960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:44291/Streaming/Channels/101.
+Error opening input files: Invalid data found when processing input

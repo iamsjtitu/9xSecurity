@@ -13,6 +13,52 @@ import socket
 import time
 from urllib.parse import quote, unquote, urlparse, urlunparse
 
+# Brand picker: {ch} = channel number (NVR/DVR), {user}/{pw} = credentials (XMEye style)
+BRANDS = [
+    {"id": "hikvision", "name": "Hikvision / Prama / HiWatch / Honeywell", "port": 554,
+     "main": "/Streaming/Channels/{ch}01", "sub": "/Streaming/Channels/{ch}02",
+     "note": "NVR par channel number = camera ka number (1, 2, 3…)"},
+    {"id": "dahua", "name": "Dahua / CP Plus / Imou / Amcrest", "port": 554,
+     "main": "/cam/realmonitor?channel={ch}&subtype=0", "sub": "/cam/realmonitor?channel={ch}&subtype=1",
+     "note": "CP Plus DVR/NVR par bhi yahi path chalta hai"},
+    {"id": "tplink", "name": "TP-Link Tapo / VIGI", "port": 554, "main": "/stream1", "sub": "/stream2",
+     "note": "Tapo app me 'Camera Account' banana padta hai (Settings > Advanced)"},
+    {"id": "reolink", "name": "Reolink", "port": 554, "main": "/h264Preview_01_main", "sub": "/h264Preview_01_sub",
+     "note": ""},
+    {"id": "uniview", "name": "Uniview (UNV)", "port": 554, "main": "/media/video1", "sub": "/media/video2", "note": ""},
+    {"id": "xmeye", "name": "Godrej / Zicom / XMEye DVR (generic Chinese)", "port": 554,
+     "main": "/user={user}_password={pw}_channel={ch}_stream=0.sdp?real_stream",
+     "sub": "/user={user}_password={pw}_channel={ch}_stream=1.sdp?real_stream",
+     "note": "Password URL me do baar jata hai — ye normal hai"},
+    {"id": "generic", "name": "Zebronics / Generic OEM (live/ch00_0)", "port": 554, "main": "/live/ch00_0",
+     "sub": "/live/ch00_1", "note": ""},
+    {"id": "axis", "name": "Axis", "port": 554, "main": "/axis-media/media.amp",
+     "sub": "/axis-media/media.amp?resolution=640x480", "note": ""},
+    {"id": "vivotek", "name": "Vivotek", "port": 554, "main": "/live.sdp", "sub": "/live2.sdp", "note": ""},
+    {"id": "panasonic", "name": "Panasonic", "port": 554, "main": "/MediaInput/h264", "sub": "/MediaInput/h264/stream_2",
+     "note": ""},
+    {"id": "auto", "name": "Pata nahi / Auto-detect (ONVIF)", "port": 554, "main": "/", "sub": "/",
+     "note": "Test dabane par app camera se asli path khud pooch lega"},
+    {"id": "custom", "name": "Custom path (khud likhein)", "port": 554, "main": "/", "sub": "/",
+     "note": "Camera ke manual/web page me diya RTSP path yahan likhein"},
+]
+
+
+def build_url(brand_id, ip, user, pw, port=None, channel=1, stream="main", custom_path=""):
+    """rtsp URL from a brand template. Password is percent-encoded so '@' etc. are safe."""
+    b = next((x for x in BRANDS if x["id"] == brand_id), None) or BRANDS[-2]
+    if brand_id == "custom":
+        path = custom_path.strip()
+    else:
+        path = b[stream if stream in ("main", "sub") else "main"]
+        path = path.format(ch=int(channel or 1), user=quote(user, safe=""), pw=quote(pw, safe=""))
+    if not path.startswith("/"):
+        path = "/" + path
+    prt = int(port or b.get("port") or 554)
+    cred = f"{quote(user, safe='')}:{quote(pw, safe='')}@" if user else ""
+    return f"rtsp://{cred}{ip.strip()}:{prt}{path}"
+
+
 COMMON_PATHS = [
     "/Streaming/Channels/101",                    # Hikvision, Prama, many OEM NVR/cams
     "/cam/realmonitor?channel=1&subtype=0",       # Dahua, CP Plus

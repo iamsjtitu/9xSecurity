@@ -87,3 +87,4 @@ credentials.json
 *.key
 .credentials
 9x_security/electron/node_modules/electron/dist/electron
+9x_security/wa_test_photo.jpg

@@ -523,6 +523,32 @@ def camera_disconnect(request: Request):
     return {"ok": True}
 
 
+@app.get("/api/camera/brands")
+def camera_brands(request: Request):
+    """Brand catalog for the URL builder (single source of truth: rtsp_discover.BRANDS)."""
+    _check(request)
+    from rtsp_discover import BRANDS
+    return {"brands": BRANDS}
+
+
+@app.post("/api/camera/build_url")
+def camera_build_url(body: dict, request: Request):
+    _check(request)
+    from rtsp_discover import build_url
+    ip = str(body.get("ip", "")).strip()
+    if not ip or not re.match(r"^[A-Za-z0-9.\-]+$", ip):
+        raise HTTPException(400, "Camera ka IP address daalein (jaise 192.168.1.28)")
+    try:
+        url = build_url(
+            str(body.get("brand", "auto")), ip, str(body.get("user", "")), str(body.get("password", "")),
+            port=body.get("port") or None, channel=body.get("channel") or 1,
+            stream=str(body.get("stream", "main")), custom_path=str(body.get("custom_path", "")),
+        )
+    except (ValueError, KeyError, IndexError) as e:
+        raise HTTPException(400, f"URL nahi ban paya: {e}")
+    return {"url": url}
+
+
 @app.post("/api/camera/test")
 def camera_test(body: dict, request: Request):
     _check(request)

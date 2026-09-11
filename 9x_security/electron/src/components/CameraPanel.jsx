@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Cctv, Plug, Unplug, Stethoscope, X, ZoomIn, ZoomOut, RotateCcw, Focus } from 'lucide-react';
+import { Cctv, Plug, Unplug, Stethoscope, X, ZoomIn, ZoomOut, RotateCcw, Focus, Wand2 } from 'lucide-react';
 import { api, BASE, getToken } from '../api';
+import UrlBuilder from './UrlBuilder.jsx';
 
 const FRAME_MS = 150;
 
 export default function CameraPanel({ state, refreshState, showToast, drawMode, setDrawMode }) {
   const [url, setUrl] = useState(state.rtsp_url || '');
+  const [showBuilder, setShowBuilder] = useState(false);
   const [busy, setBusy] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState(null);
@@ -174,11 +176,12 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
     }
   };
 
-  const runTest = async () => {
-    if (!url.trim()) { showToast('Pehle RTSP URL daalein', 'error'); return; }
+  const runTest = async (which) => {
+    const target = typeof which === 'string' ? which : url;
+    if (!target.trim()) { showToast('Pehle RTSP URL daalein', 'error'); return; }
     setTesting(true);
     try {
-      const r = await api('/api/camera/test', { method: 'POST', body: JSON.stringify({ url }), timeout: 180000 });
+      const r = await api('/api/camera/test', { method: 'POST', body: JSON.stringify({ url: target }), timeout: 180000 });
       setTestResult(r);
       if (r.url) {
         urlTouched.current = true;
@@ -221,6 +224,14 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
     }
   };
 
+  const applyBuiltUrl = async (built, test) => {
+    urlTouched.current = true;
+    setUrl(built);
+    setShowBuilder(false);
+    showToast('URL ban gaya — URL box me daal diya', 'success');
+    if (test) await runTest(built);
+  };
+
   const zoomBtn = 'h-8 w-8 flex items-center justify-center rounded-md bg-black/60 text-white hover:bg-black/80 transition-colors duration-150 disabled:opacity-40';
 
   return (
@@ -233,7 +244,10 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
           onChange={(e) => { urlTouched.current = true; setUrl(e.target.value); }}
           data-testid="rtsp-url-input"
         />
-        <button className="btn-ghost !bg-slate-800 !border-slate-700 !text-slate-200 hover:!bg-slate-700" onClick={runTest} disabled={testing} data-testid="camera-test-btn">
+        <button className="btn-ghost !bg-slate-800 !border-slate-700 !text-slate-200 hover:!bg-slate-700" onClick={() => setShowBuilder(true)} title="Brand chun kar URL banao" data-testid="url-builder-btn">
+          <Wand2 size={15} /> URL banao
+        </button>
+        <button className="btn-ghost !bg-slate-800 !border-slate-700 !text-slate-200 hover:!bg-slate-700" onClick={() => runTest()} disabled={testing} data-testid="camera-test-btn">
           <Stethoscope size={15} /> {testing ? 'Testing…' : 'Test'}
         </button>
         <button className={state.connected ? 'btn-danger' : 'btn-primary'} onClick={connect} disabled={busy} data-testid="camera-connect-btn">
@@ -377,6 +391,10 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
           />
         )}
       </div>
+
+      {showBuilder && (
+        <UrlBuilder initialUrl={url} onApply={applyBuiltUrl} onClose={() => setShowBuilder(false)} showToast={showToast} />
+      )}
 
       {testResult && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6" data-testid="test-result-modal">

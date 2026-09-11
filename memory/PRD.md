@@ -819,3 +819,16 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   stop on wrong password, probe steps + fixed URL, worker helper. Live service: /api/camera/test auto-fixed the URL in
   0.0 s; Connect with root URL → cfg saved with found path; wrong password → clear 401 status. test_iter6 tail check
   fixed (byte offsets). Real camera brand unknown → user must confirm on the new build.
+
+## Implemented (update 2026-06 #50) — Camera Brand Picker / URL Builder (testing agent iteration_24: ALL PASS, backend 90/90 + 6 UI flows)
+- rtsp_discover.BRANDS (12): Hikvision/Prama/HiWatch/Honeywell, Dahua/CP Plus/Imou/Amcrest, TP-Link Tapo/VIGI, Reolink,
+  Uniview, Godrej/Zicom/XMEye, Zebronics/generic, Axis, Vivotek, Panasonic, Auto-detect (ONVIF, path '/'), Custom.
+  Templates use {ch} (NVR channel) and {user}/{pw} (XMEye); build_url() percent-encodes the password ('@' -> %40) and
+  normalize_rtsp_url() is idempotent on the result.
+- API: GET /api/camera/brands; POST /api/camera/build_url {brand, ip, port, user, password, channel, stream main|sub,
+  custom_path} -> {url}; 400 (Hinglish) on bad/missing IP.
+- UI: 'URL banao' button (url-builder-btn) in the camera header -> UrlBuilder.jsx modal (brand select + note, IP, port,
+  user, password, channel, Main/Sub radios, custom path for 'custom', live preview via the API, 'Sirf URL box me daalo'
+  and 'Use karo + Test' which also runs the Test flow incl. stream-path auto-detect). Prefills IP/user/password from the
+  URL box.
+- Tests: test_rtsp_discover.py 9 (+builder templates), agent tests_iter24_api.py 9, Playwright flows all green.

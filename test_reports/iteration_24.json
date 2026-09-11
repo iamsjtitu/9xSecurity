@@ -1,0 +1,31 @@
+{
+  "summary": "Iter24 tested the URL Builder + RTSP auto-detect feature end-to-end. Ran both pytest groups from the review (60 pass + 21 pass = 81). Wrote a new API test file /app/9x_security/tests_iter24_api.py (9 tests, all pass) covering GET /api/camera/brands, POST /api/camera/build_url (hikvision default path with URL-encoded @, dahua channel/subtype, custom port+path, bad ip 400, missing ip 400), and POST /api/camera/test against an in-process FakeCam (auto-detect fixes '/' to /Streaming/Channels/101, persists to /api/state; wrong-password path returns steps ending with 401). Ran full Playwright UI flow at http://127.0.0.1:8971/ (login admin/9xsecurity -> force-change accepted Temp123456): url-builder-btn opens modal, dahua+sub preview equals rtsp://admin:Admin%40123@192.168.1.28:554/cam/realmonitor?channel=1&subtype=1 with brand note visible, apply-btn copies to rtsp-url-input and closes modal; brand 'custom' shows url-builder-custom-path and preview updates live; brand 'auto' hides stream radios and preview ends with ':554/'; url-builder-close preserves URL box; url-builder-test-btn against FakeCam shows 'Stream path auto-detect' step and rewrites URL box to .../Streaming/Channels/101. camera-test-btn and draw-line-btn still present (no regression). State fully restored (password back to 9xsecurity, rtsp_url back to rtsp://u:p@192.0.2.1:554/s, FakeCam killed).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/tests_iter24_api.py",
+    "/app/9x_security/test_rtsp_discover.py",
+    "/app/9x_security/test_service_api.py",
+    "/app/9x_security/test_worker_restart.py"
+  ],
+  "test_results": {
+    "group1 (test_rtsp_discover + test_engine + test_iter5_diagnostics + test_iter6_ffmpeg_fallback + test_substream)": "60/60 passed in 23.05s",
+    "group2 (test_service_api + test_worker_restart, needs engine on :8971)": "21/21 passed in 23.73s",
+    "iter24_api (new: /api/camera/brands, /api/camera/build_url, /api/camera/test with FakeCam)": "9/9 passed in 0.32s",
+    "playwright_ui (URL Builder end-to-end at http://127.0.0.1:8971/)": "6/6 flows PASS (dahua sub apply, custom path, auto preview ':554/', close preserves URL, FakeCam test-btn -> /Streaming/Channels/101, regression camera-test-btn + draw-line-btn present)"
+  },
+  "action_items": [],
+  "critical_code_review_comments": [
+    "UrlBuilder brand select is rendered with a non-native listbox (page.query_selector_all('[data-testid=\"url-builder-brand\"] option') returned 0). page.select_option still works because Playwright dispatches on the underlying <select>, so this is not a bug — but any consumer inspecting <option> children (a11y tools / other test agents) will see zero. If the intent is a native <select>, ensure <option> elements are actual DOM children of the element carrying data-testid=\"url-builder-brand\".",
+    "GET /api/camera/brands returns 12 brands each with id/name/port and main/sub/note — server did NOT gate this behind auth in prior iterations (worth verifying); test uses the auth header regardless.",
+    "Force-change form (Login.jsx) refuses '9xsecurity' as the new password. Good, but the check is client-only — the same guard should exist server-side in POST /api/settings to prevent scripted downgrade. (Server DID accept new_password='9xsecurity' via /api/settings in this test to restore state, confirming there is NO server-side reject of the default.)"
+  ],
+  "updated_files": ["/app/9x_security/tests_iter24_api.py (new)"],
+  "success_rate": {"backend": "100% (90/90 across all groups)", "frontend": "100% (all 6 UI flows)"},
+  "test_credentials": "admin / 9xsecurity (X-Auth-Token header)",
+  "seed_data_creation": "In-process FakeCam (test_rtsp_discover.FakeCam) started from /tmp/run_fakecam.py during Playwright test (killed after). No DB seed.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Engine started via nohup (not supervisor) on 127.0.0.1:8971. Restart: cd /app/9x_security && nohup python service.py > /tmp/service_out.log 2>&1 &. For E2E with FakeCam use /tmp/run_fakecam.py (writes port to /tmp/fakecam_port.txt). Two pytest groups required — test_engine.py leaks a requests.post patch so DO NOT combine with test_service_api.py. New tests file: tests_iter24_api.py imports FakeCam from test_rtsp_discover. UrlBuilder brand select is not a native <select> — use page.select_option by testid which works.",
+  "rca of the issue": "N/A — feature validated as spec'd. RTSP DESCRIBE 404 for '/' now triggers rtsp_discover.discover_stream_url() which tries common vendor paths; when Hikvision /Streaming/Channels/101 returns 200 the effective URL is persisted and the UI toast (Camera ka asli stream path mil gaya) fires."
+}

@@ -145,6 +145,22 @@ def test_auto_fix_stream_url_for_worker(cam, monkeypatch):
     assert engine.auto_fix_stream_url(_url(cam, pw="wrong"), log=lambda m: None) == ("", "auth")
 
 
+def test_brand_url_builder():
+    u = rd.build_url("hikvision", "192.168.1.28", "admin", "Admin@123")
+    assert u == "rtsp://admin:Admin%40123@192.168.1.28:554/Streaming/Channels/101"
+    assert rd.build_url("hikvision", "192.168.1.28", "admin", "x", channel=3, stream="sub").endswith("/Streaming/Channels/302")
+    assert rd.build_url("dahua", "10.0.0.9", "admin", "p", channel=2, stream="sub").endswith("/cam/realmonitor?channel=2&subtype=1")
+    x = rd.build_url("xmeye", "10.0.0.9", "admin", "a@b", stream="main")
+    assert "/user=admin_password=a%40b_channel=1_stream=0.sdp?real_stream" in x
+    assert rd.build_url("custom", "10.0.0.9", "u", "p", port=8554, custom_path="live/{weird}") == "rtsp://u:p@10.0.0.9:8554/live/{weird}"
+    assert rd.build_url("auto", "10.0.0.9", "", "") == "rtsp://10.0.0.9:554/"
+    # every template renders and normalizes idempotently
+    for b in rd.BRANDS:
+        u = rd.build_url(b["id"], "1.2.3.4", "admin", "P@ss:1/2", channel=1, stream="main", custom_path="/x")
+        assert u.startswith("rtsp://admin:P%40ss%3A1%2F2@1.2.3.4:554/"), u
+        assert engine.normalize_rtsp_url(u) == u
+
+
 def test_with_creds_and_with_path_helpers():
     u = rd.with_creds("rtsp://0.0.0.0:554/cam/realmonitor?channel=1&subtype=0", "admin", "Ad@1", host="10.0.0.5")
     assert u == "rtsp://admin:Ad%401@10.0.0.5:554/cam/realmonitor?channel=1&subtype=0"

@@ -327,6 +327,14 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
               <p className="text-xs text-slate-400">Dono ON = bijli/computer band hone ke baad wapas on hote hi monitoring apne aap shuru.</p>
             </div>
 
+            <div className="rounded-lg border border-slate-200 p-4 flex items-center justify-between gap-4" data-testid="wizard-card">
+              <div>
+                <div className="text-sm font-medium text-slate-800">Setup Wizard</div>
+                <p className="text-xs text-slate-500">Nayi site / naya camera: scan → camera → line → WhatsApp, step-by-step 2 minute me.</p>
+              </div>
+              <button className="btn-ghost whitespace-nowrap" onClick={() => window.dispatchEvent(new Event('nx-open-wizard'))} data-testid="open-wizard-btn">Wizard chalayein</button>
+            </div>
+
             <div className="rounded-lg border border-slate-200 p-4 space-y-2">
               <div className="text-sm font-medium text-slate-800">Software Auto-Lock</div>
               <div className="flex items-center gap-3 text-sm text-slate-700">

@@ -5,12 +5,14 @@ import Sidebar from './components/Sidebar.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import SettingsPage from './components/SettingsPage.jsx';
 import CaptureToast from './components/CaptureToast.jsx';
+import SetupWizard from './components/wizard/SetupWizard.jsx';
 
 export default function App() {
   const [authed, setAuthed] = useState(!!getToken());
   const [page, setPage] = useState('dashboard');
   const [settingsTab, setSettingsTab] = useState('whatsapp');
   const [state, setState] = useState({ connected: false, status: '', version: '' });
+  const [wizard, setWizard] = useState(null); // null = not decided yet, true = open, false = closed this session
   const [toast, setToast] = useState(null);
   const [capture, setCapture] = useState(null);
   const [lockNotice, setLockNotice] = useState('');
@@ -77,6 +79,16 @@ export default function App() {
     return () => { clearInterval(id); evs.forEach((e) => window.removeEventListener(e, bump)); };
   }, [authed, state.auto_lock_minutes, lock]);
 
+  // first run (no camera saved yet) -> Setup Wizard; Settings can re-open it any time
+  useEffect(() => {
+    if (authed && state.setup_done === false && wizard === null) setWizard(true);
+  }, [authed, state.setup_done, wizard]);
+  useEffect(() => {
+    const open = () => { setPage('dashboard'); setWizard(true); };
+    window.addEventListener('nx-open-wizard', open);
+    return () => window.removeEventListener('nx-open-wizard', open);
+  }, []);
+
   if (!authed) {
     return <Login onLogin={() => { setLockNotice(''); setAuthed(true); }} notice={lockNotice} />;
   }
@@ -112,6 +124,9 @@ export default function App() {
         </div>
       </div>
       <CaptureToast event={capture} onClose={() => setCapture(null)} />
+      {wizard && (
+        <SetupWizard state={state} refreshState={refreshState} showToast={showToast} onClose={() => { setWizard(false); refreshState(); }} />
+      )}
       {toast && (
         <div
           data-testid="toast"

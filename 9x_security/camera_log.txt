@@ -6023,3 +6023,216 @@ RuntimeError: no AI in test
 2026-09-11T12:36:44 | svc: AI model loaded
 2026-09-11T12:36:45 | svc: AI self-test OK (yolov8s.pt, 297 ms, 0 dets on blank frame)
 2026-09-11T12:36:45 | open_stream: transport=tcp
+2026-09-11T12:52:33 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-11T12:52:33 | purge: 0 old events removed (retention 7d, cutoff 2026-09-04)
+2026-09-11T12:52:37 | svc: auto-connect — saved camera se connect kar raha hai
+2026-09-11T12:52:37 | svc: loading AI model
+2026-09-11T12:52:38 | svc: AI model loaded
+2026-09-11T12:52:39 | svc: AI self-test OK (yolov8s.pt, 314 ms, 0 dets on blank frame)
+2026-09-11T12:52:39 | open_stream: transport=tcp
+2026-09-11T12:52:44 | open_stream: transport=udp
+2026-09-11T12:52:49 | open_stream: trying FFmpeg engine fallback
+2026-09-11T12:52:49 | ffmpeg-pipe: starting
+2026-09-11T12:52:54 | open_stream: falling back to default backend
+2026-09-11T12:52:59 | svc: source opened codec=unknown live=True
+2026-09-11T12:53:02 | svc: RTSP DESCRIBE -> 0 timed out
+2026-09-11T12:53:17 | svc: loading AI model
+2026-09-11T12:53:17 | svc: AI model loaded
+2026-09-11T12:53:17 | svc: AI self-test OK (yolov8s.pt, 302 ms, 0 dets on blank frame)
+2026-09-11T12:53:17 | open_stream: transport=tcp
+2026-09-11T12:53:45 | scan: subnets=['10.169.40'] port=554
+2026-09-11T12:53:48 | scan: onvif devices=0
+2026-09-11T12:53:49 | scan: rtsp port open on 0 host(s)
+2026-09-11T12:53:50 | === PROBE start: rtsp://****@127.0.0.1:8554/
+2026-09-11T12:53:50 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:53:50 | probe: DESCRIBE -> 400 RTSP/1.0 400 Bad Request
+2026-09-11T12:53:50 | discover: try /Streaming/Channels/101 -> 400
+2026-09-11T12:53:50 | discover: try /cam/realmonitor?channel=1&subtype=0 -> 400
+2026-09-11T12:53:50 | discover: try /stream1 -> 400
+2026-09-11T12:53:50 | discover: try /h264Preview_01_main -> 400
+2026-09-11T12:53:50 | discover: try /media/video1 -> 400
+2026-09-11T12:53:50 | discover: try /live/ch00_0 -> 400
+2026-09-11T12:53:50 | discover: try /h264/ch1/main/av_stream -> 400
+2026-09-11T12:53:50 | discover: try /onvif1 -> 400
+2026-09-11T12:53:50 | discover: try /live -> 200
+2026-09-11T12:53:50 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:53:50 | capture attempt transport=tcp wait=10.0s
+2026-09-11T12:53:53 | capture tcp: OK first frame 640x360 in 0.0s
+2026-09-11T12:53:53 | svc: loading AI model
+2026-09-11T12:53:53 | svc: AI model loaded
+2026-09-11T12:53:54 | svc: AI self-test OK (yolov8s.pt, 489 ms, 0 dets on blank frame)
+2026-09-11T12:53:54 | svc: accurate model too slow here (489 ms > 350) -> yolov8n.pt
+2026-09-11T12:53:55 | svc: AI self-test OK (yolov8n.pt, 227 ms, 0 dets on blank frame)
+2026-09-11T12:53:55 | open_stream: transport=tcp
+2026-09-11T12:53:58 | open_stream tcp: OK first frame in 0.0s
+2026-09-11T12:53:58 | svc: source opened codec=h264 live=True
+2026-09-11T12:53:58 | svc: streaming started
+2026-09-11T12:55:51 | svc: loading AI model
+2026-09-11T12:55:51 | svc: AI model loaded
+2026-09-11T12:55:52 | svc: AI self-test OK (yolov8s.pt, 321 ms, 0 dets on blank frame)
+2026-09-11T12:55:52 | open_stream: transport=tcp
+2026-09-11T12:55:53 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-09-11T12:55:56 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-11T12:55:57 | svc: loading AI model
+2026-09-11T12:55:57 | svc: loading AI model
+2026-09-11T12:55:57 | svc: AI model loaded
+2026-09-11T12:55:57 | svc: AI model loaded
+2026-09-11T12:55:58 | svc: AI self-test OK (yolov8s.pt, 608 ms, 0 dets on blank frame)
+2026-09-11T12:55:58 | svc: accurate model too slow here (608 ms > 350) -> yolov8n.pt
+2026-09-11T12:55:59 | svc: AI self-test OK (yolov8n.pt, 1066 ms, 0 dets on blank frame)
+2026-09-11T12:55:59 | svc: AI self-test OK (yolov8n.pt, 308 ms, 0 dets on blank frame)
+2026-09-11T12:55:59 | open_stream: transport=tcp
+2026-09-11T12:56:04 | open_stream: transport=udp
+2026-09-11T12:56:09 | open_stream: trying FFmpeg engine fallback
+2026-09-11T12:56:09 | ffmpeg-pipe: starting
+2026-09-11T12:56:13 | svc: loading AI model
+2026-09-11T12:56:13 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 248, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-11T12:56:13 | svc: source opened codec=unknown live=True
+2026-09-11T12:56:13 | svc: streaming started
+2026-09-11T12:56:15 | svc: loading AI model
+2026-09-11T12:56:15 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 248, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-11T12:56:15 | svc: source opened codec=unknown live=True
+2026-09-11T12:56:15 | svc: streaming started
+2026-09-11T12:58:05 | svc: loading AI model
+2026-09-11T12:58:05 | svc: AI model loaded
+2026-09-11T12:58:06 | svc: AI self-test OK (yolov8s.pt, 302 ms, 0 dets on blank frame)
+2026-09-11T12:58:06 | open_stream: transport=tcp
+2026-09-11T12:59:51 | scan: subnets=['10.169.40'] port=554
+2026-09-11T12:59:53 | scan: onvif devices=0
+2026-09-11T12:59:53 | === PROBE start: rtsp://****@127.0.0.1:8554/
+2026-09-11T12:59:53 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:59:53 | probe: DESCRIBE -> 400 RTSP/1.0 400 Bad Request
+2026-09-11T12:59:53 | discover: try /Streaming/Channels/101 -> 400
+2026-09-11T12:59:53 | discover: try /cam/realmonitor?channel=1&subtype=0 -> 400
+2026-09-11T12:59:53 | discover: try /stream1 -> 400
+2026-09-11T12:59:53 | discover: try /h264Preview_01_main -> 400
+2026-09-11T12:59:53 | discover: try /media/video1 -> 400
+2026-09-11T12:59:53 | discover: try /live/ch00_0 -> 400
+2026-09-11T12:59:53 | discover: try /h264/ch1/main/av_stream -> 400
+2026-09-11T12:59:53 | discover: try /onvif1 -> 400
+2026-09-11T12:59:53 | discover: try /live -> 200
+2026-09-11T12:59:53 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:59:53 | capture attempt transport=tcp wait=10.0s
+2026-09-11T12:59:55 | scan: rtsp port open on 0 host(s)
+2026-09-11T12:59:57 | capture tcp: OK first frame 640x360 in 0.0s
+2026-09-11T12:59:57 | svc: loading AI model
+2026-09-11T12:59:57 | svc: AI model loaded
+2026-09-11T12:59:58 | svc: AI self-test OK (yolov8s.pt, 476 ms, 0 dets on blank frame)
+2026-09-11T12:59:58 | svc: accurate model too slow here (476 ms > 350) -> yolov8n.pt
+2026-09-11T12:59:59 | svc: AI self-test OK (yolov8n.pt, 295 ms, 0 dets on blank frame)
+2026-09-11T12:59:59 | open_stream: transport=tcp
+2026-09-11T13:00:02 | open_stream tcp: OK first frame in 0.0s
+2026-09-11T13:00:02 | svc: source opened codec=h264 live=True
+2026-09-11T13:00:02 | svc: streaming started
+2026-09-11T13:02:55 | scan: subnets=['10.169.40'] port=554
+2026-09-11T13:02:58 | === PROBE start: rtsp://****@127.0.0.1:8554/
+2026-09-11T13:02:58 | probe: 127.0.0.1:8554 reachable
+2026-09-11T13:02:58 | probe: DESCRIBE -> 400 RTSP/1.0 400 Bad Request
+2026-09-11T13:02:58 | discover: try /Streaming/Channels/101 -> 400
+2026-09-11T13:02:58 | discover: try /cam/realmonitor?channel=1&subtype=0 -> 400
+2026-09-11T13:02:58 | discover: try /stream1 -> 400
+2026-09-11T13:02:58 | discover: try /h264Preview_01_main -> 400
+2026-09-11T13:02:58 | discover: try /media/video1 -> 400
+2026-09-11T13:02:58 | discover: try /live/ch00_0 -> 400
+2026-09-11T13:02:58 | discover: try /h264/ch1/main/av_stream -> 400
+2026-09-11T13:02:58 | discover: try /onvif1 -> 400
+2026-09-11T13:02:58 | discover: try /live -> 200
+2026-09-11T13:02:58 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:8554/live
+2026-09-11T13:02:58 | capture attempt transport=tcp wait=10.0s
+2026-09-11T13:02:58 | scan: onvif devices=0
+2026-09-11T13:02:59 | scan: rtsp port open on 0 host(s)
+2026-09-11T13:03:01 | capture tcp: OK first frame 640x360 in 0.0s
+2026-09-11T13:03:01 | svc: loading AI model
+2026-09-11T13:03:01 | svc: AI model loaded
+2026-09-11T13:03:02 | svc: AI self-test OK (yolov8s.pt, 484 ms, 0 dets on blank frame)
+2026-09-11T13:03:02 | svc: accurate model too slow here (484 ms > 350) -> yolov8n.pt
+2026-09-11T13:03:03 | svc: AI self-test OK (yolov8n.pt, 279 ms, 0 dets on blank frame)
+2026-09-11T13:03:03 | open_stream: transport=tcp
+2026-09-11T13:03:06 | open_stream tcp: OK first frame in 0.0s
+2026-09-11T13:03:06 | svc: source opened codec=h264 live=True
+2026-09-11T13:03:06 | svc: streaming started
+2026-09-11T13:03:39 | svc: loading AI model
+2026-09-11T13:03:39 | svc: AI model loaded
+2026-09-11T13:03:39 | svc: AI self-test OK (yolov8s.pt, 328 ms, 0 dets on blank frame)
+2026-09-11T13:03:39 | open_stream: transport=tcp
+2026-09-11T13:04:13 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-09-11T13:04:16 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-11T13:04:16 | svc: loading AI model
+2026-09-11T13:04:16 | svc: AI model loaded
+2026-09-11T13:04:17 | svc: AI self-test OK (yolov8s.pt, 305 ms, 0 dets on blank frame)
+2026-09-11T13:04:17 | open_stream: transport=tcp
+2026-09-11T13:04:22 | open_stream: transport=udp
+2026-09-11T13:04:27 | open_stream: trying FFmpeg engine fallback
+2026-09-11T13:04:27 | ffmpeg-pipe: starting
+2026-09-11T13:04:32 | svc: loading AI model
+2026-09-11T13:04:32 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 248, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-11T13:04:32 | svc: source opened codec=unknown live=True
+2026-09-11T13:04:32 | svc: streaming started
+2026-09-11T13:04:34 | svc: loading AI model
+2026-09-11T13:04:34 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 248, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-09-11T13:04:34 | svc: source opened codec=unknown live=True
+2026-09-11T13:04:34 | svc: streaming started
+2026-09-11T13:04:43 | === PROBE start: rtsp://****@127.0.0.1:44041/
+2026-09-11T13:04:43 | probe: 127.0.0.1:44041 reachable
+2026-09-11T13:04:43 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-09-11T13:04:43 | discover: try /Streaming/Channels/101 -> 200
+2026-09-11T13:04:43 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:44041/Streaming/Channels/101
+2026-09-11T13:04:43 | capture attempt transport=tcp wait=1.0s
+2026-09-11T13:04:43 | capture tcp: open FAILED
+2026-09-11T13:04:43 | capture attempt transport=udp wait=1.0s
+2026-09-11T13:04:43 | capture udp: open FAILED
+2026-09-11T13:04:43 | ffmpeg-pipe: starting
+2026-09-11T13:04:43 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T13:04:43 | === PROBE start: rtsp://****@127.0.0.1:44041/
+2026-09-11T13:04:43 | probe: 127.0.0.1:44041 reachable
+2026-09-11T13:04:43 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-09-11T13:04:43 | capture attempt transport=tcp wait=1.0s
+2026-09-11T13:04:43 | capture tcp: open FAILED
+2026-09-11T13:04:43 | capture attempt transport=udp wait=1.0s
+2026-09-11T13:04:43 | capture udp: open FAILED
+2026-09-11T13:04:43 | ffmpeg-pipe: starting
+2026-09-11T13:04:43 | ffmpeg-pipe: no frames (process exited)

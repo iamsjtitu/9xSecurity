@@ -6,7 +6,7 @@
     "x2": 0.9,
     "y2": 0.8
   },
-  "entry_direction": "neg",
+  "entry_direction": "pos",
   "confidence": 0.4,
   "detector_model": "auto",
   "detect_frame_skip": 2,
@@ -32,12 +32,13 @@
   "retention_days": 7,
   "ignore_zones": [],
   "auto_connect": true,
+  "setup_done": true,
   "auto_lock_minutes": 10,
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "4c8b3d9ae06c379a3d24b25c04ef06da",
-  "auth_hash": "3d3617ba9da7ec56a1440b1c39435a1e2d498d90b95f9d5bbcf399e11962d624",
+  "auth_salt": "1191801ed1927c921c0166d02e900a6e",
+  "auth_hash": "0058005b787edcb605bc4c9d41fd09871ea52196d064f9d0f896fefa3b1081c1",
   "github_repo": "",
   "gh_token": "TEST_GH"
 }

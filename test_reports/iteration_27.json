@@ -1,0 +1,29 @@
+{
+  "summary": "Iteration 27: End-to-end validation of the Setup Wizard (Camera -> Line -> WhatsApp -> Done). Backend: 4/4 wizard API tests pass (tests_iter27_wizard_api.py). Verified GET /api/state exposes boolean setup_done; POST /api/options {setup_done:false} while rtsp_url is set keeps state.setup_done=true (nag-suppression works for existing installs); after writing config.json with rtsp_url='' + setup_done=false + line=null, /api/state returns setup_done=false and line=null; POST /api/options {entry_direction:'neg'} flips state.entry_direction to 'neg', 'bogus' is ignored, 'pos' restores. Also regression: test_service_api.py + test_worker_restart.py (21/21 pass), test_rtsp_discover.py + test_net_scan.py (15/15 pass). Frontend (Playwright, real Chromium against http://127.0.0.1:8971 with mediamtx RTSP on 127.0.0.1:8554/live): after login (admin/9xsecurity, force-change to Temp123456) the setup-wizard auto-opens on step Camera; wizard-scan-progress is shown while the auto-scan runs. Advanced toggle -> wizard-raw-url filled with rtsp://admin:Admin@123@127.0.0.1:8554/, Test+Connect -> wizard-camera-ok appears in ~5s and wizard-next-btn is enabled. Line step: two clicks on wizard-line-canvas -> /api/state.line = {x1≈0.20,y1≈0.70,x2≈0.80,y2≈0.70}; SVG <line> and ENTRY/EXIT <text> are rendered. wizard-swap-btn toggles entry_direction (pos->neg) and a second click restores (neg->pos). WhatsApp step: wizard-wa-test-btn is disabled while key/recipients empty; entering fake-key-123 + 919876543210 enables it, and the endpoint response confirms 'TEXT/PHOTO FAILED (HTTP 401)' as expected. wizard-skip-btn advances to Done with wa_enabled=false; wizard-sum-camera / wizard-sum-line / wizard-sum-wa render correct summaries; wizard-auto-connect is checked and wizard-auto-start is disabled (browser context). wizard-finish-btn closes the wizard, /api/state.setup_done becomes true, and /api/settings.wa_enabled is false. Re-open via Settings > Timing > open-wizard-btn correctly opens directly on the Line step (camera already connected); step pill wizard-step-pill-camera present; wizard-close-btn closes it and setup_done stays true. Dashboard regression: camera-test-btn and url-builder-btn remain present, live video canvas shows frames while the wizard is closed. Cleanup done: password restored to 9xsecurity, camera disconnected, placeholder rtsp_url stored, line reset, setup_done true, entry_direction pos.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/9x_security/tests_iter27_wizard_api.py",
+    "/app/9x_security/test_service_api.py",
+    "/app/9x_security/test_worker_restart.py",
+    "/app/9x_security/test_rtsp_discover.py",
+    "/app/9x_security/test_net_scan.py"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Minor: On the wizard Camera step, when wizard-camera-ok appears the wizard-preview-empty placeholder is still visible for a brief window because LivePreview only replaces the placeholder after the first /api/frame poll returns bytes. In this test it did not clear within a few hundred ms. Not a functional bug (dashboard preview shows live frames), but consider hiding the placeholder as soon as state.connected turns true or after the first successful frame fetch.",
+    "Minor testability: /api/whatsapp/test can take 10-20 s to respond because it performs two real HTTP calls to wa.9x.design (TEXT + PHOTO). The wizard UI already handles this with a 120 s api timeout, but any automated test needs to poll wizard-wa-result for at least ~30 s."
+  ],
+  "updated_files": ["/app/9x_security/tests_iter27_wizard_api.py"],
+  "success_rate": {"backend": "100% (4/4 wizard + 21/21 service + 15/15 unit)", "frontend": "100% of scripted wizard/regression checks passed"},
+  "test_credentials": "admin / 9xsecurity (restored after test). mediamtx: admin / Admin@123 at rtsp://127.0.0.1:8554/live.",
+  "seed_data_creation": "Toggled config.json to first-run state (rtsp_url='', setup_done=false, line=null) during the test, then cleaned up to placeholder rtsp_url, line=(0.1,0.2,0.9,0.8), setup_done=true, entry_direction='pos'.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "mediamtx and the ffmpeg testsrc publisher were left running on 127.0.0.1:8554/live (Digest admin/Admin@123). Admin password is 9xsecurity but must_change_password flips true on every login because the current hash equals the seeded default; any UI test must handle the force-change screen (testids: force-new-password, force-confirm-password, force-change-btn) and then re-authenticate via API with the new temp password if it needs a raw token. sessionStorage key for the UI token is 'nx_token' (not localStorage). Login submit button testid is 'login-btn' (not 'login-submit-btn'). The /api/whatsapp/test endpoint expects wa_api_key + wa_recipients in the body (payload from StepWhatsApp).",
+  "rca of the issue": "No bugs uncovered. Wizard end-to-end works: auto-open on first-run, real RTSP Digest connect in ~5 s, line draw persists to /api/line, swap toggles entry_direction, WhatsApp test returns 401 as designed for a fake key, finish sets setup_done true, re-open lands on Line step when camera is already connected."
+}

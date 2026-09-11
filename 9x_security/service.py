@@ -436,6 +436,7 @@ def state(request: Request):
         "snapshot_dir": config.SNAPSHOT_DIR,
         "outbox_pending": _db.outbox_count(),
         "auto_lock_minutes": int(cfg.get("auto_lock_minutes", 10) or 0),
+        "setup_done": bool(cfg.get("setup_done")) or bool(cfg.get("rtsp_url")),
         "capture_paused": worker.capture_paused,
         "ai_loaded": worker.engine is not None,
         "ai_error": worker.ai_error,
@@ -679,6 +680,10 @@ def set_options(body: dict, request: Request):
             cfg["confidence"] = min(0.9, max(0.15, float(body["confidence"])))
         except (TypeError, ValueError):
             pass
+    if "setup_done" in body:
+        cfg["setup_done"] = bool(body["setup_done"])
+    if "entry_direction" in body and body["entry_direction"] in ("pos", "neg"):
+        cfg["entry_direction"] = body["entry_direction"]
     config.save_config(cfg)
     worker.apply_cfg(cfg)
     return {"ok": True}

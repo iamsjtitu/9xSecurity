@@ -864,3 +864,16 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   wrong 401, '/' 400; /api/camera/test root URL → auto-detect /live + 'Video stream (TCP)' ✔; /api/camera/connect root
   URL → Worker auto-fix → connected=true, streaming started, /api/frame JPEG; UI Test+Connect flows live frames.
 - mediamtx binary + config kept at /tmp/mediamtx, /tmp/mtx.yml (not persistent across container restarts).
+
+## Implemented (update 2026-06 #53) — First-run Setup Wizard (testing agent iteration_27: ALL PASS, real mediamtx camera)
+- electron/src/components/wizard/: SetupWizard.jsx (overlay, 4 step pills, close = skip-all), StepCamera (auto LAN scan →
+  pick / brand+IP+user+password or raw URL → Test+Connect with path auto-detect → polls state until live → canvas
+  preview), StepLine (2 clicks on live canvas → POST /api/line; SVG yellow line + green ENTRY arrow / red EXIT computed
+  with the tracker's side sign; swap; line_hints warnings), StepWhatsApp (enable, key, numbers, Test → result, Save or
+  Skip = wa_enabled false), StepDone (summary rows, auto_connect + Windows auto-start toggles, Finish → POST /api/options
+  {setup_done:true}). LivePreview.jsx polls /api/frame into a canvas via createImageBitmap (page CSP forbids blob: img).
+- Backend: config DEFAULTS setup_done=False; /api/state.setup_done = cfg.setup_done or bool(rtsp_url) (existing installs
+  not nagged); /api/options accepts setup_done and entry_direction ('pos'|'neg').
+- App.jsx auto-opens the wizard after login when setup_done is false; Settings > Timing card 'Setup Wizard' (open-wizard-btn)
+  re-opens it (starts at Line when the camera is connected). Full E2E verified with mediamtx: root URL → auto-detect
+  /live → live in ~5 s → line drawn → swap → WhatsApp test (401 with fake key, expected) → skip → finish → setup_done.

@@ -82,6 +82,7 @@ DEFAULTS = {
     "retention_days": 7,   # events + snapshots older than this are auto-deleted
     "ignore_zones": [],  # [{x1,y1,x2,y2} normalized] parked-vehicle areas never counted
     "auto_connect": True,  # engine connects the saved camera by itself at start (PC reboot) and retries
+    "setup_done": False,  # first-run Setup Wizard finished/skipped (existing installs with a camera URL count as done)
     "auto_lock_minutes": 10,  # UI locks (login screen) after this idle time; 0 = never. Engine keeps running.
     # ---- wa.9x.design account credentials (stored for reference) ----
     "wa_account_email": "",

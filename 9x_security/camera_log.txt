@@ -5551,3 +5551,475 @@ RuntimeError: no AI in test
 2026-09-11T12:09:43 | ffmpeg-pipe: starting
 2026-09-11T12:09:48 | open_stream: falling back to default backend
 2026-09-11T12:09:53 | svc: source opened codec=unknown live=True
+2026-09-11T12:23:36 | === PROBE start: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:23:36 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:23:36 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-09-11T12:25:48 | === PROBE start: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:25:48 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:25:48 | probe: DESCRIBE -> 200 RTSP/1.0 200 OK
+2026-09-11T12:25:48 | capture attempt transport=tcp wait=6s
+2026-09-11T12:25:52 | capture tcp: OK first frame 640x360 in 0.0s
+2026-09-11T12:25:52 | === PROBE start: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:25:52 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:25:52 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-09-11T12:25:52 | capture attempt transport=tcp wait=3s
+2026-09-11T12:25:52 | capture tcp: open FAILED
+2026-09-11T12:25:52 | capture attempt transport=udp wait=3s
+2026-09-11T12:25:52 | capture udp: open FAILED
+2026-09-11T12:25:52 | ffmpeg-pipe: starting
+2026-09-11T12:25:52 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:26:10 | === PROBE start: rtsp://****@127.0.0.1:8554/
+2026-09-11T12:26:10 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:26:10 | probe: DESCRIBE -> 400 RTSP/1.0 400 Bad Request
+2026-09-11T12:26:10 | discover: try /Streaming/Channels/101 -> 400
+2026-09-11T12:26:10 | discover: try /cam/realmonitor?channel=1&subtype=0 -> 400
+2026-09-11T12:26:10 | discover: try /stream1 -> 400
+2026-09-11T12:26:10 | discover: try /h264Preview_01_main -> 400
+2026-09-11T12:26:10 | discover: try /media/video1 -> 400
+2026-09-11T12:26:10 | discover: try /live/ch00_0 -> 400
+2026-09-11T12:26:10 | discover: try /h264/ch1/main/av_stream -> 400
+2026-09-11T12:26:10 | discover: try /onvif1 -> 400
+2026-09-11T12:26:10 | discover: try /live -> 200
+2026-09-11T12:26:10 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:26:10 | capture attempt transport=tcp wait=6s
+2026-09-11T12:26:13 | capture tcp: OK first frame 640x360 in 0.0s
+2026-09-11T12:26:14 | === PROBE start: rtsp://****@127.0.0.1:40155/
+2026-09-11T12:26:14 | probe: 127.0.0.1:40155 reachable
+2026-09-11T12:26:14 | probe: DESCRIBE -> 0 
+2026-09-11T12:26:14 | capture attempt transport=tcp wait=1.0s
+2026-09-11T12:26:14 | capture tcp: open FAILED
+2026-09-11T12:26:14 | capture attempt transport=udp wait=1.0s
+2026-09-11T12:26:14 | capture udp: open FAILED
+2026-09-11T12:26:14 | ffmpeg-pipe: starting
+2026-09-11T12:26:14 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:26:14 | === PROBE start: rtsp://****@127.0.0.1:40155/
+2026-09-11T12:26:14 | probe: 127.0.0.1:40155 reachable
+2026-09-11T12:26:14 | probe: DESCRIBE -> 0 
+2026-09-11T12:26:14 | capture attempt transport=tcp wait=1.0s
+2026-09-11T12:26:14 | capture tcp: open FAILED
+2026-09-11T12:26:14 | capture attempt transport=udp wait=1.0s
+2026-09-11T12:26:14 | capture udp: open FAILED
+2026-09-11T12:26:14 | ffmpeg-pipe: starting
+2026-09-11T12:26:14 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:27:48 | === PROBE start: rtsp://****@127.0.0.1:36757/
+2026-09-11T12:27:48 | probe: 127.0.0.1:36757 reachable
+2026-09-11T12:27:48 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-09-11T12:27:48 | discover: try /Streaming/Channels/101 -> 200
+2026-09-11T12:27:48 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:36757/Streaming/Channels/101
+2026-09-11T12:27:48 | capture attempt transport=tcp wait=1.0s
+2026-09-11T12:27:48 | capture tcp: open FAILED
+2026-09-11T12:27:48 | capture attempt transport=udp wait=1.0s
+2026-09-11T12:27:48 | capture udp: open FAILED
+2026-09-11T12:27:48 | ffmpeg-pipe: starting
+2026-09-11T12:27:48 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:27:48 | === PROBE start: rtsp://****@127.0.0.1:36757/
+2026-09-11T12:27:48 | probe: 127.0.0.1:36757 reachable
+2026-09-11T12:27:48 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-09-11T12:27:48 | capture attempt transport=tcp wait=1.0s
+2026-09-11T12:27:48 | capture tcp: open FAILED
+2026-09-11T12:27:48 | capture attempt transport=udp wait=1.0s
+2026-09-11T12:27:48 | capture udp: open FAILED
+2026-09-11T12:27:48 | ffmpeg-pipe: starting
+2026-09-11T12:27:48 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:27:48 | === PROBE start: rtsp://****@127.0.0.1:48909/
+2026-09-11T12:27:48 | probe: 127.0.0.1:48909 reachable
+2026-09-11T12:27:48 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-09-11T12:27:48 | discover: try /Streaming/Channels/101 -> 200
+2026-09-11T12:27:48 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:48909/Streaming/Channels/101
+2026-09-11T12:27:48 | capture attempt transport=tcp wait=1.0s
+2026-09-11T12:27:48 | capture tcp: open FAILED
+2026-09-11T12:27:48 | capture attempt transport=udp wait=1.0s
+2026-09-11T12:27:48 | capture udp: open FAILED
+2026-09-11T12:27:48 | ffmpeg-pipe: starting
+2026-09-11T12:27:48 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:27:48 | === PROBE start: rtsp://****@127.0.0.1:48909/
+2026-09-11T12:27:48 | probe: 127.0.0.1:48909 reachable
+2026-09-11T12:27:48 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-09-11T12:27:48 | capture attempt transport=tcp wait=1.0s
+2026-09-11T12:27:48 | capture tcp: open FAILED
+2026-09-11T12:27:48 | capture attempt transport=udp wait=1.0s
+2026-09-11T12:27:48 | capture udp: open FAILED
+2026-09-11T12:27:48 | ffmpeg-pipe: starting
+2026-09-11T12:27:48 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:27:49 | === PROBE start: rtsp://****@127.0.0.1:46791/
+2026-09-11T12:27:49 | probe: 127.0.0.1:46791 reachable
+2026-09-11T12:27:49 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-09-11T12:27:49 | discover: try /Streaming/Channels/101 -> 200
+2026-09-11T12:27:49 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:46791/Streaming/Channels/101
+2026-09-11T12:27:49 | capture attempt transport=tcp wait=1.0s
+2026-09-11T12:27:49 | capture tcp: open FAILED
+2026-09-11T12:27:49 | capture attempt transport=udp wait=1.0s
+2026-09-11T12:27:49 | capture udp: open FAILED
+2026-09-11T12:27:49 | ffmpeg-pipe: starting
+2026-09-11T12:27:49 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:27:49 | === PROBE start: rtsp://****@127.0.0.1:46791/
+2026-09-11T12:27:49 | probe: 127.0.0.1:46791 reachable
+2026-09-11T12:27:49 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-09-11T12:27:49 | capture attempt transport=tcp wait=1.0s
+2026-09-11T12:27:49 | capture tcp: open FAILED
+2026-09-11T12:27:49 | capture attempt transport=udp wait=1.0s
+2026-09-11T12:27:49 | capture udp: open FAILED
+2026-09-11T12:27:49 | ffmpeg-pipe: starting
+2026-09-11T12:27:49 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:28:01 | === PROBE start: rtsp://****@127.0.0.1:51869/
+2026-09-11T12:28:01 | probe: 127.0.0.1:51869 reachable
+2026-09-11T12:28:01 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-09-11T12:28:01 | discover: try /Streaming/Channels/101 -> 200
+2026-09-11T12:28:01 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:51869/Streaming/Channels/101
+2026-09-11T12:28:01 | capture attempt transport=tcp wait=1.0s
+2026-09-11T12:28:01 | capture tcp: open FAILED
+2026-09-11T12:28:01 | capture attempt transport=udp wait=1.0s
+2026-09-11T12:28:01 | capture udp: open FAILED
+2026-09-11T12:28:01 | ffmpeg-pipe: starting
+2026-09-11T12:28:01 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:28:01 | === PROBE start: rtsp://****@127.0.0.1:51869/
+2026-09-11T12:28:01 | probe: 127.0.0.1:51869 reachable
+2026-09-11T12:28:01 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-09-11T12:28:01 | capture attempt transport=tcp wait=1.0s
+2026-09-11T12:28:01 | capture tcp: open FAILED
+2026-09-11T12:28:01 | capture attempt transport=udp wait=1.0s
+2026-09-11T12:28:01 | capture udp: open FAILED
+2026-09-11T12:28:01 | ffmpeg-pipe: starting
+2026-09-11T12:28:01 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:28:50 | === PROBE start: rtsp://****@127.0.0.1:33341/
+2026-09-11T12:28:50 | probe: 127.0.0.1:33341 reachable
+2026-09-11T12:28:50 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-09-11T12:28:50 | discover: try /Streaming/Channels/101 -> 200
+2026-09-11T12:28:50 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:33341/Streaming/Channels/101
+2026-09-11T12:28:50 | capture attempt transport=tcp wait=1.0s
+2026-09-11T12:28:50 | capture tcp: open FAILED
+2026-09-11T12:28:50 | capture attempt transport=udp wait=1.0s
+2026-09-11T12:28:50 | capture udp: open FAILED
+2026-09-11T12:28:50 | ffmpeg-pipe: starting
+2026-09-11T12:28:50 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:28:50 | === PROBE start: rtsp://****@127.0.0.1:33341/
+2026-09-11T12:28:50 | probe: 127.0.0.1:33341 reachable
+2026-09-11T12:28:50 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-09-11T12:28:50 | capture attempt transport=tcp wait=1.0s
+2026-09-11T12:28:50 | capture tcp: open FAILED
+2026-09-11T12:28:50 | capture attempt transport=udp wait=1.0s
+2026-09-11T12:28:50 | capture udp: open FAILED
+2026-09-11T12:28:50 | ffmpeg-pipe: starting
+2026-09-11T12:28:50 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:28:50 | event: Exit car track 1 (cross) -> /tmp/tmphso332th/snaps/2026-09-11/Exit_car_12-28-50-209.jpg
+2026-09-11T12:28:54 | === PROBE start: notaurl
+2026-09-11T12:28:54 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-09-11T12:28:57 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-11T12:28:57 | ffmpeg-pipe: starting
+2026-09-11T12:28:57 | capture attempt transport=tcp wait=0.5s
+2026-09-11T12:29:02 | capture tcp: open FAILED
+2026-09-11T12:29:02 | UNIT_TEST_LINE_iter5
+2026-09-11T12:29:02 | MARKER_1789129742959
+2026-09-11T12:29:02 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-09-11T12:29:05 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-11T12:29:07 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-11T12:29:07 | purge: 0 old events removed (retention 7d, cutoff 2026-09-04)
+2026-09-11T12:29:11 | svc: auto-connect — saved camera se connect kar raha hai
+2026-09-11T12:29:11 | svc: loading AI model
+2026-09-11T12:29:13 | svc: AI model loaded
+2026-09-11T12:29:14 | svc: AI self-test OK (yolov8s.pt, 296 ms, 0 dets on blank frame)
+2026-09-11T12:29:14 | open_stream: transport=tcp
+2026-09-11T12:29:19 | open_stream: transport=udp
+2026-09-11T12:29:24 | open_stream: trying FFmpeg engine fallback
+2026-09-11T12:29:24 | ffmpeg-pipe: starting
+2026-09-11T12:29:29 | open_stream: falling back to default backend
+2026-09-11T12:29:34 | svc: source opened codec=unknown live=True
+2026-09-11T12:29:37 | svc: RTSP DESCRIBE -> 0 timed out
+2026-09-11T12:29:37 | === PROBE start: rtsp://****@127.0.0.1:8554/
+2026-09-11T12:29:37 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:29:37 | probe: DESCRIBE -> 400 RTSP/1.0 400 Bad Request
+2026-09-11T12:29:37 | discover: try /Streaming/Channels/101 -> 400
+2026-09-11T12:29:37 | discover: try /cam/realmonitor?channel=1&subtype=0 -> 400
+2026-09-11T12:29:37 | discover: try /stream1 -> 400
+2026-09-11T12:29:37 | discover: try /h264Preview_01_main -> 400
+2026-09-11T12:29:37 | discover: try /media/video1 -> 400
+2026-09-11T12:29:37 | discover: try /live/ch00_0 -> 400
+2026-09-11T12:29:37 | discover: try /h264/ch1/main/av_stream -> 400
+2026-09-11T12:29:37 | discover: try /onvif1 -> 400
+2026-09-11T12:29:37 | discover: try /live -> 200
+2026-09-11T12:29:37 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:29:37 | capture attempt transport=tcp wait=10.0s
+2026-09-11T12:29:40 | capture tcp: OK first frame 640x360 in 0.0s
+2026-09-11T12:29:51 | svc: loading AI model
+2026-09-11T12:29:52 | svc: AI model loaded
+2026-09-11T12:29:52 | svc: AI self-test OK (yolov8s.pt, 304 ms, 0 dets on blank frame)
+2026-09-11T12:29:52 | open_stream: transport=tcp
+2026-09-11T12:29:56 | open_stream tcp: OK first frame in 0.0s
+2026-09-11T12:29:56 | svc: source opened codec=h264 live=True
+2026-09-11T12:29:56 | svc: streaming started
+2026-09-11T12:30:00 | svc: loading AI model
+2026-09-11T12:30:00 | svc: AI model loaded
+2026-09-11T12:30:01 | svc: AI self-test OK (yolov8s.pt, 309 ms, 0 dets on blank frame)
+2026-09-11T12:30:01 | open_stream: transport=tcp
+2026-09-11T12:30:01 | open_stream: transport=udp
+2026-09-11T12:30:01 | open_stream: trying FFmpeg engine fallback
+2026-09-11T12:30:01 | ffmpeg-pipe: starting
+2026-09-11T12:30:01 | open_stream: falling back to default backend
+2026-09-11T12:30:01 | svc: source opened codec=unknown live=True
+2026-09-11T12:30:01 | svc: RTSP DESCRIBE -> 400 RTSP/1.0 400 Bad Request
+2026-09-11T12:30:01 | discover: try /Streaming/Channels/101 -> 400
+2026-09-11T12:30:01 | discover: try /cam/realmonitor?channel=1&subtype=0 -> 400
+2026-09-11T12:30:01 | discover: try /stream1 -> 400
+2026-09-11T12:30:01 | discover: try /h264Preview_01_main -> 400
+2026-09-11T12:30:01 | discover: try /media/video1 -> 400
+2026-09-11T12:30:01 | discover: try /live/ch00_0 -> 400
+2026-09-11T12:30:01 | discover: try /h264/ch1/main/av_stream -> 400
+2026-09-11T12:30:01 | discover: try /onvif1 -> 400
+2026-09-11T12:30:01 | discover: try /live -> 200
+2026-09-11T12:30:01 | svc: stream path auto-detected via common-path: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:30:01 | open_stream: transport=tcp
+2026-09-11T12:30:04 | open_stream tcp: OK first frame in 0.0s
+2026-09-11T12:30:04 | svc: source opened codec=h264 live=True
+2026-09-11T12:30:04 | svc: streaming started
+2026-09-11T12:30:30 | svc: loading AI model
+2026-09-11T12:30:30 | svc: AI model loaded
+2026-09-11T12:30:31 | svc: AI self-test OK (yolov8s.pt, 298 ms, 0 dets on blank frame)
+2026-09-11T12:30:31 | open_stream: transport=tcp
+2026-09-11T12:31:35 | === PROBE start: rtsp://****@127.0.0.1:46575/
+2026-09-11T12:31:35 | probe: 127.0.0.1:46575 reachable
+2026-09-11T12:31:35 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-09-11T12:31:35 | discover: try /Streaming/Channels/101 -> 200
+2026-09-11T12:31:35 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:46575/Streaming/Channels/101
+2026-09-11T12:31:35 | capture attempt transport=tcp wait=1.0s
+2026-09-11T12:31:35 | capture tcp: open FAILED
+2026-09-11T12:31:35 | capture attempt transport=udp wait=1.0s
+2026-09-11T12:31:35 | capture udp: open FAILED
+2026-09-11T12:31:35 | ffmpeg-pipe: starting
+2026-09-11T12:31:35 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:31:35 | === PROBE start: rtsp://****@127.0.0.1:46575/
+2026-09-11T12:31:35 | probe: 127.0.0.1:46575 reachable
+2026-09-11T12:31:35 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-09-11T12:31:35 | capture attempt transport=tcp wait=1.0s
+2026-09-11T12:31:35 | capture tcp: open FAILED
+2026-09-11T12:31:35 | capture attempt transport=udp wait=1.0s
+2026-09-11T12:31:35 | capture udp: open FAILED
+2026-09-11T12:31:35 | ffmpeg-pipe: starting
+2026-09-11T12:31:35 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:31:36 | event: Exit car track 1 (cross) -> /tmp/tmpgo_d1klf/snaps/2026-09-11/Exit_car_12-31-36-012.jpg
+2026-09-11T12:31:38 | === PROBE start: notaurl
+2026-09-11T12:31:38 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-09-11T12:31:41 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-11T12:31:41 | ffmpeg-pipe: starting
+2026-09-11T12:31:41 | capture attempt transport=tcp wait=0.5s
+2026-09-11T12:31:46 | capture tcp: open FAILED
+2026-09-11T12:31:46 | UNIT_TEST_LINE_iter5
+2026-09-11T12:31:46 | MARKER_1789129906331
+2026-09-11T12:31:46 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-09-11T12:31:49 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-09-11T12:32:31 | === PROBE start: rtsp://****@127.0.0.1:8554/
+2026-09-11T12:32:31 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:32:31 | probe: DESCRIBE -> 400 RTSP/1.0 400 Bad Request
+2026-09-11T12:32:31 | discover: try /Streaming/Channels/101 -> 400
+2026-09-11T12:32:31 | discover: try /cam/realmonitor?channel=1&subtype=0 -> 400
+2026-09-11T12:32:31 | discover: try /stream1 -> 400
+2026-09-11T12:32:31 | discover: try /h264Preview_01_main -> 400
+2026-09-11T12:32:31 | discover: try /media/video1 -> 400
+2026-09-11T12:32:31 | discover: try /live/ch00_0 -> 400
+2026-09-11T12:32:31 | discover: try /h264/ch1/main/av_stream -> 400
+2026-09-11T12:32:31 | discover: try /onvif1 -> 400
+2026-09-11T12:32:31 | discover: try /live -> 200
+2026-09-11T12:32:31 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:32:31 | capture attempt transport=tcp wait=10.0s
+2026-09-11T12:32:34 | capture tcp: OK first frame 640x360 in 0.0s
+2026-09-11T12:32:34 | === PROBE start: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:32:34 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:32:34 | probe: DESCRIBE -> 200 RTSP/1.0 200 OK
+2026-09-11T12:32:34 | capture attempt transport=tcp wait=10.0s
+2026-09-11T12:32:37 | capture tcp: OK first frame 640x360 in 0.0s
+2026-09-11T12:32:37 | === PROBE start: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:32:37 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:32:37 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-09-11T12:32:37 | capture attempt transport=tcp wait=10.0s
+2026-09-11T12:32:37 | capture tcp: open FAILED
+2026-09-11T12:32:37 | capture attempt transport=udp wait=10.0s
+2026-09-11T12:32:37 | capture udp: open FAILED
+2026-09-11T12:32:37 | ffmpeg-pipe: starting
+2026-09-11T12:32:37 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:32:37 | svc: loading AI model
+2026-09-11T12:32:37 | svc: AI model loaded
+2026-09-11T12:32:38 | svc: AI self-test OK (yolov8s.pt, 301 ms, 0 dets on blank frame)
+2026-09-11T12:32:38 | svc: loading AI model
+2026-09-11T12:32:38 | svc: AI model loaded
+2026-09-11T12:32:39 | svc: AI self-test OK (yolov8s.pt, 316 ms, 0 dets on blank frame)
+2026-09-11T12:32:39 | open_stream: transport=tcp
+2026-09-11T12:33:03 | svc: loading AI model
+2026-09-11T12:33:03 | svc: AI model loaded
+2026-09-11T12:33:03 | svc: AI self-test OK (yolov8s.pt, 312 ms, 0 dets on blank frame)
+2026-09-11T12:33:03 | open_stream: transport=tcp
+2026-09-11T12:33:03 | open_stream: transport=udp
+2026-09-11T12:33:03 | open_stream: trying FFmpeg engine fallback
+2026-09-11T12:33:03 | ffmpeg-pipe: starting
+2026-09-11T12:33:03 | open_stream: falling back to default backend
+2026-09-11T12:33:03 | svc: source opened codec=unknown live=True
+2026-09-11T12:33:03 | svc: RTSP DESCRIBE -> 400 RTSP/1.0 400 Bad Request
+2026-09-11T12:33:03 | discover: try /Streaming/Channels/101 -> 400
+2026-09-11T12:33:03 | discover: try /cam/realmonitor?channel=1&subtype=0 -> 400
+2026-09-11T12:33:03 | discover: try /stream1 -> 400
+2026-09-11T12:33:03 | discover: try /h264Preview_01_main -> 400
+2026-09-11T12:33:03 | discover: try /media/video1 -> 400
+2026-09-11T12:33:03 | discover: try /live/ch00_0 -> 400
+2026-09-11T12:33:03 | discover: try /h264/ch1/main/av_stream -> 400
+2026-09-11T12:33:03 | discover: try /onvif1 -> 400
+2026-09-11T12:33:03 | discover: try /live -> 200
+2026-09-11T12:33:03 | svc: stream path auto-detected via common-path: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:33:03 | open_stream: transport=tcp
+2026-09-11T12:33:07 | open_stream tcp: OK first frame in 0.0s
+2026-09-11T12:33:07 | svc: source opened codec=h264 live=True
+2026-09-11T12:33:07 | svc: streaming started
+2026-09-11T12:33:51 | === PROBE start: rtsp://****@127.0.0.1:8554/
+2026-09-11T12:33:51 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:33:51 | probe: DESCRIBE -> 400 RTSP/1.0 400 Bad Request
+2026-09-11T12:33:51 | discover: try /Streaming/Channels/101 -> 400
+2026-09-11T12:33:51 | discover: try /cam/realmonitor?channel=1&subtype=0 -> 400
+2026-09-11T12:33:51 | discover: try /stream1 -> 400
+2026-09-11T12:33:51 | discover: try /h264Preview_01_main -> 400
+2026-09-11T12:33:51 | discover: try /media/video1 -> 400
+2026-09-11T12:33:51 | discover: try /live/ch00_0 -> 400
+2026-09-11T12:33:51 | discover: try /h264/ch1/main/av_stream -> 400
+2026-09-11T12:33:51 | discover: try /onvif1 -> 400
+2026-09-11T12:33:51 | discover: try /live -> 200
+2026-09-11T12:33:51 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:33:51 | capture attempt transport=tcp wait=10.0s
+2026-09-11T12:33:54 | capture tcp: OK first frame 640x360 in 0.0s
+2026-09-11T12:33:54 | === PROBE start: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:33:54 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:33:54 | probe: DESCRIBE -> 200 RTSP/1.0 200 OK
+2026-09-11T12:33:54 | capture attempt transport=tcp wait=10.0s
+2026-09-11T12:33:57 | capture tcp: OK first frame 640x360 in 0.0s
+2026-09-11T12:33:57 | === PROBE start: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:33:57 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:33:57 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-09-11T12:33:57 | capture attempt transport=tcp wait=10.0s
+2026-09-11T12:33:57 | capture tcp: open FAILED
+2026-09-11T12:33:57 | capture attempt transport=udp wait=10.0s
+2026-09-11T12:33:57 | capture udp: open FAILED
+2026-09-11T12:33:57 | ffmpeg-pipe: starting
+2026-09-11T12:33:57 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:33:57 | svc: loading AI model
+2026-09-11T12:33:57 | svc: AI model loaded
+2026-09-11T12:33:58 | svc: AI self-test OK (yolov8s.pt, 311 ms, 0 dets on blank frame)
+2026-09-11T12:33:58 | open_stream: transport=tcp
+2026-09-11T12:33:58 | open_stream: transport=udp
+2026-09-11T12:33:58 | open_stream: trying FFmpeg engine fallback
+2026-09-11T12:33:58 | ffmpeg-pipe: starting
+2026-09-11T12:33:58 | open_stream: falling back to default backend
+2026-09-11T12:33:58 | svc: source opened codec=unknown live=True
+2026-09-11T12:33:58 | svc: RTSP DESCRIBE -> 400 RTSP/1.0 400 Bad Request
+2026-09-11T12:33:58 | discover: try /Streaming/Channels/101 -> 400
+2026-09-11T12:33:58 | discover: try /cam/realmonitor?channel=1&subtype=0 -> 400
+2026-09-11T12:33:58 | discover: try /stream1 -> 400
+2026-09-11T12:33:58 | discover: try /h264Preview_01_main -> 400
+2026-09-11T12:33:58 | discover: try /media/video1 -> 400
+2026-09-11T12:33:58 | discover: try /live/ch00_0 -> 400
+2026-09-11T12:33:58 | discover: try /h264/ch1/main/av_stream -> 400
+2026-09-11T12:33:58 | discover: try /onvif1 -> 400
+2026-09-11T12:33:58 | discover: try /live -> 200
+2026-09-11T12:33:58 | svc: stream path auto-detected via common-path: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:33:58 | open_stream: transport=tcp
+2026-09-11T12:34:01 | open_stream tcp: opened but no frames in 12s
+2026-09-11T12:34:01 | svc: loading AI model
+2026-09-11T12:34:01 | svc: AI model loaded
+2026-09-11T12:34:02 | svc: AI self-test OK (yolov8s.pt, 315 ms, 0 dets on blank frame)
+2026-09-11T12:34:02 | open_stream: transport=tcp
+2026-09-11T12:34:25 | === PROBE start: rtsp://****@127.0.0.1:8554/
+2026-09-11T12:34:25 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:34:25 | probe: DESCRIBE -> 400 RTSP/1.0 400 Bad Request
+2026-09-11T12:34:25 | discover: try /Streaming/Channels/101 -> 400
+2026-09-11T12:34:25 | discover: try /cam/realmonitor?channel=1&subtype=0 -> 400
+2026-09-11T12:34:25 | discover: try /stream1 -> 400
+2026-09-11T12:34:25 | discover: try /h264Preview_01_main -> 400
+2026-09-11T12:34:25 | discover: try /media/video1 -> 400
+2026-09-11T12:34:25 | discover: try /live/ch00_0 -> 400
+2026-09-11T12:34:25 | discover: try /h264/ch1/main/av_stream -> 400
+2026-09-11T12:34:25 | discover: try /onvif1 -> 400
+2026-09-11T12:34:25 | discover: try /live -> 200
+2026-09-11T12:34:25 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:34:25 | capture attempt transport=tcp wait=10.0s
+2026-09-11T12:34:28 | capture tcp: OK first frame 640x360 in 0.0s
+2026-09-11T12:34:28 | === PROBE start: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:34:28 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:34:28 | probe: DESCRIBE -> 200 RTSP/1.0 200 OK
+2026-09-11T12:34:28 | capture attempt transport=tcp wait=10.0s
+2026-09-11T12:34:31 | capture tcp: OK first frame 640x360 in 0.0s
+2026-09-11T12:34:31 | === PROBE start: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:34:31 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:34:31 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-09-11T12:34:31 | capture attempt transport=tcp wait=10.0s
+2026-09-11T12:34:31 | capture tcp: open FAILED
+2026-09-11T12:34:31 | capture attempt transport=udp wait=10.0s
+2026-09-11T12:34:31 | capture udp: open FAILED
+2026-09-11T12:34:31 | ffmpeg-pipe: starting
+2026-09-11T12:34:31 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T12:34:31 | svc: loading AI model
+2026-09-11T12:34:31 | svc: AI model loaded
+2026-09-11T12:34:32 | svc: AI self-test OK (yolov8s.pt, 305 ms, 0 dets on blank frame)
+2026-09-11T12:34:32 | open_stream: transport=tcp
+2026-09-11T12:34:32 | open_stream: transport=udp
+2026-09-11T12:34:32 | open_stream: trying FFmpeg engine fallback
+2026-09-11T12:34:32 | ffmpeg-pipe: starting
+2026-09-11T12:34:32 | open_stream: falling back to default backend
+2026-09-11T12:34:32 | svc: source opened codec=unknown live=True
+2026-09-11T12:34:32 | svc: RTSP DESCRIBE -> 400 RTSP/1.0 400 Bad Request
+2026-09-11T12:34:32 | discover: try /Streaming/Channels/101 -> 400
+2026-09-11T12:34:32 | discover: try /cam/realmonitor?channel=1&subtype=0 -> 400
+2026-09-11T12:34:32 | discover: try /stream1 -> 400
+2026-09-11T12:34:32 | discover: try /h264Preview_01_main -> 400
+2026-09-11T12:34:32 | discover: try /media/video1 -> 400
+2026-09-11T12:34:32 | discover: try /live/ch00_0 -> 400
+2026-09-11T12:34:32 | discover: try /h264/ch1/main/av_stream -> 400
+2026-09-11T12:34:32 | discover: try /onvif1 -> 400
+2026-09-11T12:34:32 | discover: try /live -> 200
+2026-09-11T12:34:32 | svc: stream path auto-detected via common-path: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:34:32 | open_stream: transport=tcp
+2026-09-11T12:34:35 | open_stream tcp: OK first frame in 0.0s
+2026-09-11T12:34:35 | svc: source opened codec=h264 live=True
+2026-09-11T12:34:35 | svc: streaming started
+2026-09-11T12:34:36 | svc: loading AI model
+2026-09-11T12:34:36 | svc: AI model loaded
+2026-09-11T12:34:37 | svc: AI self-test OK (yolov8s.pt, 319 ms, 0 dets on blank frame)
+2026-09-11T12:34:37 | open_stream: transport=tcp
+2026-09-11T12:34:47 | svc: loading AI model
+2026-09-11T12:34:47 | svc: AI model loaded
+2026-09-11T12:34:47 | svc: AI self-test OK (yolov8s.pt, 299 ms, 0 dets on blank frame)
+2026-09-11T12:34:47 | open_stream: transport=tcp
+2026-09-11T12:34:52 | open_stream: transport=udp
+2026-09-11T12:34:57 | open_stream: trying FFmpeg engine fallback
+2026-09-11T12:34:57 | ffmpeg-pipe: starting
+2026-09-11T12:35:02 | open_stream: falling back to default backend
+2026-09-11T12:35:07 | svc: source opened codec=unknown live=True
+2026-09-11T12:35:17 | svc: auto-connect — saved camera se connect kar raha hai
+2026-09-11T12:35:17 | svc: loading AI model
+2026-09-11T12:35:17 | svc: AI model loaded
+2026-09-11T12:35:17 | svc: AI self-test OK (yolov8s.pt, 300 ms, 0 dets on blank frame)
+2026-09-11T12:35:17 | open_stream: transport=tcp
+2026-09-11T12:35:22 | open_stream: transport=udp
+2026-09-11T12:35:27 | open_stream: trying FFmpeg engine fallback
+2026-09-11T12:35:27 | ffmpeg-pipe: starting
+2026-09-11T12:35:32 | open_stream: falling back to default backend
+2026-09-11T12:35:37 | svc: source opened codec=unknown live=True
+2026-09-11T12:35:47 | === PROBE start: rtsp://****@127.0.0.1:8554/
+2026-09-11T12:35:47 | probe: 127.0.0.1:8554 reachable
+2026-09-11T12:35:47 | probe: DESCRIBE -> 400 RTSP/1.0 400 Bad Request
+2026-09-11T12:35:47 | discover: try /Streaming/Channels/101 -> 400
+2026-09-11T12:35:47 | discover: try /cam/realmonitor?channel=1&subtype=0 -> 400
+2026-09-11T12:35:47 | discover: try /stream1 -> 400
+2026-09-11T12:35:47 | discover: try /h264Preview_01_main -> 400
+2026-09-11T12:35:47 | discover: try /media/video1 -> 400
+2026-09-11T12:35:47 | discover: try /live/ch00_0 -> 400
+2026-09-11T12:35:47 | discover: try /h264/ch1/main/av_stream -> 400
+2026-09-11T12:35:47 | discover: try /onvif1 -> 400
+2026-09-11T12:35:47 | discover: try /live -> 200
+2026-09-11T12:35:47 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:8554/live
+2026-09-11T12:35:47 | capture attempt transport=tcp wait=10.0s
+2026-09-11T12:35:50 | capture tcp: OK first frame 640x360 in 0.0s
+2026-09-11T12:35:57 | svc: loading AI model
+2026-09-11T12:35:57 | svc: AI model loaded
+2026-09-11T12:35:57 | svc: AI self-test OK (yolov8s.pt, 302 ms, 0 dets on blank frame)
+2026-09-11T12:35:57 | open_stream: transport=tcp
+2026-09-11T12:36:01 | open_stream tcp: OK first frame in 0.0s
+2026-09-11T12:36:01 | svc: source opened codec=h264 live=True
+2026-09-11T12:36:01 | svc: streaming started
+2026-09-11T12:36:44 | svc: loading AI model
+2026-09-11T12:36:44 | svc: AI model loaded
+2026-09-11T12:36:45 | svc: AI self-test OK (yolov8s.pt, 297 ms, 0 dets on blank frame)
+2026-09-11T12:36:45 | open_stream: transport=tcp

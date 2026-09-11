@@ -369,13 +369,14 @@ def probe_rtsp(url, wait=10.0):
     # RTSP handshake: tells apart wrong password (401) from wrong stream path (404) in ms
     code, first = rtsp_describe(fixed)
     clog(f"probe: DESCRIBE -> {code} {first}")
+    auth_failed = False
     if code == 200:
         steps.append(("RTSP handshake", True, "Camera ne username/password aur stream path accept kiya (200 OK)"))
     elif code == 401:
+        auth_failed = True
         steps.append(("RTSP handshake", False,
-                      "Username/password galat — camera ne reject kiya (401 Unauthorized). "
-                      "Camera ke web page par yahi user/password se login karke check karein."))
-        return False, steps, fixed
+                      "Camera ne 401 Unauthorized diya — username/password galat lag raha hai. "
+                      "Fir bhi FFmpeg se video try kar rahe hain..."))
     elif code:
         steps.append(("RTSP handshake", False,
                       f"Camera par ye stream path nahi hai ({first.strip()}) — camera ka asli stream path chahiye"))
@@ -413,6 +414,12 @@ def probe_rtsp(url, wait=10.0):
     steps.append(("Video stream (FFmpeg engine)", ok, detail))
     if ok:
         return True, steps, fixed
+    if auth_failed:
+        steps.append(("Hint", False,
+                      "Camera ne 401 diya aur video bhi nahi mila — username/password galat hai. Camera ke web page "
+                      "par yahi user/password se login karke check karein (kuch cameras me RTSP ka alag "
+                      "'ONVIF/RTSP user' hota hai)."))
+        return False, steps, fixed
     steps.append(("Hint", False,
                   "Camera network par hai par video nahi mila — zyada tar username/password "
                   "ya stream path (stream1 vs stream2) galat hota hai. Yahi URL VLC me "

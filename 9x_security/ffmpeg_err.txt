@@ -1922,3 +1922,85 @@ Error opening input files: Connection timed out
 [in#0 @ 0x25f0d960] Error opening input: Connection timed out
 Error opening input file rtsp://u:p@192.0.2.1:554/s.
 Error opening input files: Connection timed out
+[rtsp @ 0x20351bc0] method DESCRIBE failed: 401 Unauthorized
+[in#0 @ 0x20351960] Error opening input: Server returned 401 Unauthorized (authorization failed)
+Error opening input file rtsp://admin:wrong@127.0.0.1:8554/live.
+Error opening input files: Server returned 401 Unauthorized (authorization failed)
+[in#0 @ 0x1eb5f960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:40155/.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0x13d5d960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:wrong@127.0.0.1:40155/.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0x163c7960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:36757/Streaming/Channels/101.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0x24565960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:wrong@127.0.0.1:36757/.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0x39006960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:48909/Streaming/Channels/101.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0x3c475960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:wrong@127.0.0.1:48909/.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0x37a06960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:46791/Streaming/Channels/101.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0x3da92960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:wrong@127.0.0.1:46791/.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0xfe84960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:51869/Streaming/Channels/101.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0x1e0bd960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:wrong@127.0.0.1:51869/.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0x385bf960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:33341/Streaming/Channels/101.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0x25716960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:wrong@127.0.0.1:33341/.
+Error opening input files: Invalid data found when processing input
+[tcp @ 0x42170740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x4216d960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[in#0 @ 0x1d9dd960] Error opening input: Server returned 400 Bad Request
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:8554/.
+Error opening input files: Server returned 400 Bad Request
+[in#0 @ 0x37f3f960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:46575/Streaming/Channels/101.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0x10fa1960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:wrong@127.0.0.1:46575/.
+Error opening input files: Invalid data found when processing input
+[rtsp @ 0x17bd2bc0] method DESCRIBE failed: 401 Unauthorized
+[in#0 @ 0x17bd2960] Error opening input: Server returned 401 Unauthorized (authorization failed)
+Error opening input file rtsp://admin:wrong@127.0.0.1:8554/live.
+Error opening input files: Server returned 401 Unauthorized (authorization failed)
+[in#0 @ 0x1b570960] Error opening input: Server returned 400 Bad Request
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:8554/.
+Error opening input files: Server returned 400 Bad Request
+[rtsp @ 0x1679dbc0] method DESCRIBE failed: 401 Unauthorized
+[in#0 @ 0x1679d960] Error opening input: Server returned 401 Unauthorized (authorization failed)
+Error opening input file rtsp://admin:wrong@127.0.0.1:8554/live.
+Error opening input files: Server returned 401 Unauthorized (authorization failed)
+[in#0 @ 0x31c61960] Error opening input: Server returned 400 Bad Request
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:8554/.
+Error opening input files: Server returned 400 Bad Request
+[rtsp @ 0x23200bc0] method DESCRIBE failed: 401 Unauthorized
+[in#0 @ 0x23200960] Error opening input: Server returned 401 Unauthorized (authorization failed)
+Error opening input file rtsp://admin:wrong@127.0.0.1:8554/live.
+Error opening input files: Server returned 401 Unauthorized (authorization failed)
+[in#0 @ 0x1d1d9960] Error opening input: Server returned 400 Bad Request
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:8554/.
+Error opening input files: Server returned 400 Bad Request
+[tcp @ 0x1ee62740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x1ee5f960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0xe8b4740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0xe8b1960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out

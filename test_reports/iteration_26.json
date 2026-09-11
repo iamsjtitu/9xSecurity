@@ -1,0 +1,25 @@
+{
+  "summary": "Iteration 26: Verified the RTSP Digest single-connection fix. All 40 backend unit tests pass (test_rtsp_discover.py, test_net_scan.py, test_engine.py, test_iter5_diagnostics.py) — including the new test_describe_reuses_connection_for_digest_nonce. New iter26 API E2E suite (5/5 pass) against running mediamtx v1.11.3 on 127.0.0.1:8554 confirms: (a) rtsp_describe returns 200 for /live, 401 for wrong password, 400 for root; (b) POST /api/camera/test with the root URL auto-detects /live, RTSP handshake step is false (400) but Stream path auto-detect and Video stream (TCP) are true; (c) POST /api/camera/test with /live gives RTSP handshake ok true; (d) wrong-password test returns ok false, hint mentions 401/password, video attempts still run; (e) POST /api/camera/connect with root URL results in state.connected=true and state.rtsp_url auto-fixed to end with /live, and GET /api/frame returns a JPEG. Playwright UI test: login admin/9xsecurity, force-change form handled with Temp123456, typed root URL into rtsp-url-input, clicked camera-test-btn -> test-result-modal shows Stream path auto-detect ✔ and Video stream (TCP) ✔, URL input auto-updated to .../live, video canvas showed LIVE frames with status 'Connected — live monitoring chalu hai'. Restored admin password back to 9xsecurity via POST /api/settings and disconnected/reset the stored URL to a safe placeholder. mediamtx and the testsrc publisher were left running as instructed.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/tests_iter26_api.py",
+    "/app/9x_security/test_rtsp_discover.py",
+    "/app/9x_security/test_engine.py",
+    "/app/9x_security/test_net_scan.py",
+    "/app/9x_security/test_iter5_diagnostics.py"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Frame endpoint is /api/frame (returns raw JPEG); /api/frame.jpg does not exist — the review-request hint was ambiguous. Consider adding an alias /api/frame.jpg for MJPEG-style URL patterns if needed by any HTML img tag callers.",
+    "Modal (test-result-modal) intercepts pointer events, so any UI test that opens it must explicitly click a Close/Band button before pressing camera-connect-btn. Not a functional bug but a testability note."
+  ],
+  "updated_files": ["/app/9x_security/tests_iter26_api.py"],
+  "success_rate": {"backend": "100% (40 unit + 5 iter26 api)", "frontend": "100%"},
+  "test_credentials": "admin / 9xsecurity (restored after test). mediamtx: admin / Admin@123, path 'live'.",
+  "seed_data_creation": "None. mediamtx+testsrc publisher already running on :8554 and left running.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "mediamtx is at /tmp/mediamtx with config /tmp/mtx.yml, running on 127.0.0.1:8554 with Digest auth admin/Admin@123 and path 'live'; a ffmpeg testsrc publisher feeds it. Do not stop them. Admin password was reset to 9xsecurity — must_change_password flips back to true, so any future UI test needs to handle the force-change screen (testids: force-new-password, force-confirm-password, force-change-btn). Frame endpoint is /api/frame (JPEG bytes).",
+  "rca of the issue": "Original bug: rtsp_discover.rtsp_describe issued the initial DESCRIBE and the Digest-authenticated retry on two different TCP connections, so the second nonce validation failed on servers that bind nonces to a connection (mediamtx, real cameras). Fix in rtsp_discover._rtsp_exchange reuses the same socket for challenge+auth-retry and only reconnects if the server closed after 401; also passes algorithm=MD5 when advertised. discover_stream_url now walks all vendor paths before reporting 'auth', and engine.probe_rtsp continues to attempt TCP/UDP/FFmpeg video after a 401 (FFmpeg handles auth itself), only surfacing a password hint when everything fails. All three fixes verified end-to-end against a real Digest RTSP server."
+}

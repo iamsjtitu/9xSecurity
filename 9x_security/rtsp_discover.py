@@ -107,51 +107,66 @@ def has_stream_path(url):
     return path not in ("", "/")
 
 
-def _digest(user, pw, realm, nonce, method, uri, qop=None, cnonce="9x9x9x9x", nc="00000001"):
+def _digest(user, pw, realm, nonce, method, uri, qop=None, algorithm="", cnonce="9x9x9x9x", nc="00000001"):
     ha1 = hashlib.md5(f"{user}:{realm}:{pw}".encode()).hexdigest()
     ha2 = hashlib.md5(f"{method}:{uri}".encode()).hexdigest()
+    alg = f', algorithm={algorithm}' if algorithm else ""
     if qop:
         resp = hashlib.md5(f"{ha1}:{nonce}:{nc}:{cnonce}:{qop}:{ha2}".encode()).hexdigest()
         return (f'Digest username="{user}", realm="{realm}", nonce="{nonce}", uri="{uri}", '
-                f'response="{resp}", qop={qop}, nc={nc}, cnonce="{cnonce}"')
+                f'response="{resp}", qop={qop}, nc={nc}, cnonce="{cnonce}"{alg}')
     resp = hashlib.md5(f"{ha1}:{nonce}:{ha2}".encode()).hexdigest()
-    return f'Digest username="{user}", realm="{realm}", nonce="{nonce}", uri="{uri}", response="{resp}"'
+    return f'Digest username="{user}", realm="{realm}", nonce="{nonce}", uri="{uri}", response="{resp}"{alg}'
 
 
-def _rtsp_request(host, port, uri, auth=None, cseq=1, timeout=3.0):
-    """One DESCRIBE round-trip. -> (status_code, headers_text)."""
+def _rtsp_exchange(sock, uri, auth=None, cseq=1):
+    """One DESCRIBE round-trip on an already open socket. -> (status_code, headers_text)."""
     req = (f"DESCRIBE {uri} RTSP/1.0\r\nCSeq: {cseq}\r\nUser-Agent: 9xSecurity\r\n"
            f"Accept: application/sdp\r\n" + (f"Authorization: {auth}\r\n" if auth else "") + "\r\n")
-    with socket.create_connection((host, port), timeout=timeout) as s:
-        s.settimeout(timeout)
-        s.sendall(req.encode())
-        data = b""
-        while b"\r\n\r\n" not in data and len(data) < 65536:
-            chunk = s.recv(4096)
-            if not chunk:
-                break
-            data += chunk
+    sock.sendall(req.encode())
+    data = b""
+    while b"\r\n\r\n" not in data and len(data) < 65536:
+        chunk = sock.recv(4096)
+        if not chunk:
+            break
+        data += chunk
     text = data.decode("latin-1", "replace")
     m = re.match(r"RTSP/1\.\d\s+(\d{3})", text)
     return (int(m.group(1)) if m else 0), text
 
 
+def _rtsp_request(host, port, uri, auth=None, cseq=1, timeout=3.0):
+    with socket.create_connection((host, port), timeout=timeout) as s:
+        s.settimeout(timeout)
+        return _rtsp_exchange(s, uri, auth, cseq)
+
+
 def rtsp_describe(url, timeout=3.0):
     """-> (status_code, detail). 200 = stream path OK, 401 = bad user/password,
-    404 = no such path, 0 = no/invalid RTSP answer (socket error text in detail)."""
+    404/400/… = no such path, 0 = no/invalid RTSP answer (socket error text in detail).
+    The challenge and the authenticated retry share ONE connection (cameras/servers bind the
+    nonce to the connection — a second socket gets 401 even with the right password)."""
     host, port, user, pw, path = split_url(url)
     uri = f"rtsp://{host}:{port}{path or '/'}"
     try:
-        code, text = _rtsp_request(host, port, uri, timeout=timeout)
-        if code == 401 and user:
-            m = re.search(r'WWW-Authenticate:\s*Digest\s+([^\r\n]+)', text, re.I)
-            if m:
-                params = dict(re.findall(r'(\w+)="?([^",]*)"?', m.group(1)))
-                qop = "auth" if "auth" in params.get("qop", "") else None
-                auth = _digest(user, pw, params.get("realm", ""), params.get("nonce", ""), "DESCRIBE", uri, qop)
-            else:
-                auth = "Basic " + base64.b64encode(f"{user}:{pw}".encode()).decode()
-            code, text = _rtsp_request(host, port, uri, auth=auth, cseq=2, timeout=timeout)
+        with socket.create_connection((host, port), timeout=timeout) as s:
+            s.settimeout(timeout)
+            code, text = _rtsp_exchange(s, uri)
+            if code == 401 and user:
+                m = re.search(r'WWW-Authenticate:\s*Digest\s+([^\r\n]+)', text, re.I)
+                if m:
+                    params = dict(re.findall(r'(\w+)="?([^",]*)"?', m.group(1)))
+                    qop = "auth" if "auth" in params.get("qop", "") else None
+                    auth = _digest(user, pw, params.get("realm", ""), params.get("nonce", ""), "DESCRIBE", uri, qop,
+                                   params.get("algorithm", ""))
+                else:
+                    auth = "Basic " + base64.b64encode(f"{user}:{pw}".encode()).decode()
+                try:
+                    code, text = _rtsp_exchange(s, uri, auth=auth, cseq=2)
+                except (ConnectionError, socket.timeout, OSError):
+                    code = 0
+                if code == 0:  # server closed the connection after the 401 -> retry on a fresh one
+                    code, text = _rtsp_request(host, port, uri, auth=auth, cseq=2, timeout=timeout)
         return code, text.splitlines()[0] if text else ""
     except Exception as e:
         return 0, str(e)
@@ -208,8 +223,9 @@ def discover_stream_url(url, log=lambda m: None, budget_s=25.0):
         if code == 200:
             return cand, "onvif"
         if code == 401:
-            return "", "auth"
-    # 2) common vendor paths, verified with a real DESCRIBE
+            return cand, "onvif-unverified"  # camera named this URI itself; only our auth check failed
+    # 2) common vendor paths, verified with a real DESCRIBE. 'auth' only when EVERY answer was 401
+    codes = []
     for p in COMMON_PATHS:
         if time.time() - t0 > budget_s:
             log("discover: time budget over")
@@ -220,8 +236,9 @@ def discover_stream_url(url, log=lambda m: None, budget_s=25.0):
         log(f"discover: try {p} -> {code}")
         if code == 200:
             return cand, "common-path"
-        if code == 401:
-            return "", "auth"
         if code == 0:
             break  # camera stopped answering: do not hammer it
+        codes.append(code)
+    if codes and all(c == 401 for c in codes):
+        return "", "auth"
     return "", "none"

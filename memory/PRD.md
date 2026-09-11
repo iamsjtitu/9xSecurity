@@ -846,3 +846,21 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Container has no cameras: real scan returns [] in ~5 s (verified); UI list verified with a mocked scan response;
   FakeCam sweep on 127.0.0 verified brand/auth fingerprinting. WS-Discovery multicast itself only verifiable on the
   user's LAN (Windows firewall normally allows the unicast replies, like ONVIF Device Manager).
+
+## Fixed (update 2026-06 #52) — RTSP Digest handshake used two connections → correct password reported as 'galat' (testing agent iteration_26: ALL PASS vs real mediamtx)
+- USER: '.28 camera still not connecting; other Emergent app (Rice-Mill, raw ffmpeg URL) plays it'. Their agent's notes
+  blamed %40 encoding — DISPROVEN here: OpenCV 4.10/FFmpeg 5.1 and imageio-ffmpeg 7.0.2 both authenticate with
+  Admin%40123 against mediamtx Digest (FFmpeg url-decodes credentials).
+- REAL ROOT CAUSE (found with mediamtx v1.11.3 Digest-only, user admin / Admin@123, path live): rtsp_describe() sent the
+  challenge and the authenticated DESCRIBE on two TCP connections; gortsplib (and many cameras) bind the nonce to the
+  connection → 401 with the right password → Test said 'Username/password galat' and ABORTED before FFmpeg; discovery
+  stopped at the first 401 ('auth').
+- FIX rtsp_discover.py: _rtsp_exchange() on one socket; rtsp_describe keeps the connection for challenge+retry, adds
+  algorithm=MD5 when named, reconnects only if the server closed after 401 (FakeCam does; empty read → fresh socket).
+  discover_stream_url: 'auth' only when EVERY path answered 401; ONVIF URIs returned even when our auth check fails
+  ('onvif-unverified'). engine.probe_rtsp: 401 handshake no longer aborts — TCP/UDP/FFmpeg still run; only when they
+  fail too the final Hint blames the password.
+- Verified: unit 40/40 (new test_describe_reuses_connection_for_digest_nonce); live mediamtx: rtsp_describe /live 200,
+  wrong 401, '/' 400; /api/camera/test root URL → auto-detect /live + 'Video stream (TCP)' ✔; /api/camera/connect root
+  URL → Worker auto-fix → connected=true, streaming started, /api/frame JPEG; UI Test+Connect flows live frames.
+- mediamtx binary + config kept at /tmp/mediamtx, /tmp/mtx.yml (not persistent across container restarts).

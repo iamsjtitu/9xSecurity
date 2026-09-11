@@ -133,8 +133,14 @@ def test_probe_auto_detects_path_and_returns_fixed_url(cam, monkeypatch):
 
 
 def test_probe_reports_wrong_password_clearly(cam):
+    """401 on the handshake must NOT abort (FFmpeg may still authenticate); the final Hint
+    names the password as the cause once video also failed."""
     ok, steps, url = engine.probe_rtsp(f"rtsp://{USER}:wrong@127.0.0.1:{cam.port}/", wait=1.0)
-    assert not ok and steps[-1][0] == "RTSP handshake" and "401" in steps[-1][2]
+    names = [s[0] for s in steps]
+    hs = steps[names.index("RTSP handshake")]
+    assert not ok and hs[1] is False and "401" in hs[2]
+    assert "Video stream (TCP)" in names  # still tried
+    assert steps[-1][0] == "Hint" and "401" in steps[-1][2] and "password" in steps[-1][2]
 
 
 def test_auto_fix_stream_url_for_worker(cam, monkeypatch):
@@ -159,6 +165,35 @@ def test_brand_url_builder():
         u = rd.build_url(b["id"], "1.2.3.4", "admin", "P@ss:1/2", channel=1, stream="main", custom_path="/x")
         assert u.startswith("rtsp://admin:P%40ss%3A1%2F2@1.2.3.4:554/"), u
         assert engine.normalize_rtsp_url(u) == u
+
+
+def test_describe_reuses_connection_for_digest_nonce(cam):
+    """USER (11-09) root cause: challenge + authenticated retry must go over ONE TCP connection —
+    servers bind the nonce to the connection (mediamtx/gortsplib, many cameras). With a fresh
+    socket per request the right password still got 401 -> 'password galat'."""
+    seen = []
+
+    class Sock:
+        def __init__(self): self.n = 0
+        def settimeout(self, t): pass
+        def sendall(self, data): seen.append(data.decode()); self.n += 1
+        def recv(self, n):
+            if self.n == 1:
+                return b'RTSP/1.0 401 Unauthorized\r\nCSeq: 1\r\nWWW-Authenticate: Digest realm="IPCAM", nonce="n1", algorithm="MD5"\r\n\r\n'
+            return b"RTSP/1.0 200 OK\r\nCSeq: 2\r\n\r\n"
+        def __enter__(self): return self
+        def __exit__(self, *a): pass
+
+    conns = []
+    import rtsp_discover as mod
+    orig = mod.socket.create_connection
+    mod.socket.create_connection = lambda *a, **k: conns.append(Sock()) or conns[-1]
+    try:
+        code, _ = rd.rtsp_describe("rtsp://admin:Admin%40123@10.0.0.9:554/live")
+    finally:
+        mod.socket.create_connection = orig
+    assert code == 200 and len(conns) == 1, (code, len(conns))
+    assert 'nonce="n1"' in seen[1] and "algorithm=MD5" in seen[1] and 'username="admin"' in seen[1]
 
 
 def test_with_creds_and_with_path_helpers():

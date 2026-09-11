@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, Wand2 } from 'lucide-react';
+import { X, Wand2, Radar } from 'lucide-react';
 import { api } from '../api';
 
 // Camera URL Builder: pick brand -> IP/user/password/channel/stream -> exact RTSP URL
@@ -26,6 +26,23 @@ export default function UrlBuilder({ initialUrl, onApply, onClose, showToast }) 
   }, [f]);
 
   const brand = brands.find((b) => b.id === f.brand);
+  const [scan, setScan] = useState(null);      // null | 'busy' | {subnets, cameras, seconds, error}
+  const runScan = async () => {
+    setScan('busy');
+    try {
+      const r = await api('/api/camera/scan', { method: 'POST', body: JSON.stringify({ port: f.port || 554 }), timeout: 90000 });
+      setScan(r);
+      if (!r.cameras.length) showToast('Network par koi camera nahi mila — camera on hai aur PC ke saath same network par hai?', 'error');
+    } catch (e) {
+      setScan({ cameras: [], subnets: [], error: e.message });
+      showToast(e.message, 'error');
+    }
+  };
+  const pickCamera = (c) => {
+    setF((s) => ({ ...s, ip: c.ip, port: c.port || s.port, brand: c.brand || (c.onvif ? 'auto' : s.brand) }));
+    showToast(`${c.ip} chuna — ab username/password check karke Test karein`, 'success');
+  };
+  const brandName = (id) => brands.find((b) => b.id === id)?.name?.split(' /')[0] || '';
   const apply = async (test) => {
     if (!preview) { showToast('Camera ka IP address daalein', 'error'); return; }
     setBusy(true);
@@ -42,6 +59,42 @@ export default function UrlBuilder({ initialUrl, onApply, onClose, showToast }) 
         </div>
         <div className="p-5 space-y-4">
           <p className="text-sm text-slate-500">Camera ka brand chunein, IP/password bharein — sahi RTSP URL apne aap ban jayega.</p>
+          <div className="rounded-lg border border-dashed border-[#1f6feb]/40 bg-[#1f6feb]/5 p-3" data-testid="scan-box">
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-sm text-slate-700">
+                <span className="font-semibold">IP nahi pata?</span> Network scan karo — jo camera milega us par click karein.
+              </div>
+              <button type="button" className="btn-ghost whitespace-nowrap" onClick={runScan} disabled={scan === 'busy'} data-testid="url-builder-scan-btn">
+                <Radar size={15} className={scan === 'busy' ? 'animate-spin' : ''} /> {scan === 'busy' ? 'Scan ho raha hai…' : 'Network scan karo'}
+              </button>
+            </div>
+            {scan === 'busy' && <p className="text-xs text-slate-500 mt-2" data-testid="scan-progress">ONVIF discovery + port {f.port || 554} sweep chal raha hai (5–10 sec)…</p>}
+            {scan && scan !== 'busy' && (
+              <div className="mt-2" data-testid="scan-result">
+                <div className="text-xs text-slate-500 mb-1.5" data-testid="scan-summary">
+                  {scan.cameras.length} camera mile · subnet {scan.subnets?.map((s) => `${s}.x`).join(', ') || '-'} · {scan.seconds}s
+                </div>
+                <ul className="divide-y divide-slate-200 rounded-md border border-slate-200 bg-white max-h-44 overflow-y-auto" data-testid="scan-result-list">
+                  {scan.cameras.map((c) => (
+                    <li key={c.ip}>
+                      <button type="button" onClick={() => pickCamera(c)} data-testid={`scan-item-${c.ip.replace(/\./g, '-')}`}
+                        className="w-full flex items-center justify-between gap-3 px-3 py-2 text-left hover:bg-slate-50 transition-colors">
+                        <div>
+                          <div className="font-mono text-sm text-slate-900">{c.ip}<span className="text-slate-400">:{c.port}</span></div>
+                          <div className="text-xs text-slate-500 truncate max-w-[22rem]">{[c.name, c.hardware].filter(Boolean).join(' · ') || c.server || (c.auth_needed ? 'Password chahiye (401)' : 'RTSP port open')}</div>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {c.brand && <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">{brandName(c.brand) || c.brand}</span>}
+                          {c.onvif && <span className="text-[11px] px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200">ONVIF</span>}
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                  {!scan.cameras.length && <li className="px-3 py-2 text-sm text-slate-500" data-testid="scan-empty">Koi camera nahi mila{scan.error ? ` (${scan.error})` : ''}.</li>}
+                </ul>
+              </div>
+            )}
+          </div>
           <label className="block text-sm text-slate-700">Camera brand
             <select className={`${field} mt-1`} value={f.brand} onChange={(e) => set('brand', e.target.value)} data-testid="url-builder-brand">
               {brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}

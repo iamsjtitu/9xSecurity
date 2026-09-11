@@ -1,0 +1,43 @@
+{
+  "summary": "Iteration 25 - Camera Scan feature (net_scan + POST /api/camera/scan + URL Builder scan-box UI). All backend pytest (14 unit tests) and 5 API tests pass; frontend mocked + real scan flows pass end-to-end including regression on Apply/close. Password restored to 9xsecurity after test.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/test_net_scan.py",
+    "/app/9x_security/test_rtsp_discover.py",
+    "/app/9x_security/tests_iter25_scan_api.py"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "service.py is large (~500+ lines) — camera/scan and camera/build_url could move to a router module for maintainability.",
+    "Console shows many 404s for static assets on '/' route (favicon and similar); low-priority polish item, unrelated to scan feature."
+  ],
+  "updated_files": ["/app/9x_security/tests_iter25_scan_api.py"],
+  "success_rate": {"backend": "100% (19/19 tests)", "frontend": "100% (mocked + real scan flows)"},
+  "test_credentials": "admin / 9xsecurity (must_change_password on first login; used Temp123456 during test then POST /api/settings restored 9xsecurity)",
+  "seed_data_creation": "FakeCam started on ephemeral 127.0.0.1 port inside test only",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Camera Scan verified: POST /api/camera/scan returns {subnets, cameras, seconds}; empty result in container (~5s). Brand 'hipcam' present in GET /api/camera/brands (13 total). UI testids: url-builder-btn, url-builder-scan-btn, scan-progress, scan-result, scan-summary, scan-result-list, scan-empty, scan-item-<ip-with-dashes>, url-builder-ip/brand/preview/apply-btn/close, rtsp-url-input. Password state: 9xsecurity + must_change_password=true (unchanged).",
+  "verified_behaviors": {
+    "backend": [
+      "pytest test_net_scan.py + test_rtsp_discover.py = 14 passed",
+      "POST /api/camera/scan without token -> 401",
+      "POST /api/camera/scan {subnets:['bad']} -> 400 'Subnet aise likhein: 192.168.1'",
+      "POST /api/camera/scan {} -> 200 with subnets as 'a.b.c', cameras=[], seconds<45",
+      "GET /api/camera/brands -> 13 brands including id 'hipcam'",
+      "FakeCam scan on 127.0.0/<port> -> 127.0.0.1 auth_needed=true, realm='IP Camera', brand='hikvision', onvif=false"
+    ],
+    "frontend_mocked": [
+      "2 items rendered; scan-summary shows '2 camera mile · subnet 192.168.1.x · 6.2s'",
+      "scan-item-192-168-1-28 shows badges 'Dahua' + 'ONVIF'; click sets ip=192.168.1.28, brand=dahua, preview contains 192.168.1.28:554/cam/realmonitor?channel=1&subtype=0",
+      "scan-item-192-168-1-105 shows 'Password chahiye (401)'; click sets ip=192.168.1.105, brand stays 'dahua'",
+      "Apply -> rtsp-url-input populated with rtsp://u:p@192.168.1.105:554/... ; url-builder-close closes modal"
+    ],
+    "frontend_real": [
+      "scan-progress appeared during scan",
+      "After ~5s scan-summary shows '0 camera mile · subnet 10.169.18.x, 192.0.2.x · 5.1s' and scan-empty text 'Koi camera nahi mila.' plus expected toast"
+    ]
+  },
+  "rca_of_the_issue": "N/A - no defects found"
+}

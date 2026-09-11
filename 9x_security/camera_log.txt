@@ -4755,3 +4755,175 @@ RuntimeError: no AI in test
 2026-09-11T11:03:30 | svc: AI self-test OK (yolov8s.pt, 370 ms, 0 dets on blank frame)
 2026-09-11T11:03:30 | svc: accurate model too slow here (370 ms > 350) -> yolov8n.pt
 2026-09-11T11:03:31 | svc: AI self-test OK (yolov8n.pt, 247 ms, 0 dets on blank frame)
+2026-09-11T11:19:34 | === PROBE start: rtsp://****@127.0.0.1:38633/
+2026-09-11T11:19:34 | probe: 127.0.0.1:38633 reachable
+2026-09-11T11:19:34 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-09-11T11:19:34 | discover: try /Streaming/Channels/101 -> 200
+2026-09-11T11:19:34 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:38633/Streaming/Channels/101
+2026-09-11T11:19:34 | capture attempt transport=tcp wait=1.0s
+2026-09-11T11:19:34 | capture tcp: open FAILED
+2026-09-11T11:19:34 | capture attempt transport=udp wait=1.0s
+2026-09-11T11:19:34 | capture udp: open FAILED
+2026-09-11T11:19:34 | ffmpeg-pipe: starting
+2026-09-11T11:19:34 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T11:19:34 | === PROBE start: rtsp://****@127.0.0.1:38633/
+2026-09-11T11:19:34 | probe: 127.0.0.1:38633 reachable
+2026-09-11T11:19:34 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-09-11T11:20:01 | === PROBE start: rtsp://****@127.0.0.1:41117/
+2026-09-11T11:20:01 | probe: 127.0.0.1:41117 reachable
+2026-09-11T11:20:01 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-09-11T11:20:01 | discover: try /Streaming/Channels/101 -> 200
+2026-09-11T11:20:01 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:41117/Streaming/Channels/101
+2026-09-11T11:20:01 | capture attempt transport=tcp wait=1.0s
+2026-09-11T11:20:01 | capture tcp: open FAILED
+2026-09-11T11:20:01 | capture attempt transport=udp wait=1.0s
+2026-09-11T11:20:01 | capture udp: open FAILED
+2026-09-11T11:20:01 | ffmpeg-pipe: starting
+2026-09-11T11:20:01 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T11:20:01 | === PROBE start: rtsp://****@127.0.0.1:41117/
+2026-09-11T11:20:01 | probe: 127.0.0.1:41117 reachable
+2026-09-11T11:20:01 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-09-11T11:20:05 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-09-11T11:20:05 | purge: 0 old events removed (retention 7d, cutoff 2026-09-04)
+2026-09-11T11:20:09 | svc: auto-connect — saved camera se connect kar raha hai
+2026-09-11T11:20:09 | svc: loading AI model
+2026-09-11T11:20:11 | svc: AI model loaded
+2026-09-11T11:20:13 | svc: AI self-test OK (yolov8s.pt, 339 ms, 0 dets on blank frame)
+2026-09-11T11:20:13 | open_stream: transport=tcp
+2026-09-11T11:20:19 | open_stream: transport=udp
+2026-09-11T11:20:24 | open_stream: trying FFmpeg engine fallback
+2026-09-11T11:20:24 | ffmpeg-pipe: starting
+2026-09-11T11:20:29 | open_stream: falling back to default backend
+2026-09-11T11:20:34 | svc: source opened codec=unknown live=True
+2026-09-11T11:20:35 | scan: subnets=['10.169.18', '192.0.2'] port=554
+2026-09-11T11:20:37 | svc: RTSP DESCRIBE -> 0 timed out
+2026-09-11T11:20:38 | scan: onvif devices=0
+2026-09-11T11:20:40 | scan: rtsp port open on 0 host(s)
+2026-09-11T11:20:49 | svc: loading AI model
+2026-09-11T11:20:49 | svc: AI model loaded
+2026-09-11T11:20:51 | svc: AI self-test OK (yolov8s.pt, 554 ms, 0 dets on blank frame)
+2026-09-11T11:20:51 | svc: accurate model too slow here (554 ms > 350) -> yolov8n.pt
+2026-09-11T11:20:51 | svc: AI self-test OK (yolov8n.pt, 376 ms, 0 dets on blank frame)
+2026-09-11T11:20:51 | open_stream: transport=tcp
+2026-09-11T11:20:56 | open_stream: transport=udp
+2026-09-11T11:21:01 | open_stream: trying FFmpeg engine fallback
+2026-09-11T11:21:01 | ffmpeg-pipe: starting
+2026-09-11T11:21:06 | open_stream: falling back to default backend
+2026-09-11T11:21:11 | svc: source opened codec=unknown live=True
+2026-09-11T11:21:29 | svc: loading AI model
+2026-09-11T11:21:29 | svc: AI model loaded
+2026-09-11T11:21:30 | svc: AI self-test OK (yolov8s.pt, 359 ms, 0 dets on blank frame)
+2026-09-11T11:21:30 | svc: accurate model too slow here (359 ms > 350) -> yolov8n.pt
+2026-09-11T11:21:31 | svc: AI self-test OK (yolov8n.pt, 181 ms, 0 dets on blank frame)
+2026-09-11T11:21:31 | open_stream: transport=tcp
+2026-09-11T11:21:36 | open_stream: transport=udp
+2026-09-11T11:21:41 | open_stream: trying FFmpeg engine fallback
+2026-09-11T11:21:41 | ffmpeg-pipe: starting
+2026-09-11T11:21:46 | open_stream: falling back to default backend
+2026-09-11T11:21:51 | svc: source opened codec=unknown live=True
+2026-09-11T11:22:09 | svc: loading AI model
+2026-09-11T11:22:09 | svc: AI model loaded
+2026-09-11T11:22:10 | svc: AI self-test OK (yolov8s.pt, 306 ms, 0 dets on blank frame)
+2026-09-11T11:22:10 | open_stream: transport=tcp
+2026-09-11T11:22:15 | open_stream: transport=udp
+2026-09-11T11:22:20 | open_stream: trying FFmpeg engine fallback
+2026-09-11T11:22:20 | ffmpeg-pipe: starting
+2026-09-11T11:22:22 | === PROBE start: rtsp://****@127.0.0.1:58571/
+2026-09-11T11:22:22 | probe: 127.0.0.1:58571 reachable
+2026-09-11T11:22:22 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-09-11T11:22:22 | discover: try /Streaming/Channels/101 -> 200
+2026-09-11T11:22:22 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:58571/Streaming/Channels/101
+2026-09-11T11:22:22 | capture attempt transport=tcp wait=1.0s
+2026-09-11T11:22:22 | capture tcp: open FAILED
+2026-09-11T11:22:22 | capture attempt transport=udp wait=1.0s
+2026-09-11T11:22:22 | capture udp: open FAILED
+2026-09-11T11:22:22 | ffmpeg-pipe: starting
+2026-09-11T11:22:22 | ffmpeg-pipe: no frames (process exited)
+2026-09-11T11:22:22 | === PROBE start: rtsp://****@127.0.0.1:58571/
+2026-09-11T11:22:22 | probe: 127.0.0.1:58571 reachable
+2026-09-11T11:22:22 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-09-11T11:22:25 | open_stream: falling back to default backend
+2026-09-11T11:22:30 | svc: source opened codec=unknown live=True
+2026-09-11T11:22:49 | svc: loading AI model
+2026-09-11T11:22:49 | svc: AI model loaded
+2026-09-11T11:22:50 | scan: subnets=['10.169.18', '192.0.2'] port=554
+2026-09-11T11:22:50 | svc: AI self-test OK (yolov8s.pt, 426 ms, 0 dets on blank frame)
+2026-09-11T11:22:50 | svc: accurate model too slow here (426 ms > 350) -> yolov8n.pt
+2026-09-11T11:22:51 | svc: AI self-test OK (yolov8n.pt, 198 ms, 0 dets on blank frame)
+2026-09-11T11:22:51 | open_stream: transport=tcp
+2026-09-11T11:22:53 | scan: onvif devices=0
+2026-09-11T11:22:55 | scan: rtsp port open on 0 host(s)
+2026-09-11T11:22:56 | open_stream: transport=udp
+2026-09-11T11:23:01 | open_stream: trying FFmpeg engine fallback
+2026-09-11T11:23:01 | ffmpeg-pipe: starting
+2026-09-11T11:23:06 | open_stream: falling back to default backend
+2026-09-11T11:23:11 | svc: source opened codec=unknown live=True
+2026-09-11T11:23:20 | scan: subnets=['127.0.0'] port=45677
+2026-09-11T11:23:22 | scan: onvif devices=0
+2026-09-11T11:23:22 | scan: rtsp port open on 1 host(s)
+2026-09-11T11:23:29 | svc: loading AI model
+2026-09-11T11:23:29 | svc: AI model loaded
+2026-09-11T11:23:30 | svc: AI self-test OK (yolov8s.pt, 318 ms, 0 dets on blank frame)
+2026-09-11T11:23:30 | open_stream: transport=tcp
+2026-09-11T11:23:35 | open_stream: transport=udp
+2026-09-11T11:23:40 | open_stream: trying FFmpeg engine fallback
+2026-09-11T11:23:40 | ffmpeg-pipe: starting
+2026-09-11T11:23:45 | open_stream: falling back to default backend
+2026-09-11T11:23:50 | svc: source opened codec=unknown live=True
+2026-09-11T11:24:09 | svc: loading AI model
+2026-09-11T11:24:09 | svc: AI model loaded
+2026-09-11T11:24:10 | svc: AI self-test OK (yolov8s.pt, 326 ms, 0 dets on blank frame)
+2026-09-11T11:24:10 | open_stream: transport=tcp
+2026-09-11T11:24:15 | open_stream: transport=udp
+2026-09-11T11:24:20 | open_stream: trying FFmpeg engine fallback
+2026-09-11T11:24:20 | ffmpeg-pipe: starting
+2026-09-11T11:24:25 | open_stream: falling back to default backend
+2026-09-11T11:24:30 | svc: source opened codec=unknown live=True
+2026-09-11T11:24:49 | svc: loading AI model
+2026-09-11T11:24:49 | svc: AI model loaded
+2026-09-11T11:24:50 | svc: AI self-test OK (yolov8s.pt, 323 ms, 0 dets on blank frame)
+2026-09-11T11:24:50 | open_stream: transport=tcp
+2026-09-11T11:24:55 | open_stream: transport=udp
+2026-09-11T11:25:00 | open_stream: trying FFmpeg engine fallback
+2026-09-11T11:25:00 | ffmpeg-pipe: starting
+2026-09-11T11:25:05 | open_stream: falling back to default backend
+2026-09-11T11:25:10 | svc: source opened codec=unknown live=True
+2026-09-11T11:25:29 | svc: auto-connect — saved camera se connect kar raha hai
+2026-09-11T11:25:29 | svc: loading AI model
+2026-09-11T11:25:29 | svc: AI model loaded
+2026-09-11T11:25:30 | svc: AI self-test OK (yolov8s.pt, 303 ms, 0 dets on blank frame)
+2026-09-11T11:25:30 | open_stream: transport=tcp
+2026-09-11T11:25:35 | open_stream: transport=udp
+2026-09-11T11:25:40 | open_stream: trying FFmpeg engine fallback
+2026-09-11T11:25:40 | ffmpeg-pipe: starting
+2026-09-11T11:25:45 | open_stream: falling back to default backend
+2026-09-11T11:25:50 | svc: source opened codec=unknown live=True
+2026-09-11T11:25:51 | scan: subnets=['10.169.18', '192.0.2'] port=554
+2026-09-11T11:25:54 | scan: onvif devices=0
+2026-09-11T11:25:56 | scan: rtsp port open on 0 host(s)
+2026-09-11T11:26:09 | svc: loading AI model
+2026-09-11T11:26:09 | svc: AI model loaded
+2026-09-11T11:26:10 | svc: AI self-test OK (yolov8s.pt, 311 ms, 0 dets on blank frame)
+2026-09-11T11:26:10 | open_stream: transport=tcp
+2026-09-11T11:26:15 | open_stream: transport=udp
+2026-09-11T11:26:20 | open_stream: trying FFmpeg engine fallback
+2026-09-11T11:26:20 | ffmpeg-pipe: starting
+2026-09-11T11:26:25 | open_stream: falling back to default backend
+2026-09-11T11:26:30 | svc: source opened codec=unknown live=True
+2026-09-11T11:26:49 | svc: loading AI model
+2026-09-11T11:26:49 | svc: AI model loaded
+2026-09-11T11:26:50 | svc: AI self-test OK (yolov8s.pt, 319 ms, 0 dets on blank frame)
+2026-09-11T11:26:50 | open_stream: transport=tcp
+2026-09-11T11:26:55 | open_stream: transport=udp
+2026-09-11T11:27:00 | open_stream: trying FFmpeg engine fallback
+2026-09-11T11:27:00 | ffmpeg-pipe: starting
+2026-09-11T11:27:05 | open_stream: falling back to default backend
+2026-09-11T11:27:10 | svc: source opened codec=unknown live=True
+2026-09-11T11:27:29 | svc: loading AI model
+2026-09-11T11:27:29 | svc: AI model loaded
+2026-09-11T11:27:30 | svc: AI self-test OK (yolov8s.pt, 314 ms, 0 dets on blank frame)
+2026-09-11T11:27:30 | open_stream: transport=tcp
+2026-09-11T11:27:35 | open_stream: transport=udp
+2026-09-11T11:27:40 | open_stream: trying FFmpeg engine fallback
+2026-09-11T11:27:40 | ffmpeg-pipe: starting
+2026-09-11T11:27:45 | open_stream: falling back to default backend

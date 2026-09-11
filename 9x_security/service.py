@@ -549,6 +549,26 @@ def camera_build_url(body: dict, request: Request):
     return {"url": url}
 
 
+@app.post("/api/camera/scan")
+def camera_scan(body: dict, request: Request):
+    """LAN scan: ONVIF WS-Discovery + RTSP port sweep of the PC's /24 subnets (+ saved camera's subnet)."""
+    _check(request)
+    from net_scan import scan_network
+    from rtsp_discover import split_url
+    extra = []
+    try:
+        saved = _cfg().get("rtsp_url", "")
+        if saved:
+            extra.append(split_url(normalize_rtsp_url(saved))[0])
+    except Exception:
+        pass
+    port = int(body.get("port") or 554)
+    subnets = body.get("subnets") or None
+    if subnets and not all(re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}$", str(s)) for s in subnets):
+        raise HTTPException(400, "Subnet aise likhein: 192.168.1")
+    return scan_network(subnets=subnets, port=port, extra_hosts=extra, log=clog)
+
+
 @app.post("/api/camera/test")
 def camera_test(body: dict, request: Request):
     _check(request)

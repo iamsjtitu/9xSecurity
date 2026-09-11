@@ -32,6 +32,7 @@ BRANDS = [
      "note": "Password URL me do baar jata hai — ye normal hai"},
     {"id": "generic", "name": "Zebronics / Generic OEM (live/ch00_0)", "port": 554, "main": "/live/ch00_0",
      "sub": "/live/ch00_1", "note": ""},
+    {"id": "hipcam", "name": "Hipcam / Wansview / cheap WiFi cam (/11)", "port": 554, "main": "/11", "sub": "/12", "note": ""},
     {"id": "axis", "name": "Axis", "port": 554, "main": "/axis-media/media.amp",
      "sub": "/axis-media/media.amp?resolution=640x480", "note": ""},
     {"id": "vivotek", "name": "Vivotek", "port": 554, "main": "/live.sdp", "sub": "/live2.sdp", "note": ""},

@@ -832,3 +832,17 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   and 'Use karo + Test' which also runs the Test flow incl. stream-path auto-detect). Prefills IP/user/password from the
   URL box.
 - Tests: test_rtsp_discover.py 9 (+builder templates), agent tests_iter24_api.py 9, Playwright flows all green.
+
+## Implemented (update 2026-06 #51) — Camera Scan / LAN discovery (testing agent iteration_25: ALL PASS, 19/19 backend + UI flows)
+- net_scan.py: ONVIF WS-Discovery multicast probe on every local interface (parse_probe_match: XAddrs, name/hardware
+  scopes — unit-tested with Hikvision/Dahua ProbeMatch XML), TCP sweep of the PC's /24 subnets + saved-camera subnet
+  (128 threads, 0.6 s), unauthenticated RTSP DESCRIBE fingerprint (Server header / WWW-Authenticate realm) ->
+  guess_brand() -> BRANDS id (realm 'IP Camera…' = Hikvision family, 'Login to …' = Dahua/CP Plus, 'TP-LINK', 'Reolink',
+  'Hipcam RealServer' -> new brand hipcam (/11,/12), 'H264DVR' -> xmeye …). scan_network() ~5-10 s.
+- API POST /api/camera/scan {port?, subnets?} -> {subnets, cameras[{ip, port, rtsp_open, onvif, name, hardware, brand,
+  auth_needed, server, realm}], seconds}; 400 on malformed subnet; auth required.
+- UI (UrlBuilder modal): 'IP nahi pata? Network scan karo' box -> progress -> list of cameras (ip:port, name·hardware /
+  server / 'Password chahiye (401)', brand + ONVIF badges); click fills IP/port/brand and the preview updates.
+- Container has no cameras: real scan returns [] in ~5 s (verified); UI list verified with a mocked scan response;
+  FakeCam sweep on 127.0.0 verified brand/auth fingerprinting. WS-Discovery multicast itself only verifiable on the
+  user's LAN (Windows firewall normally allows the unicast replies, like ONVIF Device Manager).

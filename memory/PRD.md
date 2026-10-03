@@ -877,3 +877,21 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - App.jsx auto-opens the wizard after login when setup_done is false; Settings > Timing card 'Setup Wizard' (open-wizard-btn)
   re-opens it (starts at Line when the camera is connected). Full E2E verified with mediamtx: root URL → auto-detect
   /live → live in ~5 s → line drawn → swap → WhatsApp test (401 with fake key, expected) → skip → finish → setup_done.
+
+## Fixed (update 2026-06 #54) — Tailgating vehicle dropped + login 401 message (testing agent iteration_28: ALL PASS, 91/91 backend + login flows)
+- USER (12-09): 'maine exit kiya WhatsApp aaya, par peeche ek aur car exit hui uska na msg aaya na capture hua'.
+  ROOT CAUSE: engine._duplicate_reason had a pure-timing rule (overlap + now-ts < 2.5s => 'second box/flicker') that
+  fired BEFORE track-identity checks. Every crossing bbox sits ON the gate line, so two DIFFERENT vehicles always
+  overlap there => a car crossing 1-2s behind the first was dropped as a flicker (no event/snapshot/WhatsApp).
+  FIX: removed the timing rule; a crossing is a duplicate ONLY by track identity — (a) earlier track still alive AND
+  its current bbox overlaps the new crossing (two YOLO boxes on one long truck), (b) earlier track aged out right here
+  and a new track re-created at that spot (lost-box IoU>0.3), (c) new track via 'appeared-at-line' BORN inside the
+  aged-out track's last box (checked first, before the overlap gate, since a re-created crossing can fire a few frames
+  after the track moved off the earlier box). New regression test_engine_tailgating_cars_both_counted (2 cars 160px
+  apart => 2 events); live-ish SecurityEngine run produced 2 snapshots + 2 DB rows. Existing one-truck-two-boxes,
+  re-created-track, near-band, and following-vehicles tests still pass.
+- USER (overnight): login screen showed 'Session khatam — dobara login karein' and seemed stuck. FIX api.js: a 401 from
+  /api/login is a wrong credential, not an expired session — now shows the backend detail ('Galat username ya
+  password.') and does NOT fire nx-unauthorized; 401 on other paths still redirects to login. NOTE: if login hangs
+  (spinner / fetch-failed) rather than showing a wrong-password error, the engine is wedged after days — that is the
+  engine-supervisor path (iteration 21); need the exact on-screen message + Diagnostics engine block to fix further.

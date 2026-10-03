@@ -2036,3 +2036,13 @@ Error opening input files: Invalid data found when processing input
 [in#0 @ 0x1a62d960] Error opening input: Invalid data found when processing input
 Error opening input file rtsp://admin:wrong@127.0.0.1:47791/.
 Error opening input files: Invalid data found when processing input
+[tcp @ 0x97b3740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x97b0960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[in#0 @ 0xdf1a960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:45997/Streaming/Channels/101.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0xce83960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:wrong@127.0.0.1:45997/.
+Error opening input files: Invalid data found when processing input

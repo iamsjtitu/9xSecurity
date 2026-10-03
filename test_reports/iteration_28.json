@@ -1,0 +1,22 @@
+{
+  "summary": "Validated the two bug fixes for 9x Security: (A) tailgating de-dup — engine pytest suites pass 55/55 incl. the new test_engine_tailgating_cars_both_counted and the other listed scenario tests; (B) login 401 handling — wrong credential on /api/login surfaces 'Galat username ya password.' instead of session-expiry, correct admin/9xsecurity login returns a token with must_change_password=true, bad X-Auth-Token on /api/state returns 401. Backend regression (service_api/worker_restart/rtsp_discover/net_scan) passes 36/36. Frontend Playwright flow confirmed: wrong-password shows the correct error in [data-testid=login-error] and the login-form remains visible (no bounce); correct login triggers the force-change-form, setting Temp123456 lands on the dashboard app shell; admin password was restored to '9xsecurity' via POST /api/settings and default login verified (HTTP 200).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/test_tracker_false_crossings.py",
+    "/app/9x_security/test_service_api.py"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "api.js login-path 401 branch cleanly separates credential errors from session expiry — good narrow fix.",
+    "engine _duplicate_reason now relies on track identity (alive-track overlap, aged-out lost-box IoU>0.3, or appeared-at-line inside aged-out box) — removes the fragile pure-timing flicker rule that caused the tailgating drop."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (91/91)", "frontend": "100% (login flows)"},
+  "test_credentials": "admin / 9xsecurity (restored to default after test)",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Engine runs on 127.0.0.1:8971 (nohup python service.py). Button testid is 'login-btn' (not 'login-submit'). Force-change-form appears on first login with the default seed password; always restore password via POST /api/settings {new_password:'9xsecurity'} with a fresh token before finishing.",
+  "rca of the issue": "Fix verified end-to-end; tailgating scenario in test_engine_tailgating_cars_both_counted confirms two distinct tracks crossing the same line within <2.5s now both emit events."
+}

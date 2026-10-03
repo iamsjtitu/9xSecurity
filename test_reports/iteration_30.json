@@ -1,0 +1,26 @@
+{
+  "summary": "Iteration 30 — Multi-Camera feature + regression. BACKEND: 13/13 test_cameras.py+test_categories.py; 24/24 test_service_api.py+tests_iter27_wizard_api.py; 40/40 test_engine.py+test_tracker_false_crossings.py+test_capture_fixes.py+test_plate_fmt.py; 9/9 test_wa_groups.py+test_wa_phototest.py. LIVE API: new tests/test_iter30_multicam_api.py 5/5 pass (GET /api/cameras shape; /api/state includes cameras/active_camera_id/gate; add+edit+activate+line-persist+delete flow; MAX_CAMERAS=8 enforced via 400; name/gate trimmed to 40). FRONTEND: dashboard camera-select-row + camera-select (options 'Name — Gate'), camera-gate-badge 'Gate: Main Gate', manage-cameras-btn opens Settings>Cameras tab (settings-tab-cameras active, cameras-tab visible). CamerasTab: camera-card-{cam1,cam2} with camera-name/gate/url/save testids, Save disabled initially and enabled after edit, camera-active-chip-cam1 shown, camera-activate-cam2 switches active (chip moves and toast appears), two-click delete flips label to 'Pakka delete? (dobara dabayein)'. Dropdown change on dashboard switched active and updated rtsp-url-input within ~2s. Final config restored: cam1 Front Camera (Main Gate) active, cam2 Back Camera (Back Gate), 0 TEST_ events.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/tests/test_iter30_multicam_api.py",
+    "/app/test_reports/pytest/iter30_cameras.xml",
+    "/app/test_reports/pytest/iter30_api.xml",
+    "/app/test_reports/pytest/iter30_engine.xml",
+    "/app/test_reports/pytest/iter30_wa.xml",
+    "/app/test_reports/pytest/iter30_live.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Note (not a bug): the problem statement said cam1 URL should be rtsp://u:p@192.0.2.1:554/s but config.json actually had top-level rtsp_url='' at test start, so cam1 shows empty URL. Because sync_cameras() copies top-level into the active camera on every save_config, the active camera's URL always mirrors top-level — this is intentional behavior, just worth noting if any iteration expects cam1 to keep a non-empty URL across saves."
+  ],
+  "updated_files": [
+    "/app/9x_security/tests/test_iter30_multicam_api.py (new)"
+  ],
+  "success_rate": {"backend": "100% (86/86 pytest + 5/5 live API)", "frontend": "100% (all data-testids present, all flows working)"},
+  "test_credentials": "admin / 9xsecurity",
+  "seed_data_creation": "Transient TEST_ cameras added and cleaned up by tests; verified no TEST_ events remain in events.db.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Service runs at 127.0.0.1:8971; wizard modal auto-opens for admin (must_change_password=true) — close via data-testid='wizard-close-btn' before interacting with dashboard elements. All multi-camera data-testids are present and wired to backend. Config file at /app/9x_security/config.json."
+}

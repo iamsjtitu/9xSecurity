@@ -687,7 +687,7 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 
 - P1: Vehicle re-identification to avoid double counting if it lingers on line
 - P1: CSV/Excel export of event log
-- P2: Multi-camera support (separate entry/exit cams)
+- DONE (#52): Multi-camera saved list / one active / Gate Name
 - P2: Plate-based search + email/Telegram alert on entry
 - P2: Auto-delete snapshots older than N days
 
@@ -895,3 +895,38 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   password.') and does NOT fire nx-unauthorized; 401 on other paths still redirects to login. NOTE: if login hangs
   (spinner / fetch-failed) rather than showing a wrong-password error, the engine is wedged after days — that is the
   engine-supervisor path (iteration 21); need the exact on-screen message + Diagnostics engine block to fix further.
+
+## Implemented (update 2026-06 #51) — Person + Two-wheeler categories, per-category timing (testing agent iteration_29: 100%)
+- USER: Person aur Two-wheeler ke alag ON/OFF tick (car/truck/bus ke saath); sirf ticked categories alert dein; Person
+  alert me count+direction+time+photo, Bike alert me direction+time+photo; har category ka alag time window — window ke
+  bahar 'bilkul count hi na ho'.
+- detector.py: COCO person/bicycle/motorcycle + category_of() (person | two_wheeler | vehicle); config.allowed_classes()
+  from toggles enable_person / enable_two_wheeler / vehicle_classes; cat_schedules {vehicle,person,two_wheeler:
+  {enabled,start,end}} + config.category_counts_now() (overnight windows ok).
+- engine.process_frame: category gate BEFORE snapshot/DB/alert (disabled or outside window => no row, no photo, no
+  WhatsApp; camera_log 'crossing ignored: <cat> schedule ke bahar'). PERSON GROUPING (user chose 2.5 s wait): people
+  crossing within PERSON_GROUP_S=2.5 s of each other (same direction) are held and emitted as ONE event with count=N
+  (_queue_person / flush_pending; worker flushes on loop exit). Snapshot shows all persons' boxes.
+- DB events.count column (idempotent ALTER); whatsapp._caption: '👤 Person Entry — 2 persons' / '🏍️ Two-wheeler Exit' /
+  '🚗 Entry - CAR' + Time line (+ 'Gate: X' when set); still no 'Number:' line.
+- API: /api/options accepts enable_person, enable_two_wheeler, cat_schedules (HH:MM validated); /api/state + /api/settings
+  expose them; /api/events rows carry count; last_event has category/count.
+- UI: Detect row toggles class-two-wheeler / class-person; Settings > Timing card category-schedule-card
+  (cat-sch-<cat>-toggle/start/end); events table ×N badge (event-count-<id>); capture toast '×N'.
+- Tests: test_categories.py 8/8 (incl. group window + separate people); stale test_wa_groups assertions fixed.
+
+## Implemented (update 2026-06 #52) — Multiple saved cameras, ONE active (dropdown) + Gate Name (testing agent iteration_30: 100%)
+- USER: cameras list save ho, dropdown se ek active (PC par halka), har camera ka Gate Name; line/zones per-camera (approved).
+- config.py: cameras [{id,name,gate,rtsp_url,rtsp_url_main,line,entry_direction,ignore_zones}] + active_camera_id.
+  Top-level rtsp_url/line/entry_direction/ignore_zones ALWAYS = active camera (existing engine/worker/endpoints
+  unchanged); sync_cameras() in load/save mirrors top-level -> active entry, adopts first camera when active missing,
+  migrates old installs (rtsp_url -> 'Camera 1'/cam1). activate_camera() swaps the sets; gate_name(cfg). MAX 8.
+- service.py: GET/POST /api/cameras (add/edit; editing active URL updates live), POST /api/cameras/{id}/activate
+  (restarts stream if connected/auto-connect; stops with hint when URL empty), DELETE /api/cameras/{id} (active removed
+  -> first remaining; last removed -> rtsp_url cleared). /api/state: cameras, active_camera_id, gate.
+- DB events.gate column; engine stamps gate on every event; WhatsApp caption last line 'Gate: <name>' when set.
+- UI: dashboard CameraSelect (camera-select 'Name — Gate', camera-gate-badge, manage-cameras-btn) above the URL bar;
+  Settings > Cameras tab (CamerasTab.jsx: camera-card-<id> name/gate/url/save/activate/delete(2-click), add form,
+  cameras-empty); events table 'Gate: X' under date (event-gate-<id>), snapshot modal gate, toast meta gate.
+- Tests: test_cameras.py 5/5 + agent tests/test_iter30_multicam_api.py 5/5; full regression green.
+- AWAITING USER (Windows build): real person/bike detection + 2.5 s grouped alert, schedule windows, second camera switch.

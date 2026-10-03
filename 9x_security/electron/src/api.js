@@ -30,8 +30,15 @@ export async function api(path, opts = {}) {
   }
   clearTimeout(timer);
   if (res.status === 401) {
-    // engine restarted (update/reboot) or session expired: tokens live in engine memory.
-    // Go straight back to the login screen instead of 'unauthorized' errors everywhere.
+    // A 401 from the login call itself = wrong username/password: show the real reason and do
+    // NOT fire the session-expired flow (which would bounce the login screen / hide the error).
+    if (path === '/api/login') {
+      let msg = 'Galat username ya password.';
+      try { const d = await res.json(); if (d.detail) msg = typeof d.detail === 'string' ? d.detail : msg; } catch (_) { /* noop */ }
+      throw new Error(msg);
+    }
+    // 401 anywhere else = engine restarted (update/reboot) or session expired: tokens live in
+    // engine memory. Go straight back to the login screen instead of 'unauthorized' errors.
     setToken('');
     window.dispatchEvent(new CustomEvent('nx-unauthorized'));
     throw new Error('Session khatam — dobara login karein');

@@ -6236,3 +6236,146 @@ RuntimeError: no AI in test
 2026-09-11T13:04:43 | capture udp: open FAILED
 2026-09-11T13:04:43 | ffmpeg-pipe: starting
 2026-09-11T13:04:43 | ffmpeg-pipe: no frames (process exited)
+2026-10-03T09:44:54 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-44-54-324.jpg
+2026-10-03T09:44:54 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-44-54-359.jpg
+2026-10-03T09:44:54 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-44-54-373.jpg
+2026-10-03T09:44:54 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-44-54-385.jpg
+2026-10-03T09:44:54 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-44-54-414.jpg
+2026-10-03T09:44:54 | event: Entry truck track 2 (appeared-at-line) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-44-54-425.jpg
+2026-10-03T09:44:54 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_car_09-44-54-517.jpg
+2026-10-03T09:44:54 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_car_09-44-54-528.jpg
+2026-10-03T09:44:54 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-44-54-565.jpg
+2026-10-03T09:44:54 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 1)
+2026-10-03T09:44:54 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-44-54-686.jpg
+2026-10-03T09:45:51 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-45-51-694.jpg
+2026-10-03T09:45:51 | event: Entry truck track 2 (appeared-at-line) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-45-51-707.jpg
+2026-10-03T09:47:00 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-00-509.jpg
+2026-10-03T09:47:00 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-00-544.jpg
+2026-10-03T09:47:00 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-00-560.jpg
+2026-10-03T09:47:00 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-00-571.jpg
+2026-10-03T09:47:00 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-00-598.jpg
+2026-10-03T09:47:00 | crossing ignored: duplicate (track re-created where the last one was lost) of a vehicle counted <20s ago (track 2)
+2026-10-03T09:47:00 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_car_09-47-00-633.jpg
+2026-10-03T09:47:00 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_car_09-47-00-644.jpg
+2026-10-03T09:47:00 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-00-671.jpg
+2026-10-03T09:47:00 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 1)
+2026-10-03T09:47:00 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-00-769.jpg
+2026-10-03T09:47:00 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-00-825.jpg
+2026-10-03T09:47:00 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-00-837.jpg
+2026-10-03T09:47:00 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-00-868.jpg
+2026-10-03T09:47:00 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-00-901.jpg
+2026-10-03T09:47:00 | event: Exit car track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Exit_car_09-47-00-915.jpg
+2026-10-03T09:47:13 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-13-917.jpg
+2026-10-03T09:47:13 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-13-952.jpg
+2026-10-03T09:47:13 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-13-966.jpg
+2026-10-03T09:47:13 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-13-977.jpg
+2026-10-03T09:47:14 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-14-009.jpg
+2026-10-03T09:47:14 | crossing ignored: duplicate (track re-created where the last one was lost) of a vehicle counted <20s ago (track 2)
+2026-10-03T09:47:14 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_car_09-47-14-041.jpg
+2026-10-03T09:47:14 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_car_09-47-14-050.jpg
+2026-10-03T09:47:14 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-14-080.jpg
+2026-10-03T09:47:14 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 1)
+2026-10-03T09:47:14 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-14-175.jpg
+2026-10-03T09:47:14 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-14-242.jpg
+2026-10-03T09:47:14 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-14-258.jpg
+2026-10-03T09:47:14 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-14-290.jpg
+2026-10-03T09:47:14 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_09-47-14-321.jpg
+2026-10-03T09:47:14 | event: Exit car track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Exit_car_09-47-14-336.jpg
+2026-10-03T09:47:23 | event: Exit car track 1 (cross) -> /tmp/tmpb1sk8kry/snaps/2026-10-03/Exit_car_09-47-23-273.jpg
+2026-10-03T09:47:24 | === PROBE start: notaurl
+2026-10-03T09:47:24 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-10-03T09:47:27 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-03T09:47:27 | ffmpeg-pipe: starting
+2026-10-03T09:47:27 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmp09ggiyzq/snaps/2026-10-03') path=/tmp/tmp09ggiyzq/snaps/2026-10-03/Exit_car_09-47-27-453.jpg
+2026-10-03T09:47:28 | svc: loading AI model
+2026-10-03T09:47:28 | svc: AI model loaded
+2026-10-03T09:47:28 | svc: AI self-test OK (yolov8n.pt, 178 ms, 0 dets on blank frame)
+2026-10-03T09:47:28 | svc: source opened codec=hevc live=True
+2026-10-03T09:47:28 | svc: HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein
+2026-10-03T09:47:28 | svc: streaming started
+2026-10-03T09:47:31 | event: Exit bus track 1 (cross) -> /tmp/tmpxepdenpp/snaps/2026-10-03/Exit_bus_09-47-31-915.jpg
+2026-10-03T09:47:39 | event: Entry bus track 1 (cross) -> /tmp/tmpxepdenpp/snaps/2026-10-03/Entry_bus_09-47-39-913.jpg
+2026-10-03T09:48:44 | event: Exit car track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Exit_car_09-48-44-527.jpg
+2026-10-03T09:48:44 | event: Exit car track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Exit_car_09-48-44-541.jpg
+2026-10-03T09:49:24 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-10-03T09:49:24 | purge: 0 old events removed (retention 7d, cutoff 2026-09-26)
+2026-10-03T09:49:28 | svc: auto-connect — saved camera se connect kar raha hai
+2026-10-03T09:49:28 | svc: loading AI model
+2026-10-03T09:49:30 | svc: AI model loaded
+2026-10-03T09:49:32 | svc: AI self-test OK (yolov8s.pt, 484 ms, 0 dets on blank frame)
+2026-10-03T09:49:32 | svc: accurate model too slow here (484 ms > 350) -> yolov8n.pt
+2026-10-03T09:49:32 | svc: AI self-test OK (yolov8n.pt, 246 ms, 0 dets on blank frame)
+2026-10-03T09:49:32 | open_stream: transport=tcp
+2026-10-03T09:49:37 | open_stream: transport=udp
+2026-10-03T09:49:42 | open_stream: trying FFmpeg engine fallback
+2026-10-03T09:49:42 | ffmpeg-pipe: starting
+2026-10-03T09:49:47 | open_stream: falling back to default backend
+2026-10-03T09:49:52 | svc: source opened codec=unknown live=True
+2026-10-03T09:49:55 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-03T09:50:08 | svc: loading AI model
+2026-10-03T09:50:08 | svc: AI model loaded
+2026-10-03T09:50:10 | svc: AI self-test OK (yolov8s.pt, 820 ms, 0 dets on blank frame)
+2026-10-03T09:50:10 | svc: accurate model too slow here (820 ms > 350) -> yolov8n.pt
+2026-10-03T09:50:11 | svc: AI self-test OK (yolov8n.pt, 435 ms, 0 dets on blank frame)
+2026-10-03T09:50:11 | open_stream: transport=tcp
+2026-10-03T09:50:11 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-10-03T09:50:14 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-03T09:50:16 | svc: loading AI model
+2026-10-03T09:50:16 | svc: AI model loaded
+2026-10-03T09:50:17 | svc: AI self-test OK (yolov8s.pt, 571 ms, 0 dets on blank frame)
+2026-10-03T09:50:17 | svc: accurate model too slow here (571 ms > 350) -> yolov8n.pt
+2026-10-03T09:50:18 | svc: AI self-test OK (yolov8n.pt, 272 ms, 0 dets on blank frame)
+2026-10-03T09:50:18 | open_stream: transport=tcp
+2026-10-03T09:50:23 | open_stream: transport=udp
+2026-10-03T09:50:28 | open_stream: trying FFmpeg engine fallback
+2026-10-03T09:50:28 | ffmpeg-pipe: starting
+2026-10-03T09:50:32 | svc: loading AI model
+2026-10-03T09:50:32 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 248, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-10-03T09:50:32 | svc: source opened codec=unknown live=True
+2026-10-03T09:50:32 | svc: streaming started
+2026-10-03T09:50:34 | svc: loading AI model
+2026-10-03T09:50:34 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 248, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-10-03T09:50:34 | svc: source opened codec=unknown live=True
+2026-10-03T09:50:34 | svc: streaming started
+2026-10-03T09:50:36 | === PROBE start: rtsp://****@127.0.0.1:47791/
+2026-10-03T09:50:36 | probe: 127.0.0.1:47791 reachable
+2026-10-03T09:50:36 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-10-03T09:50:36 | discover: try /Streaming/Channels/101 -> 200
+2026-10-03T09:50:36 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:47791/Streaming/Channels/101
+2026-10-03T09:50:36 | capture attempt transport=tcp wait=1.0s
+2026-10-03T09:50:36 | capture tcp: open FAILED
+2026-10-03T09:50:36 | capture attempt transport=udp wait=1.0s
+2026-10-03T09:50:36 | capture udp: open FAILED
+2026-10-03T09:50:36 | ffmpeg-pipe: starting
+2026-10-03T09:50:36 | ffmpeg-pipe: no frames (process exited)
+2026-10-03T09:50:36 | === PROBE start: rtsp://****@127.0.0.1:47791/
+2026-10-03T09:50:36 | probe: 127.0.0.1:47791 reachable
+2026-10-03T09:50:36 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-10-03T09:50:36 | capture attempt transport=tcp wait=1.0s
+2026-10-03T09:50:36 | capture tcp: open FAILED
+2026-10-03T09:50:36 | capture attempt transport=udp wait=1.0s
+2026-10-03T09:50:36 | capture udp: open FAILED
+2026-10-03T09:50:36 | ffmpeg-pipe: starting
+2026-10-03T09:50:36 | ffmpeg-pipe: no frames (process exited)

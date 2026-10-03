@@ -165,6 +165,27 @@ def test_engine_recreated_track_inside_near_band_is_one_event(tmp_path, monkeypa
     _cleanup(events)
 
 
+def test_engine_tailgating_cars_both_counted(tmp_path, monkeypatch):
+    """USER (12-09): 'maine exit kiya, WhatsApp aaya, par peeche ek aur car exit hui uska
+    capture bhi nahi hua'. Two different cars cross the SAME spot < 2 s apart: car1 crosses
+    and keeps moving; car2 follows right behind. Both must count — the old 2.5 s 'flicker'
+    rule dropped car2 because its crossing bbox (always on the gate line) overlapped car1's."""
+    import engine as eng
+    clock = _Clock()
+    monkeypatch.setattr(eng.time, "time", clock)
+    e = _engine(tmp_path, _ScriptDet())
+    script = []
+    for y1 in range(60, 330, 6):
+        frame = [{"bbox": (720, y1 - 40, 840, y1 + 40), "label": "car"}]
+        y2 = y1 - 160  # car2 trails car1 by 160 px; crosses the same line ~2.5 s later
+        if y2 >= 40:
+            frame.append({"bbox": (720, y2 - 40, 840, y2 + 40), "label": "car"})
+        script.append(frame)
+    events = _drive(e, clock, script)
+    assert len(events) == 2, [(ev["direction"], ev["id"]) for ev in events]
+    _cleanup(events)
+
+
 def test_engine_second_box_on_same_truck_is_one_event(tmp_path, monkeypatch):
     import engine as eng
     clock = _Clock()

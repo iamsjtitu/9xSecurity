@@ -35,7 +35,7 @@ export default function CaptureToast({ event, onClose }) {
       )}
       <div className="min-w-0 flex-1">
         <div className={`flex items-center gap-1.5 text-sm font-bold uppercase ${entry ? 'text-emerald-700' : 'text-orange-700'}`} data-testid="capture-toast-title">
-          <Icon size={15} /> {event.direction} — {event.vehicle_type} captured
+          <Icon size={15} /> {event.direction} — {event.vehicle_type}{event.count > 1 ? ` ×${event.count}` : ''} captured
         </div>
         <div className="text-xs text-slate-500 font-mono mt-0.5" data-testid="capture-toast-meta">
           {fmtTime(event.timestamp)}

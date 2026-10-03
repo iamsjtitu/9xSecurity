@@ -6470,3 +6470,121 @@ RuntimeError: no AI in test
 2026-10-03T09:52:21 | capture udp: open FAILED
 2026-10-03T09:52:21 | ffmpeg-pipe: starting
 2026-10-03T09:52:21 | ffmpeg-pipe: no frames (process exited)
+2026-10-03T10:21:00 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-21-00-539.jpg
+2026-10-03T10:21:00 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_motorcycle_10-21-00-602.jpg
+2026-10-03T10:21:00 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-21-00-648.jpg
+2026-10-03T10:21:00 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-21-00-656.jpg
+2026-10-03T10:21:00 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-03T10:21:00 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_car_10-21-00-754.jpg
+2026-10-03T10:21:29 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-21-29-103.jpg
+2026-10-03T10:21:29 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-21-29-113.jpg
+2026-10-03T10:23:39 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-23-39-619.jpg
+2026-10-03T10:23:39 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_motorcycle_10-23-39-656.jpg
+2026-10-03T10:23:39 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-23-39-690.jpg
+2026-10-03T10:23:39 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-23-39-698.jpg
+2026-10-03T10:23:39 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-03T10:23:39 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_car_10-23-39-762.jpg
+2026-10-03T10:39:46 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-39-46-516.jpg
+2026-10-03T10:39:46 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_motorcycle_10-39-46-573.jpg
+2026-10-03T10:39:46 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-39-46-613.jpg
+2026-10-03T10:39:46 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-39-46-645.jpg
+2026-10-03T10:39:46 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-03T10:39:46 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_car_10-39-46-708.jpg
+2026-10-03T10:39:59 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-39-59-002.jpg
+2026-10-03T10:39:59 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_motorcycle_10-39-59-036.jpg
+2026-10-03T10:39:59 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-39-59-078.jpg
+2026-10-03T10:39:59 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-39-59-117.jpg
+2026-10-03T10:39:59 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-39-59-129.jpg
+2026-10-03T10:39:59 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-03T10:39:59 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_car_10-39-59-165.jpg
+2026-10-03T10:42:10 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_car_10-42-10-787.jpg
+2026-10-03T10:42:11 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-42-11-895.jpg
+2026-10-03T10:42:11 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_motorcycle_10-42-11-931.jpg
+2026-10-03T10:42:11 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-42-11-970.jpg
+2026-10-03T10:42:12 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-42-12-010.jpg
+2026-10-03T10:42:12 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-42-12-022.jpg
+2026-10-03T10:42:12 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-03T10:42:12 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_car_10-42-12-058.jpg
+2026-10-03T10:42:12 | event: Exit car track 1 (cross) -> /tmp/tmp9e_6mkxw/snaps/2026-10-03/Exit_car_10-42-12-107.jpg
+2026-10-03T10:42:16 | === PROBE start: notaurl
+2026-10-03T10:42:16 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-10-03T10:42:19 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-03T10:42:19 | ffmpeg-pipe: starting
+2026-10-03T10:42:19 | event: Entry truck track 1 (cross) -> /tmp/tmp9e_6mkxw/snaps/2026-10-03/Entry_truck_10-42-19-930.jpg
+2026-10-03T10:42:19 | event: Entry truck track 1 (cross) -> /tmp/tmp9e_6mkxw/snaps/2026-10-03/Entry_truck_10-42-19-971.jpg
+2026-10-03T10:42:19 | event: Entry truck track 2 (cross) -> /tmp/tmp9e_6mkxw/snaps/2026-10-03/Entry_truck_10-42-19-984.jpg
+2026-10-03T10:42:19 | event: Entry truck track 3 (cross) -> /tmp/tmp9e_6mkxw/snaps/2026-10-03/Entry_truck_10-42-19-995.jpg
+2026-10-03T10:42:20 | event: Entry truck track 1 (cross) -> /tmp/tmp9e_6mkxw/snaps/2026-10-03/Entry_truck_10-42-20-033.jpg
+2026-10-03T10:42:20 | crossing ignored: duplicate (track re-created where the last one was lost) of a vehicle counted <20s ago (track 2)
+2026-10-03T10:42:20 | event: Entry car track 1 (cross) -> /tmp/tmp9e_6mkxw/snaps/2026-10-03/Entry_car_10-42-20-075.jpg
+2026-10-03T10:42:20 | event: Entry car track 2 (cross) -> /tmp/tmp9e_6mkxw/snaps/2026-10-03/Entry_car_10-42-20-085.jpg
+2026-10-03T10:42:20 | event: Entry truck track 2 (cross) -> /tmp/tmp9e_6mkxw/snaps/2026-10-03/Entry_truck_10-42-20-117.jpg
+2026-10-03T10:42:20 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 1)
+2026-10-03T10:42:20 | event: Entry truck track 1 (cross) -> /tmp/tmp9e_6mkxw/snaps/2026-10-03/Entry_truck_10-42-20-225.jpg
+2026-10-03T10:42:21 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpstwmszjm/snaps/2026-10-03') path=/tmp/tmpstwmszjm/snaps/2026-10-03/Exit_car_10-42-21-317.jpg
+2026-10-03T10:42:21 | event: Exit car track 1 (cross) -> /tmp/tmp9e_6mkxw/snaps/2026-10-03/Exit_car_10-42-21-803.jpg
+2026-10-03T10:42:21 | plate OCR: track 1 Exit queued (2 crops)
+2026-10-03T10:42:22 | plate OCR: track 1 event 1 -> 'KA01MJ2022' (fake, 2 crops)
+2026-10-03T10:42:22 | plate manual: event 57 -> 'MH12AB1234'
+2026-10-03T10:42:22 | plate manual: event 57 -> '(cleared)'
+2026-10-03T10:43:44 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-10-03T10:43:47 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-03T10:43:47 | svc: loading AI model
+2026-10-03T10:43:47 | svc: AI model loaded
+2026-10-03T10:43:48 | svc: AI self-test OK (yolov8s.pt, 476 ms, 0 dets on blank frame)
+2026-10-03T10:43:48 | svc: accurate model too slow here (476 ms > 350) -> yolov8n.pt
+2026-10-03T10:43:49 | svc: AI self-test OK (yolov8n.pt, 264 ms, 0 dets on blank frame)
+2026-10-03T10:43:49 | open_stream: transport=tcp
+2026-10-03T10:43:54 | open_stream: transport=udp
+2026-10-03T10:43:59 | open_stream: trying FFmpeg engine fallback
+2026-10-03T10:43:59 | ffmpeg-pipe: starting
+2026-10-03T10:44:03 | svc: loading AI model
+2026-10-03T10:44:03 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 250, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-10-03T10:44:03 | svc: source opened codec=unknown live=True
+2026-10-03T10:44:03 | svc: streaming started
+2026-10-03T10:44:05 | svc: loading AI model
+2026-10-03T10:44:05 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 250, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-10-03T10:44:05 | svc: source opened codec=unknown live=True
+2026-10-03T10:44:05 | svc: streaming started
+2026-10-03T10:44:07 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_10-44-07-544.jpg
+2026-10-03T10:44:07 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_10-44-07-557.jpg
+2026-10-03T10:44:07 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_10-44-07-591.jpg
+2026-10-03T10:44:07 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_truck_10-44-07-628.jpg
+2026-10-03T10:44:07 | event: Exit car track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Exit_car_10-44-07-642.jpg
+2026-10-03T10:44:07 | svc: loading AI model
+2026-10-03T10:44:09 | svc: AI model loaded
+2026-10-03T10:44:10 | svc: AI self-test OK (yolov8n.pt, 253 ms, 0 dets on blank frame)
+2026-10-03T10:44:10 | svc: source opened codec=hevc live=True
+2026-10-03T10:44:10 | svc: HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein
+2026-10-03T10:44:10 | svc: streaming started
+2026-10-03T10:44:14 | event: Exit bus track 1 (cross) -> /tmp/tmpgzt7iccv/snaps/2026-10-03/Exit_bus_10-44-14-539.jpg
+2026-10-03T10:44:22 | event: Entry bus track 1 (cross) -> /tmp/tmpgzt7iccv/snaps/2026-10-03/Entry_bus_10-44-22-339.jpg
+2026-10-03T10:44:24 | svc: loading AI model
+2026-10-03T10:44:24 | svc: AI model loaded
+2026-10-03T10:44:25 | svc: AI self-test OK (yolov8s.pt, 536 ms, 0 dets on blank frame)
+2026-10-03T10:44:25 | svc: accurate model too slow here (536 ms > 350) -> yolov8n.pt
+2026-10-03T10:44:25 | svc: AI self-test OK (yolov8n.pt, 261 ms, 0 dets on blank frame)
+2026-10-03T10:46:38 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-10-03T10:46:38 | purge: 0 old events removed (retention 7d, cutoff 2026-09-26)

@@ -288,6 +288,37 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
               </p>
             </div>
 
+            <div className="rounded-lg border border-slate-200 p-4 space-y-3" data-testid="category-schedule-card">
+              <div className="text-sm font-medium text-slate-800">Category ke hisaab se time (alag-alag)</div>
+              <p className="text-xs text-slate-400 -mt-1">
+                Har category ka apna window. ON + window ke bahar = us category ki Entry/Exit <b>bilkul count nahi</b> hogi
+                (na photo, na alert). jaise: Person sirf raat 6–6, Two-wheeler 8–8, Vehicle poora din.
+              </p>
+              {[['vehicle', '🚗 Vehicle (car/truck/bus)'], ['person', '👤 Person'], ['two_wheeler', '🏍️ Two-wheeler']].map(([cat, label]) => {
+                const sch = (s.cat_schedules || {})[cat] || { enabled: false, start: '00:00', end: '23:59' };
+                const setSch = (patch) => {
+                  const next = { ...(s.cat_schedules || {}), [cat]: { ...sch, ...patch } };
+                  setS((x) => ({ ...x, cat_schedules: next }));
+                  api('/api/options', { method: 'POST', body: JSON.stringify({ cat_schedules: next }) }).catch((e) => showToast(e.message, 'error'));
+                };
+                return (
+                  <div key={cat} className="flex flex-wrap items-center gap-3 text-sm text-slate-700 border-t border-slate-100 pt-2 first:border-t-0 first:pt-0">
+                    <label className="flex items-center gap-2 cursor-pointer w-52 shrink-0">
+                      <input type="checkbox" className="h-4 w-4 accent-[#1f6feb]" checked={!!sch.enabled}
+                        onChange={(e) => setSch({ enabled: e.target.checked })} data-testid={`cat-sch-${cat}-toggle`} />
+                      {label}
+                    </label>
+                    <span className="text-slate-400">Se</span>
+                    <input type="time" className="input !w-auto" value={sch.start || '00:00'} disabled={!sch.enabled}
+                      onChange={(e) => setSch({ start: e.target.value })} data-testid={`cat-sch-${cat}-start`} />
+                    <span className="text-slate-400">Tak</span>
+                    <input type="time" className="input !w-auto" value={sch.end || '23:59'} disabled={!sch.enabled}
+                      onChange={(e) => setSch({ end: e.target.value })} data-testid={`cat-sch-${cat}-end`} />
+                  </div>
+                );
+              })}
+            </div>
+
             <div className="rounded-lg border border-slate-200 p-4 space-y-3">
               <label className="flex items-center gap-2.5 text-sm font-medium text-slate-800 cursor-pointer">
                 <input type="checkbox" className="h-4 w-4 accent-[#1f6feb]" checked={s.auto_delete_enabled !== false}

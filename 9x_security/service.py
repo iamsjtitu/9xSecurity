@@ -88,6 +88,8 @@ class Worker:
             "id": ev.get("id"),
             "direction": ev.get("direction"),
             "vehicle_type": ev.get("vehicle_type"),
+            "category": ev.get("category", "vehicle"),
+            "count": int(ev.get("count") or 1),
             "plate": ev.get("plate", ""),
             "plate_status": ev.get("plate_status", ""),
             "plate_source": ev.get("plate_source", ""),
@@ -127,7 +129,7 @@ class Worker:
             self.engine.cfg = cfg
             try:
                 self.engine.notifier.update(cfg)
-                self.engine.detector.set_allowed(cfg.get("vehicle_classes") or ["car", "truck", "bus"])
+                self.engine.detector.set_allowed(config.allowed_classes(cfg))
                 self.engine.detector.conf = float(cfg.get("confidence", 0.4))
             except Exception:
                 pass
@@ -361,6 +363,11 @@ class Worker:
                     self._jpeg = buf.tobytes()
             time.sleep(0.01)
         cap.release()
+        if self.engine is not None:
+            try:
+                self.engine.flush_pending(force=True)  # pending person group must not be lost
+            except Exception:
+                pass
         if gen == self._gen and (self.status.startswith("Connected") or self.status.startswith("Stream")):
             self.status = "Disconnected."
 
@@ -425,6 +432,9 @@ def state(request: Request):
         "wa_enabled": bool(cfg.get("wa_enabled")),
         "enable_plate": bool(cfg.get("enable_plate")),
         "vehicle_classes": cfg.get("vehicle_classes", ["car", "truck", "bus"]),
+        "enable_person": bool(cfg.get("enable_person")),
+        "enable_two_wheeler": bool(cfg.get("enable_two_wheeler")),
+        "cat_schedules": cfg.get("cat_schedules", config.DEFAULTS["cat_schedules"]),
         "detector_model": cfg.get("detector_model", "auto"),
         "confidence": cfg.get("confidence", 0.4),
         "ai_model": worker.engine.detector.model_name if worker.engine else None,
@@ -671,8 +681,23 @@ def set_options(body: dict, request: Request):
     if "enable_plate" in body:
         cfg["enable_plate"] = bool(body["enable_plate"])
     if "vehicle_classes" in body:
-        vc = [v for v in body["vehicle_classes"] if v in ("car", "truck", "bus")]
-        cfg["vehicle_classes"] = vc or ["car", "truck", "bus"]
+        cfg["vehicle_classes"] = [v for v in body["vehicle_classes"] if v in ("car", "truck", "bus")]
+    if "enable_person" in body:
+        cfg["enable_person"] = bool(body["enable_person"])
+    if "enable_two_wheeler" in body:
+        cfg["enable_two_wheeler"] = bool(body["enable_two_wheeler"])
+    if isinstance(body.get("cat_schedules"), dict):
+        sch = dict(cfg.get("cat_schedules") or config.DEFAULTS["cat_schedules"])
+        for cat in config.CATEGORIES:
+            c = body["cat_schedules"].get(cat)
+            if isinstance(c, dict):
+                cur = dict(sch.get(cat) or {})
+                cur["enabled"] = bool(c.get("enabled", cur.get("enabled", False)))
+                for k in ("start", "end"):
+                    if re.match(r"^\d{1,2}:\d{2}$", str(c.get(k, ""))):
+                        cur[k] = c[k]
+                sch[cat] = cur
+        cfg["cat_schedules"] = sch
     if body.get("detector_model") in ("auto", "fast", "accurate"):
         cfg["detector_model"] = body["detector_model"]
     if "confidence" in body:
@@ -774,6 +799,9 @@ def get_settings(request: Request):
     out["retention_days"] = int(cfg.get("retention_days", 7) or 7)
     out["auto_lock_minutes"] = int(cfg.get("auto_lock_minutes", 10) or 0)
     out["auto_connect"] = bool(cfg.get("auto_connect", True))
+    out["cat_schedules"] = cfg.get("cat_schedules", config.DEFAULTS["cat_schedules"])
+    out["enable_person"] = bool(cfg.get("enable_person"))
+    out["enable_two_wheeler"] = bool(cfg.get("enable_two_wheeler"))
     out["gh_token_builtin"] = bool(updater.DEFAULT_TOKEN)
     return out
 

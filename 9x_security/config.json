@@ -1,11 +1,6 @@
 {
-  "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
-  "line": {
-    "x1": 0.1,
-    "y1": 0.2,
-    "x2": 0.9,
-    "y2": 0.8
-  },
+  "rtsp_url": "",
+  "line": null,
   "entry_direction": "pos",
   "confidence": 0.4,
   "detector_model": "auto",
@@ -16,6 +11,25 @@
     "truck",
     "bus"
   ],
+  "enable_person": false,
+  "enable_two_wheeler": false,
+  "cat_schedules": {
+    "vehicle": {
+      "enabled": false,
+      "start": "00:00",
+      "end": "23:59"
+    },
+    "person": {
+      "enabled": false,
+      "start": "18:00",
+      "end": "06:00"
+    },
+    "two_wheeler": {
+      "enabled": false,
+      "start": "00:00",
+      "end": "23:59"
+    }
+  },
   "wa_enabled": false,
   "wa_base_url": "https://wa.9x.design",
   "wa_api_key": "",
@@ -32,13 +46,13 @@
   "retention_days": 7,
   "ignore_zones": [],
   "auto_connect": true,
-  "setup_done": true,
+  "setup_done": false,
   "auto_lock_minutes": 10,
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "f455750890c983aa207dd633a71037d0",
-  "auth_hash": "5ebce87fd63217c4e05ae78a523937a73118682d710446555e3def3c0b7ce088",
+  "auth_salt": "064db6ea61ed3a7b8d2e25af426fc830",
+  "auth_hash": "20523ca0451bfe9e0ea44f1d4aeb9838c37cc77eef37b39cd2fbc0e49fd4ef0c",
   "github_repo": "",
   "gh_token": "TEST_GH"
 }

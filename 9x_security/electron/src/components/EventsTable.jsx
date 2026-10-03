@@ -208,7 +208,10 @@ export default function EventsTable({ connected, showToast }) {
                   )}
                 </td>
                 <td className="px-5 py-2 text-slate-700">{r.date} {fmt12(r.time)}</td>
-                <td className="px-5 py-2 font-semibold uppercase text-slate-800">{r.vehicle_type}</td>
+                <td className="px-5 py-2 font-semibold uppercase text-slate-800">
+                  {r.vehicle_type}
+                  {r.count > 1 && <span className="ml-1.5 rounded bg-slate-200 px-1.5 py-0.5 text-[11px] text-slate-700" data-testid={`event-count-${r.id}`}>×{r.count}</span>}
+                </td>
                 <td className="px-5 py-2"><Badge d={r.direction} /></td>
                 <td className="px-5 py-2">
                   <PlateBadge plate={r.plate} status={r.plate_status} source={r.plate_source} testid={`event-plate-${r.id}`} />

@@ -63,6 +63,14 @@ DEFAULTS = {
     "detect_frame_skip": 2,          # run detector every N frames (CPU friendly)
     "enable_plate": True,
     "vehicle_classes": ["car", "truck", "bus"],
+    "enable_person": False,        # tick => person Entry/Exit alerts
+    "enable_two_wheeler": False,   # tick => motorcycle/bicycle Entry/Exit alerts
+    # Per-category time window. enabled + outside window => that category is NOT counted at all.
+    "cat_schedules": {
+        "vehicle": {"enabled": False, "start": "00:00", "end": "23:59"},
+        "person": {"enabled": False, "start": "00:00", "end": "23:59"},
+        "two_wheeler": {"enabled": False, "start": "00:00", "end": "23:59"},
+    },
     # ---- WhatsApp (wa.9x.design) alerts ----
     "wa_enabled": False,
     "wa_base_url": "https://wa.9x.design",
@@ -136,6 +144,27 @@ def in_time_window(start, end, now=None):
     if s < e:
         return s <= cur < e
     return cur >= s or cur < e
+
+
+CATEGORIES = ("vehicle", "person", "two_wheeler")
+
+
+def allowed_classes(cfg):
+    """COCO labels the detector should look for, from the category toggles."""
+    allowed = [c for c in (cfg.get("vehicle_classes") or []) if c in ("car", "truck", "bus")]
+    if cfg.get("enable_two_wheeler"):
+        allowed += ["motorcycle", "bicycle"]
+    if cfg.get("enable_person"):
+        allowed += ["person"]
+    return allowed
+
+
+def category_counts_now(cfg, category, now=None):
+    """Per-category schedule gate: True => this category may be counted right now."""
+    sch = (cfg.get("cat_schedules") or {}).get(category) or {}
+    if not sch.get("enabled"):
+        return True
+    return in_time_window(sch.get("start", "00:00"), sch.get("end", "23:59"), now=now)
 
 
 def ensure_std_streams():

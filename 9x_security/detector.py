@@ -3,8 +3,19 @@ import os
 
 import config
 
-# COCO class ids that represent vehicles.
-COCO_VEHICLES = {2: "car", 3: "motorcycle", 5: "bus", 7: "truck"}
+# COCO class ids we detect, grouped into user-facing categories.
+COCO_CLASSES = {0: "person", 1: "bicycle", 2: "car", 3: "motorcycle", 5: "bus", 7: "truck"}
+COCO_VEHICLES = COCO_CLASSES  # backwards-compat alias
+CATEGORY = {
+    "person": "person",
+    "bicycle": "two_wheeler", "motorcycle": "two_wheeler",
+    "car": "vehicle", "truck": "vehicle", "bus": "vehicle",
+}
+
+
+def category_of(label):
+    """person / two_wheeler / vehicle for a detected label."""
+    return CATEGORY.get(label, "vehicle")
 
 MODEL_FILES = {"fast": "yolov8n.pt", "accurate": "yolov8s.pt"}
 
@@ -53,7 +64,7 @@ class VehicleDetector:
 
     def detect(self, frame):
         """Return list of {bbox:(x1,y1,x2,y2), label, conf}."""
-        class_ids = [cid for cid, name in COCO_VEHICLES.items() if name in self.allowed]
+        class_ids = [cid for cid, name in COCO_CLASSES.items() if name in self.allowed]
         # agnostic_nms: one vehicle must not become two boxes (car + truck) -> double count
         results = self.model(
             frame, verbose=False, conf=self.conf, classes=class_ids, agnostic_nms=True, imgsz=self.imgsz
@@ -64,7 +75,7 @@ class VehicleDetector:
                 continue
             for box in r.boxes:
                 cid = int(box.cls[0])
-                name = COCO_VEHICLES.get(cid)
+                name = COCO_CLASSES.get(cid)
                 if name and name in self.allowed:
                     x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
                     dets.append(

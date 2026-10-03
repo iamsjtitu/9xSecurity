@@ -84,7 +84,7 @@ export default function ControlsPanel({ state, refreshState, showToast, drawMode
           />
           Number Plate (OCR)
         </label>
-        <div className="flex items-center gap-4 text-sm text-slate-700">
+        <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-sm text-slate-700">
           <span className="text-slate-500">Detect:</span>
           {['car', 'truck', 'bus'].map((c) => (
             <label key={c} className="flex items-center gap-1.5 cursor-pointer capitalize">
@@ -98,6 +98,20 @@ export default function ControlsPanel({ state, refreshState, showToast, drawMode
               {c}
             </label>
           ))}
+          <label className="flex items-center gap-1.5 cursor-pointer">
+            <input type="checkbox" className="h-4 w-4 accent-[#1f6feb]"
+              checked={!!state.enable_two_wheeler}
+              onChange={(e) => setOpts({ enable_two_wheeler: e.target.checked })}
+              data-testid="class-two-wheeler" />
+            🏍️ Two-wheeler
+          </label>
+          <label className="flex items-center gap-1.5 cursor-pointer">
+            <input type="checkbox" className="h-4 w-4 accent-[#1f6feb]"
+              checked={!!state.enable_person}
+              onChange={(e) => setOpts({ enable_person: e.target.checked })}
+              data-testid="class-person" />
+            👤 Person
+          </label>
         </div>
         <div className="flex items-center gap-2 text-sm text-slate-700">
           <span className="text-slate-500 shrink-0">AI Model:</span>

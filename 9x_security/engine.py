@@ -17,11 +17,12 @@ import numpy as np
 
 import config
 from database import EventDB
-from detector import VehicleDetector
+from detector import VehicleDetector, category_of
 from tracker import CentroidTracker, _iou as _box_iou
 
 OCR_MAX_QUEUE_WAIT_S = float(os.environ.get("OCR_MAX_QUEUE_WAIT_S", "20"))
 DEDUPE_S = float(os.environ.get("CROSS_DEDUPE_S", "20"))  # window for same-vehicle (track identity) de-dup
+PERSON_GROUP_S = float(os.environ.get("PERSON_GROUP_S", "2.5"))  # people crossing within this = one 'N persons' alert
 
 
 def _point_in_box(pt, box, grow=0.0):
@@ -456,7 +457,7 @@ class SecurityEngine:
             detector = VehicleDetector(
                 model_path=path,
                 conf=self.cfg.get("confidence", 0.4),
-                allowed=self.cfg.get("vehicle_classes"),
+                allowed=config.allowed_classes(self.cfg),
             )
         else:
             self.model_tier = "custom"
@@ -470,6 +471,7 @@ class SecurityEngine:
         self._best_crops = {}
         self._ocr_q = None  # single OCR worker queue (created on first crossing)
         self._recent_cross = []  # (ts, to_side, bbox) of counted crossings for de-duplication
+        self._person_groups = {}  # direction -> pending group (people crossing within PERSON_GROUP_S)
         self.line_hints = []
         # OCR models load lazily on the first crossing (async thread) — no heavy
         # torch work competes with YOLO right at engine start.
@@ -624,45 +626,123 @@ class SecurityEngine:
             self._update_best_crops(frame, original, w, h)
 
         events = []
+        now = time.time()
         for cr in crossings:
-            direction = self._direction_for(cr["to_side"])
-            image_path = self._save_snapshot(frame, cr, direction)
-            ocr_on = bool(self.cfg.get("enable_plate") and self.plate_reader is not None)
-            eid = self.db.add_event(cr["label"], direction, "", image_path, plate_status="pending" if ocr_on else "")
-            ev = {
-                "id": eid,
-                "vehicle_type": cr["label"],
-                "direction": direction,
-                "plate": "",
-                "plate_status": "pending" if ocr_on else "",
-                "plate_source": "",
-                "image_path": image_path,
-                "timestamp": datetime.now().isoformat(timespec="seconds"),
-            }
-            events.append(ev)
-            if self.on_event:
-                try:
-                    self.on_event(ev)
-                except Exception:
-                    pass
-            if ocr_on:
-                # OCR is slow on CPU: run async so the frame loop never stalls.
-                crops = []
-                c = self._plate_crop(frame, original, cr["bbox"], w, h)
-                if c is not None:
-                    crops.append(c.copy())
-                for _area, bc, _ts in self._best_crops.pop(cr["track_id"], []):
-                    crops.append(bc)  # fresh crops for the next crossing of this track
-                clog(f"plate OCR: track {cr['track_id']} {direction} queued ({len(crops)} crops)")
-                self._queue_ocr(eid, cr["track_id"], ev, crops)
+            cat = category_of(cr["label"])
+            if not self._category_enabled(cr, cat):
+                continue
+            if not config.category_counts_now(self.cfg, cat):
+                clog(f"crossing ignored: {cat} schedule ke bahar (track {cr['track_id']})")
+                continue
+            if cat == "person":
+                self._queue_person(frame, cr, self._direction_for(cr["to_side"]), now)
             else:
-                try:
-                    self.notifier.notify(ev)
-                except Exception:
-                    pass
+                events += self._emit_crossing(frame, original, cr, cat, w, h)
+        events += self.flush_pending(now=now)
 
         annotated = self._annotate(frame, a, b)
         return annotated, events
+
+    def _queue_person(self, frame, cr, direction, now):
+        """People walk through a gate in a loose group (one behind another, 0.5-2 s apart).
+        Hold the alert PERSON_GROUP_S after the LAST person so the group becomes ONE
+        '👤 Person Entry — N persons' alert with the right count."""
+        g = self._person_groups.setdefault(direction, {"crs": [], "frame": None, "last": now})
+        g["crs"].append(cr)
+        g["frame"] = frame.copy()
+        g["last"] = now
+
+    def flush_pending(self, now=None, force=False):
+        """Emit person groups whose quiet time is over (or all of them when force=True,
+        e.g. the worker is stopping)."""
+        now = time.time() if now is None else now
+        out = []
+        for direction in list(self._person_groups):
+            g = self._person_groups[direction]
+            if force or now - g["last"] >= PERSON_GROUP_S:
+                del self._person_groups[direction]
+                out += self._emit_person_group(g["frame"], g["crs"], direction)
+        return out
+
+    def _category_enabled(self, cr, cat):
+        if cat == "person":
+            return bool(self.cfg.get("enable_person"))
+        if cat == "two_wheeler":
+            return bool(self.cfg.get("enable_two_wheeler"))
+        return cr["label"] in (self.cfg.get("vehicle_classes") or ["car", "truck", "bus"])
+
+    def _emit_crossing(self, frame, original, cr, cat, w, h):
+        """Vehicle / two-wheeler crossing -> one event (+ async plate OCR for vehicles)."""
+        direction = self._direction_for(cr["to_side"])
+        image_path = self._save_snapshot(frame, cr, direction)
+        ocr_on = bool(cat == "vehicle" and self.cfg.get("enable_plate") and self.plate_reader is not None)
+        eid = self.db.add_event(cr["label"], direction, "", image_path, plate_status="pending" if ocr_on else "")
+        ev = {
+            "id": eid,
+            "vehicle_type": cr["label"],
+            "category": cat,
+            "count": 1,
+            "direction": direction,
+            "plate": "",
+            "plate_status": "pending" if ocr_on else "",
+            "plate_source": "",
+            "image_path": image_path,
+            "timestamp": datetime.now().isoformat(timespec="seconds"),
+        }
+        if self.on_event:
+            try:
+                self.on_event(ev)
+            except Exception:
+                pass
+        if ocr_on:
+            crops = []
+            c = self._plate_crop(frame, original, cr["bbox"], w, h)
+            if c is not None:
+                crops.append(c.copy())
+            for _area, bc, _ts in self._best_crops.pop(cr["track_id"], []):
+                crops.append(bc)
+            clog(f"plate OCR: track {cr['track_id']} {direction} queued ({len(crops)} crops)")
+            self._queue_ocr(eid, cr["track_id"], ev, crops)
+        else:
+            try:
+                self.notifier.notify(ev)
+            except Exception:
+                pass
+        return [ev]
+
+    def _emit_person_group(self, frame, group, direction):
+        """A group of people -> a single alert '👤 Person … N persons' (all boxes on the photo)."""
+        lead = group[-1]
+        img = frame.copy()
+        color = (0, 200, 0) if direction == "Entry" else (0, 140, 255)
+        for cr in group[:-1]:
+            x1, y1, x2, y2 = cr["bbox"]
+            cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+        image_path = self._save_snapshot(img, lead, direction)
+        count = len(group)
+        eid = self.db.add_event("person", direction, "", image_path, count=count)
+        ev = {
+            "id": eid,
+            "vehicle_type": "person",
+            "category": "person",
+            "count": count,
+            "direction": direction,
+            "plate": "",
+            "plate_status": "",
+            "plate_source": "",
+            "image_path": image_path,
+            "timestamp": datetime.now().isoformat(timespec="seconds"),
+        }
+        if self.on_event:
+            try:
+                self.on_event(ev)
+            except Exception:
+                pass
+        try:
+            self.notifier.notify(ev)
+        except Exception:
+            pass
+        return [ev]
 
     def _queue_ocr(self, eid, tid, ev, crops):
         """ONE OCR worker for the whole engine: several vehicles crossing together

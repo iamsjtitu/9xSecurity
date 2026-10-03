@@ -226,12 +226,20 @@ class WhatsAppNotifier:
             when = datetime.fromisoformat(raw).strftime("%d-%m-%Y %I:%M:%S %p")
         except ValueError:
             when = raw.replace("T", " ")
-        cap = (
-            f"🚨 9x Security\n"
-            f"{ev.get('direction', '')} - {str(ev.get('vehicle_type', '')).upper()}\n"
-            f"Time: {when}"
-        )
-        return cap
+        gate = str(ev.get("gate", "") or "").strip()
+        direction = ev.get("direction", "")
+        category = ev.get("category") or "vehicle"
+        if category == "person":
+            n = int(ev.get("count") or 1)
+            head = f"👤 Person {direction} — {n} person" + ("s" if n != 1 else "")
+        elif category == "two_wheeler":
+            head = f"🏍️ Two-wheeler {direction}"
+        else:
+            head = f"🚗 {direction} - {str(ev.get('vehicle_type', '')).upper()}"
+        lines = ["🚨 9x Security", head, f"Time: {when}"]
+        if gate:
+            lines.append(f"Gate: {gate}")
+        return "\n".join(lines)
 
     def _send_all(self, ev):
         caption = self._caption(ev)

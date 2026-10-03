@@ -50,15 +50,17 @@ class EventDB:
                 self.conn.execute("ALTER TABLE events ADD COLUMN plate_status TEXT NOT NULL DEFAULT ''")
             if "plate_source" not in cols:  # '' | 'ocr' | 'manual'
                 self.conn.execute("ALTER TABLE events ADD COLUMN plate_source TEXT NOT NULL DEFAULT ''")
+            if "count" not in cols:  # people crossing together = one event, count > 1
+                self.conn.execute("ALTER TABLE events ADD COLUMN count INTEGER NOT NULL DEFAULT 1")
             self.conn.commit()
 
-    def add_event(self, vehicle_type, direction, plate, image_path, ts=None, plate_status=""):
+    def add_event(self, vehicle_type, direction, plate, image_path, ts=None, plate_status="", count=1):
         ts = ts or datetime.now()
         with self._lock:
             cur = self.conn.execute(
                 """INSERT INTO events
-                   (timestamp, date, time, vehicle_type, direction, plate, image_path, plate_status, plate_source)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                   (timestamp, date, time, vehicle_type, direction, plate, image_path, plate_status, plate_source, count)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     ts.isoformat(timespec="seconds"),
                     ts.strftime("%Y-%m-%d"),
@@ -69,6 +71,7 @@ class EventDB:
                     image_path,
                     plate_status,
                     "ocr" if plate else "",
+                    int(count or 1),
                 ),
             )
             self.conn.commit()

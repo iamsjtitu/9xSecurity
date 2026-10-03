@@ -77,7 +77,7 @@ def test_text_and_image_route_to_group_endpoints(server, tmp_path):
     n = WhatsAppNotifier({"wa_enabled": True, "wa_base_url": server, "wa_api_key": "k",
                           "wa_recipients": ["919876543210"], "wa_groups": ["120363424861931093@g.us"]})
     ok, detail = n.test_connection()
-    assert ok and "Group 120363424861931093: SENT" in detail and "919876543210: SENT" in detail
+    assert ok and "Group 120363424861931093 TEXT: SENT" in detail and "919876543210 TEXT: SENT" in detail
     paths = [h[1] for h in HITS]
     assert "/api/v2/sendMessage" in paths and "/api/v2/sendGroup" in paths
     grp = [h for h in HITS if h[1] == "/api/v2/sendGroup"][0]
@@ -129,6 +129,6 @@ def test_settings_and_groups_endpoint(server, monkeypatch):
     r = c.post("/api/whatsapp/groups", json={}).json()
     assert r["ok"] and r["groups"][0]["name"] == "Gate Staff"
     r = c.post("/api/whatsapp/test", json={"wa_api_key": "k", "wa_recipients": [], "wa_groups": groups}).json()
-    assert r["ok"] and "Group 120363424861931093: SENT" in r["detail"]
+    assert r["ok"] and "Group 120363424861931093 TEXT: SENT" in r["detail"]
     d = c.get("/api/diagnostics").json()
     assert d["whatsapp"]["groups"] == 1

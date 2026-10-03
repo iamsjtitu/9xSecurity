@@ -90,6 +90,7 @@ class Worker:
             "vehicle_type": ev.get("vehicle_type"),
             "category": ev.get("category", "vehicle"),
             "count": int(ev.get("count") or 1),
+            "gate": ev.get("gate", ""),
             "plate": ev.get("plate", ""),
             "plate_status": ev.get("plate_status", ""),
             "plate_source": ev.get("plate_source", ""),
@@ -429,6 +430,9 @@ def state(request: Request):
         "status": worker.status,
         "version": updater.APP_VERSION,
         "rtsp_url": cfg.get("rtsp_url", ""),
+        "cameras": _cameras_public(cfg),
+        "active_camera_id": cfg.get("active_camera_id", ""),
+        "gate": config.gate_name(cfg),
         "wa_enabled": bool(cfg.get("wa_enabled")),
         "enable_plate": bool(cfg.get("enable_plate")),
         "vehicle_classes": cfg.get("vehicle_classes", ["car", "truck", "bus"]),
@@ -479,6 +483,127 @@ def camera_connect(body: dict, request: Request):
     ptz.reset_cache()
     worker.start()
     return {"ok": True}
+
+
+# ---- saved cameras (one active at a time) ----------------------------------
+def _cameras_public(cfg):
+    return [{"id": c["id"], "name": c.get("name", ""), "gate": c.get("gate", ""),
+             "rtsp_url": c.get("rtsp_url", ""), "active": c["id"] == cfg.get("active_camera_id")}
+            for c in cfg.get("cameras") or []]
+
+
+def _cameras_response(cfg):
+    return {"ok": True, "cameras": _cameras_public(cfg), "active_camera_id": cfg.get("active_camera_id", ""),
+            "rtsp_url": cfg.get("rtsp_url", ""), "gate": config.gate_name(cfg)}
+
+
+def _restart_for_camera_switch(cfg):
+    """Active camera changed: the running stream must follow it (or stop when it has no URL)."""
+    import ptz
+
+    ptz.reset_cache()
+    url = (cfg.get("rtsp_url") or "").strip()
+    if worker.connected or (not worker.user_stopped and cfg.get("auto_connect", True)):
+        if url:
+            worker.start()
+        else:
+            worker.stop()
+            worker.status = "Is camera ka RTSP URL khaali hai — Settings > Cameras me URL daalein"
+
+
+@app.get("/api/cameras")
+def cameras_list(request: Request):
+    _check(request)
+    return _cameras_response(_cfg())
+
+
+@app.post("/api/cameras")
+def cameras_save(body: dict, request: Request):
+    """Add ({name, gate, rtsp_url}) or edit ({id, name?, gate?, rtsp_url?}) a saved camera."""
+    _check(request)
+    cfg = _cfg()
+    name = str(body.get("name", "") or "").strip()[:40]
+    gate = str(body.get("gate", "") or "").strip()[:40]
+    url = str(body.get("rtsp_url", "") or "").strip()
+    cid = str(body.get("id", "") or "").strip()
+    if cid:
+        cam = next((c for c in cfg["cameras"] if c.get("id") == cid), None)
+        if cam is None:
+            raise HTTPException(404, "Camera nahi mila")
+        if "name" in body:
+            cam["name"] = name or cam.get("name") or "Camera"
+        if "gate" in body:
+            cam["gate"] = gate
+        url_changed = "rtsp_url" in body and url != (cam.get("rtsp_url") or "")
+        if url_changed:
+            cam["rtsp_url"], cam["rtsp_url_main"] = url, ""
+        if cid == cfg.get("active_camera_id"):
+            if url_changed:
+                cfg["rtsp_url"], cfg["rtsp_url_main"] = url, ""
+            config.save_config(cfg)
+            worker.apply_cfg(cfg)
+            if url_changed:
+                _restart_for_camera_switch(cfg)
+        else:
+            config.save_config(cfg)
+        clog(f"svc: camera saved {cid} '{cam['name']}' gate='{cam['gate']}'")
+        return _cameras_response(cfg)
+    if len(cfg["cameras"]) >= config.MAX_CAMERAS:
+        raise HTTPException(400, f"Zyada se zyada {config.MAX_CAMERAS} camera save ho sakte hain")
+    new_id = config.new_camera_id(cfg)
+    cam = {"id": new_id, "name": name or f"Camera {len(cfg['cameras']) + 1}", "gate": gate,
+           "rtsp_url": url, "rtsp_url_main": "", "line": dict(config.DEFAULTS["line"]),
+           "entry_direction": "pos", "ignore_zones": []}
+    cfg["cameras"].append(cam)
+    first = config.active_camera(cfg) is None
+    if first:
+        config.activate_camera(cfg, new_id)
+    config.save_config(cfg)
+    clog(f"svc: camera added {new_id} '{cam['name']}' gate='{gate}'" + (" (active)" if first else ""))
+    if first:
+        _restart_for_camera_switch(cfg)
+    return _cameras_response(cfg)
+
+
+@app.post("/api/cameras/{cid}/activate")
+def cameras_activate(cid: str, request: Request):
+    """Switch the live camera. Current line/zones/URL are kept with the old camera."""
+    _check(request)
+    cfg = _cfg()
+    if cid == cfg.get("active_camera_id"):
+        return _cameras_response(cfg)
+    try:
+        cam = config.activate_camera(cfg, cid)
+    except ValueError:
+        raise HTTPException(404, "Camera nahi mila")
+    config.save_config(cfg)
+    worker.apply_cfg(cfg)
+    clog(f"svc: active camera -> {cid} '{cam.get('name', '')}' gate='{cam.get('gate', '')}'")
+    _restart_for_camera_switch(cfg)
+    return _cameras_response(cfg)
+
+
+@app.delete("/api/cameras/{cid}")
+def cameras_delete(cid: str, request: Request):
+    _check(request)
+    cfg = _cfg()
+    cams = cfg["cameras"]
+    if not any(c.get("id") == cid for c in cams):
+        raise HTTPException(404, "Camera nahi mila")
+    was_active = cid == cfg.get("active_camera_id")
+    cfg["cameras"] = [c for c in cams if c.get("id") != cid]
+    if was_active:
+        cfg["active_camera_id"] = ""
+        if not cfg["cameras"]:
+            # last camera removed: nothing is configured any more (sync would otherwise re-create it)
+            for k in config.CAMERA_KEYS:
+                cfg[k] = config._copy(config.DEFAULTS.get(k, ""))
+    config.save_config(cfg)  # sync adopts the first remaining camera when the active one was removed
+    clog(f"svc: camera deleted {cid}" + (" (was active)" if was_active else ""))
+    if was_active:
+        worker.apply_cfg(cfg)
+        _restart_for_camera_switch(cfg)
+    return _cameras_response(cfg)
 
 
 def _substream_suggestion(cfg):

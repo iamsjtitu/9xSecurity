@@ -38,7 +38,7 @@ export default function CaptureToast({ event, onClose }) {
           <Icon size={15} /> {event.direction} — {event.vehicle_type}{event.count > 1 ? ` ×${event.count}` : ''} captured
         </div>
         <div className="text-xs text-slate-500 font-mono mt-0.5" data-testid="capture-toast-meta">
-          {fmtTime(event.timestamp)}
+          {fmtTime(event.timestamp)}{event.gate ? ` · ${event.gate}` : ''}
         </div>
         {(event.plate || event.plate_status) && (
           <div className="mt-1 flex items-center gap-1.5 text-xs">

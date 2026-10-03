@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { MessageCircle, User, Lock, Download, Send, Clock, Activity, Eye, EyeOff } from 'lucide-react';
+import { MessageCircle, User, Lock, Download, Send, Clock, Activity, Eye, EyeOff, Cctv } from 'lucide-react';
 import { api } from '../api';
 import DiagnosticsTab from './DiagnosticsTab.jsx';
 import UpdateProgress from './UpdateProgress.jsx';
 import WaGroupsPicker from './WaGroupsPicker.jsx';
+import CamerasTab from './CamerasTab.jsx';
 
 const TABS = [
+  { id: 'cameras', label: 'Cameras', icon: Cctv },
   { id: 'whatsapp', label: 'WhatsApp Alerts', icon: MessageCircle },
   { id: 'timing', label: 'Timing', icon: Clock },
   { id: 'account', label: 'Account', icon: User },
@@ -165,8 +167,9 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
         ))}
       </div>
 
-      <div className={`card p-6 flex-1 ${tab === 'diagnostics' ? 'max-w-4xl' : 'max-w-2xl'}`}>
+      <div className={`card p-6 flex-1 ${tab === 'diagnostics' || tab === 'cameras' ? 'max-w-4xl' : 'max-w-2xl'}`}>
         {tab === 'diagnostics' && <DiagnosticsTab showToast={showToast} />}
+        {tab === 'cameras' && <CamerasTab showToast={showToast} />}
         {tab === 'whatsapp' && (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-slate-900">WhatsApp Alerts (wa.9x.design)</h3>

@@ -2,10 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Cctv, Plug, Unplug, Stethoscope, X, ZoomIn, ZoomOut, RotateCcw, Focus, Wand2 } from 'lucide-react';
 import { api, BASE, getToken } from '../api';
 import UrlBuilder from './UrlBuilder.jsx';
+import CameraSelect from './CameraSelect.jsx';
 
 const FRAME_MS = 150;
 
-export default function CameraPanel({ state, refreshState, showToast, drawMode, setDrawMode }) {
+export default function CameraPanel({ state, refreshState, showToast, drawMode, setDrawMode, onManageCameras }) {
   const [url, setUrl] = useState(state.rtsp_url || '');
   const [showBuilder, setShowBuilder] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -236,6 +237,7 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
 
   return (
     <div className="bg-[#020617] rounded-xl overflow-hidden shadow-sm flex flex-col" data-testid="camera-panel">
+      <CameraSelect state={state} refreshState={refreshState} showToast={showToast} onManage={onManageCameras} />
       <div className="flex items-center gap-2 p-3 bg-slate-900/60">
         <input
           className="flex-1 rounded-md bg-slate-800 border border-slate-700 px-3 py-2.5 text-sm text-slate-100 placeholder-slate-500 outline-none focus:ring-2 focus:ring-[#1f6feb]"

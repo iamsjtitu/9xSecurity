@@ -6588,3 +6588,102 @@ RuntimeError: no AI in test
 2026-10-03T10:44:25 | svc: AI self-test OK (yolov8n.pt, 261 ms, 0 dets on blank frame)
 2026-10-03T10:46:38 | svc: starting on 127.0.0.1:8971 v1.0.0
 2026-10-03T10:46:38 | purge: 0 old events removed (retention 7d, cutoff 2026-09-26)
+2026-10-03T10:49:04 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-49-04-321.jpg
+2026-10-03T10:49:04 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_motorcycle_10-49-04-356.jpg
+2026-10-03T10:49:04 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-49-04-393.jpg
+2026-10-03T10:49:04 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-49-04-428.jpg
+2026-10-03T10:49:04 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_10-49-04-440.jpg
+2026-10-03T10:49:04 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-03T10:49:04 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_car_10-49-04-489.jpg
+2026-10-03T10:49:12 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_car_10-49-12-922.jpg
+2026-10-03T10:49:13 | event: Exit car track 1 (cross) -> /tmp/tmp4ce0jbf4/snaps/2026-10-03/Exit_car_10-49-13-407.jpg
+2026-10-03T10:49:16 | === PROBE start: notaurl
+2026-10-03T10:49:16 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-10-03T10:49:19 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-03T10:49:19 | ffmpeg-pipe: starting
+2026-10-03T10:49:19 | event: Entry truck track 1 (cross) -> /tmp/tmp4ce0jbf4/snaps/2026-10-03/Entry_truck_10-49-19-478.jpg
+2026-10-03T10:49:19 | event: Entry truck track 1 (cross) -> /tmp/tmp4ce0jbf4/snaps/2026-10-03/Entry_truck_10-49-19-516.jpg
+2026-10-03T10:49:19 | event: Entry truck track 2 (cross) -> /tmp/tmp4ce0jbf4/snaps/2026-10-03/Entry_truck_10-49-19-529.jpg
+2026-10-03T10:49:19 | event: Entry truck track 3 (cross) -> /tmp/tmp4ce0jbf4/snaps/2026-10-03/Entry_truck_10-49-19-539.jpg
+2026-10-03T10:49:19 | event: Entry truck track 1 (cross) -> /tmp/tmp4ce0jbf4/snaps/2026-10-03/Entry_truck_10-49-19-571.jpg
+2026-10-03T10:49:19 | crossing ignored: duplicate (track re-created where the last one was lost) of a vehicle counted <20s ago (track 2)
+2026-10-03T10:49:19 | event: Entry car track 1 (cross) -> /tmp/tmp4ce0jbf4/snaps/2026-10-03/Entry_car_10-49-19-607.jpg
+2026-10-03T10:49:19 | event: Entry car track 2 (cross) -> /tmp/tmp4ce0jbf4/snaps/2026-10-03/Entry_car_10-49-19-616.jpg
+2026-10-03T10:49:19 | event: Entry truck track 2 (cross) -> /tmp/tmp4ce0jbf4/snaps/2026-10-03/Entry_truck_10-49-19-705.jpg
+2026-10-03T10:49:19 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 1)
+2026-10-03T10:49:19 | event: Entry truck track 1 (cross) -> /tmp/tmp4ce0jbf4/snaps/2026-10-03/Entry_truck_10-49-19-803.jpg
+2026-10-03T10:49:21 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpu5uw3kvj/snaps/2026-10-03') path=/tmp/tmpu5uw3kvj/snaps/2026-10-03/Exit_car_10-49-21-010.jpg
+2026-10-03T10:49:35 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-10-03T10:49:38 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-03T10:49:38 | svc: loading AI model
+2026-10-03T10:49:40 | svc: AI model loaded
+2026-10-03T10:49:42 | svc: AI self-test OK (yolov8s.pt, 526 ms, 0 dets on blank frame)
+2026-10-03T10:49:42 | svc: accurate model too slow here (526 ms > 350) -> yolov8n.pt
+2026-10-03T10:49:42 | svc: AI self-test OK (yolov8n.pt, 320 ms, 0 dets on blank frame)
+2026-10-03T10:49:42 | open_stream: transport=tcp
+2026-10-03T10:49:47 | open_stream: transport=udp
+2026-10-03T10:49:52 | open_stream: trying FFmpeg engine fallback
+2026-10-03T10:49:52 | ffmpeg-pipe: starting
+2026-10-03T11:07:09 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_11-07-09-846.jpg
+2026-10-03T11:07:09 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_motorcycle_11-07-09-883.jpg
+2026-10-03T11:07:09 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_11-07-09-927.jpg
+2026-10-03T11:07:09 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_11-07-09-967.jpg
+2026-10-03T11:07:09 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_person_11-07-09-979.jpg
+2026-10-03T11:07:10 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-03T11:07:10 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-03/Entry_car_11-07-10-028.jpg
+2026-10-03T11:07:33 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-10-03T11:07:33 | purge: 0 old events removed (retention 7d, cutoff 2026-09-26)
+2026-10-03T11:07:37 | svc: auto-connect — saved camera se connect kar raha hai
+2026-10-03T11:07:37 | svc: loading AI model
+2026-10-03T11:07:39 | svc: camera added cam2 'Back Camera' gate='Back Gate'
+2026-10-03T11:07:39 | svc: active camera -> cam2 'Back Camera' gate='Back Gate'
+2026-10-03T11:07:39 | svc: AI model loaded
+2026-10-03T11:07:41 | svc: AI self-test OK (yolov8s.pt, 453 ms, 0 dets on blank frame)
+2026-10-03T11:07:41 | svc: accurate model too slow here (453 ms > 350) -> yolov8n.pt
+2026-10-03T11:07:41 | svc: AI self-test OK (yolov8n.pt, 234 ms, 0 dets on blank frame)
+2026-10-03T11:07:41 | svc: loading AI model
+2026-10-03T11:07:42 | svc: active camera -> cam1 'Camera 1' gate=''
+2026-10-03T11:07:42 | svc: AI model loaded
+2026-10-03T11:07:43 | svc: AI self-test OK (yolov8s.pt, 541 ms, 0 dets on blank frame)
+2026-10-03T11:07:43 | svc: accurate model too slow here (541 ms > 350) -> yolov8n.pt
+2026-10-03T11:07:44 | svc: AI self-test OK (yolov8n.pt, 299 ms, 0 dets on blank frame)
+2026-10-03T11:07:44 | svc: loading AI model
+2026-10-03T11:07:44 | svc: AI model loaded
+2026-10-03T11:07:45 | svc: AI self-test OK (yolov8s.pt, 461 ms, 0 dets on blank frame)
+2026-10-03T11:07:45 | svc: accurate model too slow here (461 ms > 350) -> yolov8n.pt
+2026-10-03T11:07:45 | svc: AI self-test OK (yolov8n.pt, 230 ms, 0 dets on blank frame)
+2026-10-03T11:07:45 | open_stream: transport=tcp
+2026-10-03T11:07:50 | open_stream: transport=udp
+2026-10-03T11:07:55 | open_stream: trying FFmpeg engine fallback
+2026-10-03T11:07:55 | ffmpeg-pipe: starting
+2026-10-03T11:07:58 | svc: camera saved cam1 'Front Camera' gate='Main Gate'
+2026-10-03T11:08:00 | open_stream: falling back to default backend
+2026-10-03T11:08:05 | svc: source opened codec=unknown live=True
+2026-10-03T11:08:08 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-03T11:08:17 | svc: loading AI model
+2026-10-03T11:08:17 | svc: AI model loaded
+2026-10-03T11:08:19 | svc: AI self-test OK (yolov8s.pt, 480 ms, 0 dets on blank frame)
+2026-10-03T11:08:19 | svc: accurate model too slow here (480 ms > 350) -> yolov8n.pt
+2026-10-03T11:08:19 | svc: AI self-test OK (yolov8n.pt, 244 ms, 0 dets on blank frame)
+2026-10-03T11:08:19 | open_stream: transport=tcp
+2026-10-03T11:08:24 | open_stream: transport=udp
+2026-10-03T11:08:29 | open_stream: trying FFmpeg engine fallback
+2026-10-03T11:08:29 | ffmpeg-pipe: starting
+2026-10-03T11:08:32 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-10-03T11:08:34 | open_stream: falling back to default backend
+2026-10-03T11:08:35 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-03T11:08:38 | svc: loading AI model
+2026-10-03T11:08:38 | svc: AI model loaded
+2026-10-03T11:08:39 | svc: AI self-test OK (yolov8s.pt, 504 ms, 0 dets on blank frame)
+2026-10-03T11:08:39 | svc: accurate model too slow here (504 ms > 350) -> yolov8n.pt
+2026-10-03T11:08:39 | svc: source opened codec=unknown live=True
+2026-10-03T11:08:39 | svc: AI self-test OK (yolov8n.pt, 174 ms, 0 dets on blank frame)
+2026-10-03T11:08:39 | open_stream: transport=tcp
+2026-10-03T11:08:44 | open_stream: transport=udp
+2026-10-03T11:08:49 | open_stream: trying FFmpeg engine fallback
+2026-10-03T11:08:49 | ffmpeg-pipe: starting
+2026-10-03T11:08:54 | svc: loading AI model
+2026-10-03T11:08:54 | svc: AI model loaded
+2026-10-03T11:08:55 | svc: AI self-test OK (yolov8s.pt, 531 ms, 0 dets on blank frame)
+2026-10-03T11:08:56 | svc: accurate model too slow here (531 ms > 350) -> yolov8n.pt
+2026-10-03T11:08:56 | svc: AI self-test OK (yolov8n.pt, 256 ms, 0 dets on blank frame)

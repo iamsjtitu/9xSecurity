@@ -4,7 +4,7 @@ import StatCards from './StatCards.jsx';
 import ControlsPanel from './ControlsPanel.jsx';
 import EventsTable from './EventsTable.jsx';
 
-export default function Dashboard({ state, refreshState, showToast }) {
+export default function Dashboard({ state, refreshState, showToast, onManageCameras }) {
   const [drawMode, setDrawMode] = useState(false);
 
   return (
@@ -16,6 +16,7 @@ export default function Dashboard({ state, refreshState, showToast }) {
           showToast={showToast}
           drawMode={drawMode}
           setDrawMode={setDrawMode}
+          onManageCameras={onManageCameras}
         />
       </div>
       <div className="lg:col-span-4 flex flex-col gap-6">

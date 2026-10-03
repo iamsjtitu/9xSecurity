@@ -1,0 +1,24 @@
+{
+  "summary": "Full-stack testing of the NEW person/two-wheeler detection feature in 9x_security. BACKEND: test_categories.py (8/8 PASS), test_engine.py+test_tracker_false_crossings+test_detection_strength+test_capture_fixes+test_plate_fmt (50/50 PASS when test_service_api.py excluded), test_service_api.py (20/20 PASS in isolation), test_wa_groups.py+test_wa_phototest.py (9/9 PASS in isolation). The requests.post monkeypatch leak from test_engine.py into test_service_api.py is a KNOWN pre-existing issue (documented in task) — handled by separate invocations. API: POST /api/options accepts enable_person, enable_two_wheeler, cat_schedules; /api/settings and /api/state echo them; invalid time '25x' is silently ignored (old value kept); missing categories preserved; /api/events rows include 'count' field. WhatsApp _caption() produces exactly '👤 Person Entry — 2 persons', '1 person', '🏍️ Two-wheeler Exit', '🚗 Entry - TRUCK/CAR', includes 'Time: ' line and 'Gate: X' only when provided, and contains no 'Number' text. Worker flush at service.py:367 calls engine.flush_pending(force=True) on capture exit. FRONTEND: Dashboard Detection Controls show class-car/truck/bus/two-wheeler/person checkboxes with correct data-testids; toggling persists across reload. Settings>Timing contains category-schedule-card with vehicle/person/two_wheeler rows; cat-sch-<cat>-toggle enables cat-sch-<cat>-start/end (verified disabled when toggle OFF, enabled when ON) and saves immediately. Events table badge event-count-59 rendered '×3' for a DB-inserted count=3 row. All regression testids (plate-toggle, class-car, detector-model-select, settings-tab-*) still work. Login flow required bypassing must_change_password modal by seeding sessionStorage nx_token — not a bug, this is pre-existing password-change-on-first-login behaviour.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/test_categories.py",
+    "/app/9x_security/test_service_api.py",
+    "/app/9x_security/test_wa_groups.py",
+    "/app/9x_security/test_wa_phototest.py",
+    "/app/9x_security/test_engine.py"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "test_engine.py globally monkeypatches whatsapp.requests.post without restoration via a session fixture — leaks into test_service_api.py in same pytest process. Known/documented; consider using pytest monkeypatch fixture instead of module-level assignment to avoid future flakiness.",
+    "whatsapp.WhatsAppNotifier.__init__ expects dict-like config but is sometimes called with the config module; __init__ should defensively accept either (minor)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin / 9xsecurity (must_change_password=true on first login — bypassed by injecting token into sessionStorage['nx_token'] for UI tests)",
+  "seed_data_creation": "Inserted and then deleted one person event (id=59, count=3) via database.EventDB to verify event-count-<id> badge rendering. Cleaned /app/9x_security/snapshots/2026-10-03 directory created by test_engine.py runs. Reset enable_person/enable_two_wheeler to false and all cat_schedules.enabled=false post-test.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Running test_engine.py and test_service_api.py in SAME pytest invocation causes monkeypatch leak -> service tests mock-return 200 for everything. Always invoke test_engine.py and test_service_api.py in separate pytest processes. UI login requires either (a) completing must_change_password flow, or (b) seeding sessionStorage.setItem('nx_token', <token from POST /api/login>) and reloading. All new feature data-testids present: class-person, class-two-wheeler, category-schedule-card, cat-sch-{vehicle|person|two_wheeler}-{toggle|start|end}, event-count-<id>. Note: event-count-<id> appears only for rows with count>1."
+}

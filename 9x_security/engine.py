@@ -676,12 +676,14 @@ class SecurityEngine:
         direction = self._direction_for(cr["to_side"])
         image_path = self._save_snapshot(frame, cr, direction)
         ocr_on = bool(cat == "vehicle" and self.cfg.get("enable_plate") and self.plate_reader is not None)
-        eid = self.db.add_event(cr["label"], direction, "", image_path, plate_status="pending" if ocr_on else "")
+        gate = config.gate_name(self.cfg)
+        eid = self.db.add_event(cr["label"], direction, "", image_path, plate_status="pending" if ocr_on else "", gate=gate)
         ev = {
             "id": eid,
             "vehicle_type": cr["label"],
             "category": cat,
             "count": 1,
+            "gate": gate,
             "direction": direction,
             "plate": "",
             "plate_status": "pending" if ocr_on else "",
@@ -720,12 +722,14 @@ class SecurityEngine:
             cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
         image_path = self._save_snapshot(img, lead, direction)
         count = len(group)
-        eid = self.db.add_event("person", direction, "", image_path, count=count)
+        gate = config.gate_name(self.cfg)
+        eid = self.db.add_event("person", direction, "", image_path, count=count, gate=gate)
         ev = {
             "id": eid,
             "vehicle_type": "person",
             "category": "person",
             "count": count,
+            "gate": gate,
             "direction": direction,
             "plate": "",
             "plate_status": "",

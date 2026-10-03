@@ -21,8 +21,8 @@
     },
     "person": {
       "enabled": false,
-      "start": "18:00",
-      "end": "06:00"
+      "start": "00:00",
+      "end": "23:59"
     },
     "two_wheeler": {
       "enabled": false,
@@ -45,14 +45,43 @@
   "auto_delete_enabled": true,
   "retention_days": 7,
   "ignore_zones": [],
+  "cameras": [
+    {
+      "id": "cam1",
+      "name": "Front Camera",
+      "gate": "Main Gate",
+      "rtsp_url": "",
+      "rtsp_url_main": "",
+      "line": null,
+      "entry_direction": "pos",
+      "ignore_zones": []
+    },
+    {
+      "id": "cam2",
+      "name": "Back Camera",
+      "gate": "Back Gate",
+      "rtsp_url": "rtsp://u:p@192.0.2.9:554/s",
+      "rtsp_url_main": "",
+      "line": {
+        "x1": 0.1,
+        "y1": 0.77,
+        "x2": 0.9,
+        "y2": 0.77
+      },
+      "entry_direction": "pos",
+      "ignore_zones": []
+    }
+  ],
+  "active_camera_id": "cam1",
   "auto_connect": true,
   "setup_done": false,
   "auto_lock_minutes": 10,
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "064db6ea61ed3a7b8d2e25af426fc830",
-  "auth_hash": "20523ca0451bfe9e0ea44f1d4aeb9838c37cc77eef37b39cd2fbc0e49fd4ef0c",
+  "auth_salt": "fbeaec9f8fc3b6fc609adf483dfbec9b",
+  "auth_hash": "73cd013ff0e6f6b2811108e3d032638ea997de218ba12fc2bb9ead70dd46d139",
   "github_repo": "",
-  "gh_token": "TEST_GH"
+  "gh_token": "TEST_GH",
+  "rtsp_url_main": ""
 }

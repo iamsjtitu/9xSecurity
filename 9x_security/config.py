@@ -89,6 +89,10 @@ DEFAULTS = {
     "auto_delete_enabled": True,   # auto-delete old events + snapshots
     "retention_days": 7,   # events + snapshots older than this are auto-deleted
     "ignore_zones": [],  # [{x1,y1,x2,y2} normalized] parked-vehicle areas never counted
+    # ---- Saved cameras (one ACTIVE at a time — light on the PC). The top-level rtsp_url/line/
+    # entry_direction/ignore_zones always belong to the active camera; sync_cameras() mirrors them.
+    "cameras": [],            # [{id, name, gate, rtsp_url, rtsp_url_main, line, entry_direction, ignore_zones}]
+    "active_camera_id": "",
     "auto_connect": True,  # engine connects the saved camera by itself at start (PC reboot) and retries
     "setup_done": False,  # first-run Setup Wizard finished/skipped (existing installs with a camera URL count as done)
     "auto_lock_minutes": 10,  # UI locks (login screen) after this idle time; 0 = never. Engine keeps running.
@@ -114,16 +118,93 @@ def load_config():
             cfg.update(saved)
         except Exception:
             pass
-    return cfg
+    return sync_cameras(cfg)
 
 
 def save_config(cfg):
     try:
+        sync_cameras(cfg)
         with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             json.dump(cfg, f, indent=2)
         return True
     except Exception:
         return False
+
+
+# ---- saved cameras ---------------------------------------------------------
+CAMERA_KEYS = ("rtsp_url", "rtsp_url_main", "line", "entry_direction", "ignore_zones")
+MAX_CAMERAS = 8
+
+
+def _copy(v):
+    return json.loads(json.dumps(v))
+
+
+def active_camera(cfg):
+    aid = cfg.get("active_camera_id")
+    for c in cfg.get("cameras") or []:
+        if isinstance(c, dict) and c.get("id") == aid:
+            return c
+    return None
+
+
+def new_camera_id(cfg):
+    ids = {c.get("id") for c in cfg.get("cameras") or []}
+    n = 1
+    while f"cam{n}" in ids:
+        n += 1
+    return f"cam{n}"
+
+
+def _store_from_top(cfg, cam):
+    for k in CAMERA_KEYS:
+        cam[k] = _copy(cfg.get(k, DEFAULTS.get(k, "")))
+
+
+def _load_into_top(cfg, cam):
+    for k in CAMERA_KEYS:
+        cfg[k] = _copy(cam.get(k, DEFAULTS.get(k, "")))
+
+
+def sync_cameras(cfg):
+    """Camera list <-> top-level (active camera) settings. Active camera present: the
+    top-level values are the truth and get stored into its entry. No valid active camera:
+    adopt the first saved camera. No cameras but a URL (old installs): create 'Camera 1'."""
+    cams = [c for c in (cfg.get("cameras") or []) if isinstance(c, dict) and c.get("id")]
+    cfg["cameras"] = cams
+    if not cams:
+        if cfg.get("rtsp_url"):
+            cam = {"id": "cam1", "name": "Camera 1", "gate": ""}
+            _store_from_top(cfg, cam)
+            cams.append(cam)
+            cfg["active_camera_id"] = "cam1"
+        else:
+            cfg["active_camera_id"] = ""
+        return cfg
+    cam = active_camera(cfg)
+    if cam is None:
+        cam = cams[0]
+        cfg["active_camera_id"] = cam["id"]
+        _load_into_top(cfg, cam)
+    else:
+        _store_from_top(cfg, cam)
+    return cfg
+
+
+def activate_camera(cfg, cam_id):
+    """Make cam_id the active camera: its URL/line/zones become the live top-level settings."""
+    sync_cameras(cfg)
+    cam = next((c for c in cfg["cameras"] if c.get("id") == cam_id), None)
+    if cam is None:
+        raise ValueError("camera not found")
+    cfg["active_camera_id"] = cam_id
+    _load_into_top(cfg, cam)
+    return cam
+
+
+def gate_name(cfg):
+    cam = active_camera(cfg)
+    return str((cam or {}).get("gate") or "").strip()
 
 
 def in_time_window(start, end, now=None):

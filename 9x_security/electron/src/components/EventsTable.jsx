@@ -207,7 +207,10 @@ export default function EventsTable({ connected, showToast }) {
                     </div>
                   )}
                 </td>
-                <td className="px-5 py-2 text-slate-700">{r.date} {fmt12(r.time)}</td>
+                <td className="px-5 py-2 text-slate-700">
+                  {r.date} {fmt12(r.time)}
+                  {r.gate && <div className="text-[11px] text-slate-400 normal-case" data-testid={`event-gate-${r.id}`}>Gate: {r.gate}</div>}
+                </td>
                 <td className="px-5 py-2 font-semibold uppercase text-slate-800">
                   {r.vehicle_type}
                   {r.count > 1 && <span className="ml-1.5 rounded bg-slate-200 px-1.5 py-0.5 text-[11px] text-slate-700" data-testid={`event-count-${r.id}`}>×{r.count}</span>}
@@ -228,6 +231,7 @@ export default function EventsTable({ connected, showToast }) {
             <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200">
               <div className="text-sm font-semibold text-slate-800 flex items-center gap-2" data-testid="snapshot-modal-title">
                 {preview.direction} — {preview.vehicle_type.toUpperCase()} · {preview.date} {fmt12(preview.time)} ·
+                {preview.gate && <span className="text-slate-500 font-normal" data-testid="snapshot-modal-gate">Gate: {preview.gate} ·</span>}
                 <PlateBadge plate={preview.plate} status={preview.plate_status} source={preview.plate_source} testid="snapshot-modal-plate" />
               </div>
               <button onClick={() => setPreview(null)} className="text-slate-400 hover:text-slate-700" data-testid="snapshot-modal-close">

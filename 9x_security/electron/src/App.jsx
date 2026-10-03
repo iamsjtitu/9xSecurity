@@ -110,7 +110,7 @@ export default function App() {
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         <div className="flex-1 overflow-y-auto p-6">
           {page === 'dashboard' ? (
-            <Dashboard state={state} refreshState={refreshState} showToast={showToast} />
+            <Dashboard state={state} refreshState={refreshState} showToast={showToast} onManageCameras={() => { setSettingsTab('cameras'); setPage('settings'); }} />
           ) : (
             <SettingsPage showToast={showToast} tab={settingsTab} setTab={setSettingsTab} />
           )}

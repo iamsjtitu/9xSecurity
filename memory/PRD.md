@@ -948,3 +948,16 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   for this test even when their category is OFF/outside schedule. use_fast_model() now keeps person/2-wheeler classes (bug).
 - Tests: test_categories.py 14/14 (rider on bike, rider with 2W off, driver on truck, person-before-car, walker by parked
   truck, detect_classes); regression 83 green. USER NEXT: Save to GitHub -> build install -> Timing me Person 12:00 AM -> 6:00 AM set karein.
+
+## Implemented (update 2026-06 #54) — Lone-person night chime (self-tested: test_chime.py 5/5 + API + UI screenshot)
+- USER picked 'Night Person Chime' (a: recommended defaults). chime.py: synthesised soft 2-note WAV (E5/G5 decay,
+  amplitude = volume) saved as <data>/person_chime.wav; played from the ENGINE via Windows winsound (SND_ASYNC) so it
+  works while the UI is minimised / in tray / locked; non-Windows => (False, 'Sound sirf Windows PC par bajti hai').
+  maybe_play(cfg, ev): only category 'person' (lone walkers after the rider rule), enabled + window check
+  (allowed_now), MIN_GAP_S=3 rate limit. Worker._on_event hooks it (first emission only) -> camera_log 'chime: akela person …'.
+- Config: person_chime_enabled (True), person_chime_schedule_enabled (True), person_chime_start 18:00 / end 06:00,
+  person_chime_volume 70. /api/settings GET/POST (+ person_chime_supported flag; volume clamped 0-100, bad time -> default).
+  POST /api/chime/test {volume} -> {ok, supported, detail}.
+- UI Settings > Timing: PersonChimeCard (person-chime-toggle, person-chime-schedule-toggle, person-chime-start/end
+  TimeField, person-chime-desc, person-chime-volume + -value, person-chime-test-btn). Save via timing-save-btn.
+- Real sound = Windows build (winsound). Test sound button shows the unsupported hint on non-Windows.

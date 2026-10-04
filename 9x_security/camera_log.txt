@@ -6905,3 +6905,56 @@ RuntimeError: no AI in test
 2026-10-04T07:43:31 | open_stream: transport=udp
 2026-10-04T07:43:36 | open_stream: trying FFmpeg engine fallback
 2026-10-04T07:43:36 | ffmpeg-pipe: starting
+2026-10-04T07:57:01 | chime: akela person Entry — ghanti bajayi (event 7)
+2026-10-04T07:57:16 | chime: akela person Entry — ghanti bajayi (event 7)
+2026-10-04T07:57:36 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-10-04T07:57:36 | purge: 0 old events removed (retention 7d, cutoff 2026-09-27)
+2026-10-04T07:57:40 | svc: auto-connect — saved camera se connect kar raha hai
+2026-10-04T07:57:40 | svc: loading AI model
+2026-10-04T07:57:42 | svc: AI model loaded
+2026-10-04T07:57:44 | chime: test (unsupported) vol=60
+2026-10-04T07:57:44 | svc: AI self-test OK (yolov8s.pt, 724 ms, 0 dets on blank frame)
+2026-10-04T07:57:44 | svc: accurate model too slow here (724 ms > 350) -> yolov8n.pt
+2026-10-04T07:57:45 | svc: AI self-test OK (yolov8n.pt, 316 ms, 0 dets on blank frame)
+2026-10-04T07:57:45 | open_stream: transport=tcp
+2026-10-04T07:57:50 | open_stream: transport=udp
+2026-10-04T07:57:55 | open_stream: trying FFmpeg engine fallback
+2026-10-04T07:57:55 | ffmpeg-pipe: starting
+2026-10-04T07:58:00 | open_stream: falling back to default backend
+2026-10-04T07:58:01 | chime: test (unsupported) vol=70
+2026-10-04T07:58:05 | svc: source opened codec=unknown live=True
+2026-10-04T07:58:08 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-04T07:58:20 | svc: loading AI model
+2026-10-04T07:58:20 | svc: AI model loaded
+2026-10-04T07:58:22 | svc: AI self-test OK (yolov8s.pt, 558 ms, 0 dets on blank frame)
+2026-10-04T07:58:22 | svc: accurate model too slow here (558 ms > 350) -> yolov8n.pt
+2026-10-04T07:58:22 | svc: AI self-test OK (yolov8n.pt, 296 ms, 0 dets on blank frame)
+2026-10-04T07:58:22 | open_stream: transport=tcp
+2026-10-04T07:58:27 | open_stream: transport=udp
+2026-10-04T07:58:28 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-10-04T07:58:31 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-04T07:58:32 | svc: loading AI model
+2026-10-04T07:58:32 | svc: AI model loaded
+2026-10-04T07:58:34 | svc: AI self-test OK (yolov8s.pt, 664 ms, 0 dets on blank frame)
+2026-10-04T07:58:34 | svc: accurate model too slow here (664 ms > 350) -> yolov8n.pt
+2026-10-04T07:58:35 | svc: AI self-test OK (yolov8n.pt, 474 ms, 0 dets on blank frame)
+2026-10-04T07:58:35 | open_stream: transport=tcp
+2026-10-04T07:58:40 | open_stream: transport=udp
+2026-10-04T07:58:45 | open_stream: trying FFmpeg engine fallback
+2026-10-04T07:58:45 | ffmpeg-pipe: starting
+2026-10-04T07:58:49 | chime: akela person Entry — ghanti bajayi (event 7)
+2026-10-04T07:58:49 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_motorcycle_07-58-49-117.jpg
+2026-10-04T07:58:49 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-04T07:58:49 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-04T07:58:49 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_truck_07-58-49-202.jpg
+2026-10-04T07:58:49 | person ignored: truck (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-04T07:58:49 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_car_07-58-49-251.jpg
+2026-10-04T07:58:49 | person ignored: car ne 0.0s pehle yahin cross kiya — gaadi/bike ke saath hai (track 1)
+2026-10-04T07:58:49 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_person_07-58-49-304.jpg
+2026-10-04T07:58:49 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_person_07-58-49-348.jpg
+2026-10-04T07:58:49 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_motorcycle_07-58-49-392.jpg
+2026-10-04T07:58:49 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_person_07-58-49-443.jpg
+2026-10-04T07:58:49 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_person_07-58-49-483.jpg
+2026-10-04T07:58:49 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_person_07-58-49-495.jpg
+2026-10-04T07:58:49 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-04T07:58:49 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_car_07-58-49-544.jpg

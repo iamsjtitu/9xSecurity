@@ -21,6 +21,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 import auth
+import chime
 import config
 import updater
 from database import EventDB
@@ -97,6 +98,12 @@ class Worker:
             "image_path": ev.get("image_path", ""),
             "timestamp": ev.get("timestamp"),
         }
+        if ev.get("category") == "person" and ev.get("plate_status") != "done":
+            try:
+                if chime.maybe_play(self.engine.cfg if self.engine else _cfg(), ev):
+                    clog(f"chime: akela person {ev.get('direction')} — ghanti bajayi (event {ev.get('id')})")
+            except Exception as e:
+                clog(f"chime: error {e}")
 
     @property
     def connected(self):
@@ -903,6 +910,7 @@ _SETTINGS_KEYS = (
     "wa_account_email", "wa_account_password", "gh_token",
     "wa_schedule_enabled", "wa_start", "wa_end",
     "capture_schedule_enabled", "capture_start", "capture_end",
+    "person_chime_enabled", "person_chime_schedule_enabled", "person_chime_start", "person_chime_end",
     "auto_delete_enabled",
 )
 _SECRET_KEYS = ("wa_api_key", "gh_token", "wa_account_password")
@@ -924,6 +932,8 @@ def get_settings(request: Request):
     out["retention_days"] = int(cfg.get("retention_days", 7) or 7)
     out["auto_lock_minutes"] = int(cfg.get("auto_lock_minutes", 10) or 0)
     out["auto_connect"] = bool(cfg.get("auto_connect", True))
+    out["person_chime_volume"] = int(cfg.get("person_chime_volume", 70))
+    out["person_chime_supported"] = chime.winsound is not None
     out["cat_schedules"] = cfg.get("cat_schedules", config.DEFAULTS["cat_schedules"])
     out["enable_person"] = bool(cfg.get("enable_person"))
     out["enable_two_wheeler"] = bool(cfg.get("enable_two_wheeler"))
@@ -955,6 +965,17 @@ def save_settings(body: dict, request: Request):
         cfg["auth_user"] = str(body["auth_user"]).strip() or "admin"
     if "auto_connect" in body:
         cfg["auto_connect"] = bool(body["auto_connect"])
+    for k in ("person_chime_enabled", "person_chime_schedule_enabled"):
+        if k in body:
+            cfg[k] = bool(body[k])
+    for k in ("person_chime_start", "person_chime_end"):
+        if k in body and not re.match(r"^\d{1,2}:\d{2}$", str(body[k])):
+            cfg[k] = config.DEFAULTS[k]  # garbage time -> default, never a broken window
+    if "person_chime_volume" in body:
+        try:
+            cfg["person_chime_volume"] = max(0, min(100, int(body["person_chime_volume"])))
+        except (TypeError, ValueError):
+            raise HTTPException(400, "Chime volume 0-100 ke beech hona chahiye")
     if "auto_lock_minutes" in body:
         try:
             cfg["auto_lock_minutes"] = max(0, min(720, int(body["auto_lock_minutes"])))
@@ -971,6 +992,19 @@ def save_settings(body: dict, request: Request):
     config.save_config(cfg)
     worker.apply_cfg(cfg)
     return {"ok": True}
+
+
+@app.post("/api/chime/test")
+def chime_test(body: dict, request: Request):
+    """Play the lone-person chime once at the given volume (Settings 'Test sound')."""
+    _check(request)
+    try:
+        vol = max(0, min(100, int((body or {}).get("volume", _cfg().get("person_chime_volume", 70)))))
+    except (TypeError, ValueError):
+        raise HTTPException(400, "volume 0-100")
+    supported, detail = chime.play(vol)
+    clog(f"chime: test ({'played' if supported else 'unsupported'}) vol={vol}")
+    return {"ok": True, "supported": supported, "detail": detail, "wav": os.path.basename(chime.WAV_PATH)}
 
 
 @app.post("/api/whatsapp/test")

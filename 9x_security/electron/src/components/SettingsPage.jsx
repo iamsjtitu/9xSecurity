@@ -6,6 +6,7 @@ import UpdateProgress from './UpdateProgress.jsx';
 import WaGroupsPicker from './WaGroupsPicker.jsx';
 import CamerasTab from './CamerasTab.jsx';
 import TimeField, { describeWindow } from './TimeField.jsx';
+import PersonChimeCard from './PersonChimeCard.jsx';
 
 const TABS = [
   { id: 'cameras', label: 'Cameras', icon: Cctv },
@@ -324,6 +325,8 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
                 Raat 12 baje = <b>12:00 AM</b>, dopahar 12 baje = <b>12:00 PM</b>. jaise raat ka person window: 12:00 AM se 6:00 AM.
               </p>
             </div>
+
+            <PersonChimeCard s={s} set={set} showToast={showToast} />
 
             <div className="rounded-lg border border-slate-200 p-4 space-y-3">
               <label className="flex items-center gap-2.5 text-sm font-medium text-slate-800 cursor-pointer">

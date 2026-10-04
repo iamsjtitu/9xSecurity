@@ -85,6 +85,12 @@ DEFAULTS = {
     "capture_schedule_enabled": False,  # True => detection/capture only in window (video always on)
     "capture_start": "18:00",
     "capture_end": "06:00",
+    # ---- Lone-person chime (engine-side sound, works while UI is minimised/locked) ----
+    "person_chime_enabled": True,
+    "person_chime_schedule_enabled": True,   # True => only between start-end (night); False => 24h
+    "person_chime_start": "18:00",
+    "person_chime_end": "06:00",
+    "person_chime_volume": 70,               # 0-100
     # ---- Storage ----
     "auto_delete_enabled": True,   # auto-delete old events + snapshots
     "retention_days": 7,   # events + snapshots older than this are auto-deleted

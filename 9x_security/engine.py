@@ -23,12 +23,27 @@ from tracker import CentroidTracker, _iou as _box_iou
 OCR_MAX_QUEUE_WAIT_S = float(os.environ.get("OCR_MAX_QUEUE_WAIT_S", "20"))
 DEDUPE_S = float(os.environ.get("CROSS_DEDUPE_S", "20"))  # window for same-vehicle (track identity) de-dup
 PERSON_GROUP_S = float(os.environ.get("PERSON_GROUP_S", "2.5"))  # people crossing within this = one 'N persons' alert
+PERSON_VEHICLE_S = float(os.environ.get("PERSON_VEHICLE_S", "6"))  # person crossing within this of a vehicle at the same spot = rider/driver
+RIDER_GROW = 0.25       # vehicle box grown by this fraction when testing 'person ON/WITH the vehicle'
+RIDER_MIN_OVERLAP = 0.2  # >= this fraction of the person's box inside the grown vehicle box
+MOVING_S = 4.0           # a vehicle track counts as 'moving' this long after its last real move
 
 
 def _point_in_box(pt, box, grow=0.0):
     x1, y1, x2, y2 = box
     gx, gy = grow * (x2 - x1), grow * (y2 - y1)
     return x1 - gx <= pt[0] <= x2 + gx and y1 - gy <= pt[1] <= y2 + gy
+
+
+def _overlap_frac(inner, outer, grow=0.0):
+    """Fraction of `inner` box area that lies inside `outer` (grown by `grow` per side)."""
+    ix1, iy1, ix2, iy2 = inner
+    ox1, oy1, ox2, oy2 = outer
+    gx, gy = grow * (ox2 - ox1), grow * (oy2 - oy1)
+    w = min(ix2, ox2 + gx) - max(ix1, ox1 - gx)
+    h = min(iy2, oy2 + gy) - max(iy1, oy1 - gy)
+    area = max(1, (ix2 - ix1) * (iy2 - iy1))
+    return (max(0, w) * max(0, h)) / area
 MIN_PLATE_PX = 160
 
 
@@ -457,7 +472,7 @@ class SecurityEngine:
             detector = VehicleDetector(
                 model_path=path,
                 conf=self.cfg.get("confidence", 0.4),
-                allowed=config.allowed_classes(self.cfg),
+                allowed=config.detect_classes(self.cfg),
             )
         else:
             self.model_tier = "custom"
@@ -472,6 +487,8 @@ class SecurityEngine:
         self._ocr_q = None  # single OCR worker queue (created on first crossing)
         self._recent_cross = []  # (ts, to_side, bbox) of counted crossings for de-duplication
         self._person_groups = {}  # direction -> pending group (people crossing within PERSON_GROUP_S)
+        self._recent_vehicle_cross = []  # (ts, to_side, bbox, label) — riders/drivers are not lone persons
+        self._motion = {}  # track id -> [last_move_ts, ref_point]
         self.line_hints = []
         # OCR models load lazily on the first crossing (async thread) — no heavy
         # torch work competes with YOLO right at engine start.
@@ -504,7 +521,7 @@ class SecurityEngine:
 
         path, self.model_tier = resolve_model_path("fast")
         self.detector = VehicleDetector(
-            model_path=path, conf=self.cfg.get("confidence", 0.4), allowed=self.cfg.get("vehicle_classes")
+            model_path=path, conf=self.cfg.get("confidence", 0.4), allowed=config.detect_classes(self.cfg)
         )
         return self.detector.model_name
 
@@ -621,20 +638,29 @@ class SecurityEngine:
         self.last_dets = self._drop_ignored(self.last_dets, w, h)
         crossings = self.tracker.update(self.last_dets, (a, b), frame_size=(w, h))
         crossings = self._dedupe_crossings(crossings)
+        self._update_motion(time.time())
         self._update_line_hints(a, b, w, h)
         if self.cfg.get("enable_plate") and self.plate_reader is not None:
             self._update_best_crops(frame, original, w, h)
 
         events = []
         now = time.time()
+        self._recent_vehicle_cross = [r for r in self._recent_vehicle_cross if now - r[0] < PERSON_VEHICLE_S]
         for cr in crossings:
             cat = category_of(cr["label"])
+            if cat != "person":
+                # remembered even when this category is OFF: a rider/driver must never count as a person
+                self._recent_vehicle_cross.append((now, cr["to_side"], cr["bbox"], cr["label"]))
             if not self._category_enabled(cr, cat):
                 continue
             if not config.category_counts_now(self.cfg, cat):
                 clog(f"crossing ignored: {cat} schedule ke bahar (track {cr['track_id']})")
                 continue
             if cat == "person":
+                why = self._with_vehicle(cr)
+                if why:
+                    clog(f"person ignored: {why} — gaadi/bike ke saath hai, akela paidal nahi (track {cr['track_id']})")
+                    continue
                 self._queue_person(frame, cr, self._direction_for(cr["to_side"]), now)
             else:
                 events += self._emit_crossing(frame, original, cr, cat, w, h)
@@ -642,6 +668,40 @@ class SecurityEngine:
 
         annotated = self._annotate(frame, a, b)
         return annotated, events
+
+    def _with_vehicle(self, cr):
+        """Rider / driver / passenger test: the person's box sits on a MOVING vehicle or two-wheeler
+        track (a parked truck beside a walker must not hide him), or a vehicle crossed at this very
+        spot moments before (or after — re-checked at flush)."""
+        now = time.time()
+        for tid, tr in self.tracker.tracks.items():
+            if category_of(tr.label) == "person" or not self._is_moving(tid, now):
+                continue
+            if _overlap_frac(cr["bbox"], tr.bbox, RIDER_GROW) >= RIDER_MIN_OVERLAP:
+                return f"{tr.label} (track {tid}) ke upar/saath"
+        for ts, side, box, label in self._recent_vehicle_cross:
+            if side == cr["to_side"] and _overlap_frac(cr["bbox"], box, RIDER_GROW) >= RIDER_MIN_OVERLAP:
+                return f"{label} ne {now - ts:.1f}s pehle yahin cross kiya"
+        return ""
+
+    def _update_motion(self, now):
+        """Per-track 'last moved' timestamp (ref point moved >= 15% of box height)."""
+        live = self.tracker.tracks
+        for tid in [t for t in self._motion if t not in live]:
+            del self._motion[tid]
+        for tid, tr in live.items():
+            ref = self.tracker.ref_point(tr.bbox)
+            prev = self._motion.get(tid)
+            if prev is None:
+                self._motion[tid] = [now, ref]
+                continue
+            h = max(1, tr.bbox[3] - tr.bbox[1])
+            if math.hypot(ref[0] - prev[1][0], ref[1] - prev[1][1]) >= 0.15 * h:
+                prev[0], prev[1] = now, ref
+
+    def _is_moving(self, tid, now):
+        m = self._motion.get(tid)
+        return m is not None and now - m[0] < MOVING_S
 
     def _queue_person(self, frame, cr, direction, now):
         """People walk through a gate in a loose group (one behind another, 0.5-2 s apart).
@@ -661,7 +721,16 @@ class SecurityEngine:
             g = self._person_groups[direction]
             if force or now - g["last"] >= PERSON_GROUP_S:
                 del self._person_groups[direction]
-                out += self._emit_person_group(g["frame"], g["crs"], direction)
+                # a vehicle may have crossed right AFTER the person was queued (driver sits ahead of the wheels)
+                crs = []
+                for cr in g["crs"]:
+                    why = self._with_vehicle(cr)
+                    if why:
+                        clog(f"person ignored: {why} — gaadi/bike ke saath hai (track {cr['track_id']})")
+                    else:
+                        crs.append(cr)
+                if crs:
+                    out += self._emit_person_group(g["frame"], crs, direction)
         return out
 
     def _category_enabled(self, cr, cat):

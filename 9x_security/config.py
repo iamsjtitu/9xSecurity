@@ -231,13 +231,23 @@ CATEGORIES = ("vehicle", "person", "two_wheeler")
 
 
 def allowed_classes(cfg):
-    """COCO labels the detector should look for, from the category toggles."""
+    """COCO labels that may produce an ALERT, from the category toggles."""
     allowed = [c for c in (cfg.get("vehicle_classes") or []) if c in ("car", "truck", "bus")]
     if cfg.get("enable_two_wheeler"):
         allowed += ["motorcycle", "bicycle"]
     if cfg.get("enable_person"):
         allowed += ["person"]
     return allowed
+
+
+def detect_classes(cfg):
+    """Labels the detector looks for: alert classes + context. With Person ON, vehicles and
+    two-wheelers are always detected (even when their alerts are off) so a rider/driver is
+    recognised as 'person WITH a vehicle' and never becomes a lone-person alert."""
+    classes = allowed_classes(cfg)
+    if cfg.get("enable_person"):
+        classes += [c for c in ("car", "truck", "bus", "motorcycle", "bicycle") if c not in classes]
+    return classes
 
 
 def category_counts_now(cfg, category, now=None):

@@ -5,6 +5,7 @@ import DiagnosticsTab from './DiagnosticsTab.jsx';
 import UpdateProgress from './UpdateProgress.jsx';
 import WaGroupsPicker from './WaGroupsPicker.jsx';
 import CamerasTab from './CamerasTab.jsx';
+import TimeField, { describeWindow } from './TimeField.jsx';
 
 const TABS = [
   { id: 'cameras', label: 'Cameras', icon: Cctv },
@@ -167,7 +168,7 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
         ))}
       </div>
 
-      <div className={`card p-6 flex-1 ${tab === 'diagnostics' || tab === 'cameras' ? 'max-w-4xl' : 'max-w-2xl'}`}>
+      <div className={`card p-6 flex-1 ${['diagnostics', 'cameras', 'timing'].includes(tab) ? 'max-w-4xl' : 'max-w-2xl'}`}>
         {tab === 'diagnostics' && <DiagnosticsTab showToast={showToast} />}
         {tab === 'cameras' && <CamerasTab showToast={showToast} />}
         {tab === 'whatsapp' && (
@@ -253,19 +254,16 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
                   onChange={(e) => set('wa_schedule_enabled', e.target.checked)} data-testid="wa-schedule-toggle" />
                 WhatsApp alerts sirf schedule ke time par bhejo
               </label>
-              <div className="flex items-center gap-3 text-sm text-slate-700">
+              <div className="flex items-center flex-wrap gap-3 text-sm text-slate-700">
                 <span>Se</span>
-                <input type="time" className="input !w-auto" value={s.wa_start || '18:00'}
-                  onChange={(e) => set('wa_start', e.target.value)} disabled={!s.wa_schedule_enabled}
-                  data-testid="wa-start-time" />
+                <TimeField value={s.wa_start || '18:00'} onChange={(v) => set('wa_start', v)} disabled={!s.wa_schedule_enabled} testid="wa-start-time" />
                 <span>Tak</span>
-                <input type="time" className="input !w-auto" value={s.wa_end || '06:00'}
-                  onChange={(e) => set('wa_end', e.target.value)} disabled={!s.wa_schedule_enabled}
-                  data-testid="wa-end-time" />
+                <TimeField value={s.wa_end || '06:00'} onChange={(v) => set('wa_end', v)} disabled={!s.wa_schedule_enabled} testid="wa-end-time" />
               </div>
+              <p className="text-xs font-medium text-[#1f6feb]" data-testid="wa-window-desc">→ {describeWindow(s.wa_start || '18:00', s.wa_end || '06:00')}</p>
               <p className="text-xs text-slate-400">
-                Raat ka window bhi chalega — jaise 18:00 se 06:00 = shaam 6 baje se subah 6 baje tak.
-                Baaki time events capture honge par WhatsApp nahi jaayega.
+                Raat ka window bhi chalega — jaise 6:00 PM se 6:00 AM = shaam 6 baje se subah 6 baje tak.
+                Baaki time events capture honge par WhatsApp nahi jaayega. Yaad rakhein: raat 12 baje = 12:00 AM, dopahar 12 baje = 12:00 PM.
               </p>
             </div>
 
@@ -275,16 +273,13 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
                   onChange={(e) => set('capture_schedule_enabled', e.target.checked)} data-testid="capture-schedule-toggle" />
                 Capture/detection bhi sirf schedule ke time par chale
               </label>
-              <div className="flex items-center gap-3 text-sm text-slate-700">
+              <div className="flex items-center flex-wrap gap-3 text-sm text-slate-700">
                 <span>Se</span>
-                <input type="time" className="input !w-auto" value={s.capture_start || '18:00'}
-                  onChange={(e) => set('capture_start', e.target.value)} disabled={!s.capture_schedule_enabled}
-                  data-testid="capture-start-time" />
+                <TimeField value={s.capture_start || '18:00'} onChange={(v) => set('capture_start', v)} disabled={!s.capture_schedule_enabled} testid="capture-start-time" />
                 <span>Tak</span>
-                <input type="time" className="input !w-auto" value={s.capture_end || '06:00'}
-                  onChange={(e) => set('capture_end', e.target.value)} disabled={!s.capture_schedule_enabled}
-                  data-testid="capture-end-time" />
+                <TimeField value={s.capture_end || '06:00'} onChange={(v) => set('capture_end', v)} disabled={!s.capture_schedule_enabled} testid="capture-end-time" />
               </div>
+              <p className="text-xs font-medium text-[#1f6feb]" data-testid="capture-window-desc">→ {describeWindow(s.capture_start || '18:00', s.capture_end || '06:00')}</p>
               <p className="text-xs text-slate-400">
                 OFF (default) = 24 ghante capture hota rahega. ON = window ke bahar sirf live video
                 dikhegi, snapshots/events/alerts pause rahenge.
@@ -295,7 +290,7 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
               <div className="text-sm font-medium text-slate-800">Category ke hisaab se time (alag-alag)</div>
               <p className="text-xs text-slate-400 -mt-1">
                 Har category ka apna window. ON + window ke bahar = us category ki Entry/Exit <b>bilkul count nahi</b> hogi
-                (na photo, na alert). jaise: Person sirf raat 6–6, Two-wheeler 8–8, Vehicle poora din.
+                (na photo, na alert). jaise: Person sirf raat 12:00 AM–6:00 AM, Two-wheeler 8:00 AM–8:00 PM, Vehicle poora din.
               </p>
               {[['vehicle', '🚗 Vehicle (car/truck/bus)'], ['person', '👤 Person'], ['two_wheeler', '🏍️ Two-wheeler']].map(([cat, label]) => {
                 const sch = (s.cat_schedules || {})[cat] || { enabled: false, start: '00:00', end: '23:59' };
@@ -305,21 +300,29 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
                   api('/api/options', { method: 'POST', body: JSON.stringify({ cat_schedules: next }) }).catch((e) => showToast(e.message, 'error'));
                 };
                 return (
-                  <div key={cat} className="flex flex-wrap items-center gap-3 text-sm text-slate-700 border-t border-slate-100 pt-2 first:border-t-0 first:pt-0">
-                    <label className="flex items-center gap-2 cursor-pointer w-52 shrink-0">
-                      <input type="checkbox" className="h-4 w-4 accent-[#1f6feb]" checked={!!sch.enabled}
-                        onChange={(e) => setSch({ enabled: e.target.checked })} data-testid={`cat-sch-${cat}-toggle`} />
-                      {label}
-                    </label>
-                    <span className="text-slate-400">Se</span>
-                    <input type="time" className="input !w-auto" value={sch.start || '00:00'} disabled={!sch.enabled}
-                      onChange={(e) => setSch({ start: e.target.value })} data-testid={`cat-sch-${cat}-start`} />
-                    <span className="text-slate-400">Tak</span>
-                    <input type="time" className="input !w-auto" value={sch.end || '23:59'} disabled={!sch.enabled}
-                      onChange={(e) => setSch({ end: e.target.value })} data-testid={`cat-sch-${cat}-end`} />
+                  <div key={cat} className="space-y-1 border-t border-slate-100 pt-2 first:border-t-0 first:pt-0" data-testid={`cat-sch-${cat}-row`}>
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-slate-700">
+                      <label className="flex items-center gap-2 cursor-pointer w-52 shrink-0">
+                        <input type="checkbox" className="h-4 w-4 accent-[#1f6feb]" checked={!!sch.enabled}
+                          onChange={(e) => setSch({ enabled: e.target.checked })} data-testid={`cat-sch-${cat}-toggle`} />
+                        {label}
+                      </label>
+                      <span className="text-slate-400">Se</span>
+                      <TimeField value={sch.start || '00:00'} disabled={!sch.enabled} onChange={(v) => setSch({ start: v })} testid={`cat-sch-${cat}-start`} />
+                      <span className="text-slate-400">Tak</span>
+                      <TimeField value={sch.end || '23:59'} disabled={!sch.enabled} onChange={(v) => setSch({ end: v })} testid={`cat-sch-${cat}-end`} />
+                    </div>
+                    {sch.enabled && (
+                      <p className="text-xs font-medium text-[#1f6feb] pl-1" data-testid={`cat-sch-${cat}-desc`}>
+                        → sirf {describeWindow(sch.start || '00:00', sch.end || '23:59')} count hoga
+                      </p>
+                    )}
                   </div>
                 );
               })}
+              <p className="text-xs text-slate-400 border-t border-slate-100 pt-2">
+                Raat 12 baje = <b>12:00 AM</b>, dopahar 12 baje = <b>12:00 PM</b>. jaise raat ka person window: 12:00 AM se 6:00 AM.
+              </p>
             </div>
 
             <div className="rounded-lg border border-slate-200 p-4 space-y-3">

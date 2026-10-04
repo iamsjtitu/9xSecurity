@@ -60,6 +60,93 @@ def test_allowed_classes_from_toggles():
     assert config.allowed_classes({"vehicle_classes": []}) == []  # everything off = detect nothing
 
 
+def test_detect_classes_add_vehicle_context_when_person_on():
+    """Person ON => vehicles/two-wheelers are DETECTED (not alerted) so a rider is not a lone person."""
+    assert config.detect_classes({"vehicle_classes": []}) == []
+    ctx = config.detect_classes({"vehicle_classes": ["car"], "enable_person": True})
+    assert set(ctx) == {"car", "person", "truck", "bus", "motorcycle", "bicycle"}
+    assert "person" not in config.detect_classes({"vehicle_classes": ["car"], "enable_two_wheeler": True})
+
+
+def _rider_frames(vehicle_label, person_dx=0, person_dy=-50):
+    """A vehicle crossing with a person box sitting on top of it (rider/driver)."""
+    frames = []
+    for y in range(60, 300, 6):
+        frames.append([{"bbox": (720, y - 40, 840, y + 40), "label": vehicle_label},
+                       {"bbox": (750 + person_dx, y - 40 + person_dy - 30, 810 + person_dx, y + person_dy + 10), "label": "person"}])
+    return frames
+
+
+def test_rider_on_two_wheeler_is_only_a_two_wheeler_alert(tmp_path):
+    e = _engine(tmp_path, enable_person=True, enable_two_wheeler=True)
+    ev = _drive(e, _rider_frames("motorcycle"))
+    assert [x["category"] for x in ev] == ["two_wheeler"], ev
+    for x in ev:
+        if os.path.exists(x["image_path"]):
+            os.remove(x["image_path"])
+
+
+def test_rider_with_two_wheeler_alerts_off_is_not_a_person(tmp_path):
+    """Two-wheeler OFF + Person ON: the rider is still not a lone walker -> nothing at all."""
+    e = _engine(tmp_path, enable_person=True, enable_two_wheeler=False)
+    assert _drive(e, _rider_frames("motorcycle")) == []
+
+
+def test_driver_on_truck_is_only_a_truck_alert(tmp_path):
+    e = _engine(tmp_path, enable_person=True)
+    ev = _drive(e, _rider_frames("truck", person_dy=-20))
+    assert [x["vehicle_type"] for x in ev] == ["truck"], ev
+    for x in ev:
+        if os.path.exists(x["image_path"]):
+            os.remove(x["image_path"])
+
+
+def test_person_crossing_just_before_vehicle_is_dropped_at_flush(tmp_path):
+    """Driver sits ahead of the wheels: his box crosses first, the vehicle's bottom a second later."""
+    e = _engine(tmp_path, enable_person=True)
+    frames = []
+    for y in range(60, 300, 6):
+        frames.append([{"bbox": (750, y - 10, 810, y + 50), "label": "person"},     # ref 60px ahead
+                       {"bbox": (720, y - 100, 840, y - 20), "label": "car"}])
+    ev = _drive(e, frames)
+    assert [x["vehicle_type"] for x in ev] == ["car"], ev
+    for x in ev:
+        if os.path.exists(x["image_path"]):
+            os.remove(x["image_path"])
+
+
+def test_walker_next_to_parked_vehicle_still_counts(tmp_path):
+    """A parked truck standing on the line must not hide a lone walker passing in front of it."""
+    e = _engine(tmp_path, enable_person=True)
+    parked = {"bbox": (690, 40, 870, 200), "label": "truck"}
+    frames = [[parked] for _ in range(40)]  # truck stands still long enough to be 'not moving'
+    import numpy as np
+    frame = np.zeros((540, 960, 3), np.uint8)
+    clock = [5000.0]
+    import engine as eng_mod
+    orig = eng_mod.time.time
+    eng_mod.time.time = lambda: clock[0]
+    try:
+        for dets in frames:
+            e.detector.dets = dets
+            e.process_frame(frame)
+            clock[0] += 0.2
+        out = []
+        for y in range(60, 300, 6):
+            e.detector.dets = [parked, {"bbox": (750, y - 40, 810, y + 40), "label": "person"}]
+            out += e.process_frame(frame)[1]
+            clock[0] += 0.05
+        clock[0] += eng_mod.PERSON_GROUP_S + 0.1
+        e.detector.dets = [parked]
+        out += e.process_frame(frame)[1]
+    finally:
+        eng_mod.time.time = orig
+    assert [x["category"] for x in out] == ["person"], out
+    for x in out:
+        if os.path.exists(x["image_path"]):
+            os.remove(x["image_path"])
+
+
 def test_person_toggle_off_no_event_on_toggle_counts(tmp_path):
     e = _engine(tmp_path, enable_person=False)
     assert _drive(e, _cross("person")) == []            # person off -> ignored even if detected

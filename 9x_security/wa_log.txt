@@ -311,3 +311,5 @@
 2026-10-03T11:11:18 | text | to=919876543210 | status=201 | {"success": true, "data": {"id": "txt-1"}}
 2026-10-03T11:11:18 | image | to=919876543210 | status=500 | {"success": false, "error": "media upload failed"}
 2026-10-03T11:11:18 | text | to=919876543210 | status=201 | {"success": true, "data": {"id": "txt-1"}}
+2026-10-04T07:40:22 | text | to=919876543210 | status=201 | {"success":true}
+2026-10-04T07:40:25 | image | to=919812345678 | status=200 | {"success":true}

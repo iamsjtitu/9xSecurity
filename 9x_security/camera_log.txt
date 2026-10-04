@@ -6772,3 +6772,76 @@ RuntimeError: no AI in test
 2026-10-03T11:15:18 | svc: active camera -> cam2 'Back Camera' gate='Back Gate'
 2026-10-03T11:15:20 | svc: active camera -> cam1 'Front Camera' gate='Main Gate'
 2026-10-03T11:16:43 | svc: camera saved cam1 'Front Camera' gate='Main Gate'
+2026-10-04T07:39:55 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_motorcycle_07-39-55-001.jpg
+2026-10-04T07:39:55 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-04T07:39:55 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-04T07:39:55 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_truck_07-39-55-098.jpg
+2026-10-04T07:39:55 | person ignored: truck (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-04T07:39:55 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_car_07-39-55-147.jpg
+2026-10-04T07:39:55 | person ignored: car ne 0.0s pehle yahin cross kiya — gaadi/bike ke saath hai (track 1)
+2026-10-04T07:39:55 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_person_07-39-55-217.jpg
+2026-10-04T07:39:55 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_person_07-39-55-317.jpg
+2026-10-04T07:39:55 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_motorcycle_07-39-55-367.jpg
+2026-10-04T07:39:55 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_person_07-39-55-427.jpg
+2026-10-04T07:39:55 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_person_07-39-55-476.jpg
+2026-10-04T07:39:55 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_person_07-39-55-490.jpg
+2026-10-04T07:39:55 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-04T07:39:55 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_car_07-39-55-548.jpg
+2026-10-04T07:40:13 | event: Exit car track 1 (cross) -> /tmp/tmpqsj0a57h/snaps/2026-10-04/Exit_car_07-40-13-463.jpg
+2026-10-04T07:40:22 | === PROBE start: notaurl
+2026-10-04T07:40:22 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-10-04T07:40:25 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-04T07:40:25 | ffmpeg-pipe: starting
+2026-10-04T07:40:25 | event: Entry truck track 1 (cross) -> /tmp/tmpqsj0a57h/snaps/2026-10-04/Entry_truck_07-40-25-740.jpg
+2026-10-04T07:40:25 | event: Entry truck track 1 (cross) -> /tmp/tmpqsj0a57h/snaps/2026-10-04/Entry_truck_07-40-25-791.jpg
+2026-10-04T07:40:25 | event: Entry truck track 2 (cross) -> /tmp/tmpqsj0a57h/snaps/2026-10-04/Entry_truck_07-40-25-805.jpg
+2026-10-04T07:40:25 | event: Entry truck track 3 (cross) -> /tmp/tmpqsj0a57h/snaps/2026-10-04/Entry_truck_07-40-25-817.jpg
+2026-10-04T07:40:25 | event: Entry truck track 1 (cross) -> /tmp/tmpqsj0a57h/snaps/2026-10-04/Entry_truck_07-40-25-868.jpg
+2026-10-04T07:40:25 | crossing ignored: duplicate (track re-created where the last one was lost) of a vehicle counted <20s ago (track 2)
+2026-10-04T07:40:25 | event: Entry car track 1 (cross) -> /tmp/tmpqsj0a57h/snaps/2026-10-04/Entry_car_07-40-25-917.jpg
+2026-10-04T07:40:25 | event: Entry car track 2 (cross) -> /tmp/tmpqsj0a57h/snaps/2026-10-04/Entry_car_07-40-25-927.jpg
+2026-10-04T07:40:25 | event: Entry truck track 2 (cross) -> /tmp/tmpqsj0a57h/snaps/2026-10-04/Entry_truck_07-40-25-968.jpg
+2026-10-04T07:40:25 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 1)
+2026-10-04T07:40:26 | event: Entry truck track 1 (cross) -> /tmp/tmpqsj0a57h/snaps/2026-10-04/Entry_truck_07-40-26-093.jpg
+2026-10-04T07:40:27 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpvpzt318t/snaps/2026-10-04') path=/tmp/tmpvpzt318t/snaps/2026-10-04/Exit_car_07-40-27-203.jpg
+2026-10-04T07:40:28 | event: Entry truck track 1 (cross) -> /tmp/tmpqsj0a57h/snaps/2026-10-04/Entry_truck_07-40-28-009.jpg
+2026-10-04T07:40:28 | event: Entry truck track 3 (cross) -> /tmp/tmpqsj0a57h/snaps/2026-10-04/Entry_truck_07-40-28-025.jpg
+2026-10-04T07:40:28 | event: Entry truck track 1 (cross) -> /tmp/tmpqsj0a57h/snaps/2026-10-04/Entry_truck_07-40-28-069.jpg
+2026-10-04T07:40:28 | event: Entry truck track 1 (cross) -> /tmp/tmpqsj0a57h/snaps/2026-10-04/Entry_truck_07-40-28-118.jpg
+2026-10-04T07:40:28 | event: Exit car track 2 (cross) -> /tmp/tmpqsj0a57h/snaps/2026-10-04/Exit_car_07-40-28-134.jpg
+2026-10-04T07:40:45 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-10-04T07:40:45 | purge: 0 old events removed (retention 7d, cutoff 2026-09-27)
+2026-10-04T07:40:49 | svc: auto-connect — saved camera se connect kar raha hai
+2026-10-04T07:40:49 | svc: loading AI model
+2026-10-04T07:40:51 | svc: AI model loaded
+2026-10-04T07:40:53 | svc: AI self-test OK (yolov8s.pt, 622 ms, 0 dets on blank frame)
+2026-10-04T07:40:53 | svc: accurate model too slow here (622 ms > 350) -> yolov8n.pt
+2026-10-04T07:40:54 | svc: AI self-test OK (yolov8n.pt, 372 ms, 0 dets on blank frame)
+2026-10-04T07:40:54 | open_stream: transport=tcp
+2026-10-04T07:40:59 | open_stream: transport=udp
+2026-10-04T07:41:04 | open_stream: trying FFmpeg engine fallback
+2026-10-04T07:41:04 | ffmpeg-pipe: starting
+2026-10-04T07:41:09 | open_stream: falling back to default backend
+2026-10-04T07:41:14 | svc: source opened codec=unknown live=True
+2026-10-04T07:41:17 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-04T07:41:29 | svc: loading AI model
+2026-10-04T07:41:29 | svc: AI model loaded
+2026-10-04T07:41:31 | svc: AI self-test OK (yolov8s.pt, 553 ms, 0 dets on blank frame)
+2026-10-04T07:41:31 | svc: accurate model too slow here (553 ms > 350) -> yolov8n.pt
+2026-10-04T07:41:31 | svc: AI self-test OK (yolov8n.pt, 390 ms, 0 dets on blank frame)
+2026-10-04T07:41:31 | open_stream: transport=tcp
+2026-10-04T07:41:36 | open_stream: transport=udp
+2026-10-04T07:41:41 | open_stream: trying FFmpeg engine fallback
+2026-10-04T07:41:41 | ffmpeg-pipe: starting
+2026-10-04T07:41:46 | open_stream: falling back to default backend
+2026-10-04T07:41:51 | svc: source opened codec=unknown live=True
+2026-10-04T07:42:09 | svc: loading AI model
+2026-10-04T07:42:09 | svc: AI model loaded
+2026-10-04T07:42:11 | svc: AI self-test OK (yolov8s.pt, 516 ms, 0 dets on blank frame)
+2026-10-04T07:42:11 | svc: accurate model too slow here (516 ms > 350) -> yolov8n.pt
+2026-10-04T07:42:11 | svc: AI self-test OK (yolov8n.pt, 391 ms, 0 dets on blank frame)
+2026-10-04T07:42:11 | open_stream: transport=tcp
+2026-10-04T07:42:16 | open_stream: transport=udp
+2026-10-04T07:42:21 | open_stream: trying FFmpeg engine fallback
+2026-10-04T07:42:21 | ffmpeg-pipe: starting
+2026-10-04T07:42:27 | open_stream: falling back to default backend

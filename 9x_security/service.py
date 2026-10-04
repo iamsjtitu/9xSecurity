@@ -130,7 +130,7 @@ class Worker:
             self.engine.cfg = cfg
             try:
                 self.engine.notifier.update(cfg)
-                self.engine.detector.set_allowed(config.allowed_classes(cfg))
+                self.engine.detector.set_allowed(config.detect_classes(cfg))
                 self.engine.detector.conf = float(cfg.get("confidence", 0.4))
             except Exception:
                 pass

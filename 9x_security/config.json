@@ -22,7 +22,7 @@
     "person": {
       "enabled": false,
       "start": "00:00",
-      "end": "23:59"
+      "end": "06:59"
     },
     "two_wheeler": {
       "enabled": false,

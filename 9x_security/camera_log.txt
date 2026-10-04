@@ -6958,3 +6958,46 @@ RuntimeError: no AI in test
 2026-10-04T07:58:49 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_person_07-58-49-495.jpg
 2026-10-04T07:58:49 | crossing ignored: person schedule ke bahar (track 1)
 2026-10-04T07:58:49 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-04/Entry_car_07-58-49-544.jpg
+2026-10-04T08:09:33 | chime: person Entry — ghanti bajayi (event 7)
+2026-10-04T08:09:33 | chime: vehicle Entry — ghanti bajayi (event 8)
+2026-10-04T08:09:33 | chime: two_wheeler Exit — ghanti bajayi (event 9)
+2026-10-04T08:09:38 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-10-04T08:09:39 | purge: 0 old events removed (retention 7d, cutoff 2026-09-27)
+2026-10-04T08:09:42 | svc: auto-connect — saved camera se connect kar raha hai
+2026-10-04T08:09:43 | svc: loading AI model
+2026-10-04T08:09:44 | svc: AI model loaded
+2026-10-04T08:09:46 | chime: test person (unsupported) vol=60
+2026-10-04T08:09:46 | chime: test vehicle (unsupported) vol=60
+2026-10-04T08:09:46 | chime: test two_wheeler (unsupported) vol=60
+2026-10-04T08:09:47 | svc: AI self-test OK (yolov8s.pt, 716 ms, 0 dets on blank frame)
+2026-10-04T08:09:47 | svc: accurate model too slow here (716 ms > 350) -> yolov8n.pt
+2026-10-04T08:09:47 | svc: AI self-test OK (yolov8n.pt, 270 ms, 0 dets on blank frame)
+2026-10-04T08:09:47 | open_stream: transport=tcp
+2026-10-04T08:09:52 | open_stream: transport=udp
+2026-10-04T08:09:57 | open_stream: trying FFmpeg engine fallback
+2026-10-04T08:09:57 | ffmpeg-pipe: starting
+2026-10-04T08:10:02 | open_stream: falling back to default backend
+2026-10-04T08:10:06 | chime: test vehicle (unsupported) vol=70
+2026-10-04T08:10:08 | svc: source opened codec=unknown live=True
+2026-10-04T08:10:11 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-04T08:10:23 | svc: loading AI model
+2026-10-04T08:10:23 | svc: AI model loaded
+2026-10-04T08:10:24 | svc: AI self-test OK (yolov8s.pt, 703 ms, 0 dets on blank frame)
+2026-10-04T08:10:24 | svc: accurate model too slow here (703 ms > 350) -> yolov8n.pt
+2026-10-04T08:10:25 | svc: AI self-test OK (yolov8n.pt, 419 ms, 0 dets on blank frame)
+2026-10-04T08:10:25 | open_stream: transport=tcp
+2026-10-04T08:10:29 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-10-04T08:10:30 | open_stream: transport=udp
+2026-10-04T08:10:32 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-04T08:10:35 | svc: loading AI model
+2026-10-04T08:10:35 | svc: AI model loaded
+2026-10-04T08:10:37 | svc: AI self-test OK (yolov8s.pt, 600 ms, 0 dets on blank frame)
+2026-10-04T08:10:37 | svc: accurate model too slow here (600 ms > 350) -> yolov8n.pt
+2026-10-04T08:10:38 | svc: AI self-test OK (yolov8n.pt, 418 ms, 0 dets on blank frame)
+2026-10-04T08:10:38 | open_stream: transport=tcp
+2026-10-04T08:10:43 | open_stream: transport=udp
+2026-10-04T08:10:48 | open_stream: trying FFmpeg engine fallback
+2026-10-04T08:10:48 | ffmpeg-pipe: starting
+2026-10-04T08:10:52 | chime: person Entry — ghanti bajayi (event 7)
+2026-10-04T08:10:52 | chime: vehicle Entry — ghanti bajayi (event 8)
+2026-10-04T08:10:52 | chime: two_wheeler Exit — ghanti bajayi (event 9)

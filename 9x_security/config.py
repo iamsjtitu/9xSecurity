@@ -87,7 +87,9 @@ DEFAULTS = {
     "capture_end": "06:00",
     # ---- Lone-person chime (engine-side sound, works while UI is minimised/locked) ----
     "person_chime_enabled": True,
-    "person_chime_schedule_enabled": True,   # True => only between start-end (night); False => 24h
+    "vehicle_chime_enabled": True,           # deeper 'bong-bong' for car/truck/bus
+    "two_wheeler_chime_enabled": True,       # quick 'ti-ti' for bikes
+    "person_chime_schedule_enabled": True,   # True => only between start-end (night); False => 24h (shared by all)
     "person_chime_start": "18:00",
     "person_chime_end": "06:00",
     "person_chime_volume": 70,               # 0-100

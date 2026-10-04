@@ -961,3 +961,12 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - UI Settings > Timing: PersonChimeCard (person-chime-toggle, person-chime-schedule-toggle, person-chime-start/end
   TimeField, person-chime-desc, person-chime-volume + -value, person-chime-test-btn). Save via timing-save-btn.
 - Real sound = Windows build (winsound). Test sound button shows the unsupported hint on non-Windows.
+
+## Implemented (update 2026-06 #55) — Chime for vehicles & two-wheelers (self-tested: test_chime.py 6/6 + API + UI)
+- chime.TONES per category: person E5-G5 'ding-dong' (1.4 s), vehicle G4-E4 deeper 'bong-bong' (1.7 s), two_wheeler
+  A5 quick 'ti-ti' (0.8 s); files person_chime.wav / chime_vehicle.wav / chime_two_wheeler.wav built on demand per volume.
+  Shared night window + volume (person_chime_schedule_enabled/start/end/volume); toggles person_chime_enabled,
+  vehicle_chime_enabled, two_wheeler_chime_enabled (all default ON). Rate limit 3 s PER category. Worker._on_event
+  chimes on the first emission of any category (OCR 'done' re-fire never repeats).
+- POST /api/chime/test {volume, category} (400 on unknown category). UI card: 3 category rows with own Test buttons
+  (person/vehicle/two-wheeler-chime-toggle, *-chime-test-btn), shared schedule/volume below. Real sound = Windows build.

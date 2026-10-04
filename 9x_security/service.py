@@ -98,10 +98,10 @@ class Worker:
             "image_path": ev.get("image_path", ""),
             "timestamp": ev.get("timestamp"),
         }
-        if ev.get("category") == "person" and ev.get("plate_status") != "done":
+        if ev.get("plate_status") != "done":  # first emission only (OCR backfill re-fires the same event)
             try:
                 if chime.maybe_play(self.engine.cfg if self.engine else _cfg(), ev):
-                    clog(f"chime: akela person {ev.get('direction')} — ghanti bajayi (event {ev.get('id')})")
+                    clog(f"chime: {ev.get('category')} {ev.get('direction')} — ghanti bajayi (event {ev.get('id')})")
             except Exception as e:
                 clog(f"chime: error {e}")
 
@@ -910,7 +910,8 @@ _SETTINGS_KEYS = (
     "wa_account_email", "wa_account_password", "gh_token",
     "wa_schedule_enabled", "wa_start", "wa_end",
     "capture_schedule_enabled", "capture_start", "capture_end",
-    "person_chime_enabled", "person_chime_schedule_enabled", "person_chime_start", "person_chime_end",
+    "person_chime_enabled", "vehicle_chime_enabled", "two_wheeler_chime_enabled",
+    "person_chime_schedule_enabled", "person_chime_start", "person_chime_end",
     "auto_delete_enabled",
 )
 _SECRET_KEYS = ("wa_api_key", "gh_token", "wa_account_password")
@@ -965,7 +966,7 @@ def save_settings(body: dict, request: Request):
         cfg["auth_user"] = str(body["auth_user"]).strip() or "admin"
     if "auto_connect" in body:
         cfg["auto_connect"] = bool(body["auto_connect"])
-    for k in ("person_chime_enabled", "person_chime_schedule_enabled"):
+    for k in ("person_chime_enabled", "vehicle_chime_enabled", "two_wheeler_chime_enabled", "person_chime_schedule_enabled"):
         if k in body:
             cfg[k] = bool(body[k])
     for k in ("person_chime_start", "person_chime_end"):
@@ -996,15 +997,20 @@ def save_settings(body: dict, request: Request):
 
 @app.post("/api/chime/test")
 def chime_test(body: dict, request: Request):
-    """Play the lone-person chime once at the given volume (Settings 'Test sound')."""
+    """Play a chime once at the given volume (Settings 'Test sound'); category person|vehicle|two_wheeler."""
     _check(request)
+    body = body or {}
     try:
-        vol = max(0, min(100, int((body or {}).get("volume", _cfg().get("person_chime_volume", 70)))))
+        vol = max(0, min(100, int(body.get("volume", _cfg().get("person_chime_volume", 70)))))
     except (TypeError, ValueError):
         raise HTTPException(400, "volume 0-100")
-    supported, detail = chime.play(vol)
-    clog(f"chime: test ({'played' if supported else 'unsupported'}) vol={vol}")
-    return {"ok": True, "supported": supported, "detail": detail, "wav": os.path.basename(chime.WAV_PATH)}
+    category = str(body.get("category", "person") or "person")
+    if category not in chime.TONES:
+        raise HTTPException(400, "category person|vehicle|two_wheeler")
+    supported, detail = chime.play(vol, category)
+    clog(f"chime: test {category} ({'played' if supported else 'unsupported'}) vol={vol}")
+    return {"ok": True, "supported": supported, "detail": detail, "category": category,
+            "wav": os.path.basename(chime.wav_path(category))}
 
 
 @app.post("/api/whatsapp/test")

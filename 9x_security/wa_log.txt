@@ -313,3 +313,25 @@
 2026-10-03T11:11:18 | text | to=919876543210 | status=201 | {"success": true, "data": {"id": "txt-1"}}
 2026-10-04T07:40:22 | text | to=919876543210 | status=201 | {"success":true}
 2026-10-04T07:40:25 | image | to=919812345678 | status=200 | {"success":true}
+2026-10-04T07:43:05 | text | to=919876543210 | status=201 | {"success":true}
+2026-10-04T07:43:09 | image | to=919812345678 | status=200 | {"success":true}
+2026-10-04T07:43:40 | text | to=911234567890 | status=401 | {"detail":"Invalid API token"}
+2026-10-04T07:43:40 | image | to=911234567890 | status=401 | {"detail":"Invalid API token"}
+2026-10-04T07:43:42 | text | to=919876543210 | status=201 | {"success":true}
+2026-10-04T07:43:42 | image | to=919876543210 | status=200 | {"success":true}
+2026-10-04T07:43:42 | group-text | to=120363424861931093@g.us | status=201 | {"success":true}
+2026-10-04T07:43:42 | group-image | to=120363424861931093@g.us | status=200 | {"success":true}
+2026-10-04T07:43:42 | group-image | to=120363424861931093@g.us | status=200 | {"success":true}
+2026-10-04T07:43:42 | image | to=919876543210 | status=200 | {"success":true}
+2026-10-04T07:43:42 | text-error | to=120363424861931093@g.us | status=- | HTTPConnectionPool(host='127.0.0.1', port=9): Max retries exceeded with url: /api/v2/sendGroup (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=9): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-10-04T07:43:42 | outbox-queued | to=120363424861931093@g.us | status=- | id=1 reason=Internet/connection error: HTTPConnectionPool(host='127.0.0.1', port=9): Max retries exceeded with url: /api/v2/sendGroup (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=9): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-10-04T07:43:42 | group-text | to=120363424861931093@g.us | status=201 | {"success":true}
+2026-10-04T07:43:42 | outbox-sent | to=120363424861931093@g.us | status=- | id=1
+2026-10-04T07:43:42 | group-text | to=120363424861931093@g.us | status=201 | {"success":true}
+2026-10-04T07:43:42 | group-image | to=120363424861931093@g.us | status=200 | {"success":true}
+2026-10-04T07:43:45 | text | to=919876543210 | status=201 | {"success": true, "data": {"id": "txt-1"}}
+2026-10-04T07:43:45 | image | to=919876543210 | status=200 | {"success": true, "data": {"messageId": "pic-77", "fileType": "jpg"}}
+2026-10-04T07:43:45 | status | to=- | status=200 | {"success": true, "result": {"status": "OK", "statusInfo": "message successfully sent.", "delivery": "device"}}
+2026-10-04T07:43:45 | text | to=919876543210 | status=201 | {"success": true, "data": {"id": "txt-1"}}
+2026-10-04T07:43:45 | image | to=919876543210 | status=500 | {"success": false, "error": "media upload failed"}
+2026-10-04T07:43:45 | text | to=919876543210 | status=201 | {"success": true, "data": {"id": "txt-1"}}

@@ -930,3 +930,21 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   cameras-empty); events table 'Gate: X' under date (event-gate-<id>), snapshot modal gate, toast meta gate.
 - Tests: test_cameras.py 5/5 + agent tests/test_iter30_multicam_api.py 5/5; full regression green.
 - AWAITING USER (Windows build): real person/bike detection + 2.5 s grouped alert, schedule windows, second camera switch.
+
+## Implemented (update 2026-06 #53) — 12-hour AM/PM schedule picker + "person WITH vehicle is not a person" (testing agent iteration_31: 100%)
+- USER: Person timing '12:00 se 06:00' set kiya phir bhi din me person msg; aur gaadi/tractor/bike ke saath wale
+  person ka alag alert nahi chahiye — sirf akela paidal person count ho.
+- ROOT CAUSE #1: 24h <input type=time> me 12:00 = dopahar; user ka matlab raat 12 (00:00) tha -> window dopahar 12 ->
+  subah 6 ban gaya. FIX: TimeField.jsx 12-ghante picker (hour 12/1-11, minute, 'AM (raat/subah)' / 'PM (dopahar/shaam)')
+  for WA window, Capture window and all category windows; description line '→ raat 12:00 AM se subah 6:00 AM tak'
+  (describeWindow/dayPart); hints 'raat 12 baje = 12:00 AM, dopahar 12 = 12:00 PM'. Stored value stays 'HH:MM' 24h.
+  testids: <name>-hour/-minute/-ampm + data-value; wa-window-desc, capture-window-desc, cat-sch-<cat>-desc. Timing card max-w-4xl.
+- RULE #2 (engine): config.detect_classes() = alert classes + context (Person ON => car/truck/bus/motorcycle/bicycle are
+  always DETECTED so a rider is seen with his bike even when 2-wheeler alerts are OFF). _with_vehicle(cr): person box
+  >= 20% inside a MOVING vehicle/two-wheeler track box grown 25% (rider/driver/passenger), OR overlaps a vehicle
+  crossing at the same spot within PERSON_VEHICLE_S=6 s (same direction) -> person dropped (camera_log 'person ignored:
+  ... ke upar/saath' / '... ne Xs pehle yahin cross kiya'); re-checked at group flush (driver's box crosses before the
+  wheels). Parked vehicles (no move for MOVING_S=4 s, _update_motion) never hide a walker. Vehicle crossings are remembered
+  for this test even when their category is OFF/outside schedule. use_fast_model() now keeps person/2-wheeler classes (bug).
+- Tests: test_categories.py 14/14 (rider on bike, rider with 2W off, driver on truck, person-before-car, walker by parked
+  truck, detect_classes); regression 83 green. USER NEXT: Save to GitHub -> build install -> Timing me Person 12:00 AM -> 6:00 AM set karein.

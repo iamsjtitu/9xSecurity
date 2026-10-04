@@ -1,6 +1,11 @@
 {
   "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
-  "line": null,
+  "line": {
+    "x1": 0.1,
+    "y1": 0.2,
+    "x2": 0.9,
+    "y2": 0.8
+  },
   "entry_direction": "pos",
   "confidence": 0.4,
   "detector_model": "auto",
@@ -52,7 +57,12 @@
       "gate": "Main Gate",
       "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
       "rtsp_url_main": "",
-      "line": null,
+      "line": {
+        "x1": 0.1,
+        "y1": 0.2,
+        "x2": 0.9,
+        "y2": 0.8
+      },
       "entry_direction": "pos",
       "ignore_zones": []
     },
@@ -79,8 +89,8 @@
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "cbe7f241d1d951376310c06df22fe04f",
-  "auth_hash": "ab2d3bcb4511c490f97bbb0a26e418100b29df8f94add525687b68b369cc5ba1",
+  "auth_salt": "93db5490a127d8513983ffe5d4126281",
+  "auth_hash": "73b82869f91ba091b2fea37b3280b4e302f540c2913c83e4431e53f786b7b934",
   "github_repo": "",
   "gh_token": "TEST_GH",
   "rtsp_url_main": ""

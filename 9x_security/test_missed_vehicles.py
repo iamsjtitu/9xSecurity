@@ -56,6 +56,57 @@ def test_stale_track_never_grabs_a_new_vehicle_appearing_elsewhere():
     assert out == [] and len(tr.tracks) == 2
 
 
+def test_truck_clipped_by_right_edge_while_crossing_user_line_is_counted():
+    """USER 07-10 log: line drawn from (0.08,0.586) to (0.926,0.976) — its right half lies where big
+    close trucks touch the right picture edge. The clipped box's bottom-centre is wrong, so the old
+    rule refused to count; now the vehicle's known full width rebuilds the true centre."""
+    w, h = 960, 540
+    line = ((int(0.08 * w), int(0.586 * h)), (int(0.926 * w), int(0.976 * h)))
+    tr = CentroidTracker(min_gap_s=3.0)
+    t, out = 1000.0, []
+    # truck (300 px wide) fully visible above the line, driving down-right; from x1 > 660 its box is
+    # clipped at the right edge, and THAT is where its bottom-centre crosses the drawn line
+    for i in range(15):
+        rx, ry = 710 + i * 10, 440 + i * 7
+        out += tr.update([{"bbox": (rx - 150, ry - 200, min(w, rx + 150), ry), "label": "truck"}], line, now=t, frame_size=(w, h))
+        t += 0.07
+    assert len(out) == 1 and out[0]["via"] == "cross", (out, [r["reason"] for r in tr.rejects])
+    assert out[0]["bbox"][2] == w  # counted while clipped
+
+
+def test_truck_that_was_never_seen_whole_at_the_edge_is_still_not_counted():
+    """Regression guard: a box that is clipped from the start (phantom side-edge alerts) has no known
+    width -> no compensation -> no crossing."""
+    w, h = 960, 540
+    line = ((int(0.08 * w), int(0.586 * h)), (int(0.926 * w), int(0.976 * h)))
+    tr = CentroidTracker(min_gap_s=3.0)
+    t, out = 1000.0, []
+    for i in range(30):
+        bottom = 400 + i * 6
+        out += tr.update([{"bbox": (700, bottom - 200, w, bottom), "label": "truck"}], line, now=t, frame_size=(w, h))
+        t += 0.07
+    assert out == []
+
+
+def test_track_survives_a_two_second_occlusion_on_a_fast_pc():
+    """15 fps: 20 frames used to be only 1.3 s. Hidden 2 s behind the pillar -> same track, counted."""
+    tr = CentroidTracker(min_gap_s=3.0)
+    t, out = 1000.0, []
+    for bottom in (200, 215, 230, 245, 260):          # 15 px per 0.066 s ~ 225 px/s towards the line
+        out += tr.update([_box(480, bottom, w=120, h=150)], LINE, now=t, frame_size=FS)
+        t += 0.066
+    for _ in range(30):                               # 2.0 s without detections
+        out += tr.update([], LINE, now=t, frame_size=FS)
+        t += 0.066
+    assert len(tr.tracks) == 1                        # not aged out yet (lost_after_s 2.5)
+    out += tr.update([_box(480, 260 + 460, w=120, h=150)], LINE, now=t, frame_size=FS)  # where it should be now
+    assert len(out) == 1 and out[0]["track_id"] == 1
+    for _ in range(25):                               # > 20 frames AND > 2.5 s -> aged out
+        tr.update([], LINE, now=t, frame_size=FS)
+        t += 0.15
+    assert tr.tracks == {} and 1 in tr.lost
+
+
 def test_rejects_explain_uncounted_flips_and_possible_miss():
     tr = CentroidTracker(min_gap_s=3.0)
     short_line = ((800, 380), (960, 380))          # vehicle crosses the infinite line but NOT the drawn segment

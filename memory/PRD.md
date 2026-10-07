@@ -993,3 +993,19 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   possible-miss, queued cars both count / trolley box once, following car after lost-at-line); test_categories +3
   (animal vote, wide/tiny person dropped, dog beside walker). NEXT: user pastes Diagnostics after a miss -> read the
   'crossing rejected'/'POSSIBLE MISS'/'crossing ignored: duplicate' lines around that time.
+
+## Implemented (update 2026-06 #57) — USER log analysis (v1.0.37, 07-10): 4 Entry/2 Exit real vs 2/1 logged -> edge-clipping + aging fixes (self-tested: 81+20 pytest green)
+- LOG FINDINGS: only one dedupe line all day (13:29:54 'second box on the same vehicle' track 60 vs track 61 same frame,
+  IoU>0.3 -> one vehicle double-boxed, OK); the other 3 misses left NO log in 1.0.37 (no reject logging yet). Line is
+  (0.08,0.586)->(0.926,0.976): its right half lies where big close trucks touch the RIGHT picture edge; old rule
+  '_touches_edge -> steady=False' refused those crossings AND the stale side made the later flip fail the segment test
+  -> silent miss. Fast PC (ai 64 ms yolov8s): max_disappeared=20 frames was only ~1.3 s -> a truck hidden 2 s came
+  back as a new track past the line. engine_out: one engine crash 0xC0000374 on 03-10 (HEVC decode) -> restart gap.
+- FIX tracker: edge compensation — Track.full_w (width when last seen whole) rebuilds the true bottom-centre of a
+  left/right-clipped box (right: x1+full_w/2, left: x2-full_w/2) and keeps the track steady; boxes clipped from birth
+  (start_edge, no full_w) still never count (phantom side-edge guard kept). Track.ref stores the compensated ref used
+  for jump/segment maths. Aging: lost only when disappeared>max_disappeared AND now-last_ts>=lost_after_s (2.5 s).
+- Line hint reworded: both ends >= 5% inside the picture. Tests: test_missed_vehicles.py +3 (user-geometry clipped
+  truck counted, clipped-from-birth not counted, 2 s occlusion at 15 fps survives + ages out after 2.5 s/20 frames).
+- NEXT: user installs the new build -> camera_log will show 'crossing rejected: …'/'POSSIBLE MISS' for any remaining miss.
+  Advice given: line ends thoda andar (bottom-right end upar), camera H.264/sub-stream for HEVC drops.

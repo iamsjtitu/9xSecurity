@@ -590,7 +590,8 @@ class SecurityEngine:
         hints = []
         m = 0.04
         if any(not (m * w <= p[0] <= (1 - m) * w and m * h <= p[1] <= (1 - m) * h) for p in (a, b)):
-            hints.append("Line frame ke kinare ko chhoo rahi hai — kinare par aadhi dikhne wali/khadi gaadiyan galat alert de sakti hain; line ko thoda andar rakhein")
+            hints.append("Line picture ke kinare tak jaa rahi hai — kinare par kati hui (aadhi dikhti) gaadi ka sahi point nahi milta, "
+                         "crossing miss ya galat ho sakti hai; line ke dono sire kinare se kam se kam 5% andar rakhein")
         if math.hypot(b[0] - a[0], b[1] - a[1]) < 0.12 * w:
             hints.append("Line bahut chhoti hai — gate ki poori chaudai par khichein taaki har gaadi ise kaate")
         now = time.time()

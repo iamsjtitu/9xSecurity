@@ -76,6 +76,8 @@ class Track:
         self.last_ts = ts         # time of the last matched detection (speed-aware matching)
         self.vel = None           # centroid velocity px/s (EMA), None until the 2nd detection
         self.last_reject = ""     # why the latest side flip was NOT counted (diagnostics)
+        self.ref = ((bbox[0] + bbox[2]) // 2, bbox[3])  # ref point used last time (edge-compensated)
+        self.full_w = None        # width when last seen fully inside the picture (edge compensation)
 
     @property
     def counted(self):
@@ -106,10 +108,15 @@ class CentroidTracker:
     crossing it is disarmed until the ref point moves >= hysteresis px past the
     line, and a new crossing needs >= min_gap_s since the last one."""
 
-    def __init__(self, max_disappeared=20, max_distance=90, near_band=0, hysteresis=None, min_gap_s=3.0):
+    def __init__(self, max_disappeared=20, max_distance=90, near_band=0, hysteresis=None, min_gap_s=3.0,
+                 lost_after_s=2.5):
         self.next_id = 1
         self.tracks = {}
         self.max_disappeared = max_disappeared
+        # a track is dropped only after BOTH max_disappeared frames AND lost_after_s seconds without
+        # a detection: on a fast PC (15 fps) 20 frames is just 1.3 s — a truck hidden behind the gate
+        # pillar for 2 s would come back as a NEW track past the line and never be counted
+        self.lost_after_s = lost_after_s
         self.max_distance = max_distance
         # Occluded gates: a vehicle may FIRST appear already just past the line
         # (wall hides the outside). If it appeared within near_band px of the line
@@ -202,17 +209,30 @@ class CentroidTracker:
 
         for di, (c, d) in enumerate(inputs):
             cur_ref = self.ref_point(d["bbox"])
-            cur_dist = _side(cur_ref, a, b) / line_len
-            cur_sign = self._sign(cur_dist)
             best_id = assigned.get(di)
             if best_id is not None:
                 tr = self.tracks[best_id]
+                x1, y1, x2, y2 = d["bbox"]
+                edge = _touches_edge(d["bbox"], frame_size)
+                if edge and tr.full_w:
+                    # box clipped by the left/right picture edge: its centre is NOT the vehicle's
+                    # centre. We know how wide the vehicle really is (seen fully a moment ago), so
+                    # rebuild the true bottom-centre instead of refusing to count the crossing.
+                    if x2 >= frame_size[0] - 3:
+                        cur_ref = (int(x1 + tr.full_w / 2), y2)
+                    else:
+                        cur_ref = (int(x2 - tr.full_w / 2), y2)
+                    edge = False
+                elif not edge:
+                    tr.full_w = x2 - x1
+            cur_dist = _side(cur_ref, a, b) / line_len
+            cur_sign = self._sign(cur_dist)
+            if best_id is not None:
                 prev_sign = tr.side
-                prev_ref = self.ref_point(tr.bbox)
+                prev_ref = tr.ref
                 prev_c = tr.centroid
                 dt = max(0.0, now - tr.last_ts)
                 jump = math.hypot(cur_ref[0] - prev_ref[0], cur_ref[1] - prev_ref[1])
-                x1, y1, x2, y2 = d["bbox"]
                 size = max(x2 - x1, y2 - y1, 20)
                 # one-step teleport = not a real move. Allowed step: where the vehicle SHOULD be
                 # (its velocity x time, or stopped), or — for a fresh track without velocity yet —
@@ -226,14 +246,14 @@ class CentroidTracker:
                 else:
                     jump_eff, max_jump = jump, 0.8 * size
                 steady = jump_eff <= max_jump
-                edge = _touches_edge(d["bbox"], frame_size)
                 if edge:
-                    steady = False  # partly outside the picture: its bottom-centre is not where the vehicle is
+                    steady = False  # partly outside the picture and we never saw it whole: position unknown
                 if steady and dt > 1e-3:
                     v = ((c[0] - prev_c[0]) / dt, (c[1] - prev_c[1]) / dt)
                     tr.vel = v if tr.vel is None else (0.5 * tr.vel[0] + 0.5 * v[0], 0.5 * tr.vel[1] + 0.5 * v[1])
                 tr.centroid = c
                 tr.bbox = d["bbox"]
+                tr.ref = cur_ref
                 tr.labels[d["label"]] += 1
                 tr.disappeared = 0
                 tr.last_ts = now
@@ -288,14 +308,16 @@ class CentroidTracker:
                 self.next_id += 1
                 self.tracks[tid] = Track(tid, c, d["bbox"], d["label"], cur_sign, cur_dist, ts=now)
                 self.tracks[tid].start_edge = _touches_edge(d["bbox"], frame_size)
+                if not self.tracks[tid].start_edge:
+                    self.tracks[tid].full_w = d["bbox"][2] - d["bbox"][0]
                 used_track_ids.add(tid)
 
-        # Age out unmatched tracks
+        # Age out unmatched tracks (both the frame count AND the wall-clock gap must be exceeded)
         for tid in list(self.tracks.keys()):
             if tid not in used_track_ids:
                 tr = self.tracks[tid]
                 tr.disappeared += 1
-                if tr.disappeared > self.max_disappeared:
+                if tr.disappeared > self.max_disappeared and (now - tr.last_ts) >= self.lost_after_s:
                     if tr.crossings == 0 and tr.start_side != 0 and tr.side != 0 and tr.side != tr.start_side:
                         # it ended up on the other side of the line without ever being counted
                         self.rejects.append({"track_id": tid, "label": tr.label, "bbox": tr.bbox, "to_side": tr.side,

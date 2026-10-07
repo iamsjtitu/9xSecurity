@@ -970,3 +970,26 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   chimes on the first emission of any category (OCR 'done' re-fire never repeats).
 - POST /api/chime/test {volume, category} (400 on unknown category). UI card: 3 category rows with own Test buttons
   (person/vehicle/two-wheeler-chime-toggle, *-chime-test-btn), shared schedule/volume below. Real sound = Windows build.
+
+## Implemented (update 2026-06 #56) — Animal ≠ person + 2% missed-vehicle hardening + 'why not counted' logs (self-tested: 93 pytest green)
+- USER: (1) kutta 'PERSON' ban kar capture hua (night, 25x78 px box); (2) ~2% gaadiyan miss — zyadatar tez gaadi/bike
+  aur 2 gaadiyan peeche-peeche; Diagnostics log baad me bhejenge.
+- ANIMALS: detector COCO +bird/cat/dog/horse/sheep/cow (category 'animal', NEVER alerted); config.detect_classes adds
+  them as context when Person ON; tracker label vote: animal >= 25% of frames -> animal (ANIMAL_VOTE); engine
+  _sanitize_persons drops 'person' boxes wider than tall or < 4% frame height; _category_enabled('animal') False;
+  rider rule only looks at vehicle/two_wheeler tracks (a dog beside a walker does not hide him); HUD '(animal, ignored)'.
+- TRACKER (slow PC 2-4 det/s): Track.last_ts + vel (EMA centroid px/s). Matching window: known velocity -> predicted
+  position with slack base+0.5*speed*dt; unknown velocity -> fresh track (disappeared==0) gets cadence allowance
+  min(3*size, 5 sizes/s * dt), stale track only base radius (a vanished track must never grab a new vehicle elsewhere —
+  first attempt did exactly that, caught by test_e). Teleport guard uses the same prediction/cadence logic.
+  Engine passes now=_det_ts (detection time; skip frames re-feed stale boxes with dt 0).
+- DEDUPE: 'second box on the same vehicle' only within SAME_VEHICLE_S=3 s of the earlier crossing (queued cars in a
+  front-view camera overlap in the picture but cross seconds later -> both count); 'track re-created at the same spot'
+  only for via appeared-at-line (a vehicle followed from the other side that crosses here is the NEXT one).
+- DIAGNOSTICS: tracker.rejects -> camera_log 'crossing rejected: track N car Entry — <reason>' (rate-limited 10 s/track;
+  reasons: edge / teleport jump / outside drawn segment / not re-armed / within 3 s / same direction again) and
+  'POSSIBLE MISS: track N ... side badla par count nahi hua'; engine.possible_misses + detect_classes in /api/diagnostics.
+- Tests: test_missed_vehicles.py 6 (fast bike 2 det/s, hidden 1 s then past the line, stale track no grab, rejects +
+  possible-miss, queued cars both count / trolley box once, following car after lost-at-line); test_categories +3
+  (animal vote, wide/tiny person dropped, dog beside walker). NEXT: user pastes Diagnostics after a miss -> read the
+  'crossing rejected'/'POSSIBLE MISS'/'crossing ignored: duplicate' lines around that time.

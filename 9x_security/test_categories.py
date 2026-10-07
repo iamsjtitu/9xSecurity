@@ -42,6 +42,8 @@ def _drive(e, dets_per_frame, flush=True):
 
 
 def _cross(label, x=780, extra=0):
+    if label == "person":  # a human is taller than wide
+        return [[{"bbox": (x - 25 + extra, y - 70, x + 25 + extra, y + 10), "label": label}] for y in range(60, 300, 6)]
     return [[{"bbox": (x - 60 + extra, y - 40, x + 60 + extra, y + 40), "label": label}] for y in range(60, 300, 6)]
 
 
@@ -64,8 +66,47 @@ def test_detect_classes_add_vehicle_context_when_person_on():
     """Person ON => vehicles/two-wheelers are DETECTED (not alerted) so a rider is not a lone person."""
     assert config.detect_classes({"vehicle_classes": []}) == []
     ctx = config.detect_classes({"vehicle_classes": ["car"], "enable_person": True})
-    assert set(ctx) == {"car", "person", "truck", "bus", "motorcycle", "bicycle"}
+    assert {"car", "person", "truck", "bus", "motorcycle", "bicycle", "dog", "cow"} <= set(ctx)
     assert "person" not in config.detect_classes({"vehicle_classes": ["car"], "enable_two_wheeler": True})
+    assert "dog" not in config.detect_classes({"vehicle_classes": ["car"], "enable_two_wheeler": True})
+
+
+def test_animal_is_never_a_person(tmp_path):
+    """Dog called 'person' in some frames but 'dog' in >=25% -> animal -> no event, no photo."""
+    assert category_of("dog") == "animal" and category_of("cow") == "animal"
+    e = _engine(tmp_path, enable_person=True)
+    frames = []
+    for i, y in enumerate(range(60, 300, 6)):
+        label = "dog" if i % 3 == 0 else "person"  # 1 of 3 frames says dog
+        frames.append([{"bbox": (760, y - 70, 800, y + 10), "label": label}])
+    assert _drive(e, frames) == []
+
+
+def test_person_box_wider_than_tall_or_tiny_is_dropped(tmp_path):
+    e = _engine(tmp_path, enable_person=True)
+    wide = [[{"bbox": (720, y - 30, 840, y + 10), "label": "person"}] for y in range(60, 300, 6)]   # 120x40: animal shape
+    assert _drive(e, wide) == []
+    tiny = [[{"bbox": (778, y - 12, 782, y + 2), "label": "person"}] for y in range(60, 300, 6)]     # 4x14 px blob
+    assert _drive(_engine(tmp_path, enable_person=True), tiny) == []
+    tall = [[{"bbox": (760, y - 70, 800, y + 10), "label": "person"}] for y in range(60, 300, 6)]   # 40x80 human
+    ev = _drive(_engine(tmp_path, enable_person=True), tall)
+    assert len(ev) == 1 and ev[0]["category"] == "person"
+    for x in ev:
+        if os.path.exists(x["image_path"]):
+            os.remove(x["image_path"])
+
+
+def test_dog_beside_walker_does_not_hide_the_walker(tmp_path):
+    e = _engine(tmp_path, enable_person=True)
+    frames = []
+    for y in range(60, 300, 6):
+        frames.append([{"bbox": (760, y - 70, 800, y + 10), "label": "person"},
+                       {"bbox": (805, y - 20, 845, y + 10), "label": "dog"}])
+    ev = _drive(e, frames)
+    assert [x["category"] for x in ev] == ["person"], ev
+    for x in ev:
+        if os.path.exists(x["image_path"]):
+            os.remove(x["image_path"])
 
 
 def _rider_frames(vehicle_label, person_dx=0, person_dy=-50):
@@ -106,7 +147,7 @@ def test_person_crossing_just_before_vehicle_is_dropped_at_flush(tmp_path):
     e = _engine(tmp_path, enable_person=True)
     frames = []
     for y in range(60, 300, 6):
-        frames.append([{"bbox": (750, y - 10, 810, y + 50), "label": "person"},     # ref 60px ahead
+        frames.append([{"bbox": (755, y - 20, 805, y + 50), "label": "person"},     # ref 70px ahead
                        {"bbox": (720, y - 100, 840, y - 20), "label": "car"}])
     ev = _drive(e, frames)
     assert [x["vehicle_type"] for x in ev] == ["car"], ev
@@ -193,7 +234,7 @@ def test_person_group_flushes_after_quiet_time_and_separate_people_are_separate(
     monkeypatch.setattr(eng.time, "time", lambda: clock[0])
     out = []
     for y in range(60, 300, 6):
-        e.detector.dets = [{"bbox": (720, y - 40, 840, y + 40), "label": "person"}]
+        e.detector.dets = [{"bbox": (760, y - 70, 800, y + 10), "label": "person"}]
         out += e.process_frame(frame)[1]
         clock[0] += 0.03
     assert out == []                      # within the 2.5 s window: still waiting
@@ -202,7 +243,7 @@ def test_person_group_flushes_after_quiet_time_and_separate_people_are_separate(
     out += e.process_frame(frame)[1]      # next frame after the quiet time -> emitted
     assert len(out) == 1 and out[0]["count"] == 1
     for y in range(60, 300, 6):           # a second person much later -> its own alert
-        e.detector.dets = [{"bbox": (720, y - 40, 840, y + 40), "label": "person"}]
+        e.detector.dets = [{"bbox": (760, y - 70, 800, y + 10), "label": "person"}]
         out += e.process_frame(frame)[1]
         clock[0] += 0.03
     out += e.flush_pending(force=True)

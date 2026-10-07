@@ -7001,3 +7001,190 @@ RuntimeError: no AI in test
 2026-10-04T08:10:52 | chime: person Entry — ghanti bajayi (event 7)
 2026-10-04T08:10:52 | chime: vehicle Entry — ghanti bajayi (event 8)
 2026-10-04T08:10:52 | chime: two_wheeler Exit — ghanti bajayi (event 9)
+2026-10-07T09:13:02 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-13-02-993.jpg
+2026-10-07T09:13:03 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-13-03-054.jpg
+2026-10-07T09:13:03 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_motorcycle_09-13-03-111.jpg
+2026-10-07T09:13:03 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-07T09:13:03 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-07T09:13:03 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-13-03-264.jpg
+2026-10-07T09:13:03 | person ignored: truck (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-07T09:13:03 | person ignored: car (track 2) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-07T09:13:03 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_car_09-13-03-321.jpg
+2026-10-07T09:13:03 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-13-03-445.jpg
+2026-10-07T09:13:03 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-13-03-511.jpg
+2026-10-07T09:13:03 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_motorcycle_09-13-03-572.jpg
+2026-10-07T09:13:03 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-13-03-660.jpg
+2026-10-07T09:13:03 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-07T09:13:03 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_car_09-13-03-784.jpg
+2026-10-07T09:13:03 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-13-03-849.jpg
+2026-10-07T09:13:03 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-13-03-899.jpg
+2026-10-07T09:13:03 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-13-03-914.jpg
+2026-10-07T09:13:03 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-13-03-925.jpg
+2026-10-07T09:13:03 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-13-03-981.jpg
+2026-10-07T09:13:03 | crossing ignored: duplicate (track re-created where the last one was lost) of a vehicle counted <20s ago (track 2)
+2026-10-07T09:13:04 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_car_09-13-04-042.jpg
+2026-10-07T09:13:04 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_car_09-13-04-053.jpg
+2026-10-07T09:13:04 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-13-04-097.jpg
+2026-10-07T09:13:04 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 1)
+2026-10-07T09:13:04 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-13-04-306.jpg
+2026-10-07T09:13:14 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-13-14-422.jpg
+2026-10-07T09:13:14 | event: Exit truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Exit_truck_09-13-14-434.jpg
+2026-10-07T09:13:14 | crossing rejected: track 1 truck Entry — pichhli crossing ke baad abhi re-arm nahi hua (line ke bahut paas) (box (720, 56, 840, 136))
+2026-10-07T09:13:14 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-13-14-481.jpg
+2026-10-07T09:13:14 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-13-14-529.jpg
+2026-10-07T09:13:14 | event: Exit car track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Exit_car_09-13-14-543.jpg
+2026-10-07T09:13:14 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpi3houvl0/snaps/2026-10-07') path=/tmp/tmpi3houvl0/snaps/2026-10-07/Exit_car_09-13-14-593.jpg
+2026-10-07T09:13:15 | event: Exit car track 1 (cross) -> /tmp/tmp_bbogrkv/snaps/2026-10-07/Exit_car_09-13-15-402.jpg
+2026-10-07T09:13:16 | === PROBE start: notaurl
+2026-10-07T09:13:16 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-10-07T09:13:19 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-07T09:13:19 | ffmpeg-pipe: starting
+2026-10-07T09:16:45 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-16-45-154.jpg
+2026-10-07T09:16:45 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-16-45-195.jpg
+2026-10-07T09:16:45 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_motorcycle_09-16-45-230.jpg
+2026-10-07T09:16:45 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-07T09:16:45 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-07T09:16:45 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-16-45-306.jpg
+2026-10-07T09:16:45 | person ignored: truck (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-07T09:16:45 | person ignored: car (track 2) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-07T09:16:45 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_car_09-16-45-345.jpg
+2026-10-07T09:16:45 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-16-45-390.jpg
+2026-10-07T09:16:45 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-16-45-430.jpg
+2026-10-07T09:16:45 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_motorcycle_09-16-45-468.jpg
+2026-10-07T09:16:45 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-16-45-510.jpg
+2026-10-07T09:16:45 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-07T09:16:45 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_car_09-16-45-600.jpg
+2026-10-07T09:16:45 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-16-45-644.jpg
+2026-10-07T09:16:45 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-16-45-685.jpg
+2026-10-07T09:16:45 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-16-45-699.jpg
+2026-10-07T09:16:45 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-16-45-711.jpg
+2026-10-07T09:16:45 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-16-45-746.jpg
+2026-10-07T09:16:45 | crossing ignored: duplicate (track re-created where the last one was lost) of a vehicle counted <20s ago (track 2)
+2026-10-07T09:16:45 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_car_09-16-45-789.jpg
+2026-10-07T09:16:45 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_car_09-16-45-799.jpg
+2026-10-07T09:16:45 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-16-45-835.jpg
+2026-10-07T09:16:45 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 1)
+2026-10-07T09:16:45 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-16-45-938.jpg
+2026-10-07T09:16:49 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-16-49-339.jpg
+2026-10-07T09:16:49 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-16-49-352.jpg
+2026-10-07T09:16:49 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-16-49-387.jpg
+2026-10-07T09:16:49 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-16-49-422.jpg
+2026-10-07T09:16:49 | event: Exit car track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Exit_car_09-16-49-437.jpg
+2026-10-07T09:16:49 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpgi9pdfu0/snaps/2026-10-07') path=/tmp/tmpgi9pdfu0/snaps/2026-10-07/Exit_car_09-16-49-474.jpg
+2026-10-07T09:16:49 | event: Exit car track 1 (cross) -> /tmp/tmph62fn0g_/snaps/2026-10-07/Exit_car_09-16-49-667.jpg
+2026-10-07T09:16:50 | === PROBE start: notaurl
+2026-10-07T09:16:50 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-10-07T09:16:53 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-07T09:16:53 | ffmpeg-pipe: starting
+2026-10-07T09:17:31 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-17-31-236.jpg
+2026-10-07T09:17:31 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-17-31-280.jpg
+2026-10-07T09:17:31 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_motorcycle_09-17-31-318.jpg
+2026-10-07T09:17:31 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-07T09:17:31 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-07T09:17:31 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-17-31-398.jpg
+2026-10-07T09:17:31 | person ignored: truck (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-07T09:17:31 | person ignored: car (track 2) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-07T09:17:31 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_car_09-17-31-440.jpg
+2026-10-07T09:17:31 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-17-31-487.jpg
+2026-10-07T09:17:31 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-17-31-533.jpg
+2026-10-07T09:17:31 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_motorcycle_09-17-31-573.jpg
+2026-10-07T09:17:31 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-17-31-615.jpg
+2026-10-07T09:17:31 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-17-31-650.jpg
+2026-10-07T09:17:31 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-17-31-661.jpg
+2026-10-07T09:17:31 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-07T09:17:31 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_car_09-17-31-698.jpg
+2026-10-07T09:18:24 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-18-24-265.jpg
+2026-10-07T09:18:24 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-18-24-300.jpg
+2026-10-07T09:18:24 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-18-24-311.jpg
+2026-10-07T09:18:24 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-18-24-320.jpg
+2026-10-07T09:18:24 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-18-24-370.jpg
+2026-10-07T09:18:24 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-18-24-383.jpg
+2026-10-07T09:18:49 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-18-49-338.jpg
+2026-10-07T09:18:49 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-18-49-351.jpg
+2026-10-07T09:18:49 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-18-49-364.jpg
+2026-10-07T09:18:49 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 2)
+2026-10-07T09:18:49 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-18-49-405.jpg
+2026-10-07T09:18:49 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-18-49-417.jpg
+2026-10-07T09:19:03 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_car_09-19-03-348.jpg
+2026-10-07T09:19:03 | event: Exit car track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Exit_car_09-19-03-894.jpg
+2026-10-07T09:19:03 | plate OCR: track 1 Exit queued (2 crops)
+2026-10-07T09:19:04 | plate OCR: track 1 event 1 -> 'MH12AB1234' (single-read, 2 crops)
+2026-10-07T09:19:05 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-05-448.jpg
+2026-10-07T09:19:05 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-05-461.jpg
+2026-10-07T09:19:05 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-05-473.jpg
+2026-10-07T09:19:05 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 2)
+2026-10-07T09:19:05 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-05-510.jpg
+2026-10-07T09:19:05 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-05-523.jpg
+2026-10-07T09:19:05 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-19-05-607.jpg
+2026-10-07T09:19:05 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-19-05-650.jpg
+2026-10-07T09:19:05 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_motorcycle_09-19-05-689.jpg
+2026-10-07T09:19:05 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-07T09:19:05 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-07T09:19:05 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-05-779.jpg
+2026-10-07T09:19:05 | person ignored: truck (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-07T09:19:05 | person ignored: car (track 2) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-07T09:19:05 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_car_09-19-05-819.jpg
+2026-10-07T09:19:05 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-19-05-865.jpg
+2026-10-07T09:19:05 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-19-05-912.jpg
+2026-10-07T09:19:05 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_motorcycle_09-19-05-949.jpg
+2026-10-07T09:19:05 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-19-05-992.jpg
+2026-10-07T09:19:06 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-19-06-044.jpg
+2026-10-07T09:19:06 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_person_09-19-06-056.jpg
+2026-10-07T09:19:06 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-07T09:19:06 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_car_09-19-06-107.jpg
+2026-10-07T09:19:06 | chime: person Entry — ghanti bajayi (event 7)
+2026-10-07T09:19:06 | chime: vehicle Entry — ghanti bajayi (event 8)
+2026-10-07T09:19:06 | chime: two_wheeler Exit — ghanti bajayi (event 9)
+2026-10-07T09:19:06 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-06-270.jpg
+2026-10-07T09:19:06 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-06-308.jpg
+2026-10-07T09:19:06 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-06-323.jpg
+2026-10-07T09:19:06 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-06-333.jpg
+2026-10-07T09:19:06 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-06-367.jpg
+2026-10-07T09:19:06 | crossing ignored: duplicate (track re-created where the last one was lost) of a vehicle counted <20s ago (track 2)
+2026-10-07T09:19:06 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_car_09-19-06-407.jpg
+2026-10-07T09:19:06 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_car_09-19-06-417.jpg
+2026-10-07T09:19:06 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-06-453.jpg
+2026-10-07T09:19:06 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 1)
+2026-10-07T09:19:06 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-06-629.jpg
+2026-10-07T09:19:10 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-10-440.jpg
+2026-10-07T09:19:10 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-10-453.jpg
+2026-10-07T09:19:10 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-10-494.jpg
+2026-10-07T09:19:10 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-07/Entry_truck_09-19-10-536.jpg
+2026-10-07T09:19:10 | event: Exit car track 2 (cross) -> /app/9x_security/snapshots/2026-10-07/Exit_car_09-19-10-552.jpg
+2026-10-07T09:19:10 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpcsmce74m/snaps/2026-10-07') path=/tmp/tmpcsmce74m/snaps/2026-10-07/Exit_car_09-19-10-596.jpg
+2026-10-07T09:19:10 | event: Exit car track 1 (cross) -> /tmp/tmpkxi3rzlg/snaps/2026-10-07/Exit_car_09-19-10-979.jpg
+2026-10-07T09:19:11 | === PROBE start: notaurl
+2026-10-07T09:19:11 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-10-07T09:19:14 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-07T09:19:14 | ffmpeg-pipe: starting
+2026-10-07T09:19:14 | event: Exit car track 1 (cross) -> /tmp/tmpkxi3rzlg/snaps/2026-10-07/Exit_car_09-19-14-982.jpg
+2026-10-07T09:19:14 | plate OCR: track 1 Exit queued (2 crops)
+2026-10-07T09:19:15 | plate OCR: track 1 event 1 -> 'KA01MJ2022' (fake, 2 crops)
+2026-10-07T09:19:15 | svc: loading AI model
+2026-10-07T09:19:15 | svc: AI model loaded
+2026-10-07T09:19:15 | svc: AI self-test OK (yolov8n.pt, 201 ms, 0 dets on blank frame)
+2026-10-07T09:19:15 | svc: source opened codec=hevc live=True
+2026-10-07T09:19:15 | svc: HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein
+2026-10-07T09:19:15 | svc: streaming started
+2026-10-07T09:19:19 | event: Exit bus track 1 (cross) -> /tmp/tmpfybv7_pv/snaps/2026-10-07/Exit_bus_09-19-19-384.jpg
+2026-10-07T09:19:27 | event: Entry bus track 1 (cross) -> /tmp/tmpfybv7_pv/snaps/2026-10-07/Entry_bus_09-19-27-139.jpg
+2026-10-07T09:21:11 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-10-07T09:21:11 | purge: 0 old events removed (retention 7d, cutoff 2026-09-30)
+2026-10-07T09:21:15 | svc: auto-connect — saved camera se connect kar raha hai
+2026-10-07T09:21:15 | svc: loading AI model
+2026-10-07T09:21:16 | svc: AI model loaded
+2026-10-07T09:21:18 | svc: AI self-test OK (yolov8s.pt, 706 ms, 0 dets on blank frame)
+2026-10-07T09:21:18 | svc: accurate model too slow here (706 ms > 350) -> yolov8n.pt
+2026-10-07T09:21:19 | svc: AI self-test OK (yolov8n.pt, 508 ms, 0 dets on blank frame)
+2026-10-07T09:21:19 | open_stream: transport=tcp
+2026-10-07T09:21:20 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-10-07T09:21:23 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-07T09:21:24 | svc: loading AI model
+2026-10-07T09:21:25 | svc: AI model loaded
+2026-10-07T09:21:26 | svc: AI self-test OK (yolov8s.pt, 503 ms, 0 dets on blank frame)
+2026-10-07T09:21:26 | svc: accurate model too slow here (503 ms > 350) -> yolov8n.pt
+2026-10-07T09:21:26 | svc: AI self-test OK (yolov8n.pt, 248 ms, 0 dets on blank frame)
+2026-10-07T09:21:26 | open_stream: transport=tcp
+2026-10-07T09:21:31 | open_stream: transport=udp
+2026-10-07T09:21:36 | open_stream: trying FFmpeg engine fallback
+2026-10-07T09:21:36 | ffmpeg-pipe: starting

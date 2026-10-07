@@ -251,10 +251,12 @@ def allowed_classes(cfg):
 def detect_classes(cfg):
     """Labels the detector looks for: alert classes + context. With Person ON, vehicles and
     two-wheelers are always detected (even when their alerts are off) so a rider/driver is
-    recognised as 'person WITH a vehicle' and never becomes a lone-person alert."""
+    recognised as 'person WITH a vehicle', and animals are detected so a dog/cow is never
+    mistaken for a person (animals are never alerted)."""
     classes = allowed_classes(cfg)
     if cfg.get("enable_person"):
-        classes += [c for c in ("car", "truck", "bus", "motorcycle", "bicycle") if c not in classes]
+        classes += [c for c in ("car", "truck", "bus", "motorcycle", "bicycle",
+                                "dog", "cat", "cow", "horse", "sheep", "bird") if c not in classes]
     return classes
 
 

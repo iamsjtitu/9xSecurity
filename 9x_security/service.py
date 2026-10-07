@@ -1121,6 +1121,8 @@ def diagnostics(request: Request):
             "detector_model": cfg.get("detector_model", "auto"),
             "ai_model": eng.detector.model_name if eng else None,
             "ai_tier": eng.model_tier if eng else None,
+            "possible_misses": getattr(eng, "possible_misses", 0) if eng else 0,
+            "detect_classes": config.detect_classes(cfg),
         },
         "whatsapp": {
             "enabled": bool(cfg.get("wa_enabled")),

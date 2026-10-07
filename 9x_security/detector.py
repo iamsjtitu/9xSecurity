@@ -3,18 +3,23 @@ import os
 
 import config
 
-# COCO class ids we detect, grouped into user-facing categories.
-COCO_CLASSES = {0: "person", 1: "bicycle", 2: "car", 3: "motorcycle", 5: "bus", 7: "truck"}
+# COCO class ids we detect, grouped into user-facing categories. Animals are detected only as
+# CONTEXT (never alerted): a dog/cow that YOLO would otherwise call 'person' in a few frames
+# gets its real label and is voted out of the person category by the tracker.
+ANIMAL_LABELS = ("dog", "cat", "cow", "horse", "sheep", "bird")
+COCO_CLASSES = {0: "person", 1: "bicycle", 2: "car", 3: "motorcycle", 5: "bus", 7: "truck",
+                14: "bird", 15: "cat", 16: "dog", 17: "horse", 18: "sheep", 19: "cow"}
 COCO_VEHICLES = COCO_CLASSES  # backwards-compat alias
 CATEGORY = {
     "person": "person",
     "bicycle": "two_wheeler", "motorcycle": "two_wheeler",
     "car": "vehicle", "truck": "vehicle", "bus": "vehicle",
+    **{a: "animal" for a in ANIMAL_LABELS},
 }
 
 
 def category_of(label):
-    """person / two_wheeler / vehicle for a detected label."""
+    """person / two_wheeler / vehicle / animal for a detected label."""
     return CATEGORY.get(label, "vehicle")
 
 MODEL_FILES = {"fast": "yolov8n.pt", "accurate": "yolov8s.pt"}

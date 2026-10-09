@@ -353,3 +353,5 @@
 2026-10-07T09:30:56 | image | to=919812345678 | status=200 | {"success":true}
 2026-10-07T09:32:35 | text | to=911234567890 | status=401 | {"detail":"Invalid API token"}
 2026-10-07T09:32:36 | image | to=911234567890 | status=401 | {"detail":"Invalid API token"}
+2026-10-09T08:04:10 | text | to=911234567890 | status=401 | {"detail":"Invalid API token"}
+2026-10-09T08:04:12 | image | to=911234567890 | status=401 | {"detail":"Invalid API token"}

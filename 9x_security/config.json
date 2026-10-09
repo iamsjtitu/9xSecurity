@@ -1,11 +1,6 @@
 {
-  "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
-  "line": {
-    "x1": 0.1,
-    "y1": 0.2,
-    "x2": 0.9,
-    "y2": 0.8
-  },
+  "rtsp_url": "",
+  "line": null,
   "entry_direction": "pos",
   "confidence": 0.4,
   "detector_model": "auto",
@@ -62,16 +57,17 @@
       "id": "cam1",
       "name": "Front Camera",
       "gate": "Main Gate",
-      "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
+      "rtsp_url": "",
       "rtsp_url_main": "",
-      "line": {
-        "x1": 0.1,
-        "y1": 0.2,
-        "x2": 0.9,
-        "y2": 0.8
-      },
+      "line": null,
       "entry_direction": "pos",
-      "ignore_zones": []
+      "ignore_zones": [],
+      "monitor": false,
+      "schedule": {
+        "enabled": false,
+        "start": "20:00",
+        "end": "08:00"
+      }
     },
     {
       "id": "cam2",
@@ -86,18 +82,24 @@
         "y2": 0.77
       },
       "entry_direction": "pos",
-      "ignore_zones": []
+      "ignore_zones": [],
+      "monitor": true,
+      "schedule": {
+        "enabled": true,
+        "start": "20:00",
+        "end": "08:00"
+      }
     }
   ],
   "active_camera_id": "cam1",
   "auto_connect": true,
-  "setup_done": true,
+  "setup_done": false,
   "auto_lock_minutes": 10,
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "e42b9ffec7110444a5bc7c37dd240865",
-  "auth_hash": "6731e4e776db1115edef7c07fa64953054b54d651021c76543816d3f60176898",
+  "auth_salt": "9a3077cceb7bbfc2141e646518925478",
+  "auth_hash": "ad4e291517015e5ae7574bbff0818893871cdb62b0e659e4e058465ef9b7c7f2",
   "github_repo": "",
   "gh_token": "TEST_GH",
   "rtsp_url_main": ""

@@ -61,8 +61,52 @@ def _check(request: Request):
 AUTO_MODEL_MAX_MS = int(os.environ.get("AUTO_MODEL_MAX_MS", "350"))  # accurate model budget per frame
 
 
-class Worker:
+class SharedPlateReader:
+    """One EasyOCR instance for all camera workers (models are heavy); reads are serialised."""
+
     def __init__(self):
+        self._reader = None
+        self._lock = threading.Lock()
+
+    def _get(self):
+        if self._reader is None:
+            from plate_reader import PlateReader
+
+            self._reader = PlateReader()
+        return self._reader
+
+    def warmup(self):
+        with self._lock:
+            return self._get().warmup()
+
+    def read_many(self, crops, budget_s=8.0):
+        with self._lock:
+            return self._get().read_many(crops, budget_s=budget_s)
+
+    def read(self, crop):
+        with self._lock:
+            return self._get().read(crop)
+
+    @property
+    def last_error(self):
+        return getattr(self._reader, "last_error", "")
+
+    @property
+    def last_trace(self):
+        return getattr(self._reader, "last_trace", [])
+
+
+_plate_reader = SharedPlateReader()
+_open_lock = threading.Lock()  # open_stream sets process-wide FFmpeg env options: one open at a time
+
+
+class Worker:
+    """One camera = one worker (own stream + own engine). All saved cameras run together; each
+    stays in STANDBY (stream closed, no CPU) outside its own time window unless it is the camera
+    being viewed on the dashboard."""
+
+    def __init__(self, cam_id=""):
+        self.cam_id = cam_id
         self._running = False
         self.user_stopped = False  # set by Disconnect: auto-connect stays quiet until Connect
         self._fix_attempts = {}   # source url -> ts of last stream-path discovery attempt
@@ -75,6 +119,7 @@ class Worker:
         self._lock = threading.Lock()
         self.last_frame_ts = 0.0
         self.capture_paused = False
+        self.standby = False      # outside own time window and not viewed: stream closed
         self.ai_error = ""        # last AI failure (self-test / per-frame), '' = healthy
         self.ai_ms = None         # smoothed process_frame time (ms)
         self.ai_frames = 0        # frames processed by AI since connect
@@ -83,6 +128,37 @@ class Worker:
         self.last_event = None    # latest captured event (for the UI capture toast)
         self.codec = ""           # stream codec (hevc/h264/...) for diagnostics
         self.frames_dropped = 0   # live frames skipped because the AI was busy (normal, keeps lag ~0)
+
+    # ---- per-camera config -------------------------------------------------
+    def camera(self, cfg=None):
+        cfg = cfg or _cfg()
+        return config.camera_by_id(cfg, self.cam_id)
+
+    def cam_cfg(self, cfg=None):
+        cfg = cfg or _cfg()
+        cam = config.camera_by_id(cfg, self.cam_id)
+        return config.camera_cfg(cfg, cam) if cam else cfg
+
+    @property
+    def name(self):
+        cam = self.camera()
+        return (cam or {}).get("name") or "Camera"
+
+    def is_viewed(self, cfg=None):
+        cfg = cfg or _cfg()
+        return not self.cam_id or cfg.get("active_camera_id") == self.cam_id
+
+    def window_open(self, cfg=None):
+        cam = self.camera(cfg)
+        return config.camera_window_open(cam) if cam else True
+
+    def should_stream(self, cfg=None):
+        """Stream only inside the camera's own window — or whenever the user is looking at it."""
+        cfg = cfg or _cfg()
+        return self.window_open(cfg) or self.is_viewed(cfg)
+
+    def _log(self, msg):
+        clog(f"svc[{self.name}]: {msg}" if self.cam_id else f"svc: {msg}")
 
     def _on_event(self, ev):
         self.last_event = {
@@ -134,6 +210,7 @@ class Worker:
 
     def apply_cfg(self, cfg):
         if self.engine is not None:
+            cfg = self.cam_cfg(cfg)
             self.engine.cfg = cfg
             try:
                 self.engine.notifier.update(cfg)
@@ -190,22 +267,23 @@ class Worker:
     def _open(self, source, live, gen=None):
         """open_stream + (for live RTSP) a latest-frame reader so the decoder never
         waits for the AI. Records the stream codec for diagnostics."""
-        cap = open_stream(source, (lambda: self._alive(gen)) if gen is not None else (lambda: self._running))
+        with _open_lock:
+            cap = open_stream(source, (lambda: self._alive(gen)) if gen is not None else (lambda: self._running))
         if cap is None:
             return None
         self.codec = codec_name(cap)
         self.frames_dropped = 0
         if live:
             cap = LatestFrameReader(cap)
-        clog(f"svc: source opened codec={self.codec or 'unknown'} live={live}")
+        self._log(f"source opened codec={self.codec or 'unknown'} live={live}")
         if self.codec in HEVC_CODECS:
-            clog("svc: HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 "
-                 "ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein")
+            self._log("HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 "
+                      "ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein")
         return cap
 
     def _auto_fix_source(self, source):
         """Live RTSP open failed: ask the camera why (DESCRIBE) and, for a wrong/missing stream
-        path, discover the real one and save it as the camera URL. Re-tried per URL every 10 min."""
+        path, discover the real one and save it as THIS camera's URL. Re-tried per URL every 10 min."""
         now = time.time()
         last = self._fix_attempts.get(source)
         if last and now - last < 600:
@@ -215,13 +293,17 @@ class Worker:
         try:
             fixed, why = auto_fix_stream_url(source)
         except Exception as e:
-            clog(f"svc: stream path discovery error: {e}")
+            self._log(f"stream path discovery error: {e}")
             return ""
         self.open_error = why
         if not fixed:
             return ""
         cfg = _cfg()
-        cfg["rtsp_url"] = fixed
+        cam = config.camera_by_id(cfg, self.cam_id)
+        if cam is not None:
+            cam["rtsp_url"] = fixed
+        if cam is None or cfg.get("active_camera_id") == self.cam_id:
+            cfg["rtsp_url"] = fixed
         config.save_config(cfg)
         self._fix_attempts.pop(source, None)
         return fixed
@@ -246,22 +328,43 @@ class Worker:
         t0 = time.time()
         dets = self.engine.detector.detect(blank)
         ms = (time.time() - t0) * 1000
-        clog(f"svc: AI self-test OK ({getattr(self.engine.detector, 'model_name', '?')}, {ms:.0f} ms, {len(dets)} dets on blank frame)")
+        self._log(f"AI self-test OK ({getattr(self.engine.detector, 'model_name', '?')}, {ms:.0f} ms, {len(dets)} dets on blank frame)")
         return ms
 
+    def _standby_status(self, cam):
+        sch = config.camera_schedule(cam)
+        return (f"Standby — {cam.get('name', 'Camera')} ka time {config.fmt12(sch['start'])} se {config.fmt12(sch['end'])} tak hai; "
+                f"us time apne aap chalu hoga (stream band, PC par load nahi)")
+
+    def _wait_standby(self, gen):
+        """Outside own window and not viewed: hold with the stream closed. Returns False if stopped."""
+        cam = self.camera()
+        if cam is None:
+            return self._alive(gen)
+        self.standby = True
+        self.capture_paused = True
+        self.status = self._standby_status(cam)
+        self._log("standby — apne time window ke bahar, stream band")
+        while self._alive(gen) and not self.should_stream():
+            time.sleep(2)
+        self.standby = False
+        if self._alive(gen):
+            self._log("standby khatam — stream khol raha hai")
+        return self._alive(gen)
+
     def _run_impl(self, gen):
-        cfg = _cfg()
+        cfg = self.cam_cfg()
         self.ai_error, self.ai_ms, self.ai_frames, self.ai_errors = "", None, 0, 0
         self.status = "AI model load ho raha hai..."
-        clog("svc: loading AI model")
+        self._log("loading AI model")
         try:
-            self.engine = SecurityEngine(cfg=cfg, db=_db)
+            self.engine = SecurityEngine(cfg=cfg, db=_db, plate_reader=_plate_reader if cfg.get("enable_plate") else None)
             self.engine.on_event = self._on_event
-            clog("svc: AI model loaded")
+            self._log("AI model loaded")
         except Exception:
             import traceback
 
-            clog("svc: MODEL LOAD FAILED:\n" + traceback.format_exc())
+            self._log("MODEL LOAD FAILED:\n" + traceback.format_exc())
             self.engine = None
             self.ai_error = "model load: " + traceback.format_exc().strip().splitlines()[-1][:200]
         if self.engine is not None:
@@ -270,14 +373,26 @@ class Worker:
                 if (cfg.get("detector_model", "auto") == "auto" and self.engine.model_tier == "accurate"
                         and self.ai_ms > AUTO_MODEL_MAX_MS):
                     name = self.engine.use_fast_model()
-                    clog(f"svc: accurate model too slow here ({self.ai_ms:.0f} ms > {AUTO_MODEL_MAX_MS}) -> {name}")
+                    self._log(f"accurate model too slow here ({self.ai_ms:.0f} ms > {AUTO_MODEL_MAX_MS}) -> {name}")
                     self.ai_ms = self._ai_selftest()
             except Exception:
                 self._note_ai_error("AI self-test", __import__("traceback").format_exc())
-                clog("svc: AI self-test FAILED (detection disabled):\n"
-                     + __import__("traceback").format_exc())
+                self._log("AI self-test FAILED (detection disabled):\n" + __import__("traceback").format_exc())
                 self.engine = None
 
+        while self._alive(gen):
+            if not self.should_stream() and not self._wait_standby(gen):
+                break
+            cfg = self.cam_cfg()
+            if self.engine is not None:
+                self.engine.cfg = cfg
+            if not self._stream_once(gen, cfg):
+                break
+        if gen == self._gen and (self.status.startswith("Connected") or self.status.startswith("Stream")):
+            self.status = "Disconnected."
+
+    def _stream_once(self, gen, cfg):
+        """Open the camera and process frames until stop / standby. Returns True to continue (standby)."""
         url = cfg.get("rtsp_url", "").strip()
         source = normalize_rtsp_url(url) if url else 0
         live = isinstance(source, str) and source.lower().startswith("rtsp")
@@ -297,27 +412,34 @@ class Worker:
             if self._alive(gen):
                 self.status = self._open_error_status()
                 self._running = False
-            return
+            return False
         self.status = self._live_status()
-        clog("svc: streaming started")
+        self._log("streaming started")
         fail = 0
         paused = False
         last_ok = time.time()
         self.last_frame_ts = last_ok
+        last_sched_check = 0.0
+        to_standby = False
         while self._alive(gen):
             ok, frame = cap.read()
             if not self._alive(gen):
                 break
+            if time.time() - last_sched_check > 2:
+                last_sched_check = time.time()
+                if not self.should_stream():
+                    to_standby = True
+                    break
             if not ok:
                 fail += 1
                 # watchdog: reconnect on 50 bad reads OR >15s without a good frame
                 if fail > 50 or time.time() - last_ok > 15:
                     self.status = "Stream toota — dobara connect ho raha hai..."
-                    clog("svc: stream lost, reconnecting (watchdog)")
+                    self._log("stream lost, reconnecting (watchdog)")
                     cap.release()
                     cap = self._open(source, live, gen)
                     if cap is None:
-                        break
+                        return False
                     if not paused:
                         self.status = self._live_status()
                     fail = 0
@@ -330,22 +452,29 @@ class Worker:
             self.frames_dropped = getattr(cap, "dropped", 0)
             small = cv2.resize(frame, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
             live_cfg = self.engine.cfg if self.engine else cfg
-            capture_on = (not live_cfg.get("capture_schedule_enabled")) or config.in_time_window(
+            cam = self.camera()
+            window_open = config.camera_window_open(cam) if cam else True
+            capture_on = window_open and ((not live_cfg.get("capture_schedule_enabled")) or config.in_time_window(
                 live_cfg.get("capture_start", "18:00"), live_cfg.get("capture_end", "06:00")
-            )
+            ))
             if capture_on and paused:
                 paused = False
                 self.capture_paused = False
                 self.status = self._live_status()
-                clog("svc: capture resumed (schedule)")
+                self._log("capture resumed (schedule)")
             elif not capture_on and not paused:
                 paused = True
                 self.capture_paused = True
-                self.status = (
-                    f"Connected — capture PAUSED (schedule {live_cfg.get('capture_start')}"
-                    f"-{live_cfg.get('capture_end')} ke bahar), video chalu hai"
-                )
-                clog("svc: capture paused (schedule)")
+                if not window_open:
+                    sch = config.camera_schedule(cam)
+                    self.status = (f"Connected — {cam.get('name', 'Camera')} ka time {config.fmt12(sch['start'])} se "
+                                   f"{config.fmt12(sch['end'])} tak: abhi capture PAUSED (sirf live view)")
+                else:
+                    self.status = (
+                        f"Connected — capture PAUSED (schedule {live_cfg.get('capture_start')}"
+                        f"-{live_cfg.get('capture_end')} ke bahar), video chalu hai"
+                    )
+                self._log("capture paused (schedule)")
             if self.engine is not None and capture_on:
                 try:
                     t0 = time.time()
@@ -376,11 +505,87 @@ class Worker:
                 self.engine.flush_pending(force=True)  # pending person group must not be lost
             except Exception:
                 pass
-        if gen == self._gen and (self.status.startswith("Connected") or self.status.startswith("Stream")):
-            self.status = "Disconnected."
+        if to_standby:
+            with self._lock:
+                self._jpeg = None
+        return to_standby
 
 
-worker = Worker()
+class WorkerPool:
+    """One Worker per saved camera; all run together (each in its own time window)."""
+
+    def __init__(self):
+        self.workers = {}
+        self._lock = threading.Lock()
+
+    def get(self, cam_id):
+        with self._lock:
+            w = self.workers.get(cam_id)
+            if w is None:
+                w = self.workers[cam_id] = Worker(cam_id)
+            return w
+
+    def active(self, cfg=None):
+        """Worker of the camera being VIEWED on the dashboard (line drawing, Connect/Disconnect)."""
+        cfg = cfg or _cfg()
+        return self.get(cfg.get("active_camera_id") or "")
+
+    def all(self):
+        with self._lock:
+            return list(self.workers.values())
+
+    def apply_cfg(self, cfg):
+        for w in self.all():
+            w.apply_cfg(cfg)
+
+    def last_event(self):
+        evs = [w.last_event for w in self.all() if w.last_event]
+        return max(evs, key=lambda e: e.get("timestamp") or "") if evs else None
+
+    def any_connected(self):
+        return any(w.connected for w in self.all())
+
+    def sync(self, cfg, auto=False):
+        """Make the running workers match the camera list: monitored cameras with a URL run,
+        the rest stop; removed cameras are dropped. auto=True also (re)starts stopped workers
+        (auto-connect loop)."""
+        cams = {c["id"]: c for c in cfg.get("cameras") or []}
+        for cid, w in list(self.workers.items()):
+            if (cid and cid not in cams) or (not cid and cams):  # removed camera / legacy no-id worker
+                w.stop()
+                with self._lock:
+                    self.workers.pop(cid, None)
+        started = []
+        for cid, cam in cams.items():
+            w = self.get(cid)
+            wanted = bool(cam.get("monitor", True)) and bool((cam.get("rtsp_url") or "").strip())
+            if not wanted:
+                if w.connected or w._running:
+                    w.stop()
+                    w.status = "Monitoring OFF — Connect dabakar chalu karein" if cam.get("rtsp_url") else \
+                        "Is camera ka RTSP URL khaali hai — Settings > Cameras me URL daalein"
+                continue
+            if auto and not w.connected and not w._running and not w.user_stopped:
+                w.status = "Auto-connect: camera se connect ho raha hai..."
+                w.start()
+                started.append(cam.get("name", cid))
+        return started
+
+
+pool = WorkerPool()
+
+
+class _ActiveWorkerProxy:
+    """Back-compat: `worker.<attr>` always means the camera currently viewed on the dashboard."""
+
+    def __getattr__(self, name):
+        return getattr(pool.active(), name)
+
+    def __setattr__(self, name, value):
+        setattr(pool.active(), name, value)
+
+
+worker = _ActiveWorkerProxy()
 
 
 # ---- auth ------------------------------------------------------------------
@@ -393,9 +598,9 @@ def health():
 def public_status():
     """Lock/login screen proof that monitoring keeps running (no secrets)."""
     return {
-        "connected": worker.connected,
+        "connected": pool.any_connected(),
         "events_today": _db.counts_today(),
-        "last_event_time": (worker.last_event or {}).get("timestamp"),
+        "last_event_time": (pool.last_event() or {}).get("timestamp"),
     }
 
 
@@ -466,7 +671,8 @@ def state(request: Request):
         "frames_dropped": worker.frames_dropped,
         "substream_url": _substream_suggestion(cfg),
         "rtsp_url_main": cfg.get("rtsp_url_main", ""),
-        "last_event": worker.last_event,
+        "last_event": pool.last_event(),
+        "cameras_running": sum(1 for w in pool.all() if w.connected and not w.standby),
         "update_available": _update_info["available"],
         "update_latest": _update_info["latest"],
         "update_job": {"state": _update_job["state"], "percent": _update_job["percent"]},
@@ -480,22 +686,44 @@ def state(request: Request):
 
 @app.post("/api/camera/connect")
 def camera_connect(body: dict, request: Request):
+    """Connect the camera being viewed: save its URL, turn its monitoring ON and start its worker."""
     _check(request)
-    worker.user_stopped = False
     cfg = _cfg()
     cfg["rtsp_url"] = str(body.get("url", "")).strip()
-    config.save_config(cfg)
+    config.save_config(cfg)  # sync: creates 'Camera 1' on a fresh install / updates the viewed camera
+    cam = config.active_camera(cfg)
+    if cam is not None:
+        cam["monitor"] = True
+        config.save_config(cfg)
     import ptz
 
     ptz.reset_cache()
-    worker.start()
+    w = pool.active(cfg)
+    w.user_stopped = False
+    w.start()
+    pool.sync(cfg)
     return {"ok": True}
 
 
-# ---- saved cameras (one active at a time) ----------------------------------
+# ---- saved cameras (all run together, one is VIEWED) ---------------------
+def _camera_status(cam):
+    w = pool.workers.get(cam["id"])
+    sch = config.camera_schedule(cam)
+    return {
+        "monitor": bool(cam.get("monitor", True)),
+        "schedule": sch,
+        "window_open": config.camera_window_open(cam),
+        "connected": bool(w and w.connected),
+        "standby": bool(w and w.standby),
+        "capture_paused": bool(w and w.capture_paused),
+        "status": (w.status if w else ("Monitoring OFF" if not cam.get("monitor", True) else "Idle")),
+    }
+
+
 def _cameras_public(cfg):
     return [{"id": c["id"], "name": c.get("name", ""), "gate": c.get("gate", ""),
-             "rtsp_url": c.get("rtsp_url", ""), "active": c["id"] == cfg.get("active_camera_id")}
+             "rtsp_url": c.get("rtsp_url", ""), "active": c["id"] == cfg.get("active_camera_id"),
+             **_camera_status(c)}
             for c in cfg.get("cameras") or []]
 
 
@@ -504,18 +732,28 @@ def _cameras_response(cfg):
             "rtsp_url": cfg.get("rtsp_url", ""), "gate": config.gate_name(cfg)}
 
 
-def _restart_for_camera_switch(cfg):
-    """Active camera changed: the running stream must follow it (or stop when it has no URL)."""
+def _clean_schedule(raw, old):
+    """{enabled,start,end} from the request; bad times keep the old value."""
+    sch = dict(old)
+    if not isinstance(raw, dict):
+        return sch
+    if "enabled" in raw:
+        sch["enabled"] = bool(raw["enabled"])
+    for k in ("start", "end"):
+        v = str(raw.get(k, "") or "")
+        if re.match(r"^\d{1,2}:\d{2}$", v):
+            sch[k] = v
+    return sch
+
+
+def _sync_workers(cfg):
+    """Camera list changed: start/stop/remove workers to match it (auto-connect rules apply)."""
     import ptz
 
     ptz.reset_cache()
-    url = (cfg.get("rtsp_url") or "").strip()
-    if worker.connected or (not worker.user_stopped and cfg.get("auto_connect", True)):
-        if url:
-            worker.start()
-        else:
-            worker.stop()
-            worker.status = "Is camera ka RTSP URL khaali hai — Settings > Cameras me URL daalein"
+    started = pool.sync(cfg, auto=bool(cfg.get("auto_connect", True)))
+    if started:
+        clog(f"svc: cameras started: {', '.join(started)}")
 
 
 @app.get("/api/cameras")
@@ -526,7 +764,9 @@ def cameras_list(request: Request):
 
 @app.post("/api/cameras")
 def cameras_save(body: dict, request: Request):
-    """Add ({name, gate, rtsp_url}) or edit ({id, name?, gate?, rtsp_url?}) a saved camera."""
+    """Add ({name, gate, rtsp_url, schedule?, monitor?}) or edit ({id, name?, gate?, rtsp_url?,
+    schedule?, monitor?}) a saved camera. schedule = {enabled, start, end} = this camera's own
+    capture window (outside it: standby, no snaps, no WhatsApp)."""
     _check(request)
     cfg = _cfg()
     name = str(body.get("name", "") or "").strip()[:40]
@@ -541,40 +781,47 @@ def cameras_save(body: dict, request: Request):
             cam["name"] = name or cam.get("name") or "Camera"
         if "gate" in body:
             cam["gate"] = gate
+        if "schedule" in body:
+            cam["schedule"] = _clean_schedule(body["schedule"], config.camera_schedule(cam))
+        if "monitor" in body:
+            cam["monitor"] = bool(body["monitor"])
+            if cam["monitor"]:
+                pool.get(cid).user_stopped = False
         url_changed = "rtsp_url" in body and url != (cam.get("rtsp_url") or "")
         if url_changed:
             cam["rtsp_url"], cam["rtsp_url_main"] = url, ""
-        if cid == cfg.get("active_camera_id"):
-            if url_changed:
+            if cid == cfg.get("active_camera_id"):
                 cfg["rtsp_url"], cfg["rtsp_url_main"] = url, ""
-            config.save_config(cfg)
-            worker.apply_cfg(cfg)
-            if url_changed:
-                _restart_for_camera_switch(cfg)
-        else:
-            config.save_config(cfg)
-        clog(f"svc: camera saved {cid} '{cam['name']}' gate='{cam['gate']}'")
+        config.save_config(cfg)
+        pool.apply_cfg(cfg)
+        if url_changed and (pool.get(cid).connected or pool.get(cid)._running):
+            pool.get(cid).start()  # new URL: the running stream must follow it
+        _sync_workers(cfg)
+        sch = config.camera_schedule(cam)
+        clog(f"svc: camera saved {cid} '{cam['name']}' gate='{cam['gate']}' monitor={cam.get('monitor', True)} "
+             f"window={'off' if not sch['enabled'] else sch['start'] + '-' + sch['end']}")
         return _cameras_response(cfg)
     if len(cfg["cameras"]) >= config.MAX_CAMERAS:
         raise HTTPException(400, f"Zyada se zyada {config.MAX_CAMERAS} camera save ho sakte hain")
     new_id = config.new_camera_id(cfg)
     cam = {"id": new_id, "name": name or f"Camera {len(cfg['cameras']) + 1}", "gate": gate,
            "rtsp_url": url, "rtsp_url_main": "", "line": dict(config.DEFAULTS["line"]),
-           "entry_direction": "pos", "ignore_zones": []}
+           "entry_direction": "pos", "ignore_zones": [], "monitor": bool(body.get("monitor", True)),
+           "schedule": _clean_schedule(body.get("schedule"), config.CAMERA_SCHEDULE_DEFAULT)}
     cfg["cameras"].append(cam)
     first = config.active_camera(cfg) is None
     if first:
         config.activate_camera(cfg, new_id)
     config.save_config(cfg)
     clog(f"svc: camera added {new_id} '{cam['name']}' gate='{gate}'" + (" (active)" if first else ""))
-    if first:
-        _restart_for_camera_switch(cfg)
+    _sync_workers(cfg)
     return _cameras_response(cfg)
 
 
 @app.post("/api/cameras/{cid}/activate")
 def cameras_activate(cid: str, request: Request):
-    """Switch the live camera. Current line/zones/URL are kept with the old camera."""
+    """Switch the camera being VIEWED (dashboard video, line drawing). All cameras keep running;
+    a viewed camera streams even outside its window (live view only, no capture)."""
     _check(request)
     cfg = _cfg()
     if cid == cfg.get("active_camera_id"):
@@ -584,9 +831,9 @@ def cameras_activate(cid: str, request: Request):
     except ValueError:
         raise HTTPException(404, "Camera nahi mila")
     config.save_config(cfg)
-    worker.apply_cfg(cfg)
-    clog(f"svc: active camera -> {cid} '{cam.get('name', '')}' gate='{cam.get('gate', '')}'")
-    _restart_for_camera_switch(cfg)
+    pool.apply_cfg(cfg)
+    clog(f"svc: viewing camera -> {cid} '{cam.get('name', '')}' gate='{cam.get('gate', '')}'")
+    _sync_workers(cfg)
     return _cameras_response(cfg)
 
 
@@ -607,9 +854,8 @@ def cameras_delete(cid: str, request: Request):
                 cfg[k] = config._copy(config.DEFAULTS.get(k, ""))
     config.save_config(cfg)  # sync adopts the first remaining camera when the active one was removed
     clog(f"svc: camera deleted {cid}" + (" (was active)" if was_active else ""))
-    if was_active:
-        worker.apply_cfg(cfg)
-        _restart_for_camera_switch(cfg)
+    pool.apply_cfg(cfg)
+    _sync_workers(cfg)
     return _cameras_response(cfg)
 
 
@@ -659,10 +905,17 @@ def camera_mainstream(request: Request):
 
 @app.post("/api/camera/disconnect")
 def camera_disconnect(request: Request):
+    """Disconnect the camera being viewed: its monitoring goes OFF (persisted) and its worker stops."""
     _check(request)
-    worker.user_stopped = True  # auto-connect must not fight a manual Disconnect
-    worker.stop()
-    worker.status = "Disconnected."
+    cfg = _cfg()
+    cam = config.active_camera(cfg)
+    if cam is not None:
+        cam["monitor"] = False
+        config.save_config(cfg)
+    w = pool.active(cfg)
+    w.user_stopped = True  # auto-connect must not fight a manual Disconnect
+    w.stop()
+    w.status = "Disconnected."
     return {"ok": True}
 
 
@@ -781,7 +1034,7 @@ def set_ignore_zones(body: dict, request: Request):
     cfg = _cfg()
     cfg["ignore_zones"] = zones
     config.save_config(cfg)
-    worker.apply_cfg(cfg)
+    pool.apply_cfg(cfg)
     clog(f"ignore zones set: {len(zones)}")
     return {"ok": True, "ignore_zones": zones}
 
@@ -792,7 +1045,7 @@ def set_line(body: dict, request: Request):
     cfg = _cfg()
     cfg["line"] = {k: float(body[k]) for k in ("x1", "y1", "x2", "y2")}
     config.save_config(cfg)
-    worker.apply_cfg(cfg)
+    pool.apply_cfg(cfg)
     return {"ok": True, "line": cfg["line"]}
 
 
@@ -802,7 +1055,7 @@ def swap_direction(request: Request):
     cfg = _cfg()
     cfg["entry_direction"] = "neg" if cfg.get("entry_direction") == "pos" else "pos"
     config.save_config(cfg)
-    worker.apply_cfg(cfg)
+    pool.apply_cfg(cfg)
     return {"ok": True, "entry_direction": cfg["entry_direction"]}
 
 
@@ -842,7 +1095,7 @@ def set_options(body: dict, request: Request):
     if "entry_direction" in body and body["entry_direction"] in ("pos", "neg"):
         cfg["entry_direction"] = body["entry_direction"]
     config.save_config(cfg)
-    worker.apply_cfg(cfg)
+    pool.apply_cfg(cfg)
     return {"ok": True}
 
 
@@ -871,9 +1124,10 @@ def set_event_plate(eid: int, body: dict, request: Request):
     row = _db.update_event_plate(eid, plate, source="manual", status="done")
     if row is None:
         raise HTTPException(404, "event nahi mila")
-    if worker.last_event and worker.last_event.get("id") == eid:
-        worker.last_event = {**worker.last_event, "plate": plate, "plate_status": "done",
-                             "plate_source": "manual" if plate else ""}
+    for w in pool.all():
+        if w.last_event and w.last_event.get("id") == eid:
+            w.last_event = {**w.last_event, "plate": plate, "plate_status": "done",
+                            "plate_source": "manual" if plate else ""}
     clog(f"plate manual: event {eid} -> '{plate or '(cleared)'}'")
     return {"ok": True, "event": row}
 
@@ -991,7 +1245,7 @@ def save_settings(body: dict, request: Request):
         salt, h = auth.hash_password(str(body["new_password"]))
         cfg["auth_salt"], cfg["auth_hash"] = salt, h
     config.save_config(cfg)
-    worker.apply_cfg(cfg)
+    pool.apply_cfg(cfg)
     return {"ok": True}
 
 
@@ -1124,6 +1378,18 @@ def diagnostics(request: Request):
             "possible_misses": getattr(eng, "possible_misses", 0) if eng else 0,
             "detect_classes": config.detect_classes(cfg),
         },
+        "cameras": [
+            {
+                "id": c["id"], "name": c.get("name"), "gate": c.get("gate"), "viewed": c["id"] == cfg.get("active_camera_id"),
+                **_camera_status(c),
+                "ai_ms": (round(w.ai_ms) if w and w.ai_ms is not None else None),
+                "ai_frames": w.ai_frames if w else 0, "ai_errors": w.ai_errors if w else 0,
+                "codec": w.codec if w else "", "frames_dropped": w.frames_dropped if w else 0,
+                "possible_misses": getattr(w.engine, "possible_misses", 0) if w and w.engine else 0,
+                "frame_age": (round(time.time() - w.last_frame_ts, 1) if w and w.connected and w.last_frame_ts else None),
+            }
+            for c in cfg.get("cameras") or [] for w in [pool.workers.get(c["id"])]
+        ],
         "whatsapp": {
             "enabled": bool(cfg.get("wa_enabled")),
             "api_key_set": bool(cfg.get("wa_api_key")),
@@ -1415,21 +1681,18 @@ def _port_free(port):
 
 
 def _auto_connect_loop():
-    """After a PC reboot the app starts with Windows: connect the saved camera by itself
+    """After a PC reboot the app starts with Windows: connect every monitored camera by itself
     and keep retrying (camera/network often come up minutes after the PC)."""
     time.sleep(4)  # let uvicorn come up first
     last_log = 0.0
     while True:
         try:
             cfg = _cfg()
-            url = str(cfg.get("rtsp_url", "")).strip()
-            if (cfg.get("auto_connect", True) and url and not worker.user_stopped
-                    and not worker.connected and not worker._running):
+            started = pool.sync(cfg, auto=bool(cfg.get("auto_connect", True)))
+            if started:
                 if time.time() - last_log > 300:
-                    clog("svc: auto-connect — saved camera se connect kar raha hai")
+                    clog(f"svc: auto-connect — {', '.join(started)} se connect kar raha hai")
                     last_log = time.time()
-                worker.status = "Auto-connect: camera se connect ho raha hai..."
-                worker.start()
                 time.sleep(25)  # give the open/AI-load a chance before judging
         except Exception as e:
             clog(f"svc: auto-connect error {e}")

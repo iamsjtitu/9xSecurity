@@ -7318,3 +7318,141 @@ RuntimeError: no AI in test
 2026-10-07T09:32:26 | open_stream: transport=udp
 2026-10-07T09:32:31 | open_stream: trying FFmpeg engine fallback
 2026-10-07T09:32:31 | ffmpeg-pipe: starting
+2026-10-09T08:00:27 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-10-09T08:00:27 | svc[Back]: standby khatam — stream khol raha hai
+2026-10-09T08:00:27 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-10-09T08:00:27 | svc[Back]: streaming started
+2026-10-09T08:00:43 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-10-09T08:00:43 | svc[Back]: standby khatam — stream khol raha hai
+2026-10-09T08:00:43 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-10-09T08:00:43 | svc[Back]: streaming started
+2026-10-09T08:02:28 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-10-09T08:02:28 | purge: 0 old events removed (retention 7d, cutoff 2026-10-02)
+2026-10-09T08:02:32 | svc[Front Camera]: loading AI model
+2026-10-09T08:02:32 | svc: auto-connect — Front Camera, Back Camera se connect kar raha hai
+2026-10-09T08:02:32 | svc[Back Camera]: loading AI model
+2026-10-09T08:02:38 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=20:00-08:00
+2026-10-09T08:02:39 | svc[Front Camera]: AI model loaded
+2026-10-09T08:02:39 | svc[Back Camera]: AI model loaded
+2026-10-09T08:02:42 | svc: AI self-test OK (yolov8s.pt, 652 ms, 0 dets on blank frame)
+2026-10-09T08:02:42 | svc: AI self-test OK (yolov8s.pt, 685 ms, 0 dets on blank frame)
+2026-10-09T08:02:42 | svc[Back Camera]: accurate model too slow here (652 ms > 350) -> yolov8n.pt
+2026-10-09T08:02:42 | svc[Front Camera]: accurate model too slow here (685 ms > 350) -> yolov8n.pt
+2026-10-09T08:02:43 | svc: AI self-test OK (yolov8n.pt, 275 ms, 0 dets on blank frame)
+2026-10-09T08:02:43 | open_stream: transport=tcp
+2026-10-09T08:02:43 | svc: AI self-test OK (yolov8n.pt, 278 ms, 0 dets on blank frame)
+2026-10-09T08:02:43 | svc[Back Camera]: standby — apne time window ke bahar, stream band
+2026-10-09T08:02:48 | open_stream: transport=udp
+2026-10-09T08:02:53 | open_stream: trying FFmpeg engine fallback
+2026-10-09T08:02:53 | ffmpeg-pipe: starting
+2026-10-09T08:02:58 | open_stream: falling back to default backend
+2026-10-09T08:03:03 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-09T08:03:06 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-09T08:03:12 | svc[Front Camera]: loading AI model
+2026-10-09T08:03:12 | svc[Front Camera]: AI model loaded
+2026-10-09T08:03:13 | svc: AI self-test OK (yolov8s.pt, 501 ms, 0 dets on blank frame)
+2026-10-09T08:03:13 | svc[Front Camera]: accurate model too slow here (501 ms > 350) -> yolov8n.pt
+2026-10-09T08:03:14 | svc: AI self-test OK (yolov8n.pt, 248 ms, 0 dets on blank frame)
+2026-10-09T08:03:14 | open_stream: transport=tcp
+2026-10-09T08:03:19 | open_stream: transport=udp
+2026-10-09T08:03:24 | open_stream: trying FFmpeg engine fallback
+2026-10-09T08:03:24 | ffmpeg-pipe: starting
+2026-10-09T08:03:29 | open_stream: falling back to default backend
+2026-10-09T08:03:34 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-09T08:03:50 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-10-09T08:03:52 | svc[Front Camera]: loading AI model
+2026-10-09T08:03:52 | svc[Front Camera]: AI model loaded
+2026-10-09T08:03:53 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-09T08:03:53 | svc: AI self-test OK (yolov8s.pt, 514 ms, 0 dets on blank frame)
+2026-10-09T08:03:54 | svc[Front Camera]: accurate model too slow here (514 ms > 350) -> yolov8n.pt
+2026-10-09T08:03:54 | svc: AI self-test OK (yolov8n.pt, 234 ms, 0 dets on blank frame)
+2026-10-09T08:03:54 | svc[Front Camera]: loading AI model
+2026-10-09T08:03:54 | svc[Front Camera]: AI model loaded
+2026-10-09T08:03:56 | svc: AI self-test OK (yolov8s.pt, 553 ms, 0 dets on blank frame)
+2026-10-09T08:03:56 | svc[Front Camera]: accurate model too slow here (553 ms > 350) -> yolov8n.pt
+2026-10-09T08:03:56 | svc: AI self-test OK (yolov8n.pt, 224 ms, 0 dets on blank frame)
+2026-10-09T08:03:56 | open_stream: transport=tcp
+2026-10-09T08:04:01 | open_stream: transport=udp
+2026-10-09T08:04:06 | open_stream: trying FFmpeg engine fallback
+2026-10-09T08:04:06 | ffmpeg-pipe: starting
+2026-10-09T08:04:12 | svc[Front Camera]: loading AI model
+2026-10-09T08:04:12 | svc[Front Camera]: AI model loaded
+2026-10-09T08:04:13 | svc: AI self-test OK (yolov8s.pt, 508 ms, 0 dets on blank frame)
+2026-10-09T08:04:13 | svc[Front Camera]: accurate model too slow here (508 ms > 350) -> yolov8n.pt
+2026-10-09T08:04:14 | svc: AI self-test OK (yolov8n.pt, 250 ms, 0 dets on blank frame)
+2026-10-09T08:04:14 | svc: camera added cam3 'TEST_Cam' gate='TEST_Gate'
+2026-10-09T08:04:14 | svc: cameras started: TEST_Cam
+2026-10-09T08:04:14 | svc[TEST_Cam]: loading AI model
+2026-10-09T08:04:14 | svc: camera saved cam3 'TEST_Cam2' gate='TEST_Gate2' monitor=True window=off
+2026-10-09T08:04:14 | svc: viewing camera -> cam3 'TEST_Cam2' gate='TEST_Gate2'
+2026-10-09T08:04:14 | svc[TEST_Cam2]: AI model loaded
+2026-10-09T08:04:15 | svc: viewing camera -> cam1 'Front Camera' gate='Main Gate'
+2026-10-09T08:04:15 | svc: viewing camera -> cam3 'TEST_Cam2' gate='TEST_Gate2'
+2026-10-09T08:04:16 | svc: AI self-test OK (yolov8s.pt, 514 ms, 0 dets on blank frame)
+2026-10-09T08:04:16 | svc[TEST_Cam2]: accurate model too slow here (514 ms > 350) -> yolov8n.pt
+2026-10-09T08:04:16 | svc: viewing camera -> cam1 'Front Camera' gate='Main Gate'
+2026-10-09T08:04:16 | svc: camera deleted cam3
+2026-10-09T08:04:16 | svc: camera added cam3 'TEST_L0' gate='G'
+2026-10-09T08:04:16 | svc: cameras started: TEST_L0
+2026-10-09T08:04:16 | svc[TEST_L0]: loading AI model
+2026-10-09T08:04:16 | svc: camera added cam4 'TEST_L1' gate='G'
+2026-10-09T08:04:16 | svc: cameras started: TEST_L1
+2026-10-09T08:04:16 | svc[TEST_L1]: loading AI model
+2026-10-09T08:04:16 | svc: camera added cam5 'TEST_L2' gate='G'
+2026-10-09T08:04:16 | svc: cameras started: TEST_L2
+2026-10-09T08:04:16 | svc[TEST_L2]: loading AI model
+2026-10-09T08:04:16 | svc: camera added cam6 'TEST_L3' gate='G'
+2026-10-09T08:04:16 | svc: AI self-test OK (yolov8n.pt, 223 ms, 0 dets on blank frame)
+2026-10-09T08:04:16 | svc: cameras started: TEST_L3
+2026-10-09T08:04:16 | svc[TEST_L3]: loading AI model
+2026-10-09T08:04:16 | svc: camera added cam7 'TEST_L4' gate='G'
+2026-10-09T08:04:16 | svc: cameras started: TEST_L4
+2026-10-09T08:04:16 | svc[TEST_L4]: loading AI model
+2026-10-09T08:04:16 | svc: camera added cam8 'TEST_L5' gate='G'
+2026-10-09T08:04:16 | svc: cameras started: TEST_L5
+2026-10-09T08:04:16 | svc[TEST_L5]: loading AI model
+2026-10-09T08:04:16 | svc: camera deleted cam3
+2026-10-09T08:04:16 | svc: camera deleted cam4
+2026-10-09T08:04:16 | svc: camera deleted cam5
+2026-10-09T08:04:16 | svc: camera deleted cam6
+2026-10-09T08:04:16 | svc: camera deleted cam7
+2026-10-09T08:04:16 | svc: camera deleted cam8
+2026-10-09T08:04:16 | svc: camera added cam3 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN' gate='GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG'
+2026-10-09T08:04:17 | svc: cameras started: NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+2026-10-09T08:04:17 | svc[NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN]: loading AI model
+2026-10-09T08:04:17 | svc: camera deleted cam3
+2026-10-09T08:04:17 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-10-09T08:04:17 | svc[Back]: standby khatam — stream khol raha hai
+2026-10-09T08:04:17 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-10-09T08:04:17 | svc[Back]: streaming started
+2026-10-09T08:04:17 | chime: person Entry — ghanti bajayi (event 7)
+2026-10-09T08:04:17 | chime: vehicle Entry — ghanti bajayi (event 8)
+2026-10-09T08:04:17 | chime: two_wheeler Exit — ghanti bajayi (event 9)
+2026-10-09T08:04:17 | svc[Camera]: AI model loaded
+2026-10-09T08:04:17 | svc[Camera]: AI model loaded
+2026-10-09T08:04:17 | svc[Camera]: AI model loaded
+2026-10-09T08:04:17 | svc[Camera]: AI model loaded
+2026-10-09T08:04:17 | svc[Camera]: AI model loaded
+2026-10-09T08:04:17 | svc[Camera]: AI model loaded
+2026-10-09T08:04:17 | svc[Camera]: AI model loaded
+2026-10-09T08:04:22 | svc: AI self-test OK (yolov8s.pt, 2179 ms, 0 dets on blank frame)
+2026-10-09T08:04:22 | svc[Camera]: accurate model too slow here (2179 ms > 350) -> yolov8n.pt
+2026-10-09T08:04:22 | svc: AI self-test OK (yolov8s.pt, 2406 ms, 0 dets on blank frame)
+2026-10-09T08:04:22 | svc: AI self-test OK (yolov8s.pt, 2123 ms, 0 dets on blank frame)
+2026-10-09T08:04:23 | svc: AI self-test OK (yolov8s.pt, 2175 ms, 0 dets on blank frame)
+2026-10-09T08:04:23 | svc[Camera]: accurate model too slow here (2123 ms > 350) -> yolov8n.pt
+2026-10-09T08:04:23 | svc[Camera]: accurate model too slow here (2406 ms > 350) -> yolov8n.pt
+2026-10-09T08:04:23 | svc: AI self-test OK (yolov8s.pt, 2177 ms, 0 dets on blank frame)
+2026-10-09T08:04:23 | svc: AI self-test OK (yolov8s.pt, 2102 ms, 0 dets on blank frame)
+2026-10-09T08:04:23 | svc: AI self-test OK (yolov8s.pt, 2151 ms, 0 dets on blank frame)
+2026-10-09T08:04:23 | svc[Camera]: accurate model too slow here (2175 ms > 350) -> yolov8n.pt
+2026-10-09T08:04:23 | svc[Camera]: accurate model too slow here (2177 ms > 350) -> yolov8n.pt
+2026-10-09T08:04:23 | svc[Camera]: accurate model too slow here (2102 ms > 350) -> yolov8n.pt
+2026-10-09T08:04:23 | svc[Camera]: accurate model too slow here (2151 ms > 350) -> yolov8n.pt
+2026-10-09T08:04:24 | svc: AI self-test OK (yolov8n.pt, 362 ms, 0 dets on blank frame)
+2026-10-09T08:04:25 | svc: AI self-test OK (yolov8n.pt, 805 ms, 0 dets on blank frame)
+2026-10-09T08:04:25 | svc: AI self-test OK (yolov8n.pt, 800 ms, 0 dets on blank frame)
+2026-10-09T08:04:25 | svc: AI self-test OK (yolov8n.pt, 631 ms, 0 dets on blank frame)
+2026-10-09T08:04:25 | svc: AI self-test OK (yolov8n.pt, 668 ms, 0 dets on blank frame)
+2026-10-09T08:04:26 | svc: AI self-test OK (yolov8n.pt, 690 ms, 0 dets on blank frame)
+2026-10-09T08:04:26 | svc: AI self-test OK (yolov8n.pt, 600 ms, 0 dets on blank frame)

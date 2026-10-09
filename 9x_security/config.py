@@ -141,6 +141,7 @@ def save_config(cfg):
 
 # ---- saved cameras ---------------------------------------------------------
 CAMERA_KEYS = ("rtsp_url", "rtsp_url_main", "line", "entry_direction", "ignore_zones")
+CAMERA_SCHEDULE_DEFAULT = {"enabled": False, "start": "20:00", "end": "08:00"}  # per-camera capture window
 MAX_CAMERAS = 8
 
 
@@ -180,9 +181,13 @@ def sync_cameras(cfg):
     adopt the first saved camera. No cameras but a URL (old installs): create 'Camera 1'."""
     cams = [c for c in (cfg.get("cameras") or []) if isinstance(c, dict) and c.get("id")]
     cfg["cameras"] = cams
+    for c in cams:
+        c.setdefault("monitor", True)
+        c.setdefault("schedule", dict(CAMERA_SCHEDULE_DEFAULT))
     if not cams:
         if cfg.get("rtsp_url"):
-            cam = {"id": "cam1", "name": "Camera 1", "gate": ""}
+            cam = {"id": "cam1", "name": "Camera 1", "gate": "", "monitor": True,
+                   "schedule": dict(CAMERA_SCHEDULE_DEFAULT)}
             _store_from_top(cfg, cam)
             cams.append(cam)
             cfg["active_camera_id"] = "cam1"
@@ -211,8 +216,51 @@ def activate_camera(cfg, cam_id):
 
 
 def gate_name(cfg):
+    if "_camera_id" in cfg:  # per-camera view built by camera_cfg()
+        return str(cfg.get("_gate") or "").strip()
     cam = active_camera(cfg)
     return str((cam or {}).get("gate") or "").strip()
+
+
+
+
+def camera_by_id(cfg, cam_id):
+    return next((c for c in cfg.get("cameras") or [] if c.get("id") == cam_id), None)
+
+
+def camera_cfg(cfg, cam):
+    """Settings view for ONE camera's worker: shared settings + that camera's URL/line/zones/gate.
+    (All saved cameras run at the same time, each with its own time window.)"""
+    out = dict(cfg)
+    for k in CAMERA_KEYS:
+        out[k] = _copy(cam.get(k, DEFAULTS.get(k, "")))
+    out["_camera_id"] = cam.get("id", "")
+    out["_camera_name"] = cam.get("name", "")
+    out["_gate"] = cam.get("gate", "")
+    return out
+
+
+def camera_schedule(cam):
+    sch = dict(CAMERA_SCHEDULE_DEFAULT)
+    sch.update({k: v for k, v in (cam.get("schedule") or {}).items() if k in sch})
+    return sch
+
+
+def camera_window_open(cam, now=None):
+    """False only when this camera has its own time window and `now` is outside it."""
+    sch = camera_schedule(cam)
+    if not sch.get("enabled"):
+        return True
+    return in_time_window(sch.get("start", "20:00"), sch.get("end", "08:00"), now=now)
+
+
+def fmt12(hhmm):
+    """'20:00' -> '8:00 PM' (user-facing; the app never shows 24h times)."""
+    try:
+        h, m = [int(x) for x in str(hhmm).split(":")[:2]]
+    except (ValueError, TypeError):
+        return str(hhmm)
+    return f"{h % 12 or 12}:{m:02d} {'PM' if h >= 12 else 'AM'}"
 
 
 def in_time_window(start, end, now=None):

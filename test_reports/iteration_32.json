@@ -1,0 +1,26 @@
+{
+  "summary": "Iter32 multicam-workers: tested per-camera monitor flags, per-camera schedule/windows (standby outside window), activate (viewed), add/delete workers, line applies to viewed only, options/settings OK, diagnostics per-camera fields, camera_log svc[name]: prefix. All 123 unit/integration tests pass + 20 live-API tests (19 pass, 1 skip at window boundary). Frontend: camera-select glyphs (● / ◐ / ○) + 'Name — Gate', camera-viewed-status, cameras-running-badge ('N/M camera chalu'), Settings > Cameras shows 'N/M chalu' header, per-card status/monitor/schedule UI, 'Dashboard par' chip switches on activate, Save disabled when not dirty, descriptions correct ('… sirf raat 8:00 PM se agle din subah 8:00 AM tak snap lega' / '… 24 ghante chalega'). Standby state visible outside time window as expected (container is daytime UTC).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/tests/test_iter32_live_api.py",
+    "/app/test_reports/pytest/multicam.xml",
+    "/app/test_reports/pytest/service_api.xml",
+    "/app/test_reports/pytest/engine.xml",
+    "/app/test_reports/pytest/wa.xml",
+    "/app/test_reports/pytest/iter32_live.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "GET /api/options returns 404 (only POST implemented) — not a bug per spec but mildly surprising; consider aligning GET to return current effective options for diagnostics parity with /api/settings.",
+    "Standby/window state can race around boundary minute (observed one skipped assertion when near 20:00/08:00). Minor; just document."
+  ],
+  "updated_files": ["/app/9x_security/tests/test_iter32_live_api.py"],
+  "success_rate": {"backend": "100% (142/142, 1 skipped at boundary)", "frontend": "100% (all testids verified)"},
+  "test_credentials": "admin / 9xsecurity",
+  "seed_data_creation": "Temporary TEST_Cam added+deleted during test; cam1/cam2 restored to baseline (cam1 viewed/monitor true, cam2 schedule 20:00-08:00 enabled, monitor true).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Live test file at /app/9x_security/tests/test_iter32_live_api.py covers full multicam lifecycle (schedule, monitor, activate, add/delete). Container clock is UTC daytime — cam2 (20:00-08:00) is CLOSED most of the day; near 08:00/20:00 boundary expect test_08 to skip. If needed re-baseline via POST /api/cameras with cam1 rtsp_url rtsp://u:p@192.0.2.1:554/s monitor true, cam2 schedule enabled 20:00-08:00 monitor true.",
+  "rca of the issue": "N/A — all specified behaviours confirmed."
+}

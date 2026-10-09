@@ -2126,3 +2126,31 @@ Error opening input files: Connection timed out
 [in#0 @ 0xc73d960] Error opening input: Connection timed out
 Error opening input file rtsp://u:p@192.0.2.1:554/s.
 Error opening input files: Connection timed out
+[tcp @ 0x84ff740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x84fc960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x1cffc740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x1cff9960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x389e9740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x389e6960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x1b00c740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x1b009960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x10610740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x1060d960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x16195740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x16192960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x15a7d740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x15a7a960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out

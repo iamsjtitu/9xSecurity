@@ -1,6 +1,11 @@
 {
-  "rtsp_url": "",
-  "line": null,
+  "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
+  "line": {
+    "x1": 0.1,
+    "y1": 0.5,
+    "x2": 0.9,
+    "y2": 0.5
+  },
   "entry_direction": "pos",
   "confidence": 0.4,
   "detector_model": "auto",
@@ -57,12 +62,17 @@
       "id": "cam1",
       "name": "Front Camera",
       "gate": "Main Gate",
-      "rtsp_url": "",
+      "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
       "rtsp_url_main": "",
-      "line": null,
+      "line": {
+        "x1": 0.1,
+        "y1": 0.5,
+        "x2": 0.9,
+        "y2": 0.5
+      },
       "entry_direction": "pos",
       "ignore_zones": [],
-      "monitor": false,
+      "monitor": true,
       "schedule": {
         "enabled": false,
         "start": "20:00",
@@ -98,8 +108,8 @@
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "9a3077cceb7bbfc2141e646518925478",
-  "auth_hash": "ad4e291517015e5ae7574bbff0818893871cdb62b0e659e4e058465ef9b7c7f2",
+  "auth_salt": "9e81b75d34b968cf3d7f228a009ec6b3",
+  "auth_hash": "729b95bc1651a092aa344d269d5479ca71ab9ed47b88c7dc33055e6318233d13",
   "github_repo": "",
   "gh_token": "TEST_GH",
   "rtsp_url_main": ""

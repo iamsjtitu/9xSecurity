@@ -1009,3 +1009,25 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   truck counted, clipped-from-birth not counted, 2 s occlusion at 15 fps survives + ages out after 2.5 s/20 frames).
 - NEXT: user installs the new build -> camera_log will show 'crossing rejected: …'/'POSSIBLE MISS' for any remaining miss.
   Advice given: line ends thoda andar (bottom-right end upar), camera H.264/sub-stream for HEVC drops.
+
+## Implemented (update 2026-06 #58) — ALL cameras run together, each with its OWN time window (testing agent iteration_32: 100%)
+- USER chose (c): 'dono camera ek saath chalein, har ek apne time me' (accepting double PC load). Request: Camera 2 ka time
+  raat 8 → subah 8 => sirf us time snap/WhatsApp.
+- MODEL CHANGE: Worker(cam_id) per saved camera (own stream + own SecurityEngine; one SharedPlateReader with a lock for
+  OCR; open_stream serialised by _open_lock because it sets process-wide FFmpeg env). WorkerPool: get/active/all/
+  apply_cfg/last_event/any_connected/sync(cfg, auto). `worker` global is now _ActiveWorkerProxy = worker of the VIEWED
+  camera (dashboard video, line/zones, Connect/Disconnect, substream, PTZ). _auto_connect_loop -> pool.sync every 15 s.
+- Per camera: monitor (True; Disconnect => False persisted, Connect => True), schedule {enabled,start,end}
+  (default off / 20:00-08:00). Worker loop: outside own window AND not viewed => STANDBY (stream closed, status
+  'Standby — <name> ka time 8:00 PM se 8:00 AM tak hai…', polls every 2 s); viewed while outside window => streams but
+  capture PAUSED ('sirf live view'); global capture_schedule still applies on top. camera_cfg() = shared settings +
+  camera keys + _camera_id/_gate (gate_name honours it). Logs prefixed 'svc[<camera>]:'.
+- API: /api/cameras GET/POST accept schedule+monitor; entries carry monitor/schedule/window_open/connected/standby/
+  capture_paused/status; activate = switch VIEW only (no restarts); /api/state cameras_running + pool.last_event;
+  /api/public/status connected = any; /api/diagnostics.cameras per-worker stats.
+- UI: CamerasTab card: status dot/text, 'Is camera ki monitoring chalu', 'Sirf is time me snap/WhatsApp' + AM/PM
+  TimeFields + desc; 'Dashboard par dikhao' / chip 'Dashboard par'; header 'N/M chalu'; 5 s refresh. CameraSelect: glyph
+  ●/◐/○, camera-viewed-status, cameras-running-badge.
+- Tests: test_multicam_workers.py 8 (camera_cfg/gate, window+fmt12, should_stream, pool.sync start/stop/remove/legacy,
+  last_event, standby wait, stream_once -> standby). Note: both engines self-test concurrently at startup => measured
+  ms doubles => 'auto' picks yolov8n on a mid PC (reflects real 2-camera load).

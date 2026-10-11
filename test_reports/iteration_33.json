@@ -1,0 +1,32 @@
+{
+  "summary": "Iteration 33 — backend-only verification of the standing-vehicle 'clearly past' + resume_from fix in /app/9x_security. Ran the full tracker/engine regression suites requested by main agent (test_standing_vehicle 10, test_tracker_false_crossings 10, test_custom_scenarios, test_missed_vehicles, test_engine 19, test_capture_fixes, test_categories, test_detection_strength + test_live_e2e with real YOLO ~17 s, tests/test_iter32_live_api, tests/test_iter30_multicam_api, test_service_api in its own process). All 146 collected tests passed (2 skipped as expected in multicam API). Added a new file tests/test_iter33_tracker_additional.py with 12 extra scenarios exercising slow-PC cadence, fully random wobble, resume at 1 min / 4 min / expiry, 2-detection crossings, creep entries, real exit+re-entry, two-truck tailgating on the user's exact line, and the engine-level user scenario at 4 fps. All 12 pass. API sanity on 127.0.0.1:8971: /api/health ok, /api/state and /api/diagnostics 200 OK with cameras cam1/cam2 and engine fields tracks_now + possible_misses present. No MISSED-crossing regression found; the new 'clearly past (>=20% of box) OR monotone run of that length' rule still counts a 2-frame fast crossing, a creeping entry (eventually, once clearly past), and tailgating vehicles.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/tests/test_iter33_tracker_additional.py",
+    "/app/test_reports/pytest/iter33_tracker.xml",
+    "/app/test_reports/pytest/iter33_engine.xml",
+    "/app/test_reports/pytest/iter33_apis.xml",
+    "/app/test_reports/pytest/iter33_service.xml",
+    "/app/test_reports/pytest/iter33_live.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "tracker.py and engine.py were NOT modified by the testing agent (per instructions).",
+    "Observed cross-file pollution: test_engine.py globally monkeypatches whatsapp.requests.post which breaks tests/test_iter32_live_api.py and tests/test_iter30_multicam_api.py when run in the same pytest process; already documented in review request. Consider scoping to a pytest fixture with teardown so suites can be run together.",
+    "Resume memory window = RESUME_S (300 s). This is a product policy and matches the user's '5 minutes' expectation. Behaviour on expiry (>5 min) is a second genuine Entry — documented and tested."
+  ],
+  "updated_files": [
+    "/app/9x_security/tests/test_iter33_tracker_additional.py (new)"
+  ],
+  "success_rate": {"backend": "100% (146/146 collected, 2 skipped)", "frontend": "not tested (backend-only request)"},
+  "test_credentials": "service login admin / 9xsecurity (POST /api/login) on http://127.0.0.1:8971",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Standing-vehicle fix is stable across cadence (0.125-0.3 s), random wobble patterns, resume windows (1 min, 4 min, expiry at 5 min+), and does not regress genuine 2-detection / creeping / tailgating / exit+re-entry crossings. If the user reports another 'bar bar msg' incident, first inspect camera_log.txt for 'jitter' rate-limited lines and 'resume' lines to confirm the fix engaged. For brand new tracker tests, follow the Sim helper in test_standing_vehicle.py; for engine tests, use _engine/_ScriptDet/_Clock/_drive from test_tracker_false_crossings.py and remember to pass line=LINE_N dict + entry_direction='pos' for the user geometry. Never run test_service_api.py in the same pytest process as test_engine.py (global requests.post patch).",
+  "rca of the issue": "Original user bug (track 1238, three events on one standing truck): YOLO box oscillated between 'cab+load' (bottom-centre +14 px gate side) and 'cab only' (bottom-centre -21 px road side), moving ~35 px across the yellow line while the vehicle was physically stationary waiting for the gate to open. Old tracker counted any side flip. Fix (shipped by main agent and verified here): (1) tracker only counts when the ref point is CLEARLY past the line — >=20% of max(w,h) of the bbox, with a hysteresis min, OR arrived there in a monotone run of that same length (momentum, dies after 1 s standing); (2) tracks born inside the jitter band start with side=0 and only count via 'appeared-at-line'; (3) RESUME_S=300 s memory via _inherit_source + IoU>=0.6 so a counted vehicle that is briefly lost or acquires a second YOLO box inherits crossings/side/armed and never counts twice; (4) engine logs rate-limited 'crossing rejected: ... jitter ...' and 'resume' lines. Reproduction and all mitigation scenarios covered by test_standing_vehicle.py (10 tests) and the new tests/test_iter33_tracker_additional.py (12 tests)."
+}

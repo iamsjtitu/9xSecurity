@@ -685,7 +685,7 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 
 ## Backlog / Next
 
-- P1: Vehicle re-identification to avoid double counting if it lingers on line
+- DONE (#59): Vehicle lingering on the line no longer double counts (clear-side rule + 5-min memory)
 - P1: CSV/Excel export of event log
 - DONE (#52): Multi-camera saved list / one active / Gate Name
 - P2: Plate-based search + email/Telegram alert on entry
@@ -1031,3 +1031,25 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Tests: test_multicam_workers.py 8 (camera_cfg/gate, window+fmt12, should_stream, pool.sync start/stop/remove/legacy,
   last_event, standby wait, stream_once -> standby). Note: both engines self-test concurrently at startup => measured
   ms doubles => 'auto' picks yolov8n on a mid PC (reflects real 2-camera load).
+
+## Implemented (update 2026-06 #59) — "Ek gaadi ka bar bar msg": standing-on-the-line truck flip-flop fixed (testing agent iteration_33: 146/146 + 12 extra scenarios)
+- USER (11-10, v1.0.39 diagnostics): track 1238 gave Entry 10:49:40 -> Exit 10:50:41 -> Entry 10:59:52; truck stood ON the
+  yellow line waiting for the gate; its YOLO box wobbled cab+load (bottom-centre +14 px) <-> cab only (-21 px) = 35 px swing
+  across the line (user's two snapshots). Old tracker counted any side flip (re-arm 15% of height ~ the wobble size).
+- tracker.py: `clear_px()` = max(hyst, 20% of max(w,h)) — a crossing counts only when the vehicle is CLEARLY on the new
+  side (|dist| >= clear) OR reached it in one monotone run >= clear (`_push_run` momentum, dies after RUN_HOLD_S=1 s
+  standing, resets on direction change) -> fast vehicles still count at the first flip, a standing wobble never does.
+  `tr.side` is the COMMITTED side (0 = born inside min(clear, near_band) band: counts later via appeared-at-line in either
+  direction); `seg_hit` remembers the step that touched the drawn segment; re-arm uses the same `clear`.
+  MEMORY (user: 5 min): `lost[tid] = (bbox, ts, state)`; a new box with IoU >= 0.6 to a COUNTED vehicle (lost < RESUME_S=300 s,
+  or a LIVE counted track = 2nd YOLO box) on its own side / inside the band inherits crossings/side/armed (`resumed_from`)
+  -> never a 2nd Entry; after 5 min it is a new vehicle (documented). rejects kinds: jitter | reject | possible-miss | resumed.
+- engine.py: _log_rejects logs 'crossing rejected: ... line par khadi gaadi ka box hil raha hai (jitter) ...' (1/min/track) and
+  'track N = wahi gaadi jo pehle count ho chuki hai (purana track M)'; _duplicate_reason new rule 'second box born on the same
+  vehicle' (TWIN_APPEAR_S 6 s, matched on the new track's birth point) because appeared-at-line now fires ~81 px later.
+- Tests: test_standing_vehicle.py 10 (user's exact line + boxes: arrive once, 60 s wobble, stop-short then enter, lost 4 min
+  = same vehicle, 6 min = new, twin box, real exit+re-entry = 3, following truck = 2, fast 1-step car, slow creep, engine
+  log 'jitter'); tests/test_iter33_tracker_additional.py 12 (agent). iteration_33: 146/146 backend green, API sanity OK.
+- AWAITING USER (new build): standing truck at the gate = 1 msg; exit->re-entry still 2; check camera_log 'jitter' lines.
+- Told user: every saved camera runs its own stream + AI (WorkerPool); 3-4 cameras = proportional CPU; use time windows
+  (Standby = 0 load), sub-stream (HEVC main stream is the heaviest; their stream reconnects every 10-20 min), model 'auto'.

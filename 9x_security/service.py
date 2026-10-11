@@ -26,8 +26,8 @@ import config
 import updater
 from database import EventDB
 from engine import (
-    HEVC_CODECS, LatestFrameReader, SecurityEngine, auto_fix_stream_url, clog, codec_name, normalize_rtsp_url,
-    open_stream, probe_rtsp, substream_url,
+    HEVC_CODECS, LatestFrameReader, SecurityEngine, auto_fix_stream_url, clog, codec_name, draw_line2, line2_px,
+    normalize_rtsp_url, open_stream, probe_rtsp, substream_url,
 )
 from whatsapp import WhatsAppNotifier, parse_recipients
 
@@ -261,6 +261,9 @@ class Worker:
             a = (int(float(ln.get("x1", 0.5)) * w), int(float(ln.get("y1", 0.0)) * h))
             b = (int(float(ln.get("x2", 0.5)) * w), int(float(ln.get("y2", 1.0)) * h))
             cv2.line(frame, a, b, (0, 255, 255), 2)
+            l2 = line2_px(cfg, w, h)
+            if l2:
+                draw_line2(frame, *l2)
             if self.ai_error or self.engine is None:
                 msg = "AI ERROR - detection band hai. Settings > Diagnostics dekhein"
                 cv2.rectangle(frame, (0, h - 30), (w, h), (0, 0, 160), -1)
@@ -671,6 +674,8 @@ def state(request: Request):
         "ai_tier": worker.engine.model_tier if worker.engine else None,
         "entry_direction": cfg.get("entry_direction", "pos"),
         "line": cfg.get("line"),
+        "line2": cfg.get("line2") or None,
+        "entry_direction2": config.entry_direction2(cfg),
         "ignore_zones": cfg.get("ignore_zones") or [],
         "line_hints": list(getattr(worker.engine, "line_hints", []) or []) if worker.engine else [],
         "snapshot_dir": config.SNAPSHOT_DIR,
@@ -894,7 +899,8 @@ def cameras_save(body: dict, request: Request):
     new_id = config.new_camera_id(cfg)
     cam = {"id": new_id, "name": name or f"Camera {len(cfg['cameras']) + 1}", "gate": gate,
            "rtsp_url": url, "rtsp_url_main": "", "line": dict(config.DEFAULTS["line"]),
-           "entry_direction": "pos", "ignore_zones": [], "monitor": bool(body.get("monitor", True)),
+           "entry_direction": "pos", "line2": None, "entry_direction2": "", "ignore_zones": [],
+           "monitor": bool(body.get("monitor", True)),
            "schedule": _clean_schedule(body.get("schedule"), config.CAMERA_SCHEDULE_DEFAULT)}
     cfg["cameras"].append(cam)
     first = config.active_camera(cfg) is None
@@ -1137,14 +1143,52 @@ def set_line(body: dict, request: Request):
     return {"ok": True, "line": cfg["line"]}
 
 
+@app.post("/api/line2")
+def set_line2(body: dict, request: Request):
+    """Person/bike line: only person + two-wheeler are judged on it (car/truck/bus keep the main
+    line). {clear: true} removes it -> persons/bikes go back to the main line."""
+    _check(request)
+    cfg = _cfg()
+    if body.get("clear"):
+        cfg["line2"], cfg["entry_direction2"] = None, ""
+        clog("person/bike line removed — person & two-wheeler ab main line par count honge")
+    else:
+        try:
+            cfg["line2"] = {k: float(body[k]) for k in ("x1", "y1", "x2", "y2")}
+        except (KeyError, TypeError, ValueError):
+            raise HTTPException(400, "line ke 2 points chahiye (x1,y1,x2,y2)")
+        cfg["entry_direction2"] = config.infer_entry_direction2(cfg)
+        clog(f"person/bike line set {cfg['line2']} entry_direction2={cfg['entry_direction2']} "
+             "(car/truck/bus main line par, person/bike is line par)")
+    config.save_config(cfg)
+    pool.apply_cfg(cfg)
+    return {"ok": True, "line2": cfg["line2"], "entry_direction2": config.entry_direction2(cfg)}
+
+
 @app.post("/api/swap")
 def swap_direction(request: Request):
+    """Camera-level Entry/Exit swap: both lines flip together (they stay consistent)."""
     _check(request)
     cfg = _cfg()
     cfg["entry_direction"] = "neg" if cfg.get("entry_direction") == "pos" else "pos"
+    if cfg.get("line2"):
+        cfg["entry_direction2"] = "neg" if config.entry_direction2(cfg) == "pos" else "pos"
     config.save_config(cfg)
     pool.apply_cfg(cfg)
-    return {"ok": True, "entry_direction": cfg["entry_direction"]}
+    return {"ok": True, "entry_direction": cfg["entry_direction"], "entry_direction2": config.entry_direction2(cfg)}
+
+
+@app.post("/api/swap2")
+def swap_direction2(request: Request):
+    """Entry/Exit swap for the person/bike line only."""
+    _check(request)
+    cfg = _cfg()
+    if not cfg.get("line2"):
+        raise HTTPException(400, "Pehle Person/Bike line banayein")
+    cfg["entry_direction2"] = "neg" if config.entry_direction2(cfg) == "pos" else "pos"
+    config.save_config(cfg)
+    pool.apply_cfg(cfg)
+    return {"ok": True, "entry_direction2": cfg["entry_direction2"]}
 
 
 @app.post("/api/options")
@@ -1453,11 +1497,13 @@ def diagnostics(request: Request):
             "codec": worker.codec,
             "frames_dropped": worker.frames_dropped,
             "capture_paused": worker.capture_paused,
-            "tracks_now": len(eng.tracker.tracks) if eng else 0,
+            "tracks_now": (len(eng.tracker.tracks) + len(eng.tracker2.tracks)) if eng else 0,
             "detections_now": len(eng.last_dets) if eng else 0,
             "plate_ocr": bool(eng and eng.plate_reader is not None),
             "line": cfg.get("line"),
             "entry_direction": cfg.get("entry_direction"),
+            "line2": cfg.get("line2") or None,
+            "entry_direction2": config.entry_direction2(cfg) if cfg.get("line2") else None,
             "vehicle_classes": cfg.get("vehicle_classes"),
             "confidence": cfg.get("confidence"),
             "detector_model": cfg.get("detector_model", "auto"),

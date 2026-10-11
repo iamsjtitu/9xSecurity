@@ -58,6 +58,10 @@ DEFAULTS = {
     # Which crossing direction counts as ENTRY.
     # cross product sign flips from negative->positive = "pos", positive->negative = "neg"
     "entry_direction": "pos",
+    # Optional SECOND line for person + two-wheeler only (car/truck/bus keep the main line).
+    # None => persons/bikes are counted on the main line too. Each object meets exactly ONE line.
+    "line2": None,
+    "entry_direction2": "",  # '' => inferred from the main line when line2 is drawn
     "confidence": 0.35,
     "detector_model": "auto",        # auto | fast (yolov8n) | accurate (yolov8s)
     "detect_frame_skip": 2,          # run detector every N frames (CPU friendly)
@@ -140,7 +144,7 @@ def save_config(cfg):
 
 
 # ---- saved cameras ---------------------------------------------------------
-CAMERA_KEYS = ("rtsp_url", "rtsp_url_main", "line", "entry_direction", "ignore_zones")
+CAMERA_KEYS = ("rtsp_url", "rtsp_url_main", "line", "entry_direction", "line2", "entry_direction2", "ignore_zones")
 CAMERA_SCHEDULE_DEFAULT = {"enabled": False, "start": "20:00", "end": "08:00"}  # per-camera capture window
 MAX_CAMERAS = 8
 
@@ -220,6 +224,27 @@ def gate_name(cfg):
         return str(cfg.get("_gate") or "").strip()
     cam = active_camera(cfg)
     return str((cam or {}).get("gate") or "").strip()
+
+
+def infer_entry_direction2(cfg):
+    """Entry side for the person/bike line so that it agrees with the main line: a line drawn
+    roughly the same way (a->b vectors pointing alike) inherits entry_direction, one drawn the
+    opposite way gets the flipped sign. The user can still Swap the person/bike line alone."""
+    ln, l2 = cfg.get("line") or {}, cfg.get("line2") or {}
+    try:
+        dot = ((float(ln["x2"]) - float(ln["x1"])) * (float(l2["x2"]) - float(l2["x1"]))
+               + (float(ln["y2"]) - float(ln["y1"])) * (float(l2["y2"]) - float(l2["y1"])))
+    except (KeyError, TypeError, ValueError):
+        dot = 1.0
+    main = cfg.get("entry_direction", "pos")
+    if dot >= 0:
+        return main
+    return "neg" if main == "pos" else "pos"
+
+
+def entry_direction2(cfg):
+    """Effective entry sign for the person/bike line ('' falls back to the main line's)."""
+    return cfg.get("entry_direction2") or cfg.get("entry_direction", "pos")
 
 
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { PenLine, ArrowLeftRight, FolderOpen, Ban, Trash2, AlertTriangle } from 'lucide-react';
+import { PenLine, ArrowLeftRight, FolderOpen, Ban, Trash2, AlertTriangle, Bike } from 'lucide-react';
 import { api } from '../api';
 
 export default function ControlsPanel({ state, refreshState, showToast, drawMode, setDrawMode }) {
@@ -11,10 +11,26 @@ export default function ControlsPanel({ state, refreshState, showToast, drawMode
     } catch (e) { showToast(e.message, 'error'); }
   };
 
+  const clearLine2 = async () => {
+    try {
+      await api('/api/line2', { method: 'POST', body: JSON.stringify({ clear: true }) });
+      showToast('Person/Bike line hata di — ab person & two-wheeler bhi main line par count honge', 'info');
+      refreshState();
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+
+  const swap2 = async () => {
+    try {
+      const r = await api('/api/swap2', { method: 'POST' });
+      showToast(`Person/Bike line ki Entry/Exit swap ho gayi (${r.entry_direction2})`, 'success');
+      refreshState();
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+
   const swap = async () => {
     try {
       const r = await api('/api/swap', { method: 'POST' });
-      showToast(`Entry/Exit direction swap ho gayi (${r.entry_direction})`, 'success');
+      showToast(`Entry/Exit direction swap ho gayi (${r.entry_direction})${state.line2 ? ' — dono lines' : ''}`, 'success');
       refreshState();
     } catch (e) { showToast(e.message, 'error'); }
   };
@@ -53,6 +69,35 @@ export default function ControlsPanel({ state, refreshState, showToast, drawMode
             {state.line_hints.map((h) => <div key={h} className="flex gap-1.5"><AlertTriangle size={13} className="shrink-0 mt-0.5" /><span>{h}</span></div>)}
           </div>
         )}
+        <button
+          className={drawMode === 'line2' ? 'btn-primary justify-center !bg-fuchsia-600 !border-fuchsia-600' : 'btn-ghost justify-center'}
+          onClick={() => setDrawMode(drawMode === 'line2' ? false : 'line2')}
+          data-testid="draw-line2-btn"
+          title="Sirf Person aur Two-wheeler is line par count honge; car/truck/bus main (yellow) line par"
+        >
+          <Bike size={15} /> {drawMode === 'line2' ? 'Video par 2 click karein…' : state.line2 ? 'Person/Bike Line dobara banayein' : 'Draw Person/Bike Line'}
+        </button>
+        <div
+          className={`rounded-lg px-3 py-2 text-xs ${state.line2 ? 'border border-fuchsia-200 bg-fuchsia-50 text-fuchsia-900' : 'bg-slate-50 text-slate-500'}`}
+          data-testid="line2-status"
+        >
+          {state.line2 ? (
+            <>
+              <div className="font-semibold">Person/Bike line set hai (magenta)</div>
+              <div className="mt-0.5">Car/Truck/Bus → yellow line · Person/Two-wheeler → magenta line. Har object sirf ek line par ginta hai.</div>
+              <div className="mt-2 flex gap-2">
+                <button className="rounded-md border border-fuchsia-300 bg-white px-2 py-1 text-[11px] font-semibold text-fuchsia-800 hover:bg-fuchsia-100" onClick={swap2} data-testid="swap-line2-btn">
+                  <ArrowLeftRight size={12} className="inline mr-1" />Swap Entry/Exit (Person/Bike)
+                </button>
+                <button className="rounded-md border border-rose-200 bg-white px-2 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-50" onClick={clearLine2} data-testid="clear-line2-btn">
+                  <Trash2 size={12} className="inline mr-1" />Hatao
+                </button>
+              </div>
+            </>
+          ) : (
+            <span>Person/Bike line nahi bani — person & two-wheeler bhi yellow line par count honge.</span>
+          )}
+        </div>
         <button
           className={drawMode === 'zone' ? 'btn-primary justify-center' : 'btn-ghost justify-center'}
           onClick={() => setDrawMode(drawMode === 'zone' ? false : 'zone')}

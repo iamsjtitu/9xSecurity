@@ -209,6 +209,12 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
           const zones = [...(state.ignore_zones || []), { x1: firstPoint.x, y1: firstPoint.y, x2: nx, y2: ny }];
           await api('/api/ignore_zones', { method: 'POST', body: JSON.stringify({ zones }) });
           showToast('Ignore zone set ho gaya ✔ — is area ki gaadiyan count nahi hongi', 'success');
+        } else if (drawMode === 'line2') {
+          await api('/api/line2', {
+            method: 'POST',
+            body: JSON.stringify({ x1: firstPoint.x, y1: firstPoint.y, x2: nx, y2: ny }),
+          });
+          showToast('Person/Bike line set ho gayi ✔ — person & two-wheeler ab sirf is line par count honge', 'success');
         } else {
           await api('/api/line', {
             method: 'POST',
@@ -380,15 +386,17 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
           </div>
         )}
         {drawMode && (
-          <div className={`absolute top-3 left-3 rounded-md px-3 py-1.5 text-xs font-semibold ${drawMode === 'zone' ? 'bg-rose-500/90 text-white' : 'bg-amber-500/90 text-black'}`} data-testid="draw-hint">
+          <div className={`absolute top-3 left-3 rounded-md px-3 py-1.5 text-xs font-semibold ${drawMode === 'zone' ? 'bg-rose-500/90 text-white' : drawMode === 'line2' ? 'bg-fuchsia-500/90 text-white' : 'bg-amber-500/90 text-black'}`} data-testid="draw-hint">
             {drawMode === 'zone'
               ? (firstPoint ? 'Ab zone ka DUSRA kona click karein' : 'Ignore zone: parking area ka PEHLA kona click karein')
-              : (firstPoint ? 'Ab END point par click karein' : 'Line ka START point click karein')}
+              : drawMode === 'line2'
+                ? (firstPoint ? 'Ab Person/Bike line ka END point click karein' : 'Person/Bike line (sirf person & two-wheeler): START point click karein')
+                : (firstPoint ? 'Ab END point par click karein' : 'Line ka START point click karein')}
           </div>
         )}
         {firstPoint && (
           <div
-            className="absolute h-3 w-3 rounded-full bg-amber-400 ring-2 ring-black -translate-x-1/2 -translate-y-1/2"
+            className={`absolute h-3 w-3 rounded-full ring-2 ring-black -translate-x-1/2 -translate-y-1/2 ${drawMode === 'line2' ? 'bg-fuchsia-400' : 'bg-amber-400'}`}
             style={{ left: `${firstPoint.x * 100}%`, top: `${firstPoint.y * 100}%` }}
           />
         )}

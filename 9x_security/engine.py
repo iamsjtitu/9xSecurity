@@ -31,6 +31,28 @@ RIDER_MIN_OVERLAP = 0.2  # >= this fraction of the person's box inside the grown
 RIDER_SHAPE = 1.8        # a seated rider's box is shorter than this many widths (a walker is 2.5-3.5x)
 RIDER_SPEED = 1.5        # ... and moves faster than this many body-heights per second (a walker ~0.8)
 MOVING_S = 4.0           # a vehicle track counts as 'moving' this long after its last real move
+SAME_OBJECT_IOU = 0.4    # a box in the OTHER tracker overlapping this much = the same object (YOLO car<->motorcycle flip)
+TWIN_ALERT_S = 30.0      # ... and it was alerted this recently -> no second alert for it on the other line
+LINE2_COLOR = (255, 0, 255)  # person/bike line (magenta); the main vehicle line stays yellow
+
+
+def draw_line2(img, a, b):
+    """Person/bike line on a frame: magenta + a small tag so it is never confused with the yellow line."""
+    cv2.line(img, a, b, LINE2_COLOR, 2)
+    mx, my = (a[0] + b[0]) // 2, (a[1] + b[1]) // 2
+    cv2.putText(img, "PERSON / BIKE", (mx + 6, max(12, my - 6)), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 0), 3, cv2.LINE_AA)
+    cv2.putText(img, "PERSON / BIKE", (mx + 6, max(12, my - 6)), cv2.FONT_HERSHEY_SIMPLEX, 0.45, LINE2_COLOR, 1, cv2.LINE_AA)
+
+
+def line2_px(cfg, w, h):
+    """Pixel endpoints of cfg['line2'] or None when not drawn."""
+    ln = cfg.get("line2")
+    if not ln:
+        return None
+    try:
+        return ((int(float(ln["x1"]) * w), int(float(ln["y1"]) * h)), (int(float(ln["x2"]) * w), int(float(ln["y2"]) * h)))
+    except (KeyError, TypeError, ValueError):
+        return None
 
 
 def _point_in_box(pt, box, grow=0.0):
@@ -481,7 +503,11 @@ class SecurityEngine:
         else:
             self.model_tier = "custom"
         self.detector = detector
+        # two trackers, two lines: car/truck/bus cross the MAIN (yellow) line; person + two-wheeler
+        # (+ animals as context) cross the person/bike line — or the main line when none is drawn.
+        # Every object lives in exactly one tracker, so it can never be counted on both lines.
         self.tracker = CentroidTracker()
+        self.tracker2 = CentroidTracker()
         self.plate_reader = plate_reader
         if self.cfg.get("enable_plate") and self.plate_reader is None:
             from plate_reader import PlateReader
@@ -489,10 +515,10 @@ class SecurityEngine:
             self.plate_reader = PlateReader()
         self._best_crops = {}
         self._ocr_q = None  # single OCR worker queue (created on first crossing)
-        self._recent_cross = []  # (ts, to_side, bbox) of counted crossings for de-duplication
+        self._recent_cross = {1: [], 2: []}  # per tracker: (ts, to_side, bbox, tid) of counted crossings for de-duplication
         self._person_groups = {}  # direction -> pending group (people crossing within PERSON_GROUP_S)
-        self._recent_vehicle_cross = []  # (ts, to_side, bbox, label) — riders/drivers are not lone persons
-        self._motion = {}  # track id -> [last_move_ts, ref_point]
+        self._recent_vehicle_cross = []  # (ts, direction, bbox, label) — riders/drivers are not lone persons
+        self._motion = {}  # (tracker no, track id) -> [last_move_ts, ref_point]
         self._det_ts = time.time()
         self._reject_log_ts = {}  # track id -> last time a rejected crossing was logged
         self.possible_misses = 0  # tracks that changed side without a counted crossing (diagnostics)
@@ -516,9 +542,28 @@ class SecurityEngine:
         b = (int(ln["x2"] * w), int(ln["y2"] * h))
         return a, b
 
-    def _direction_for(self, to_side):
-        """Map crossing target side sign to Entry/Exit per configuration."""
-        entry_sign = 1 if self.cfg.get("entry_direction", "pos") == "pos" else -1
+    def has_line2(self):
+        return bool(self.cfg.get("line2"))
+
+    def line2_points(self, w, h):
+        """Person/bike line in pixels; the main line when none is drawn."""
+        ln = self.cfg.get("line2")
+        if not ln:
+            return self.line_points(w, h)
+        return (int(ln["x1"] * w), int(ln["y1"] * h)), (int(ln["x2"] * w), int(ln["y2"] * h))
+
+    def _tracker(self, which):
+        return self.tracker2 if which == 2 else self.tracker
+
+    def _live_tracks(self):
+        for which, trk in ((1, self.tracker), (2, self.tracker2)):
+            for tid, tr in trk.tracks.items():
+                yield (which, tid), tr
+
+    def _direction_for(self, to_side, which=1):
+        """Map crossing target side sign to Entry/Exit per configuration (per line)."""
+        ed = config.entry_direction2(self.cfg) if (which == 2 and self.has_line2()) else self.cfg.get("entry_direction", "pos")
+        entry_sign = 1 if ed == "pos" else -1
         return "Entry" if to_side == entry_sign else "Exit"
 
     # ---- main per-frame pipeline ------------------------------------------
@@ -574,34 +619,43 @@ class SecurityEngine:
     def _log_rejects(self):
         """camera_log: why a side flip was NOT counted (rate-limited per track) + possible misses."""
         now = time.time()
-        for r in self.tracker.rejects:
-            tid = r["track_id"]
-            if r["kind"] == "possible-miss":
-                self.possible_misses += 1
-                clog(f"POSSIBLE MISS: track {tid} {r['label']} line ke doosri taraf pahuncha par count nahi hua — "
+        for which, trk in ((1, self.tracker), (2, self.tracker2)):
+            for r in trk.rejects:
+                tid = r["track_id"]
+                if r["kind"] == "possible-miss":
+                    self.possible_misses += 1
+                    clog(f"POSSIBLE MISS: track {tid} {r['label']} line ke doosri taraf pahuncha par count nahi hua — "
+                         f"{r['reason']} (box {r['bbox']})")
+                    continue
+                if r["kind"] == "resumed":
+                    clog(f"track {tid} = wahi gaadi jo pehle count ho chuki hai (purana track {r['from']}, line par khadi/"
+                         f"doosra box) — dobara count nahi hogi (box {r['bbox']})")
+                    continue
+                # a standing vehicle wobbles every frame: explain it once a minute, other rejects every 10 s
+                key = (which, tid)
+                if now - self._reject_log_ts.get(key, 0) < (60 if r["kind"] == "jitter" else 10):
+                    continue
+                self._reject_log_ts[key] = now
+                clog(f"crossing rejected: track {tid} {r['label']} {self._direction_for(r['to_side'], which)} — "
                      f"{r['reason']} (box {r['bbox']})")
-                continue
-            if r["kind"] == "resumed":
-                clog(f"track {tid} = wahi gaadi jo pehle count ho chuki hai (purana track {r['from']}, line par khadi/"
-                     f"doosra box) — dobara count nahi hogi (box {r['bbox']})")
-                continue
-            # a standing vehicle wobbles every frame: explain it once a minute, other rejects every 10 s
-            if now - self._reject_log_ts.get(tid, 0) < (60 if r["kind"] == "jitter" else 10):
-                continue
-            self._reject_log_ts[tid] = now
-            clog(f"crossing rejected: track {tid} {r['label']} {self._direction_for(r['to_side'])} — {r['reason']} (box {r['bbox']})")
-        for tid in [t for t in self._reject_log_ts if t not in self.tracker.tracks]:
-            del self._reject_log_ts[tid]
+        for key in [k for k in self._reject_log_ts if k[1] not in self._tracker(k[0]).tracks]:
+            del self._reject_log_ts[key]
 
-    def _update_line_hints(self, a, b, w, h):
-        """Live placement advice for the yellow line (shown under 'Draw Detection Line')."""
+    def _geom_hints(self, a, b, w, h, prefix=""):
         hints = []
         m = 0.04
         if any(not (m * w <= p[0] <= (1 - m) * w and m * h <= p[1] <= (1 - m) * h) for p in (a, b)):
-            hints.append("Line picture ke kinare tak jaa rahi hai — kinare par kati hui (aadhi dikhti) gaadi ka sahi point nahi milta, "
-                         "crossing miss ya galat ho sakti hai; line ke dono sire kinare se kam se kam 5% andar rakhein")
+            hints.append(f"{prefix}Line picture ke kinare tak jaa rahi hai — kinare par kati hui (aadhi dikhti) gaadi ka sahi "
+                         "point nahi milta, crossing miss ya galat ho sakti hai; line ke dono sire kinare se kam se kam 5% andar rakhein")
         if math.hypot(b[0] - a[0], b[1] - a[1]) < 0.12 * w:
-            hints.append("Line bahut chhoti hai — gate ki poori chaudai par khichein taaki har gaadi ise kaate")
+            hints.append(f"{prefix}Line bahut chhoti hai — gate ki poori chaudai par khichein taaki har gaadi ise kaate")
+        return hints
+
+    def _update_line_hints(self, a, b, w, h, a2=None, b2=None):
+        """Live placement advice for the yellow line (shown under 'Draw Detection Line')."""
+        hints = self._geom_hints(a, b, w, h)
+        if self.has_line2() and a2 is not None:
+            hints += self._geom_hints(a2, b2, w, h, "Person/Bike line: ")
         now = time.time()
         for tr in self.tracker.tracks.values():
             x1, y1, x2, y2 = tr.bbox
@@ -613,9 +667,9 @@ class SecurityEngine:
             if now - still > 8 and moved < 0.1 * max(x2 - x1, y2 - y1) and _segment_hits_box(a, b, tr.bbox):
                 hints.append(f"Ek khadi gaadi ({tr.label}) line ke upar hai — use Ignore Zone se cover karein ya line hatayein")
                 break
-        self.line_hints = hints[:2]
+        self.line_hints = hints[:3]
 
-    def _dedupe_crossings(self, crossings):
+    def _dedupe_crossings(self, crossings, which=1):
         """One photo per vehicle — but never swallow the NEXT vehicle. A same-direction
         crossing at the same spot within DEDUPE_S is dropped ONLY when track identity proves
         it is the same physical vehicle: the earlier track is still alive and still sits on
@@ -625,30 +679,31 @@ class SecurityEngine:
         gate. NOTE: every crossing bbox sits on the gate line, so two different vehicles always
         overlap here — overlap+timing alone can never tell them apart, only track identity can."""
         now = time.time()
-        self._recent_cross = [r for r in self._recent_cross if now - r[0] < DEDUPE_S]
+        recent = [r for r in self._recent_cross[which] if now - r[0] < DEDUPE_S]
+        self._recent_cross[which] = recent
         out = []
         for cr in crossings:
-            why = self._duplicate_reason(cr, now)
+            why = self._duplicate_reason(cr, now, self._tracker(which), recent)
             if why:
                 clog(f"crossing ignored: duplicate ({why}) of a vehicle counted <{DEDUPE_S:.0f}s ago (track {cr['track_id']})")
                 continue
-            self._recent_cross.append((now, cr["to_side"], cr["bbox"], cr["track_id"]))
+            recent.append((now, cr["to_side"], cr["bbox"], cr["track_id"]))
             out.append(cr)
         return out
 
-    def _duplicate_reason(self, cr, now):
-        newtr = self.tracker.tracks.get(cr["track_id"])
-        for ts, side, box, tid in self._recent_cross:
+    def _duplicate_reason(self, cr, now, trk, recent):
+        newtr = trk.tracks.get(cr["track_id"])
+        for ts, side, box, tid in recent:
             if side != cr["to_side"] or tid == cr["track_id"]:
                 continue
-            lost = self.tracker.lost.get(tid)
+            lost = trk.lost.get(tid)
             # Same vehicle that stopped on the line, was lost, and re-appeared there with a NEW
             # track id — its crossing can fire a few frames later, after it has moved off the
             # earlier box, so match on where the new track was BORN, not where it is now.
             if (cr.get("via") == "appeared-at-line" and newtr is not None and lost is not None
                     and _point_in_box(newtr.start_ref, lost[0], 0.25)):
                 return "track re-created where the last one was lost"
-            live = self.tracker.tracks.get(tid)
+            live = trk.tracks.get(tid)
             # 2nd YOLO box BORN on a vehicle that was just crossing (long truck: cab + body): its own
             # 'appeared-at-line' fires 1-5 s later and further in, so match where it was born and
             # check that the first box is still glued to it now
@@ -681,7 +736,8 @@ class SecurityEngine:
         """
         h, w = frame.shape[:2]
         a, b = self.line_points(w, h)
-        self.tracker.near_band = 0.10 * h
+        a2, b2 = self.line2_points(w, h)
+        self.tracker.near_band = self.tracker2.near_band = 0.10 * h
         skip = max(1, int(self.cfg.get("detect_frame_skip", 2)))
 
         if self.frame_idx % skip == 0:
@@ -692,11 +748,18 @@ class SecurityEngine:
         self.frame_idx += 1
 
         self.last_dets = self._sanitize_persons(self._drop_ignored(self.last_dets, w, h), h)
-        crossings = self.tracker.update(self.last_dets, (a, b), now=self._det_ts, frame_size=(w, h))
+        # car/truck/bus -> main line; person/two-wheeler/animal -> person/bike line (= main line when not drawn)
+        dets_v = [d for d in self.last_dets if category_of(d["label"]) == "vehicle"]
+        dets_p = [d for d in self.last_dets if category_of(d["label"]) != "vehicle"]
+        crossings = []
+        for which, trk, dets, ln in ((1, self.tracker, dets_v, (a, b)), (2, self.tracker2, dets_p, (a2, b2))):
+            crs = trk.update(dets, ln, now=self._det_ts, frame_size=(w, h))
+            for cr in crs:
+                cr["which"] = which
+            crossings += self._dedupe_crossings(crs, which)
         self._log_rejects()
-        crossings = self._dedupe_crossings(crossings)
         self._update_motion(time.time())
-        self._update_line_hints(a, b, w, h)
+        self._update_line_hints(a, b, w, h, a2, b2)
         if self.cfg.get("enable_plate") and self.plate_reader is not None:
             self._update_best_crops(frame, original, w, h)
 
@@ -705,9 +768,10 @@ class SecurityEngine:
         self._recent_vehicle_cross = [r for r in self._recent_vehicle_cross if now - r[0] < PERSON_VEHICLE_S]
         for cr in crossings:
             cat = category_of(cr["label"])
+            direction = self._direction_for(cr["to_side"], cr["which"])
             if cat in ("vehicle", "two_wheeler"):
                 # remembered even when this category is OFF: a rider/driver must never count as a person
-                self._recent_vehicle_cross.append((now, cr["to_side"], cr["bbox"], cr["label"]))
+                self._recent_vehicle_cross.append((now, direction, cr["bbox"], cr["label"]))
             if not self._category_enabled(cr, cat):
                 continue
             if not config.category_counts_now(self.cfg, cat):
@@ -718,13 +782,34 @@ class SecurityEngine:
                 if why:
                     clog(f"person ignored: {why} — gaadi/bike ke saath hai, akela paidal nahi (track {cr['track_id']})")
                     continue
-                self._queue_person(frame, cr, self._direction_for(cr["to_side"]), now)
+                self._queue_person(frame, cr, direction, now)
             else:
+                why = self._same_object_alerted(cr, now)
+                if why:
+                    clog(f"crossing ignored: {why} (track {cr['track_id']} {cr['label']})")
+                    continue
                 events += self._emit_crossing(frame, original, cr, cat, w, h)
+                self._mark_twins(cr, now)
         events += self.flush_pending(now=now)
 
-        annotated = self._annotate(frame, a, b)
+        annotated = self._annotate(frame, a, b, a2, b2)
         return annotated, events
+
+    def _same_object_alerted(self, cr, now):
+        """YOLO may call one auto/tractor 'car' in some frames and 'motorcycle' in others: then
+        BOTH trackers follow it. The first alert marks the twin track in the other tracker, so
+        the same object never gets a second alert on the other line."""
+        tr = self._tracker(cr["which"]).tracks.get(cr["track_id"])
+        twin = getattr(tr, "twin_alert", None)
+        if twin and now - twin[0] < TWIN_ALERT_S:
+            return f"same object: {twin[1]} ke roop me {now - twin[0]:.0f}s pehle alert ho chuka (doosri line)"
+        return ""
+
+    def _mark_twins(self, cr, now):
+        other = self._tracker(2 if cr["which"] == 1 else 1)
+        for tr in other.tracks.values():
+            if _box_iou(tr.bbox, cr["bbox"]) >= SAME_OBJECT_IOU:
+                tr.twin_alert = (now, cr["label"])
 
     def _with_vehicle(self, cr):
         """Rider / driver / passenger test: the person's box sits on a MOVING vehicle or two-wheeler
@@ -733,40 +818,41 @@ class SecurityEngine:
         now = time.time()
         # the rider himself when YOLO never boxed the bike (user 11-10: bike + rider = two 'person'
         # boxes): a SEATED shape (short, wide box) moving at bike speed is nobody walking
-        own = self.tracker.tracks.get(cr["track_id"])
+        own = self.tracker2.tracks.get(cr["track_id"])
         x1, y1, x2, y2 = cr["bbox"]
         w, h = max(1, x2 - x1), max(1, y2 - y1)
         if own is not None and own.vel is not None and h < RIDER_SHAPE * w:
             speed = math.hypot(own.vel[0], own.vel[1]) / h
             if speed > RIDER_SPEED:
                 return f"baitha hua aur tez ({speed:.1f} body-height/s, box {w}x{h}) — bike/gaadi par sawaar"
-        for tid, tr in self.tracker.tracks.items():
-            if category_of(tr.label) not in ("vehicle", "two_wheeler") or not self._is_moving(tid, now):
+        for key, tr in self._live_tracks():
+            if category_of(tr.label) not in ("vehicle", "two_wheeler") or not self._is_moving(key, now):
                 continue
             if _overlap_frac(cr["bbox"], tr.bbox, RIDER_GROW) >= RIDER_MIN_OVERLAP:
-                return f"{tr.label} (track {tid}) ke upar/saath"
-        for ts, side, box, label in self._recent_vehicle_cross:
-            if side == cr["to_side"] and _overlap_frac(cr["bbox"], box, RIDER_GROW) >= RIDER_MIN_OVERLAP:
+                return f"{tr.label} (track {key[1]}) ke upar/saath"
+        direction = self._direction_for(cr["to_side"], cr.get("which", 2))
+        for ts, dirn, box, label in self._recent_vehicle_cross:
+            if dirn == direction and _overlap_frac(cr["bbox"], box, RIDER_GROW) >= RIDER_MIN_OVERLAP:
                 return f"{label} ne {now - ts:.1f}s pehle yahin cross kiya"
         return ""
 
     def _update_motion(self, now):
         """Per-track 'last moved' timestamp (ref point moved >= 15% of box height)."""
-        live = self.tracker.tracks
-        for tid in [t for t in self._motion if t not in live]:
-            del self._motion[tid]
-        for tid, tr in live.items():
-            ref = self.tracker.ref_point(tr.bbox)
-            prev = self._motion.get(tid)
+        live = dict(self._live_tracks())
+        for key in [k for k in self._motion if k not in live]:
+            del self._motion[key]
+        for key, tr in live.items():
+            ref = CentroidTracker.ref_point(tr.bbox)
+            prev = self._motion.get(key)
             if prev is None:
-                self._motion[tid] = [now, ref]
+                self._motion[key] = [now, ref]
                 continue
             h = max(1, tr.bbox[3] - tr.bbox[1])
             if math.hypot(ref[0] - prev[1][0], ref[1] - prev[1][1]) >= 0.15 * h:
                 prev[0], prev[1] = now, ref
 
-    def _is_moving(self, tid, now):
-        m = self._motion.get(tid)
+    def _is_moving(self, key, now):
+        m = self._motion.get(key)
         return m is not None and now - m[0] < MOVING_S
 
     def _queue_person(self, frame, cr, direction, now):
@@ -810,7 +896,7 @@ class SecurityEngine:
 
     def _emit_crossing(self, frame, original, cr, cat, w, h):
         """Vehicle / two-wheeler crossing -> one event (+ async plate OCR for vehicles)."""
-        direction = self._direction_for(cr["to_side"])
+        direction = self._direction_for(cr["to_side"], cr.get("which", 1))
         image_path = self._save_snapshot(frame, cr, direction)
         ocr_on = bool(cat == "vehicle" and self.cfg.get("enable_plate") and self.plate_reader is not None)
         gate = config.gate_name(self.cfg)
@@ -1022,7 +1108,7 @@ class SecurityEngine:
             clog(f"event: {direction} {cr['label']} SNAPSHOT SAVE FAILED ({e}) path={path}")
             return ""
 
-    def _annotate(self, frame, a, b):
+    def _annotate(self, frame, a, b, a2=None, b2=None):
         img = frame
         for zx1, zy1, zx2, zy2 in self._zones_px(img.shape[1], img.shape[0]):
             ov = img[zy1:zy2, zx1:zx2]
@@ -1031,7 +1117,9 @@ class SecurityEngine:
             cv2.rectangle(img, (zx1, zy1), (zx2, zy2), (80, 80, 230), 2)
             cv2.putText(img, "IGNORE", (zx1 + 6, zy1 + 18), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (80, 80, 230), 1, cv2.LINE_AA)
         cv2.line(img, a, b, (0, 255, 255), 2)
-        for tr in self.tracker.tracks.values():
+        if self.has_line2() and a2 is not None:
+            draw_line2(img, a2, b2)
+        for _key, tr in self._live_tracks():
             x1, y1, x2, y2 = tr.bbox
             animal = category_of(tr.label) == "animal"
             col = (160, 160, 160) if (tr.counted or animal) else (0, 200, 0)
@@ -1040,8 +1128,8 @@ class SecurityEngine:
                 img, tr.label + (" (counted)" if tr.counted else " (animal, ignored)" if animal else ""),
                 (x1, max(12, y1 - 6)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, col, 1,
             )
-            cv2.circle(img, self.tracker.ref_point(tr.bbox), 5, (0, 0, 255), -1)
-        n = len(self.tracker.tracks)
+            cv2.circle(img, CentroidTracker.ref_point(tr.bbox), 5, (0, 0, 255), -1)
+        n = len(self.tracker.tracks) + len(self.tracker2.tracks)
         hud = f"AI: {n} vehicle{'s' if n != 1 else ''} tracked"
         if self.last_detect_ms is not None:
             hud += f"  |  {self.last_detect_ms:.0f} ms"

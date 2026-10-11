@@ -102,7 +102,9 @@
         "enabled": true,
         "start": "20:00",
         "end": "08:00"
-      }
+      },
+      "line2": null,
+      "entry_direction2": ""
     }
   ],
   "active_camera_id": "cam1",
@@ -112,8 +114,8 @@
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "3bdf53ec29791108bf7939ae9387efd9",
-  "auth_hash": "9a06ce9dc3a78b8216d0aa25ec664c7b07d5c0531f330274fbb2ed65898bd8b7",
+  "auth_salt": "144245523e454745c4fda404be258271",
+  "auth_hash": "912ba735e5262be3c45bc8da45388a6fa6d0194f3a169dbbbc6b039a166cf372",
   "github_repo": "",
   "gh_token": "TEST_GH",
   "rtsp_url_main": ""

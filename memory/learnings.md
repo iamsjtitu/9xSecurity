@@ -28,3 +28,9 @@
 - NEVER `git checkout -- events.db` while service.py is running: the service keeps the old inode open and
   reads/writes a phantom DB (API shows [] while the file has rows). Clean rows with sqlite DELETE instead;
   if you did checkout, restart the service.
+- /api/line, /api/line2, /api/swap, /api/ignore_zones act on the VIEWED (active) camera only: for a temporary
+  test camera call POST /api/cameras/{id}/activate first, and re-activate cam1 afterwards.
+- A file-backed camera REPLAYS the video when it ends (watchdog reconnect): E2E videos must be longer than the
+  observation window or crossings get counted once per replay (looks like duplicates but is not).
+- Engine has TWO trackers since #61: eng.tracker (car/truck/bus, main line) and eng.tracker2 (person/two-wheeler/
+  animal, line2 or main line). Tests that inject tracks for persons/bikes must use tracker2.

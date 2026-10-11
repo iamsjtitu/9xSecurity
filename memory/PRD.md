@@ -686,6 +686,7 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 ## Backlog / Next
 
 - DONE (#59): Vehicle lingering on the line no longer double counts (clear-side rule + 5-min memory)
+- DONE (#61): Separate Person/Bike line (magenta) — vehicles on the yellow line only
 - P1: CSV/Excel export of event log
 - DONE (#52): Multi-camera saved list / one active / Gate Name
 - P2: Plate-based search + email/Telegram alert on entry
@@ -1079,3 +1080,34 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   use time windows / sub-stream / 'fast' model; meter shows when it is too much.
 - iteration_34: backend 100% (114 core + 7 + 43 API), frontend 100% (card states, live numbers with a file camera
   '8.9 fps · 91 ms · 0% skip', diagnostics table, regressions).
+
+## Implemented (update 2026-06 #61) — Separate Person/Bike detection line (testing agent iteration_35: 100% + real-YOLO E2E)
+- USER (11-10): 'Two wheeler aur person ke liye alag detection line … car/truck/tractor wala main line hi rahega,
+  double nahi ana chahiye'. Snapshot showed a bike+rider counted at the far right picture edge of the vehicle line.
+- ENGINE (engine.py): TWO trackers — self.tracker (car/truck/bus) judged on the MAIN yellow line, self.tracker2
+  (person + two-wheeler + animals-as-context) judged on cfg['line2'] (magenta) or the main line when none is drawn.
+  Detections are split by detector.category_of BEFORE tracking, so one object lives in exactly one tracker = counted
+  on exactly one line. Per-tracker dedupe (_recent_cross[which]), rejects log / line hints / motion keyed by
+  (tracker, tid); _with_vehicle (rider/driver test) scans BOTH trackers via _live_tracks(); _recent_vehicle_cross
+  compares Entry/Exit strings (lines may have different orientations). Twin guard: an object YOLO flips
+  car<->motorcycle is followed by both trackers — the first alert marks the IoU>=0.4 twin track (_mark_twins,
+  TWIN_ALERT_S 30 s) so the other line never alerts it again (_same_object_alerted). _direction_for(to_side, which)
+  uses entry_direction2 for line2. draw_line2()/line2_px() helpers: magenta line + 'PERSON / BIKE' tag on the live
+  frame and on the paused (schedule) frame (service Worker._draw_line_only).
+- CONFIG: DEFAULTS line2 None / entry_direction2 ''; CAMERA_KEYS += line2, entry_direction2 (per camera, isolated);
+  infer_entry_direction2(cfg): line2 drawn in the same a->b sense as the main line inherits entry_direction, drawn the
+  opposite way gets the flipped sign (so 'walking in' = Entry like 'driving in'); entry_direction2(cfg) fallback.
+- API: POST /api/line2 {x1,y1,x2,y2} (infers entry_direction2) | {clear:true}; POST /api/swap2 (line2 only, 400 without
+  line2); POST /api/swap now flips BOTH lines (consistency); /api/state + diagnostics expose line2/entry_direction2;
+  camera_log 'person/bike line set … / removed'.
+- UI Detection Controls: 'Draw Person/Bike Line' (draw-line2-btn, fuchsia draw mode + draw-hint), status box
+  line2-status ('nahi bani — person & two-wheeler bhi yellow line par count honge' / 'set hai (magenta)' with
+  swap-line2-btn + clear-line2-btn 'Hatao'). CameraPanel drawMode 'line2' -> POST /api/line2.
+- Tests: test_two_lines.py 14 (which line counts what, backward compat without line2, 1+1 simultaneous, direction
+  inference, swap2, label-flip = 1 alert, rider on bike, driver on car across trackers, per-camera isolation, drawing);
+  tests/test_iter35_line2.py 15 (agent: API + extra scenarios); 153 regression green; tests/line2_real_yolo_check.py
+  (real YOLO, file camera): bus over MAIN line = 1 event, bus over the PERSON/BIKE line region = 0 events (422 AI frames).
+- LEARNING: /api/line, /api/line2, /api/swap configure the VIEWED (active) camera — a temp test camera must be
+  activated first. A file camera REPLAYS when the file ends (watchdog reconnect) -> make E2E videos longer than the wait.
+- AWAITING USER (new build): draw the magenta line on the person/bike path; bike+rider = 1 two-wheeler alert on it,
+  car/truck only on the yellow line, nothing double.

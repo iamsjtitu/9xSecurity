@@ -23,6 +23,7 @@ from tracker import CentroidTracker, _iou as _box_iou
 OCR_MAX_QUEUE_WAIT_S = float(os.environ.get("OCR_MAX_QUEUE_WAIT_S", "20"))
 DEDUPE_S = float(os.environ.get("CROSS_DEDUPE_S", "20"))  # window for same-vehicle (track identity) de-dup
 SAME_VEHICLE_S = float(os.environ.get("SAME_VEHICLE_S", "3"))  # two YOLO boxes on ONE vehicle cross within this
+TWIN_APPEAR_S = 6.0  # a 2nd box born ON a crossing vehicle may 'appear at the line' this long after the 1st box crossed
 PERSON_GROUP_S = float(os.environ.get("PERSON_GROUP_S", "2.5"))  # people crossing within this = one 'N persons' alert
 PERSON_VEHICLE_S = float(os.environ.get("PERSON_VEHICLE_S", "6"))  # person crossing within this of a vehicle at the same spot = rider/driver
 RIDER_GROW = 0.25       # vehicle box grown by this fraction when testing 'person ON/WITH the vehicle'
@@ -578,7 +579,12 @@ class SecurityEngine:
                 clog(f"POSSIBLE MISS: track {tid} {r['label']} line ke doosri taraf pahuncha par count nahi hua — "
                      f"{r['reason']} (box {r['bbox']})")
                 continue
-            if now - self._reject_log_ts.get(tid, 0) < 10:
+            if r["kind"] == "resumed":
+                clog(f"track {tid} = wahi gaadi jo pehle count ho chuki hai (purana track {r['from']}, line par khadi/"
+                     f"doosra box) — dobara count nahi hogi (box {r['bbox']})")
+                continue
+            # a standing vehicle wobbles every frame: explain it once a minute, other rejects every 10 s
+            if now - self._reject_log_ts.get(tid, 0) < (60 if r["kind"] == "jitter" else 10):
                 continue
             self._reject_log_ts[tid] = now
             clog(f"crossing rejected: track {tid} {r['label']} {self._direction_for(r['to_side'])} — {r['reason']} (box {r['bbox']})")
@@ -640,9 +646,16 @@ class SecurityEngine:
             if (cr.get("via") == "appeared-at-line" and newtr is not None and lost is not None
                     and _point_in_box(newtr.start_ref, lost[0], 0.25)):
                 return "track re-created where the last one was lost"
+            live = self.tracker.tracks.get(tid)
+            # 2nd YOLO box BORN on a vehicle that was just crossing (long truck: cab + body): its own
+            # 'appeared-at-line' fires 1-5 s later and further in, so match where it was born and
+            # check that the first box is still glued to it now
+            if (cr.get("via") == "appeared-at-line" and newtr is not None and live is not None
+                    and now - ts <= TWIN_APPEAR_S and _point_in_box(newtr.start_ref, box, 0.25)
+                    and _box_iou(live.bbox, cr["bbox"]) > 0.3):
+                return "second box born on the same vehicle"
             if _box_iou(box, cr["bbox"]) <= 0.25:
                 continue  # crossed at a different place -> different vehicle
-            live = self.tracker.tracks.get(tid)
             if live is not None:
                 # earlier vehicle still tracked: same body only if its box still sits on the new
                 # crossing (two YOLO boxes on one tractor-trolley) AND the boxes crossed within

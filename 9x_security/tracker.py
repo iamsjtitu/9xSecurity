@@ -8,6 +8,10 @@ ANIMAL_LABELS = ("dog", "cat", "cow", "horse", "sheep", "bird")
 ANIMAL_VOTE = 0.25   # >= this share of frames called it an animal -> it is an animal, never a person
 SPEED_MAX = 5.0      # plausible speed: box-sizes per second (bike at ~30 km/h through a gate)
 JUMP_CAP = 3.0       # never accept a single-step jump above this many box-sizes
+CLEAR_FRAC = 0.20    # 'clearly past the line' = this fraction of the box's larger side (min hysteresis)
+RUN_HOLD_S = 1.0     # momentum (monotone progress towards one side) dies after this long without motion
+RESUME_S = 300.0     # a counted vehicle lost standing at the gate is remembered this long (user: 5 min)
+RESUME_IOU = 0.6     # a new box this similar to a counted vehicle's box IS that vehicle
 
 
 def _side(p, a, b):
@@ -63,7 +67,7 @@ class Track:
         self.centroid = centroid
         self.bbox = bbox
         self.labels = Counter([label])
-        self.side = side          # last known side sign (-1 / 0 / 1)
+        self.side = side          # COMMITTED side sign (-1 / 1), 0 = born on the line, side not yet known
         self.start_side = side
         self.start_dist = dist    # signed px distance to line when first seen
         self.start_ref = ((bbox[0] + bbox[2]) // 2, bbox[3])  # ref point when first seen
@@ -78,6 +82,11 @@ class Track:
         self.last_reject = ""     # why the latest side flip was NOT counted (diagnostics)
         self.ref = ((bbox[0] + bbox[2]) // 2, bbox[3])  # ref point used last time (edge-compensated)
         self.full_w = None        # width when last seen fully inside the picture (edge compensation)
+        self.dist = dist          # signed px distance to the line at the last detection
+        self.run = 0.0            # monotone perpendicular progress (px, signed) — momentum towards a side
+        self.run_ts = ts
+        self.seg_hit = False      # since the side was last committed, a step crossed the DRAWN segment
+        self.resumed_from = None  # id of the counted vehicle this track continues (lost / second box)
 
     @property
     def counted(self):
@@ -97,6 +106,13 @@ class Track:
                 return heavy
         return self.labels.most_common(1)[0][0]
 
+    def state(self):
+        return (self.crossings, self.last_cross_ts, self.last_cross_to, self.side, self.armed)
+
+    def inherit(self, src_id, state):
+        self.crossings, self.last_cross_ts, self.last_cross_to, self.side, self.armed = state
+        self.resumed_from = src_id
+
 
 class CentroidTracker:
     """Matches detections by centroid distance; line-crossing is judged on the
@@ -104,8 +120,13 @@ class CentroidTracker:
     looking down, a vehicle's centroid is already past a ground line when it
     first becomes visible — bottom-center crosses the line reliably.
 
+    A crossing counts only when the vehicle is CLEARLY on the new side: either its
+    ref point is >= `clear` px past the line (CLEAR_FRAC of the box) or it travelled
+    >= `clear` px towards that side in one monotone run. A vehicle standing ON the
+    line whose YOLO box wobbles (cab only / cab + load) therefore never flips.
+
     A track can cross MORE THAN ONCE (car exits, turns, comes back in): after a
-    crossing it is disarmed until the ref point moves >= hysteresis px past the
+    crossing it is disarmed until the ref point moves >= `clear` px past the
     line, and a new crossing needs >= min_gap_s since the last one."""
 
     def __init__(self, max_disappeared=20, max_distance=90, near_band=0, hysteresis=None, min_gap_s=3.0,
@@ -124,7 +145,10 @@ class CentroidTracker:
         self.near_band = near_band
         self.hysteresis = hysteresis
         self.min_gap_s = min_gap_s
-        self.lost = {}  # tid -> (last bbox, ts) of aged-out tracks (engine de-dup: "lost right here?")
+        # tid -> (last bbox, ts, state-or-None) of aged-out tracks. state (crossings...) is kept
+        # RESUME_S for counted vehicles: a truck standing at the gate that YOLO loses for a while
+        # comes back as the SAME counted vehicle, never as a fresh one that could count again.
+        self.lost = {}
         self.rejects = []  # per update(): side flips that were NOT counted + possible misses (diagnostics)
 
     @staticmethod
@@ -169,6 +193,51 @@ class CentroidTracker:
         if self.hysteresis is not None:
             return self.hysteresis
         return max(20.0, 0.5 * self.near_band)
+
+    def clear_px(self, bbox):
+        """'Clearly past the line' margin for this box: a standing truck's YOLO box wobbles
+        ~10% of its size (cab only <-> cab + load), so a flip inside this band is jitter."""
+        x1, y1, x2, y2 = bbox
+        return max(self._hyst(), CLEAR_FRAC * max(x2 - x1, y2 - y1))
+
+    @staticmethod
+    def _push_run(tr, delta, now):
+        """Momentum: monotone perpendicular progress. A turn (sign change) or a stop
+        (> RUN_HOLD_S without motion) restarts it — a vehicle that stopped at the gate
+        gets no credit for the way it came."""
+        if abs(delta) < 1.0:
+            if now - tr.run_ts > RUN_HOLD_S:
+                tr.run = 0.0
+            return
+        if now - tr.run_ts > RUN_HOLD_S or (tr.run != 0 and (delta > 0) != (tr.run > 0)):
+            tr.run = 0.0
+        tr.run += delta
+        tr.run_ts = now
+
+    def _inherit_source(self, bbox, cur_dist, cur_sign, clear, now):
+        """A new box that is almost the same box as a COUNTED vehicle — one YOLO lost at the
+        gate a moment (or minutes) ago, or a second box on a live counted vehicle — continues
+        that vehicle's crossing state instead of starting a fresh, countable life.
+        Only on the vehicle's own side of the line (or inside the jitter band): a vehicle
+        tracked in from the OTHER side is the next vehicle, never the old one."""
+        best, best_iou, best_state, best_lost = None, RESUME_IOU, None, False
+        for tid, (box, ts, state) in self.lost.items():
+            if state is None or now - ts > RESUME_S:
+                continue
+            iou = _iou(box, bbox)
+            if iou >= best_iou and (cur_sign == state[3] or abs(cur_dist) < clear):
+                best, best_iou, best_state, best_lost = tid, iou, state, True
+        for tid, tr in self.tracks.items():
+            if tr.crossings == 0:
+                continue
+            iou = _iou(tr.bbox, bbox)
+            if iou >= best_iou and (cur_sign == tr.side or abs(cur_dist) < clear):
+                best, best_iou, best_state, best_lost = tid, iou, tr.state(), False
+        if best is None:
+            return None
+        if best_lost:
+            self.lost.pop(best, None)
+        return best, best_state
 
     def update(self, detections, line, now=None, frame_size=None):
         """
@@ -227,10 +296,12 @@ class CentroidTracker:
                     tr.full_w = x2 - x1
             cur_dist = _side(cur_ref, a, b) / line_len
             cur_sign = self._sign(cur_dist)
+            clear = self.clear_px(d["bbox"])
             if best_id is not None:
                 prev_sign = tr.side
                 prev_ref = tr.ref
                 prev_c = tr.centroid
+                prev_dist = tr.dist
                 dt = max(0.0, now - tr.last_ts)
                 jump = math.hypot(cur_ref[0] - prev_ref[0], cur_ref[1] - prev_ref[1])
                 size = max(x2 - x1, y2 - y1, 20)
@@ -254,25 +325,33 @@ class CentroidTracker:
                 tr.centroid = c
                 tr.bbox = d["bbox"]
                 tr.ref = cur_ref
+                tr.dist = cur_dist
                 tr.labels[d["label"]] += 1
                 tr.disappeared = 0
                 tr.last_ts = now
+                if steady:
+                    self._push_run(tr, cur_dist - prev_dist, now)
+                    if _hits_segment(prev_ref, cur_ref, a, b):
+                        tr.seg_hit = True
+                # clearly on this side: far enough past the line, or arrived here in one real run
+                sure = abs(cur_dist) >= clear or (abs(tr.run) >= clear and self._sign(tr.run) == cur_sign)
 
-                # re-arm only once the vehicle is clearly past the line it just crossed:
-                # at least 15% of its own height (a Bolero stopping at the gate jitters +-20px)
-                if not tr.armed and abs(cur_dist) >= max(self._hyst(), 0.15 * (y2 - y1)):
+                # re-arm only once the vehicle is clearly past the line it just crossed
+                if not tr.armed and abs(cur_dist) >= clear:
                     tr.armed = True
 
-                flipped = prev_sign != 0 and cur_sign != 0 and cur_sign != prev_sign
-                on_segment = _hits_segment(prev_ref, cur_ref, a, b)
-                crossed = flipped and steady and on_segment
+                raw_flip = prev_sign != 0 and cur_sign != 0 and cur_sign != prev_sign
+                # the step that made it 'sure' may be a few detections after the one that touched
+                # the drawn segment -> remember that the path did cross the yellow segment
+                on_segment = _hits_segment(prev_ref, cur_ref, a, b) or (tr.seg_hit and -0.3 <= _along(cur_ref, a, b) <= 1.3)
+                crossed = raw_flip and steady and sure and on_segment
                 appeared_at_line = (
                     tr.crossings == 0
                     and self.near_band > 0
                     and cur_sign != 0
                     and abs(tr.start_dist) <= self.near_band
                     and abs(cur_dist) >= 1.5 * self.near_band
-                    and self._sign(tr.start_dist) in (0, cur_sign)
+                    and tr.start_side in (0, cur_sign)  # born ON the line (0): whichever way it drives off
                     and steady
                     and not tr.start_edge  # came into view from the picture edge, not 'at the line'
                     and -0.15 <= _along(tr.start_ref, a, b) <= 1.15  # appeared ON the drawn segment
@@ -297,19 +376,35 @@ class CentroidTracker:
                     tr.last_cross_ts = now
                     tr.last_cross_to = cur_sign
                     tr.armed = False
-                elif flipped:
-                    tr.last_reject = self._reject_reason(edge, steady, jump, max_jump, on_segment, tr, gap_ok, repeat)
+                    tr.side = cur_sign
+                    tr.seg_hit = False
+                elif raw_flip:
+                    tr.last_reject = self._reject_reason(edge, steady, sure, cur_dist, clear, jump, max_jump,
+                                                         on_segment, tr, gap_ok, repeat)
                     self.rejects.append({"track_id": best_id, "label": tr.label, "bbox": d["bbox"],
-                                         "to_side": cur_sign, "reason": tr.last_reject, "kind": "reject"})
-                if steady or cur_sign == prev_sign:
-                    tr.side = cur_sign  # a teleport does not change which side we believe the vehicle is on
+                                         "to_side": cur_sign, "reason": tr.last_reject,
+                                         "kind": "jitter" if steady and not sure else "reject"})
+                if sure and steady:
+                    tr.side = cur_sign  # commit only a CLEAR position; a wobble inside the band changes nothing
+                    tr.seg_hit = False
             else:
                 tid = self.next_id
                 self.next_id += 1
-                self.tracks[tid] = Track(tid, c, d["bbox"], d["label"], cur_sign, cur_dist, ts=now)
-                self.tracks[tid].start_edge = _touches_edge(d["bbox"], frame_size)
-                if not self.tracks[tid].start_edge:
-                    self.tracks[tid].full_w = d["bbox"][2] - d["bbox"][0]
+                # born inside the jitter band: side unknown until it clearly moves off the line
+                # (appeared-at-line then counts whichever way it drives). Beyond the near band a
+                # birth is far enough from the line to trust its side.
+                unsure_r = min(clear, self.near_band) if self.near_band > 0 else 0.0
+                side0 = cur_sign if abs(cur_dist) >= unsure_r else 0
+                tr = Track(tid, c, d["bbox"], d["label"], side0, cur_dist, ts=now)
+                tr.start_edge = _touches_edge(d["bbox"], frame_size)
+                if not tr.start_edge:
+                    tr.full_w = d["bbox"][2] - d["bbox"][0]
+                src = self._inherit_source(d["bbox"], cur_dist, cur_sign, clear, now)
+                if src is not None:
+                    tr.inherit(src[0], src[1])
+                    self.rejects.append({"track_id": tid, "label": d["label"], "bbox": d["bbox"], "to_side": tr.side,
+                                         "reason": "", "kind": "resumed", "from": src[0]})
+                self.tracks[tid] = tr
                 used_track_ids.add(tid)
 
         # Age out unmatched tracks (both the frame count AND the wall-clock gap must be exceeded)
@@ -323,17 +418,20 @@ class CentroidTracker:
                         self.rejects.append({"track_id": tid, "label": tr.label, "bbox": tr.bbox, "to_side": tr.side,
                                              "reason": tr.last_reject or "side badla par koi crossing count nahi hui",
                                              "kind": "possible-miss"})
-                    self.lost[tid] = (tr.bbox, now)
+                    self.lost[tid] = (tr.bbox, now, tr.state() if tr.crossings else None)
                     del self.tracks[tid]
-        self.lost = {k: v for k, v in self.lost.items() if now - v[1] < 120}
+        self.lost = {k: v for k, v in self.lost.items() if now - v[1] < (RESUME_S if v[2] else 120)}
         return crossings
 
     @staticmethod
-    def _reject_reason(edge, steady, jump, max_jump, on_segment, tr, gap_ok, repeat):
+    def _reject_reason(edge, steady, sure, cur_dist, clear, jump, max_jump, on_segment, tr, gap_ok, repeat):
         if edge:
             return "box picture ke kinare ko chhoo raha tha (aadhi gaadi bahar)"
         if not steady:
             return f"ek step me {jump:.0f}px jump (limit {max_jump:.0f}px) — teleport/galat match"
+        if not sure:
+            return (f"line par khadi gaadi ka box hil raha hai (jitter): sirf {abs(cur_dist):.0f}px paar, "
+                    f"saaf paar ke liye {clear:.0f}px chahiye")
         if not on_segment:
             return "line ko drawn segment ke bahar cross kiya (line chhoti hai?)"
         if not tr.armed:

@@ -233,7 +233,8 @@ class WhatsAppNotifier:
             n = int(ev.get("count") or 1)
             head = f"👤 Person {direction} — {n} person" + ("s" if n != 1 else "")
         elif category == "two_wheeler":
-            head = f"🏍️ Two-wheeler {direction}"
+            n = int(ev.get("count") or 1)
+            head = f"🏍️ Two-wheeler {direction}" + (f" — {n} bikes" if n > 1 else "")
         else:
             head = f"🚗 {direction} - {str(ev.get('vehicle_type', '')).upper()}"
         lines = ["🚨 9x Security", head, f"Time: {when}"]

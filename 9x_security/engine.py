@@ -25,6 +25,12 @@ DEDUPE_S = float(os.environ.get("CROSS_DEDUPE_S", "20"))  # window for same-vehi
 SAME_VEHICLE_S = float(os.environ.get("SAME_VEHICLE_S", "3"))  # two YOLO boxes on ONE vehicle cross within this
 TWIN_APPEAR_S = 6.0  # a 2nd box born ON a crossing vehicle may 'appear at the line' this long after the 1st box crossed
 PERSON_GROUP_S = float(os.environ.get("PERSON_GROUP_S", "2.5"))  # people crossing within this = one 'N persons' alert
+TW_GROUP_S = float(os.environ.get("TW_GROUP_S", "4"))  # two-wheelers crossing within this = one 'N bikes' alert
+GROUP_MAX_S = 15.0       # a group never waits longer than this since its first member (steady traffic)
+GROUP_RECENT_S = 8.0     # an alerted member is remembered this long: a late twin of it is merged, not re-alerted
+SAME_MEMBER_IOU = 0.2    # a new crossing overlapping a member (or where it has moved to) this much = same object
+SAME_MEMBER_DIST = 0.5   # ... or its centre within this many box-sizes of the member's predicted centre
+SAME_SPOT_S = 1.0        # the plain 'same spot' test only within this: later, the same spot is the NEXT one in line
 PERSON_VEHICLE_S = float(os.environ.get("PERSON_VEHICLE_S", "6"))  # person crossing within this of a vehicle at the same spot = rider/driver
 RIDER_GROW = 0.25       # vehicle box grown by this fraction when testing 'person ON/WITH the vehicle'
 RIDER_MIN_OVERLAP = 0.2  # >= this fraction of the person's box inside the grown vehicle box
@@ -507,7 +513,7 @@ class SecurityEngine:
         # (+ animals as context) cross the person/bike line — or the main line when none is drawn.
         # Every object lives in exactly one tracker, so it can never be counted on both lines.
         self.tracker = CentroidTracker()
-        self.tracker2 = CentroidTracker()
+        self.tracker2 = CentroidTracker(merge_twins=True)
         self.plate_reader = plate_reader
         if self.cfg.get("enable_plate") and self.plate_reader is None:
             from plate_reader import PlateReader
@@ -516,7 +522,8 @@ class SecurityEngine:
         self._best_crops = {}
         self._ocr_q = None  # single OCR worker queue (created on first crossing)
         self._recent_cross = {1: [], 2: []}  # per tracker: (ts, to_side, bbox, tid) of counted crossings for de-duplication
-        self._person_groups = {}  # direction -> pending group (people crossing within PERSON_GROUP_S)
+        self._groups = {}  # (category, direction) -> pending group (persons / two-wheelers crossing together)
+        self._group_recent = []  # members already alerted: a late twin box of one of them is merged, not re-alerted
         self._recent_vehicle_cross = []  # (ts, direction, bbox, label) — riders/drivers are not lone persons
         self._motion = {}  # (tracker no, track id) -> [last_move_ts, ref_point]
         self._det_ts = time.time()
@@ -782,14 +789,19 @@ class SecurityEngine:
                 if why:
                     clog(f"person ignored: {why} — gaadi/bike ke saath hai, akela paidal nahi (track {cr['track_id']})")
                     continue
-                self._queue_person(frame, cr, direction, now)
+                self._queue_group(cat, frame, cr, direction, now)
             else:
                 why = self._same_object_alerted(cr, now)
                 if why:
                     clog(f"crossing ignored: {why} (track {cr['track_id']} {cr['label']})")
                     continue
-                events += self._emit_crossing(frame, original, cr, cat, w, h)
                 self._mark_twins(cr, now)
+                if cat == "two_wheeler":
+                    # bikes/cycles pushed or ridden together (and the same cycle seen as two boxes)
+                    # -> ONE alert '🏍️ Two-wheeler Exit — 2 bikes', never one photo per box
+                    self._queue_group(cat, frame, cr, direction, now)
+                else:
+                    events += self._emit_crossing(frame, original, cr, cat, w, h)
         events += self.flush_pending(now=now)
 
         annotated = self._annotate(frame, a, b, a2, b2)
@@ -855,34 +867,79 @@ class SecurityEngine:
         m = self._motion.get(key)
         return m is not None and now - m[0] < MOVING_S
 
-    def _queue_person(self, frame, cr, direction, now):
-        """People walk through a gate in a loose group (one behind another, 0.5-2 s apart).
-        Hold the alert PERSON_GROUP_S after the LAST person so the group becomes ONE
-        '👤 Person Entry — N persons' alert with the right count."""
-        g = self._person_groups.setdefault(direction, {"crs": [], "frame": None, "last": now})
-        g["crs"].append(cr)
+    def _queue_group(self, cat, frame, cr, direction, now):
+        """People (and two-wheelers) pass a gate in a loose group (0.5-3 s apart). Hold the alert
+        a quiet time after the LAST one so the group becomes ONE alert with the right count —
+        and merge boxes that are the same object again (a cycle tracked twice after an ID swap,
+        a bicycle + motorcycle box on one bike): they must never inflate the count or re-alert."""
+        tr = self.tracker2.tracks.get(cr["track_id"])
+        member = {"cr": cr, "ts": now, "bbox": cr["bbox"], "vel": getattr(tr, "vel", None), "cat": cat,
+                  "direction": direction, "start_ref": getattr(tr, "start_ref", None),
+                  "born_ts": getattr(tr, "born_ts", now)}
+        self._group_recent = [m for m in self._group_recent if now - m["ts"] < GROUP_RECENT_S]
+        g = self._groups.setdefault((cat, direction), {"crs": [], "frame": None, "last": now, "first": now})
+        same = self._same_member(g["crs"], member, now) or self._same_member(
+            [m for m in self._group_recent if m["cat"] == cat and m["direction"] == direction], member, now)
+        if same:
+            clog(f"{cat} crossing merged: {same} — dobara count/alert nahi (track {cr['track_id']} {cr['label']})")
+        else:
+            g["crs"].append(member)
         g["frame"] = frame.copy()
-        g["last"] = now
+        g["last"] = now  # a twin box keeps the group open too: the scene is still busy
+
+    @staticmethod
+    def _same_member(members, new, now):
+        """Is `new` the same object as one already in `members`? Same track, same spot, or the spot
+        where that member has MOVED TO since (its box shifted by its own speed x time): two cycles
+        side by side stay apart, one cycle seen again a few seconds later lands on its prediction."""
+        bx1, by1, bx2, by2 = new["bbox"]
+        ncx, ncy = (bx1 + bx2) / 2, (by1 + by2) / 2
+        nsize = max(bx2 - bx1, by2 - by1, 1)
+        for m in members:
+            if m["cr"]["track_id"] == new["cr"]["track_id"]:
+                return f"same track {m['cr']['track_id']}"
+            if now - m["ts"] <= SAME_SPOT_S and _box_iou(m["bbox"], new["bbox"]) > SAME_MEMBER_IOU:
+                return "same spot as a box counted this very second"
+            # a second box BORN on that member around its crossing ('appeared at the line' later)
+            if (new["cr"].get("via") == "appeared-at-line" and new.get("start_ref") is not None
+                    and new.get("born_ts", now) <= m["ts"] + 1.0 and _point_in_box(new["start_ref"], m["bbox"], 0.25)):
+                return f"doosra box jo {m['cr']['label']} track {m['cr']['track_id']} par hi bana tha"
+            vel = m["vel"]
+            if vel is None:
+                continue
+            dt = max(0.0, now - m["ts"])
+            dx, dy = vel[0] * dt, vel[1] * dt
+            x1, y1, x2, y2 = m["bbox"]
+            pred = (int(x1 + dx), int(y1 + dy), int(x2 + dx), int(y2 + dy))
+            pcx, pcy = (x1 + x2) / 2 + dx, (y1 + y2) / 2 + dy
+            size = max(x2 - x1, y2 - y1, nsize)
+            if (_box_iou(pred, new["bbox"]) > SAME_MEMBER_IOU
+                    or math.hypot(ncx - pcx, ncy - pcy) <= SAME_MEMBER_DIST * size):
+                return f"wahi {m['cr']['label']} jo {dt:.1f}s pehle count hua (aage badh gaya)"
+        return ""
 
     def flush_pending(self, now=None, force=False):
-        """Emit person groups whose quiet time is over (or all of them when force=True,
-        e.g. the worker is stopping)."""
+        """Emit groups whose quiet time is over (or all of them when force=True, e.g. the worker
+        is stopping)."""
         now = time.time() if now is None else now
         out = []
-        for direction in list(self._person_groups):
-            g = self._person_groups[direction]
-            if force or now - g["last"] >= PERSON_GROUP_S:
-                del self._person_groups[direction]
-                # a vehicle may have crossed right AFTER the person was queued (driver sits ahead of the wheels)
+        for key in list(self._groups):
+            g = self._groups[key]
+            cat, direction = key
+            quiet = PERSON_GROUP_S if cat == "person" else TW_GROUP_S
+            if force or now - g["last"] >= quiet or now - g["first"] >= GROUP_MAX_S:
+                del self._groups[key]
                 crs = []
-                for cr in g["crs"]:
-                    why = self._with_vehicle(cr)
+                for m in g["crs"]:
+                    # a vehicle may have crossed right AFTER the person was queued (driver sits ahead of the wheels)
+                    why = self._with_vehicle(m["cr"]) if cat == "person" else ""
                     if why:
-                        clog(f"person ignored: {why} — gaadi/bike ke saath hai (track {cr['track_id']})")
+                        clog(f"person ignored: {why} — gaadi/bike ke saath hai (track {m['cr']['track_id']})")
                     else:
-                        crs.append(cr)
+                        crs.append(m)
                 if crs:
-                    out += self._emit_person_group(g["frame"], crs, direction)
+                    self._group_recent += crs
+                    out += self._emit_group(g["frame"], [m["cr"] for m in crs], direction, cat)
         return out
 
     def _category_enabled(self, cr, cat):
@@ -935,8 +992,8 @@ class SecurityEngine:
                 pass
         return [ev]
 
-    def _emit_person_group(self, frame, group, direction):
-        """A group of people -> a single alert '👤 Person … N persons' (all boxes on the photo)."""
+    def _emit_group(self, frame, group, direction, cat):
+        """A group of people / two-wheelers -> a single alert with the count (all boxes on the photo)."""
         lead = group[-1]
         img = frame.copy()
         color = (0, 200, 0) if direction == "Entry" else (0, 140, 255)
@@ -945,12 +1002,13 @@ class SecurityEngine:
             cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
         image_path = self._save_snapshot(img, lead, direction)
         count = len(group)
+        label = "person" if cat == "person" else lead["label"]
         gate = config.gate_name(self.cfg)
-        eid = self.db.add_event("person", direction, "", image_path, count=count, gate=gate)
+        eid = self.db.add_event(label, direction, "", image_path, count=count, gate=gate)
         ev = {
             "id": eid,
-            "vehicle_type": "person",
-            "category": "person",
+            "vehicle_type": label,
+            "category": cat,
             "count": count,
             "gate": gate,
             "direction": direction,

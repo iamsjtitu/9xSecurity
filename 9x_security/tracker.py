@@ -14,6 +14,8 @@ CLEAR_FRAC = 0.20    # 'clearly past the line' = this fraction of the box's larg
 RUN_HOLD_S = 1.0     # momentum (monotone progress towards one side) dies after this long without motion
 RESUME_S = 300.0     # a counted vehicle lost standing at the gate is remembered this long (user: 5 min)
 RESUME_IOU = 0.6     # a new box this similar to a counted vehicle's box IS that vehicle
+TWIN_IOU = 0.55      # two LIVE tracks glued together this much (merge_twins trackers) = one object, two boxes
+TWIN_FRAMES = 4      # ... for this many consecutive updates before the uncounted twin inherits the counted state
 
 
 def _side(p, a, b):
@@ -89,6 +91,8 @@ class Track:
         self.run_ts = ts
         self.seg_hit = False      # since the side was last committed, a step crossed the DRAWN segment
         self.resumed_from = None  # id of the counted vehicle this track continues (lost / second box)
+        self.born_ts = ts         # when this track was created (twin-box tests in the engine)
+        self.twin_frames = 0      # consecutive updates glued to a counted track (merge_twins)
 
     @property
     def counted(self):
@@ -139,10 +143,14 @@ class CentroidTracker:
     line, and a new crossing needs >= min_gap_s since the last one."""
 
     def __init__(self, max_disappeared=20, max_distance=90, near_band=0, hysteresis=None, min_gap_s=3.0,
-                 lost_after_s=2.5):
+                 lost_after_s=2.5, merge_twins=False):
         self.next_id = 1
         self.tracks = {}
         self.max_disappeared = max_disappeared
+        # person/two-wheeler tracker: a bicycle often carries TWO live boxes (bicycle + motorcycle label,
+        # or two boxes after an ID swap); once one of them is counted the other must inherit that state.
+        # Never for cars: a queued car behind another overlaps it in a front-view camera and is the NEXT car.
+        self.merge_twins = merge_twins
         # a track is dropped only after BOTH max_disappeared frames AND lost_after_s seconds without
         # a detection: on a fast PC (15 fps) 20 frames is just 1.3 s — a truck hidden behind the gate
         # pillar for 2 s would come back as a NEW track past the line and never be counted
@@ -416,6 +424,9 @@ class CentroidTracker:
                 self.tracks[tid] = tr
                 used_track_ids.add(tid)
 
+        if self.merge_twins:
+            self._merge_twins()
+
         # Age out unmatched tracks (both the frame count AND the wall-clock gap must be exceeded)
         for tid in list(self.tracks.keys()):
             if tid not in used_track_ids:
@@ -431,6 +442,24 @@ class CentroidTracker:
                     del self.tracks[tid]
         self.lost = {k: v for k, v in self.lost.items() if now - v[1] < (RESUME_S if v[2] else 120)}
         return crossings
+
+    def _merge_twins(self):
+        """An UNCOUNTED live track glued (IoU >= TWIN_IOU) to a COUNTED one for TWIN_FRAMES updates
+        is a second box on the same object: it inherits the counted state (side, disarmed,
+        last direction) so it can never count that bicycle/person again."""
+        for tid, tr in self.tracks.items():
+            if tr.crossings:
+                continue
+            src = next((o for oid, o in self.tracks.items()
+                        if oid != tid and o.crossings and _iou(o.bbox, tr.bbox) >= TWIN_IOU), None)
+            if src is None:
+                tr.twin_frames = 0
+                continue
+            tr.twin_frames += 1
+            if tr.twin_frames >= TWIN_FRAMES:
+                tr.inherit(src.id, src.state())
+                self.rejects.append({"track_id": tid, "label": tr.label, "bbox": tr.bbox, "to_side": tr.side,
+                                     "reason": "", "kind": "resumed", "from": src.id})
 
     @staticmethod
     def _reject_reason(edge, steady, sure, cur_dist, clear, jump, max_jump, on_segment, tr, gap_ok, repeat):

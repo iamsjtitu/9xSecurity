@@ -1053,3 +1053,29 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - AWAITING USER (new build): standing truck at the gate = 1 msg; exit->re-entry still 2; check camera_log 'jitter' lines.
 - Told user: every saved camera runs its own stream + AI (WorkerPool); 3-4 cameras = proportional CPU; use time windows
   (Standby = 0 load), sub-stream (HEVC main stream is the heaviest; their stream reconnects every 10-20 min), model 'auto'.
+
+## Implemented (update 2026-06 #60) — Rider = 2 persons fix + Camera Load Meter + 5-camera AI check (testing agent iteration_34: 100% backend 164 tests + UI)
+- USER (11-10 12:09 PM): bike + rider -> '👤 Person Entry — 2 persons'. (Timing part was user's own setting: Person
+  window saved as 12:00 PM -> 8:00 AM = dopahar 12 se; user corrected it.) YOLO boxed bike + rider as two 'person'
+  boxes, no motorcycle -> rider suppression (needs a two-wheeler track) never fired.
+  FIX tracker.Track.label: a 'person' plurality with >= 25% motorcycle/bicycle votes IS the two-wheeler
+  (TWO_WHEELER_VOTE). engine._with_vehicle: SEATED shape (box < 1.8 widths tall, RIDER_SHAPE) moving > 1.5
+  body-heights/s (RIDER_SPEED, from the track's own velocity) = rider -> 'person ignored: baitha hua aur tez ...'.
+  Tall walkers (walking or running) and stocky slow walkers still count. test_categories._drive now uses a fake
+  8-fps clock (speeds need real time steps). Tests: test_rider_shape.py 8 + tests/test_iter34_rider_scenarios.py 7.
+- CAMERA LOAD METER (user picked: right column card, no WhatsApp alert): Worker.fps + drop_pct (2-s window);
+  service._camera_load() levels None|idle|connecting|warming|ok|warn|bad (LOAD_FPS 8/4, LOAD_AI_MS 250/400);
+  _camera_status() now carries ai_ms/ai_frames/ai_errors/ai_model/codec/frames_dropped/fps/drop_pct/
+  possible_misses/frame_age/load (used by /api/state.cameras, /api/cameras, diagnostics.cameras);
+  _load_sampler() thread (psutil cpu %, ram %, engine rss MB; None without psutil) -> _load_summary(cfg) =
+  /api/state.load + diagnostics.load {cpu_pct, ram_pct, app_ram_mb, cores, level, hint, running, ai_total_ms};
+  LOAD_CPU 70/85. requirements +psutil, workflow --hidden-import psutil.
+  UI: LoadMeter.jsx card (testids load-meter, load-level, load-cpu(-value), load-ram(-value), load-cameras,
+  load-cam-<id>(-fps/-ai/-drop/-text), load-hint, load-legend) under StatCards; DiagnosticsTab 'diag-load' table.
+- 5-CAMERA AI CHECK (tests/multicam_load_check.py N secs): 5 file-backed cameras together -> every camera runs
+  its own YOLO (ai_frames up, events per gate). This container has a 2-CPU quota: 1 cam 8.7 fps / 99 ms,
+  5 cams 1.4 fps / 620 ms each (level bad, hint shown). A global inference lock was benchmarked (5.1 vs 6.1 inf/s
+  concurrent) -> SLOWER -> reverted; concurrent engines stay. Told user: 3-4 cameras run, CPU scales ~linearly;
+  use time windows / sub-stream / 'fast' model; meter shows when it is too much.
+- iteration_34: backend 100% (114 core + 7 + 43 API), frontend 100% (card states, live numbers with a file camera
+  '8.9 fps · 91 ms · 0% skip', diagnostics table, regressions).

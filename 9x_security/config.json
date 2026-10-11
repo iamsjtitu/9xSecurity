@@ -2,9 +2,9 @@
   "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
   "line": {
     "x1": 0.1,
-    "y1": 0.5,
+    "y1": 0.2,
     "x2": 0.9,
-    "y2": 0.5
+    "y2": 0.8
   },
   "entry_direction": "pos",
   "confidence": 0.4,
@@ -66,9 +66,9 @@
       "rtsp_url_main": "",
       "line": {
         "x1": 0.1,
-        "y1": 0.5,
+        "y1": 0.2,
         "x2": 0.9,
-        "y2": 0.5
+        "y2": 0.8
       },
       "entry_direction": "pos",
       "ignore_zones": [],
@@ -108,8 +108,8 @@
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "8f2ceb776bba41770d68265e54d77129",
-  "auth_hash": "65501594adb2f1b8b5ee65320d51b729628f81763969365d80d376610581c74b",
+  "auth_salt": "3bdf53ec29791108bf7939ae9387efd9",
+  "auth_hash": "9a06ce9dc3a78b8216d0aa25ec664c7b07d5c0531f330274fbb2ed65898bd8b7",
   "github_repo": "",
   "gh_token": "TEST_GH",
   "rtsp_url_main": ""

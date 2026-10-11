@@ -16815,3 +16815,17 @@ RuntimeError: no AI in test
 2026-10-11T12:44:15 | open_stream: trying FFmpeg engine fallback
 2026-10-11T12:44:15 | ffmpeg-pipe: starting
 2026-10-11T12:44:20 | open_stream: falling back to default backend
+2026-10-11T12:44:25 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T12:44:42 | svc: auto-connect — Front Camera se connect kar raha hai
+2026-10-11T12:44:42 | svc[Front Camera]: loading AI model
+2026-10-11T12:44:43 | svc[Front Camera]: AI model loaded
+2026-10-11T12:44:44 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 567 ms, 0 dets on blank frame)
+2026-10-11T12:44:44 | svc[Front Camera]: accurate model too slow here (567 ms > 350) -> yolov8n.pt
+2026-10-11T12:44:44 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 252 ms, 0 dets on blank frame)
+2026-10-11T12:44:44 | open_stream: transport=tcp
+2026-10-11T12:44:49 | open_stream: transport=udp
+2026-10-11T12:44:55 | open_stream: trying FFmpeg engine fallback
+2026-10-11T12:44:55 | ffmpeg-pipe: starting
+2026-10-11T12:45:00 | open_stream: falling back to default backend
+2026-10-11T12:45:05 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T12:45:08 | svc: RTSP DESCRIBE -> 0 timed out

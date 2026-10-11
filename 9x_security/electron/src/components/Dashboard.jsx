@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import CameraPanel from './CameraPanel.jsx';
 import StatCards from './StatCards.jsx';
+import LoadMeter from './LoadMeter.jsx';
 import ControlsPanel from './ControlsPanel.jsx';
 import EventsTable from './EventsTable.jsx';
 
@@ -21,6 +22,7 @@ export default function Dashboard({ state, refreshState, showToast, onManageCame
       </div>
       <div className="lg:col-span-4 flex flex-col gap-6">
         <StatCards />
+        <LoadMeter state={state} />
         <ControlsPanel
           state={state}
           refreshState={refreshState}

@@ -71,6 +71,8 @@ class VehicleDetector:
         """Return list of {bbox:(x1,y1,x2,y2), label, conf}."""
         class_ids = [cid for cid, name in COCO_CLASSES.items() if name in self.allowed]
         # agnostic_nms: one vehicle must not become two boxes (car + truck) -> double count
+        # (several cameras = several engines detecting concurrently: measured faster in total than
+        # a turn-by-turn lock, so no serialisation here)
         results = self.model(
             frame, verbose=False, conf=self.conf, classes=class_ids, agnostic_nms=True, imgsz=self.imgsz
         )

@@ -6,6 +6,8 @@ from collections import Counter
 HEAVY = ("bus", "truck")
 ANIMAL_LABELS = ("dog", "cat", "cow", "horse", "sheep", "bird")
 ANIMAL_VOTE = 0.25   # >= this share of frames called it an animal -> it is an animal, never a person
+TWO_WHEELER_LABELS = ("motorcycle", "bicycle")
+TWO_WHEELER_VOTE = 0.25  # a 'person' that was a motorcycle/bicycle in >= 25% of frames is the two-wheeler
 SPEED_MAX = 5.0      # plausible speed: box-sizes per second (bike at ~30 km/h through a gate)
 JUMP_CAP = 3.0       # never accept a single-step jump above this many box-sizes
 CLEAR_FRAC = 0.20    # 'clearly past the line' = this fraction of the box's larger side (min hysteresis)
@@ -104,7 +106,14 @@ class Track:
         for heavy in HEAVY:
             if self.labels.get(heavy, 0) / total >= 0.30:
                 return heavy
-        return self.labels.most_common(1)[0][0]
+        top = self.labels.most_common(1)[0][0]
+        if top == "person":
+            # a bike + rider is often boxed as 'person' most of the time: if YOLO saw a two-wheeler
+            # in >= 25% of frames, this is the two-wheeler (never a lone walker)
+            tw = {k: v for k, v in self.labels.items() if k in TWO_WHEELER_LABELS}
+            if tw and sum(tw.values()) / total >= TWO_WHEELER_VOTE:
+                return max(tw, key=tw.get)
+        return top
 
     def state(self):
         return (self.crossings, self.last_cross_ts, self.last_cross_to, self.side, self.armed)

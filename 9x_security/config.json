@@ -1,9 +1,9 @@
 {
   "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
   "line": {
-    "x1": 0.0,
+    "x1": 0.1,
     "y1": 0.5,
-    "x2": 1.0,
+    "x2": 0.9,
     "y2": 0.5
   },
   "entry_direction": "pos",
@@ -65,9 +65,9 @@
       "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
       "rtsp_url_main": "",
       "line": {
-        "x1": 0.0,
+        "x1": 0.1,
         "y1": 0.5,
-        "x2": 1.0,
+        "x2": 0.9,
         "y2": 0.5
       },
       "entry_direction": "pos",

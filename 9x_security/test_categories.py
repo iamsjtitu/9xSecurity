@@ -29,15 +29,24 @@ def _engine(tmp_path, **over):
     return e
 
 
-def _drive(e, dets_per_frame, flush=True):
+def _drive(e, dets_per_frame, flush=True, fps=8.0):
+    """Feeds scripted detections at a realistic cadence (fake clock, 8 fps): the tracker's speeds
+    (rider = seated shape moving fast) only mean something with real time steps."""
     import numpy as np
     frame = np.zeros((540, 960, 3), np.uint8)
     out = []
-    for dets in dets_per_frame:
-        e.detector.dets = dets
-        out += e.process_frame(frame)[1]
-    if flush:
-        out += e.flush_pending(force=True)  # person alerts wait PERSON_GROUP_S for the group
+    real_time = eng.time.time
+    t = [real_time()]
+    eng.time.time = lambda: t[0]
+    try:
+        for dets in dets_per_frame:
+            e.detector.dets = dets
+            t[0] += 1.0 / fps
+            out += e.process_frame(frame)[1]
+        if flush:
+            out += e.flush_pending(force=True)  # person alerts wait PERSON_GROUP_S for the group
+    finally:
+        eng.time.time = real_time
     return out
 
 
@@ -214,9 +223,9 @@ def test_person_group_is_one_event_with_count(tmp_path):
     e = _engine(tmp_path, enable_person=True)
     frames = []
     for y in range(60, 300, 6):
-        frames.append([{"bbox": (700, y - 40, 760, y + 40), "label": "person"},
-                       {"bbox": (820, y - 40, 880, y + 40), "label": "person"}])
-    assert _drive(e, frames, flush=False) == []
+        frames.append([{"bbox": (700, y - 90, 740, y + 10), "label": "person"},
+                       {"bbox": (820, y - 90, 860, y + 10), "label": "person"}])
+    assert _drive(e, frames, flush=False, fps=30.0) == []     # 40 frames = 1.3 s: group window still open
     ev = e.flush_pending(force=True)
     assert len(ev) == 1 and ev[0]["count"] == 2, ev
     assert ev[0]["vehicle_type"] == "person" and os.path.exists(ev[0]["image_path"])

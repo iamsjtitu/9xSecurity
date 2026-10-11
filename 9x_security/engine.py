@@ -28,6 +28,8 @@ PERSON_GROUP_S = float(os.environ.get("PERSON_GROUP_S", "2.5"))  # people crossi
 PERSON_VEHICLE_S = float(os.environ.get("PERSON_VEHICLE_S", "6"))  # person crossing within this of a vehicle at the same spot = rider/driver
 RIDER_GROW = 0.25       # vehicle box grown by this fraction when testing 'person ON/WITH the vehicle'
 RIDER_MIN_OVERLAP = 0.2  # >= this fraction of the person's box inside the grown vehicle box
+RIDER_SHAPE = 1.8        # a seated rider's box is shorter than this many widths (a walker is 2.5-3.5x)
+RIDER_SPEED = 1.5        # ... and moves faster than this many body-heights per second (a walker ~0.8)
 MOVING_S = 4.0           # a vehicle track counts as 'moving' this long after its last real move
 
 
@@ -729,6 +731,15 @@ class SecurityEngine:
         track (a parked truck beside a walker must not hide him), or a vehicle crossed at this very
         spot moments before (or after — re-checked at flush)."""
         now = time.time()
+        # the rider himself when YOLO never boxed the bike (user 11-10: bike + rider = two 'person'
+        # boxes): a SEATED shape (short, wide box) moving at bike speed is nobody walking
+        own = self.tracker.tracks.get(cr["track_id"])
+        x1, y1, x2, y2 = cr["bbox"]
+        w, h = max(1, x2 - x1), max(1, y2 - y1)
+        if own is not None and own.vel is not None and h < RIDER_SHAPE * w:
+            speed = math.hypot(own.vel[0], own.vel[1]) / h
+            if speed > RIDER_SPEED:
+                return f"baitha hua aur tez ({speed:.1f} body-height/s, box {w}x{h}) — bike/gaadi par sawaar"
         for tid, tr in self.tracker.tracks.items():
             if category_of(tr.label) not in ("vehicle", "two_wheeler") or not self._is_moving(tid, now):
                 continue

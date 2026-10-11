@@ -9348,3 +9348,1677 @@ RuntimeError: no AI in test
 2026-10-11T06:38:07 | ffmpeg-pipe: starting
 2026-10-11T06:38:12 | open_stream: falling back to default backend
 2026-10-11T06:38:17 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:38:34 | svc[Front Camera]: loading AI model
+2026-10-11T06:38:34 | svc[Back Camera]: loading AI model
+2026-10-11T06:38:35 | svc[Front Camera]: AI model loaded
+2026-10-11T06:38:35 | svc[Back Camera]: AI model loaded
+2026-10-11T06:38:36 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 779 ms, 0 dets on blank frame)
+2026-10-11T06:38:36 | svc[Front Camera]: accurate model too slow here (779 ms > 350) -> yolov8n.pt
+2026-10-11T06:38:36 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 790 ms, 0 dets on blank frame)
+2026-10-11T06:38:37 | svc[Back Camera]: accurate model too slow here (790 ms > 350) -> yolov8n.pt
+2026-10-11T06:38:37 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 306 ms, 0 dets on blank frame)
+2026-10-11T06:38:37 | open_stream: transport=tcp
+2026-10-11T06:38:37 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 299 ms, 0 dets on blank frame)
+2026-10-11T06:38:42 | open_stream: transport=udp
+2026-10-11T06:38:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:38:47 | ffmpeg-pipe: starting
+2026-10-11T06:38:52 | open_stream: falling back to default backend
+2026-10-11T06:38:57 | open_stream: transport=tcp
+2026-10-11T06:38:57 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:39:02 | open_stream: transport=udp
+2026-10-11T06:39:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:39:07 | ffmpeg-pipe: starting
+2026-10-11T06:39:12 | open_stream: falling back to default backend
+2026-10-11T06:39:14 | svc[Front Camera]: loading AI model
+2026-10-11T06:39:14 | svc[Front Camera]: AI model loaded
+2026-10-11T06:39:16 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 518 ms, 0 dets on blank frame)
+2026-10-11T06:39:16 | svc[Front Camera]: accurate model too slow here (518 ms > 350) -> yolov8n.pt
+2026-10-11T06:39:16 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 190 ms, 0 dets on blank frame)
+2026-10-11T06:39:17 | open_stream: transport=tcp
+2026-10-11T06:39:17 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:39:22 | open_stream: transport=udp
+2026-10-11T06:39:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:39:27 | ffmpeg-pipe: starting
+2026-10-11T06:39:32 | open_stream: falling back to default backend
+2026-10-11T06:39:37 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:39:54 | svc[Front Camera]: loading AI model
+2026-10-11T06:39:54 | svc[Back Camera]: loading AI model
+2026-10-11T06:39:54 | svc[Front Camera]: AI model loaded
+2026-10-11T06:39:54 | svc[Back Camera]: AI model loaded
+2026-10-11T06:39:56 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 639 ms, 0 dets on blank frame)
+2026-10-11T06:39:56 | svc[Front Camera]: accurate model too slow here (639 ms > 350) -> yolov8n.pt
+2026-10-11T06:39:56 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 674 ms, 0 dets on blank frame)
+2026-10-11T06:39:56 | svc[Back Camera]: accurate model too slow here (674 ms > 350) -> yolov8n.pt
+2026-10-11T06:39:57 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 285 ms, 0 dets on blank frame)
+2026-10-11T06:39:57 | open_stream: transport=tcp
+2026-10-11T06:39:57 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 261 ms, 0 dets on blank frame)
+2026-10-11T06:40:02 | open_stream: transport=udp
+2026-10-11T06:40:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:40:07 | ffmpeg-pipe: starting
+2026-10-11T06:40:12 | open_stream: falling back to default backend
+2026-10-11T06:40:17 | open_stream: transport=tcp
+2026-10-11T06:40:17 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:40:22 | open_stream: transport=udp
+2026-10-11T06:40:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:40:27 | ffmpeg-pipe: starting
+2026-10-11T06:40:32 | open_stream: falling back to default backend
+2026-10-11T06:40:34 | svc[Front Camera]: loading AI model
+2026-10-11T06:40:34 | svc[Front Camera]: AI model loaded
+2026-10-11T06:40:36 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 471 ms, 0 dets on blank frame)
+2026-10-11T06:40:36 | svc[Front Camera]: accurate model too slow here (471 ms > 350) -> yolov8n.pt
+2026-10-11T06:40:36 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 183 ms, 0 dets on blank frame)
+2026-10-11T06:40:37 | open_stream: transport=tcp
+2026-10-11T06:40:37 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:40:42 | open_stream: transport=udp
+2026-10-11T06:40:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:40:47 | ffmpeg-pipe: starting
+2026-10-11T06:40:52 | open_stream: falling back to default backend
+2026-10-11T06:40:57 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:41:14 | svc[Front Camera]: loading AI model
+2026-10-11T06:41:14 | svc[Back Camera]: loading AI model
+2026-10-11T06:41:14 | svc[Front Camera]: AI model loaded
+2026-10-11T06:41:14 | svc[Back Camera]: AI model loaded
+2026-10-11T06:41:16 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 650 ms, 0 dets on blank frame)
+2026-10-11T06:41:16 | svc[Front Camera]: accurate model too slow here (650 ms > 350) -> yolov8n.pt
+2026-10-11T06:41:16 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 681 ms, 0 dets on blank frame)
+2026-10-11T06:41:16 | svc[Back Camera]: accurate model too slow here (681 ms > 350) -> yolov8n.pt
+2026-10-11T06:41:17 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 285 ms, 0 dets on blank frame)
+2026-10-11T06:41:17 | open_stream: transport=tcp
+2026-10-11T06:41:17 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 264 ms, 0 dets on blank frame)
+2026-10-11T06:41:22 | open_stream: transport=udp
+2026-10-11T06:41:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:41:27 | ffmpeg-pipe: starting
+2026-10-11T06:41:32 | open_stream: falling back to default backend
+2026-10-11T06:41:37 | open_stream: transport=tcp
+2026-10-11T06:41:37 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:41:42 | open_stream: transport=udp
+2026-10-11T06:41:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:41:47 | ffmpeg-pipe: starting
+2026-10-11T06:41:52 | open_stream: falling back to default backend
+2026-10-11T06:41:54 | svc: auto-connect — Front Camera se connect kar raha hai
+2026-10-11T06:41:54 | svc[Front Camera]: loading AI model
+2026-10-11T06:41:54 | svc[Front Camera]: AI model loaded
+2026-10-11T06:41:56 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 475 ms, 0 dets on blank frame)
+2026-10-11T06:41:56 | svc[Front Camera]: accurate model too slow here (475 ms > 350) -> yolov8n.pt
+2026-10-11T06:41:56 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 196 ms, 0 dets on blank frame)
+2026-10-11T06:41:57 | open_stream: transport=tcp
+2026-10-11T06:41:57 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:42:02 | open_stream: transport=udp
+2026-10-11T06:42:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:42:07 | ffmpeg-pipe: starting
+2026-10-11T06:42:12 | open_stream: falling back to default backend
+2026-10-11T06:42:17 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:42:34 | svc[Front Camera]: loading AI model
+2026-10-11T06:42:34 | svc[Back Camera]: loading AI model
+2026-10-11T06:42:35 | svc[Front Camera]: AI model loaded
+2026-10-11T06:42:35 | svc[Back Camera]: AI model loaded
+2026-10-11T06:42:36 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 631 ms, 0 dets on blank frame)
+2026-10-11T06:42:36 | svc[Front Camera]: accurate model too slow here (631 ms > 350) -> yolov8n.pt
+2026-10-11T06:42:36 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 631 ms, 0 dets on blank frame)
+2026-10-11T06:42:36 | svc[Back Camera]: accurate model too slow here (631 ms > 350) -> yolov8n.pt
+2026-10-11T06:42:37 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 263 ms, 0 dets on blank frame)
+2026-10-11T06:42:37 | open_stream: transport=tcp
+2026-10-11T06:42:37 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 291 ms, 0 dets on blank frame)
+2026-10-11T06:42:42 | open_stream: transport=udp
+2026-10-11T06:42:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:42:47 | ffmpeg-pipe: starting
+2026-10-11T06:42:52 | open_stream: falling back to default backend
+2026-10-11T06:42:57 | open_stream: transport=tcp
+2026-10-11T06:42:57 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:43:02 | open_stream: transport=udp
+2026-10-11T06:43:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:43:07 | ffmpeg-pipe: starting
+2026-10-11T06:43:12 | open_stream: falling back to default backend
+2026-10-11T06:43:14 | svc[Front Camera]: loading AI model
+2026-10-11T06:43:14 | svc[Front Camera]: AI model loaded
+2026-10-11T06:43:16 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 467 ms, 0 dets on blank frame)
+2026-10-11T06:43:16 | svc[Front Camera]: accurate model too slow here (467 ms > 350) -> yolov8n.pt
+2026-10-11T06:43:16 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 195 ms, 0 dets on blank frame)
+2026-10-11T06:43:17 | open_stream: transport=tcp
+2026-10-11T06:43:17 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:43:22 | open_stream: transport=udp
+2026-10-11T06:43:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:43:27 | ffmpeg-pipe: starting
+2026-10-11T06:43:32 | open_stream: falling back to default backend
+2026-10-11T06:43:37 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:43:54 | svc[Back Camera]: loading AI model
+2026-10-11T06:43:54 | svc[Front Camera]: loading AI model
+2026-10-11T06:43:54 | svc[Back Camera]: AI model loaded
+2026-10-11T06:43:54 | svc[Front Camera]: AI model loaded
+2026-10-11T06:43:56 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 641 ms, 0 dets on blank frame)
+2026-10-11T06:43:56 | svc[Front Camera]: accurate model too slow here (641 ms > 350) -> yolov8n.pt
+2026-10-11T06:43:56 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 649 ms, 0 dets on blank frame)
+2026-10-11T06:43:56 | svc[Back Camera]: accurate model too slow here (649 ms > 350) -> yolov8n.pt
+2026-10-11T06:43:57 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 280 ms, 0 dets on blank frame)
+2026-10-11T06:43:57 | open_stream: transport=tcp
+2026-10-11T06:43:57 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 246 ms, 0 dets on blank frame)
+2026-10-11T06:44:02 | open_stream: transport=udp
+2026-10-11T06:44:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:44:07 | ffmpeg-pipe: starting
+2026-10-11T06:44:12 | open_stream: falling back to default backend
+2026-10-11T06:44:17 | open_stream: transport=tcp
+2026-10-11T06:44:17 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:44:22 | open_stream: transport=udp
+2026-10-11T06:44:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:44:27 | ffmpeg-pipe: starting
+2026-10-11T06:44:32 | open_stream: falling back to default backend
+2026-10-11T06:44:34 | svc[Front Camera]: loading AI model
+2026-10-11T06:44:34 | svc[Front Camera]: AI model loaded
+2026-10-11T06:44:36 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 495 ms, 0 dets on blank frame)
+2026-10-11T06:44:36 | svc[Front Camera]: accurate model too slow here (495 ms > 350) -> yolov8n.pt
+2026-10-11T06:44:36 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 197 ms, 0 dets on blank frame)
+2026-10-11T06:44:37 | open_stream: transport=tcp
+2026-10-11T06:44:37 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:44:42 | open_stream: transport=udp
+2026-10-11T06:44:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:44:47 | ffmpeg-pipe: starting
+2026-10-11T06:44:52 | open_stream: falling back to default backend
+2026-10-11T06:44:57 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:45:14 | svc[Front Camera]: loading AI model
+2026-10-11T06:45:14 | svc[Back Camera]: loading AI model
+2026-10-11T06:45:14 | svc[Front Camera]: AI model loaded
+2026-10-11T06:45:14 | svc[Back Camera]: AI model loaded
+2026-10-11T06:45:16 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 669 ms, 0 dets on blank frame)
+2026-10-11T06:45:16 | svc[Front Camera]: accurate model too slow here (669 ms > 350) -> yolov8n.pt
+2026-10-11T06:45:16 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 696 ms, 0 dets on blank frame)
+2026-10-11T06:45:16 | svc[Back Camera]: accurate model too slow here (696 ms > 350) -> yolov8n.pt
+2026-10-11T06:45:17 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 287 ms, 0 dets on blank frame)
+2026-10-11T06:45:17 | open_stream: transport=tcp
+2026-10-11T06:45:17 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 281 ms, 0 dets on blank frame)
+2026-10-11T06:45:22 | open_stream: transport=udp
+2026-10-11T06:45:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:45:27 | ffmpeg-pipe: starting
+2026-10-11T06:45:32 | open_stream: falling back to default backend
+2026-10-11T06:45:37 | open_stream: transport=tcp
+2026-10-11T06:45:37 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:45:42 | open_stream: transport=udp
+2026-10-11T06:45:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:45:47 | ffmpeg-pipe: starting
+2026-10-11T06:45:52 | open_stream: falling back to default backend
+2026-10-11T06:45:54 | svc[Front Camera]: loading AI model
+2026-10-11T06:45:55 | svc[Front Camera]: AI model loaded
+2026-10-11T06:45:56 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 463 ms, 0 dets on blank frame)
+2026-10-11T06:45:56 | svc[Front Camera]: accurate model too slow here (463 ms > 350) -> yolov8n.pt
+2026-10-11T06:45:56 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 179 ms, 0 dets on blank frame)
+2026-10-11T06:45:57 | open_stream: transport=tcp
+2026-10-11T06:45:57 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:46:02 | open_stream: transport=udp
+2026-10-11T06:46:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:46:07 | ffmpeg-pipe: starting
+2026-10-11T06:46:12 | open_stream: falling back to default backend
+2026-10-11T06:46:17 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:46:34 | svc[Back Camera]: loading AI model
+2026-10-11T06:46:34 | svc[Front Camera]: loading AI model
+2026-10-11T06:46:34 | svc[Back Camera]: AI model loaded
+2026-10-11T06:46:34 | svc[Front Camera]: AI model loaded
+2026-10-11T06:46:36 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 680 ms, 0 dets on blank frame)
+2026-10-11T06:46:36 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 680 ms, 0 dets on blank frame)
+2026-10-11T06:46:36 | svc[Back Camera]: accurate model too slow here (680 ms > 350) -> yolov8n.pt
+2026-10-11T06:46:36 | svc[Front Camera]: accurate model too slow here (680 ms > 350) -> yolov8n.pt
+2026-10-11T06:46:37 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 280 ms, 0 dets on blank frame)
+2026-10-11T06:46:37 | open_stream: transport=tcp
+2026-10-11T06:46:37 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 271 ms, 0 dets on blank frame)
+2026-10-11T06:46:42 | open_stream: transport=udp
+2026-10-11T06:46:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:46:47 | ffmpeg-pipe: starting
+2026-10-11T06:46:52 | open_stream: falling back to default backend
+2026-10-11T06:46:57 | open_stream: transport=tcp
+2026-10-11T06:46:57 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:47:00 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-11T06:47:02 | open_stream: transport=udp
+2026-10-11T06:47:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:47:07 | ffmpeg-pipe: starting
+2026-10-11T06:47:12 | open_stream: falling back to default backend
+2026-10-11T06:47:14 | svc: auto-connect — Back Camera se connect kar raha hai
+2026-10-11T06:47:14 | svc[Back Camera]: loading AI model
+2026-10-11T06:47:14 | svc[Back Camera]: AI model loaded
+2026-10-11T06:47:16 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 468 ms, 0 dets on blank frame)
+2026-10-11T06:47:16 | svc[Back Camera]: accurate model too slow here (468 ms > 350) -> yolov8n.pt
+2026-10-11T06:47:16 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 190 ms, 0 dets on blank frame)
+2026-10-11T06:47:17 | open_stream: transport=tcp
+2026-10-11T06:47:17 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:47:22 | open_stream: transport=udp
+2026-10-11T06:47:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:47:27 | ffmpeg-pipe: starting
+2026-10-11T06:47:32 | open_stream: falling back to default backend
+2026-10-11T06:47:37 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:47:54 | svc[Front Camera]: loading AI model
+2026-10-11T06:47:54 | svc[Back Camera]: loading AI model
+2026-10-11T06:47:54 | svc[Back Camera]: AI model loaded
+2026-10-11T06:47:54 | svc[Front Camera]: AI model loaded
+2026-10-11T06:47:56 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 861 ms, 0 dets on blank frame)
+2026-10-11T06:47:56 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 839 ms, 0 dets on blank frame)
+2026-10-11T06:47:56 | svc[Front Camera]: accurate model too slow here (861 ms > 350) -> yolov8n.pt
+2026-10-11T06:47:56 | svc[Back Camera]: accurate model too slow here (839 ms > 350) -> yolov8n.pt
+2026-10-11T06:47:57 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-11T06:47:57 | person ignored: baitha hua aur tez (2.0 body-height/s, box 70x80) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:47:57 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-11T06:47:57 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-47-57-160.jpg
+2026-10-11T06:47:57 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-47-57-236.jpg
+2026-10-11T06:47:57 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-47-57-287.jpg
+2026-10-11T06:47:57 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:47:57 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_motorcycle_06-47-57-356.jpg
+2026-10-11T06:47:57 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-47-57-473.jpg
+2026-10-11T06:47:57 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-47-57-537.jpg
+2026-10-11T06:47:57 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_motorcycle_06-47-57-574.jpg
+2026-10-11T06:47:57 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:47:57 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 329 ms, 0 dets on blank frame)
+2026-10-11T06:47:57 | open_stream: transport=tcp
+2026-10-11T06:47:57 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 321 ms, 0 dets on blank frame)
+2026-10-11T06:47:57 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:47:57 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-47-57-639.jpg
+2026-10-11T06:47:57 | person ignored: truck (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:47:57 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_06-47-57-676.jpg
+2026-10-11T06:47:57 | person ignored: car (track 2) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-11T06:47:57 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-47-57-721.jpg
+2026-10-11T06:47:57 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-47-57-762.jpg
+2026-10-11T06:47:57 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_motorcycle_06-47-57-797.jpg
+2026-10-11T06:47:57 | event: Entry person track 1 (appeared-at-line) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-47-57-835.jpg
+2026-10-11T06:47:57 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-47-57-897.jpg
+2026-10-11T06:47:57 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-47-57-908.jpg
+2026-10-11T06:47:57 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-11T06:47:57 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_06-47-57-947.jpg
+2026-10-11T06:48:02 | open_stream: transport=udp
+2026-10-11T06:48:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:48:07 | ffmpeg-pipe: starting
+2026-10-11T06:48:12 | open_stream: falling back to default backend
+2026-10-11T06:48:17 | open_stream: transport=tcp
+2026-10-11T06:48:17 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:48:20 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-11T06:48:22 | open_stream: transport=udp
+2026-10-11T06:48:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:48:27 | ffmpeg-pipe: starting
+2026-10-11T06:48:29 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-11T06:48:29 | person ignored: baitha hua aur tez (2.0 body-height/s, box 70x80) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:48:29 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-11T06:48:29 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-48-29-844.jpg
+2026-10-11T06:48:29 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-48-29-883.jpg
+2026-10-11T06:48:29 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-48-29-918.jpg
+2026-10-11T06:48:29 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:48:29 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_motorcycle_06-48-29-958.jpg
+2026-10-11T06:48:30 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-48-30-055.jpg
+2026-10-11T06:48:30 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-48-30-114.jpg
+2026-10-11T06:48:30 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_motorcycle_06-48-30-193.jpg
+2026-10-11T06:48:30 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:48:30 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:48:30 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-30-306.jpg
+2026-10-11T06:48:30 | person ignored: truck (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:48:30 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_06-48-30-348.jpg
+2026-10-11T06:48:30 | person ignored: car (track 2) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-11T06:48:30 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-48-30-406.jpg
+2026-10-11T06:48:30 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-48-30-457.jpg
+2026-10-11T06:48:30 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_motorcycle_06-48-30-507.jpg
+2026-10-11T06:48:30 | person ignored: baitha hua aur tez (2.3 body-height/s, box 60x80) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:48:30 | person ignored: baitha hua aur tez (2.3 body-height/s, box 60x80) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-11T06:48:30 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-48-30-613.jpg
+2026-10-11T06:48:30 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-48-30-627.jpg
+2026-10-11T06:48:30 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-11T06:48:30 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_06-48-30-666.jpg
+2026-10-11T06:48:30 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-30-835.jpg
+2026-10-11T06:48:30 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (720, 144, 840, 224))
+2026-10-11T06:48:30 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-30-882.jpg
+2026-10-11T06:48:30 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-30-896.jpg
+2026-10-11T06:48:30 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-30-908.jpg
+2026-10-11T06:48:30 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-30-946.jpg
+2026-10-11T06:48:30 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (720, 98, 840, 178))
+2026-10-11T06:48:30 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_06-48-30-994.jpg
+2026-10-11T06:48:31 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_06-48-31-009.jpg
+2026-10-11T06:48:31 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-31-057.jpg
+2026-10-11T06:48:31 | crossing ignored: duplicate (second box born on the same vehicle) of a vehicle counted <20s ago (track 2)
+2026-10-11T06:48:31 | event: Entry truck track 1 (appeared-at-line) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-31-167.jpg
+2026-10-11T06:48:31 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-31-282.jpg
+2026-10-11T06:48:31 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-31-295.jpg
+2026-10-11T06:48:31 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-31-331.jpg
+2026-10-11T06:48:31 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (720, 144, 840, 224))
+2026-10-11T06:48:31 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-31-370.jpg
+2026-10-11T06:48:31 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (720, 210, 840, 290))
+2026-10-11T06:48:31 | event: Exit car track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Exit_car_06-48-31-384.jpg
+2026-10-11T06:48:31 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-31-431.jpg
+2026-10-11T06:48:31 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-31-443.jpg
+2026-10-11T06:48:31 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-31-455.jpg
+2026-10-11T06:48:31 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 2)
+2026-10-11T06:48:31 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-31-500.jpg
+2026-10-11T06:48:31 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-48-31-513.jpg
+2026-10-11T06:48:31 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_06-48-31-654.jpg
+2026-10-11T06:48:31 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_06-48-31-663.jpg
+2026-10-11T06:48:32 | open_stream: falling back to default backend
+2026-10-11T06:48:34 | svc[Front Camera]: loading AI model
+2026-10-11T06:48:34 | svc[Front Camera]: AI model loaded
+2026-10-11T06:48:36 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 544 ms, 0 dets on blank frame)
+2026-10-11T06:48:36 | svc[Front Camera]: accurate model too slow here (544 ms > 350) -> yolov8n.pt
+2026-10-11T06:48:36 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 230 ms, 0 dets on blank frame)
+2026-10-11T06:48:37 | open_stream: transport=tcp
+2026-10-11T06:48:37 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:48:41 | person ignored: baitha hua aur tez (2.3 body-height/s, box 60x80) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:48:41 | person ignored: baitha hua aur tez (2.3 body-height/s, box 60x80) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-11T06:48:42 | open_stream: transport=udp
+2026-10-11T06:48:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:48:47 | ffmpeg-pipe: starting
+2026-10-11T06:48:52 | open_stream: falling back to default backend
+2026-10-11T06:48:57 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:49:04 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-11T06:49:04 | person ignored: baitha hua aur tez (2.0 body-height/s, box 70x80) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:49:04 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-11T06:49:04 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-49-04-752.jpg
+2026-10-11T06:49:04 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-49-04-789.jpg
+2026-10-11T06:49:04 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-49-04-828.jpg
+2026-10-11T06:49:04 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:49:04 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_motorcycle_06-49-04-864.jpg
+2026-10-11T06:49:04 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-49-04-943.jpg
+2026-10-11T06:49:04 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-49-04-982.jpg
+2026-10-11T06:49:05 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_motorcycle_06-49-05-023.jpg
+2026-10-11T06:49:05 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:49:05 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:49:05 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-05-113.jpg
+2026-10-11T06:49:05 | person ignored: truck (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T06:49:05 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_06-49-05-156.jpg
+2026-10-11T06:49:05 | person ignored: car (track 2) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-11T06:49:05 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-49-05-216.jpg
+2026-10-11T06:49:05 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-49-05-265.jpg
+2026-10-11T06:49:05 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_motorcycle_06-49-05-304.jpg
+2026-10-11T06:49:05 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-49-05-345.jpg
+2026-10-11T06:49:05 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-49-05-388.jpg
+2026-10-11T06:49:05 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_06-49-05-400.jpg
+2026-10-11T06:49:05 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-11T06:49:05 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_06-49-05-441.jpg
+2026-10-11T06:49:05 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-05-591.jpg
+2026-10-11T06:49:05 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (720, 144, 840, 224))
+2026-10-11T06:49:05 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-05-631.jpg
+2026-10-11T06:49:05 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-05-643.jpg
+2026-10-11T06:49:05 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-05-654.jpg
+2026-10-11T06:49:05 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-05-685.jpg
+2026-10-11T06:49:05 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (720, 98, 840, 178))
+2026-10-11T06:49:05 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_06-49-05-727.jpg
+2026-10-11T06:49:05 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_06-49-05-736.jpg
+2026-10-11T06:49:05 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-05-771.jpg
+2026-10-11T06:49:05 | crossing ignored: duplicate (second box born on the same vehicle) of a vehicle counted <20s ago (track 2)
+2026-10-11T06:49:05 | event: Entry truck track 1 (appeared-at-line) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-05-876.jpg
+2026-10-11T06:49:05 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-05-960.jpg
+2026-10-11T06:49:05 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-05-973.jpg
+2026-10-11T06:49:06 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-06-019.jpg
+2026-10-11T06:49:06 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (720, 144, 840, 224))
+2026-10-11T06:49:06 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-06-063.jpg
+2026-10-11T06:49:06 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (720, 210, 840, 290))
+2026-10-11T06:49:06 | event: Exit car track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Exit_car_06-49-06-079.jpg
+2026-10-11T06:49:06 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-06-119.jpg
+2026-10-11T06:49:06 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-06-131.jpg
+2026-10-11T06:49:06 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-06-144.jpg
+2026-10-11T06:49:06 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 2)
+2026-10-11T06:49:06 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-06-184.jpg
+2026-10-11T06:49:06 | event: Entry truck track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_06-49-06-196.jpg
+2026-10-11T06:49:06 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_06-49-06-325.jpg
+2026-10-11T06:49:06 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_06-49-06-335.jpg
+2026-10-11T06:49:06 | event: Exit car track 1 (cross) -> /tmp/tmps6f6irzt/snaps/2026-10-11/Exit_car_06-49-06-372.jpg
+2026-10-11T06:49:09 | === PROBE start: notaurl
+2026-10-11T06:49:09 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-10-11T06:49:12 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-11T06:49:12 | ffmpeg-pipe: starting
+2026-10-11T06:49:12 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpxaaeqerj/snaps/2026-10-11') path=/tmp/tmpxaaeqerj/snaps/2026-10-11/Exit_car_06-49-12-941.jpg
+2026-10-11T06:49:14 | svc[Back Camera]: loading AI model
+2026-10-11T06:49:14 | svc[Front Camera]: loading AI model
+2026-10-11T06:49:15 | svc[Back Camera]: AI model loaded
+2026-10-11T06:49:15 | svc[Front Camera]: AI model loaded
+2026-10-11T06:49:16 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 686 ms, 0 dets on blank frame)
+2026-10-11T06:49:16 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 691 ms, 0 dets on blank frame)
+2026-10-11T06:49:16 | svc[Back Camera]: accurate model too slow here (686 ms > 350) -> yolov8n.pt
+2026-10-11T06:49:16 | svc[Front Camera]: accurate model too slow here (691 ms > 350) -> yolov8n.pt
+2026-10-11T06:49:17 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 310 ms, 0 dets on blank frame)
+2026-10-11T06:49:17 | open_stream: transport=tcp
+2026-10-11T06:49:17 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 309 ms, 0 dets on blank frame)
+2026-10-11T06:49:22 | open_stream: transport=udp
+2026-10-11T06:49:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:49:27 | ffmpeg-pipe: starting
+2026-10-11T06:49:32 | open_stream: falling back to default backend
+2026-10-11T06:49:37 | open_stream: transport=tcp
+2026-10-11T06:49:37 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:49:42 | open_stream: transport=udp
+2026-10-11T06:49:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:49:47 | ffmpeg-pipe: starting
+2026-10-11T06:49:52 | open_stream: falling back to default backend
+2026-10-11T06:49:54 | svc[Back Camera]: loading AI model
+2026-10-11T06:49:54 | svc[Back Camera]: AI model loaded
+2026-10-11T06:49:56 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 546 ms, 0 dets on blank frame)
+2026-10-11T06:49:56 | svc[Back Camera]: accurate model too slow here (546 ms > 350) -> yolov8n.pt
+2026-10-11T06:49:56 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 242 ms, 0 dets on blank frame)
+2026-10-11T06:49:57 | open_stream: transport=tcp
+2026-10-11T06:49:57 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:50:02 | open_stream: transport=udp
+2026-10-11T06:50:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:50:07 | ffmpeg-pipe: starting
+2026-10-11T06:50:12 | open_stream: falling back to default backend
+2026-10-11T06:50:17 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:50:34 | svc[Back Camera]: loading AI model
+2026-10-11T06:50:34 | svc[Front Camera]: loading AI model
+2026-10-11T06:50:34 | svc[Front Camera]: AI model loaded
+2026-10-11T06:50:34 | svc[Back Camera]: AI model loaded
+2026-10-11T06:50:36 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 643 ms, 0 dets on blank frame)
+2026-10-11T06:50:36 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 649 ms, 0 dets on blank frame)
+2026-10-11T06:50:36 | svc[Front Camera]: accurate model too slow here (643 ms > 350) -> yolov8n.pt
+2026-10-11T06:50:36 | svc[Back Camera]: accurate model too slow here (649 ms > 350) -> yolov8n.pt
+2026-10-11T06:50:37 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 282 ms, 0 dets on blank frame)
+2026-10-11T06:50:37 | open_stream: transport=tcp
+2026-10-11T06:50:37 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 261 ms, 0 dets on blank frame)
+2026-10-11T06:50:42 | open_stream: transport=udp
+2026-10-11T06:50:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:50:47 | ffmpeg-pipe: starting
+2026-10-11T06:50:52 | open_stream: falling back to default backend
+2026-10-11T06:50:57 | open_stream: transport=tcp
+2026-10-11T06:50:57 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:51:02 | open_stream: transport=udp
+2026-10-11T06:51:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:51:07 | ffmpeg-pipe: starting
+2026-10-11T06:51:12 | open_stream: falling back to default backend
+2026-10-11T06:51:14 | svc[Front Camera]: loading AI model
+2026-10-11T06:51:14 | svc[Front Camera]: AI model loaded
+2026-10-11T06:51:16 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 537 ms, 0 dets on blank frame)
+2026-10-11T06:51:16 | svc[Front Camera]: accurate model too slow here (537 ms > 350) -> yolov8n.pt
+2026-10-11T06:51:16 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 228 ms, 0 dets on blank frame)
+2026-10-11T06:51:17 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:51:17 | open_stream: transport=tcp
+2026-10-11T06:51:22 | open_stream: transport=udp
+2026-10-11T06:51:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:51:27 | ffmpeg-pipe: starting
+2026-10-11T06:51:32 | open_stream: falling back to default backend
+2026-10-11T06:51:37 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:51:54 | svc[Back Camera]: loading AI model
+2026-10-11T06:51:54 | svc[Front Camera]: loading AI model
+2026-10-11T06:51:54 | svc[Back Camera]: AI model loaded
+2026-10-11T06:51:54 | svc[Front Camera]: AI model loaded
+2026-10-11T06:51:56 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 662 ms, 0 dets on blank frame)
+2026-10-11T06:51:56 | svc[Back Camera]: accurate model too slow here (662 ms > 350) -> yolov8n.pt
+2026-10-11T06:51:56 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 675 ms, 0 dets on blank frame)
+2026-10-11T06:51:56 | svc[Front Camera]: accurate model too slow here (675 ms > 350) -> yolov8n.pt
+2026-10-11T06:51:57 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 289 ms, 0 dets on blank frame)
+2026-10-11T06:51:57 | open_stream: transport=tcp
+2026-10-11T06:51:57 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 284 ms, 0 dets on blank frame)
+2026-10-11T06:52:02 | open_stream: transport=udp
+2026-10-11T06:52:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:52:07 | ffmpeg-pipe: starting
+2026-10-11T06:52:12 | open_stream: falling back to default backend
+2026-10-11T06:52:17 | open_stream: transport=tcp
+2026-10-11T06:52:17 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:52:22 | open_stream: transport=udp
+2026-10-11T06:52:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:52:27 | ffmpeg-pipe: starting
+2026-10-11T06:52:32 | open_stream: falling back to default backend
+2026-10-11T06:52:34 | svc: auto-connect — Back Camera se connect kar raha hai
+2026-10-11T06:52:34 | svc[Back Camera]: loading AI model
+2026-10-11T06:52:34 | svc[Back Camera]: AI model loaded
+2026-10-11T06:52:36 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 466 ms, 0 dets on blank frame)
+2026-10-11T06:52:36 | svc[Back Camera]: accurate model too slow here (466 ms > 350) -> yolov8n.pt
+2026-10-11T06:52:36 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 187 ms, 0 dets on blank frame)
+2026-10-11T06:52:37 | open_stream: transport=tcp
+2026-10-11T06:52:37 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:52:42 | open_stream: transport=udp
+2026-10-11T06:52:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:52:47 | ffmpeg-pipe: starting
+2026-10-11T06:52:52 | open_stream: falling back to default backend
+2026-10-11T06:52:57 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:53:14 | svc[Front Camera]: loading AI model
+2026-10-11T06:53:14 | svc[Back Camera]: loading AI model
+2026-10-11T06:53:15 | svc[Back Camera]: AI model loaded
+2026-10-11T06:53:15 | svc[Front Camera]: AI model loaded
+2026-10-11T06:53:16 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 694 ms, 0 dets on blank frame)
+2026-10-11T06:53:16 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 694 ms, 0 dets on blank frame)
+2026-10-11T06:53:16 | svc[Back Camera]: accurate model too slow here (694 ms > 350) -> yolov8n.pt
+2026-10-11T06:53:16 | svc[Front Camera]: accurate model too slow here (694 ms > 350) -> yolov8n.pt
+2026-10-11T06:53:17 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 311 ms, 0 dets on blank frame)
+2026-10-11T06:53:17 | open_stream: transport=tcp
+2026-10-11T06:53:17 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 294 ms, 0 dets on blank frame)
+2026-10-11T06:53:22 | open_stream: transport=udp
+2026-10-11T06:53:25 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-10-11T06:53:25 | purge: 0 old events removed (retention 7d, cutoff 2026-10-04)
+2026-10-11T06:53:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:53:27 | ffmpeg-pipe: starting
+2026-10-11T06:53:29 | svc[Front Camera]: loading AI model
+2026-10-11T06:53:29 | svc[Back Camera]: loading AI model
+2026-10-11T06:53:29 | svc: auto-connect — Front Camera, Back Camera se connect kar raha hai
+2026-10-11T06:53:30 | svc[Back Camera]: AI model loaded
+2026-10-11T06:53:30 | svc[Front Camera]: AI model loaded
+2026-10-11T06:53:32 | open_stream: falling back to default backend
+2026-10-11T06:53:34 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 1122 ms, 0 dets on blank frame)
+2026-10-11T06:53:34 | svc[Back Camera]: accurate model too slow here (1122 ms > 350) -> yolov8n.pt
+2026-10-11T06:53:34 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 1122 ms, 0 dets on blank frame)
+2026-10-11T06:53:34 | svc[Front Camera]: accurate model too slow here (1122 ms > 350) -> yolov8n.pt
+2026-10-11T06:53:35 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 541 ms, 0 dets on blank frame)
+2026-10-11T06:53:35 | open_stream: transport=tcp
+2026-10-11T06:53:35 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 572 ms, 0 dets on blank frame)
+2026-10-11T06:53:37 | open_stream: transport=tcp
+2026-10-11T06:53:37 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:53:40 | open_stream: transport=udp
+2026-10-11T06:53:42 | open_stream: transport=udp
+2026-10-11T06:53:45 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:53:45 | ffmpeg-pipe: starting
+2026-10-11T06:53:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:53:47 | ffmpeg-pipe: starting
+2026-10-11T06:53:50 | open_stream: falling back to default backend
+2026-10-11T06:53:52 | open_stream: falling back to default backend
+2026-10-11T06:53:54 | svc[Back Camera]: loading AI model
+2026-10-11T06:53:54 | svc[Back Camera]: AI model loaded
+2026-10-11T06:53:56 | open_stream: transport=tcp
+2026-10-11T06:53:56 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:53:56 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 471 ms, 0 dets on blank frame)
+2026-10-11T06:53:56 | svc[Back Camera]: accurate model too slow here (471 ms > 350) -> yolov8n.pt
+2026-10-11T06:53:56 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 197 ms, 0 dets on blank frame)
+2026-10-11T06:53:58 | open_stream: transport=tcp
+2026-10-11T06:53:58 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:53:59 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-11T06:54:01 | open_stream: transport=udp
+2026-10-11T06:54:03 | open_stream: transport=udp
+2026-10-11T06:54:06 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:54:06 | ffmpeg-pipe: starting
+2026-10-11T06:54:08 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:54:08 | ffmpeg-pipe: starting
+2026-10-11T06:54:09 | svc[Back Camera]: loading AI model
+2026-10-11T06:54:09 | svc[Back Camera]: AI model loaded
+2026-10-11T06:54:10 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 470 ms, 0 dets on blank frame)
+2026-10-11T06:54:10 | svc[Back Camera]: accurate model too slow here (470 ms > 350) -> yolov8n.pt
+2026-10-11T06:54:10 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 188 ms, 0 dets on blank frame)
+2026-10-11T06:54:11 | open_stream: falling back to default backend
+2026-10-11T06:54:13 | open_stream: falling back to default backend
+2026-10-11T06:54:16 | open_stream: transport=tcp
+2026-10-11T06:54:16 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:54:18 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:54:19 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-11T06:54:21 | open_stream: transport=udp
+2026-10-11T06:54:26 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:54:26 | ffmpeg-pipe: starting
+2026-10-11T06:54:31 | open_stream: falling back to default backend
+2026-10-11T06:54:33 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-10-11T06:54:33 | purge: 0 old events removed (retention 7d, cutoff 2026-10-04)
+2026-10-11T06:54:34 | svc[Back Camera]: loading AI model
+2026-10-11T06:54:34 | svc[Front Camera]: loading AI model
+2026-10-11T06:54:34 | svc[Front Camera]: AI model loaded
+2026-10-11T06:54:34 | svc[Back Camera]: AI model loaded
+2026-10-11T06:54:36 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 658 ms, 0 dets on blank frame)
+2026-10-11T06:54:36 | svc[Front Camera]: accurate model too slow here (658 ms > 350) -> yolov8n.pt
+2026-10-11T06:54:36 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 700 ms, 0 dets on blank frame)
+2026-10-11T06:54:36 | svc[Back Camera]: accurate model too slow here (700 ms > 350) -> yolov8n.pt
+2026-10-11T06:54:37 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 292 ms, 0 dets on blank frame)
+2026-10-11T06:54:37 | open_stream: transport=tcp
+2026-10-11T06:54:37 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 294 ms, 0 dets on blank frame)
+2026-10-11T06:54:37 | svc[Front Camera]: loading AI model
+2026-10-11T06:54:37 | svc[Back Camera]: loading AI model
+2026-10-11T06:54:37 | svc: auto-connect — Front Camera, Back Camera se connect kar raha hai
+2026-10-11T06:54:39 | svc[Front Camera]: AI model loaded
+2026-10-11T06:54:39 | svc[Back Camera]: AI model loaded
+2026-10-11T06:54:41 | svc: camera added cam3 'LoadTest 1' gate='LT-1'
+2026-10-11T06:54:41 | svc: cameras started: LoadTest 1
+2026-10-11T06:54:41 | svc[LoadTest 1]: loading AI model
+2026-10-11T06:54:41 | svc: camera added cam4 'LoadTest 2' gate='LT-2'
+2026-10-11T06:54:41 | svc[LoadTest 2]: loading AI model
+2026-10-11T06:54:41 | svc: cameras started: LoadTest 2
+2026-10-11T06:54:41 | svc: camera added cam5 'LoadTest 3' gate='LT-3'
+2026-10-11T06:54:41 | svc: cameras started: LoadTest 3
+2026-10-11T06:54:41 | svc[LoadTest 3]: loading AI model
+2026-10-11T06:54:41 | svc: camera added cam6 'LoadTest 4' gate='LT-4'
+2026-10-11T06:54:41 | svc: cameras started: LoadTest 4
+2026-10-11T06:54:41 | svc[LoadTest 4]: loading AI model
+2026-10-11T06:54:41 | svc: camera added cam7 'LoadTest 5' gate='LT-5'
+2026-10-11T06:54:41 | svc: cameras started: LoadTest 5
+2026-10-11T06:54:41 | svc[LoadTest 5]: loading AI model
+2026-10-11T06:54:42 | svc[LoadTest 3]: AI model loaded
+2026-10-11T06:54:42 | open_stream: transport=udp
+2026-10-11T06:54:42 | svc[LoadTest 1]: AI model loaded
+2026-10-11T06:54:42 | svc[LoadTest 4]: AI model loaded
+2026-10-11T06:54:42 | svc[LoadTest 5]: AI model loaded
+2026-10-11T06:54:42 | svc[LoadTest 2]: AI model loaded
+2026-10-11T06:54:43 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 1242 ms, 0 dets on blank frame)
+2026-10-11T06:54:43 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 1345 ms, 0 dets on blank frame)
+2026-10-11T06:54:43 | svc[Back Camera]: accurate model too slow here (1242 ms > 350) -> yolov8n.pt
+2026-10-11T06:54:43 | svc[Front Camera]: accurate model too slow here (1345 ms > 350) -> yolov8n.pt
+2026-10-11T06:54:46 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 981 ms, 0 dets on blank frame)
+2026-10-11T06:54:46 | open_stream: transport=tcp
+2026-10-11T06:54:46 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 1080 ms, 0 dets on blank frame)
+2026-10-11T06:54:47 | svc[LoadTest 1]: AI self-test OK (yolov8s.pt, 1699 ms, 0 dets on blank frame)
+2026-10-11T06:54:47 | svc[LoadTest 1]: accurate model too slow here (1699 ms > 350) -> yolov8n.pt
+2026-10-11T06:54:47 | svc[LoadTest 3]: AI self-test OK (yolov8s.pt, 1782 ms, 0 dets on blank frame)
+2026-10-11T06:54:47 | svc[LoadTest 3]: accurate model too slow here (1782 ms > 350) -> yolov8n.pt
+2026-10-11T06:54:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:54:47 | ffmpeg-pipe: starting
+2026-10-11T06:54:47 | svc[LoadTest 2]: AI self-test OK (yolov8s.pt, 1616 ms, 0 dets on blank frame)
+2026-10-11T06:54:47 | svc[LoadTest 2]: accurate model too slow here (1616 ms > 350) -> yolov8n.pt
+2026-10-11T06:54:47 | svc[LoadTest 4]: AI self-test OK (yolov8s.pt, 1697 ms, 0 dets on blank frame)
+2026-10-11T06:54:47 | svc[LoadTest 5]: AI self-test OK (yolov8s.pt, 1622 ms, 0 dets on blank frame)
+2026-10-11T06:54:47 | svc[LoadTest 4]: accurate model too slow here (1697 ms > 350) -> yolov8n.pt
+2026-10-11T06:54:47 | svc[LoadTest 5]: accurate model too slow here (1622 ms > 350) -> yolov8n.pt
+2026-10-11T06:54:48 | svc[LoadTest 1]: AI self-test OK (yolov8n.pt, 681 ms, 0 dets on blank frame)
+2026-10-11T06:54:48 | svc[LoadTest 3]: AI self-test OK (yolov8n.pt, 589 ms, 0 dets on blank frame)
+2026-10-11T06:54:49 | svc[LoadTest 2]: AI self-test OK (yolov8n.pt, 501 ms, 0 dets on blank frame)
+2026-10-11T06:54:49 | svc[LoadTest 4]: AI self-test OK (yolov8n.pt, 466 ms, 0 dets on blank frame)
+2026-10-11T06:54:49 | svc[LoadTest 5]: AI self-test OK (yolov8n.pt, 467 ms, 0 dets on blank frame)
+2026-10-11T06:54:51 | open_stream: transport=udp
+2026-10-11T06:54:52 | open_stream: falling back to default backend
+2026-10-11T06:54:56 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:54:56 | ffmpeg-pipe: starting
+2026-10-11T06:54:57 | open_stream: transport=tcp
+2026-10-11T06:54:57 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:55:01 | open_stream: falling back to default backend
+2026-10-11T06:55:02 | open_stream: transport=udp
+2026-10-11T06:55:06 | open_stream: transport=tcp
+2026-10-11T06:55:06 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:55:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:55:07 | ffmpeg-pipe: starting
+2026-10-11T06:55:09 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-11T06:55:11 | open_stream: transport=udp
+2026-10-11T06:55:12 | open_stream: falling back to default backend
+2026-10-11T06:55:14 | svc[LoadTest 1]: loading AI model
+2026-10-11T06:55:14 | svc[LoadTest 4]: loading AI model
+2026-10-11T06:55:14 | svc[LoadTest 2]: loading AI model
+2026-10-11T06:55:14 | svc[Front Camera]: loading AI model
+2026-10-11T06:55:14 | svc[LoadTest 5]: loading AI model
+2026-10-11T06:55:14 | svc[LoadTest 3]: loading AI model
+2026-10-11T06:55:15 | svc[LoadTest 2]: AI model loaded
+2026-10-11T06:55:15 | svc[LoadTest 4]: AI model loaded
+2026-10-11T06:55:15 | svc[LoadTest 5]: AI model loaded
+2026-10-11T06:55:15 | svc[LoadTest 1]: AI model loaded
+2026-10-11T06:55:15 | svc[Front Camera]: AI model loaded
+2026-10-11T06:55:15 | svc[LoadTest 3]: AI model loaded
+2026-10-11T06:55:16 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:55:16 | ffmpeg-pipe: starting
+2026-10-11T06:55:17 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:55:17 | svc[Back Camera]: loading AI model
+2026-10-11T06:55:18 | svc[Back Camera]: AI model loaded
+2026-10-11T06:55:20 | svc[LoadTest 4]: AI self-test OK (yolov8s.pt, 2181 ms, 0 dets on blank frame)
+2026-10-11T06:55:20 | svc[LoadTest 2]: AI self-test OK (yolov8s.pt, 2391 ms, 0 dets on blank frame)
+2026-10-11T06:55:20 | svc[LoadTest 4]: accurate model too slow here (2181 ms > 350) -> yolov8n.pt
+2026-10-11T06:55:20 | svc[LoadTest 5]: AI self-test OK (yolov8s.pt, 2400 ms, 0 dets on blank frame)
+2026-10-11T06:55:20 | svc[LoadTest 1]: AI self-test OK (yolov8s.pt, 2306 ms, 0 dets on blank frame)
+2026-10-11T06:55:20 | svc[LoadTest 2]: accurate model too slow here (2391 ms > 350) -> yolov8n.pt
+2026-10-11T06:55:20 | svc[LoadTest 3]: AI self-test OK (yolov8s.pt, 2318 ms, 0 dets on blank frame)
+2026-10-11T06:55:21 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 2316 ms, 0 dets on blank frame)
+2026-10-11T06:55:21 | open_stream: falling back to default backend
+2026-10-11T06:55:21 | svc[LoadTest 5]: accurate model too slow here (2400 ms > 350) -> yolov8n.pt
+2026-10-11T06:55:21 | svc[LoadTest 1]: accurate model too slow here (2306 ms > 350) -> yolov8n.pt
+2026-10-11T06:55:21 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 896 ms, 0 dets on blank frame)
+2026-10-11T06:55:21 | svc[Back Camera]: accurate model too slow here (896 ms > 350) -> yolov8n.pt
+2026-10-11T06:55:21 | svc[LoadTest 3]: accurate model too slow here (2318 ms > 350) -> yolov8n.pt
+2026-10-11T06:55:21 | svc[Front Camera]: accurate model too slow here (2316 ms > 350) -> yolov8n.pt
+2026-10-11T06:55:22 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 801 ms, 0 dets on blank frame)
+2026-10-11T06:55:23 | svc[LoadTest 4]: AI self-test OK (yolov8n.pt, 981 ms, 0 dets on blank frame)
+2026-10-11T06:55:23 | svc[LoadTest 4]: source opened codec=fmp4 live=False
+2026-10-11T06:55:23 | svc[LoadTest 4]: streaming started
+2026-10-11T06:55:23 | svc[LoadTest 2]: AI self-test OK (yolov8n.pt, 702 ms, 0 dets on blank frame)
+2026-10-11T06:55:23 | svc[LoadTest 2]: source opened codec=fmp4 live=False
+2026-10-11T06:55:23 | svc[LoadTest 2]: streaming started
+2026-10-11T06:55:23 | svc[LoadTest 5]: AI self-test OK (yolov8n.pt, 876 ms, 0 dets on blank frame)
+2026-10-11T06:55:23 | svc[LoadTest 5]: source opened codec=fmp4 live=False
+2026-10-11T06:55:23 | svc[LoadTest 5]: streaming started
+2026-10-11T06:55:23 | svc[LoadTest 1]: AI self-test OK (yolov8n.pt, 790 ms, 0 dets on blank frame)
+2026-10-11T06:55:23 | svc[LoadTest 1]: source opened codec=fmp4 live=False
+2026-10-11T06:55:23 | svc[LoadTest 1]: streaming started
+2026-10-11T06:55:23 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 809 ms, 0 dets on blank frame)
+2026-10-11T06:55:23 | open_stream: transport=tcp
+2026-10-11T06:55:24 | svc[LoadTest 3]: AI self-test OK (yolov8n.pt, 880 ms, 0 dets on blank frame)
+2026-10-11T06:55:26 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:55:26 | svc[LoadTest 1]: source opened codec=fmp4 live=False
+2026-10-11T06:55:26 | svc[LoadTest 1]: streaming started
+2026-10-11T06:55:26 | svc[LoadTest 3]: source opened codec=fmp4 live=False
+2026-10-11T06:55:26 | svc[LoadTest 3]: streaming started
+2026-10-11T06:55:26 | svc[LoadTest 2]: source opened codec=fmp4 live=False
+2026-10-11T06:55:26 | svc[LoadTest 2]: streaming started
+2026-10-11T06:55:26 | open_stream: transport=tcp
+2026-10-11T06:55:26 | svc[LoadTest 4]: source opened codec=fmp4 live=False
+2026-10-11T06:55:26 | svc[LoadTest 5]: source opened codec=fmp4 live=False
+2026-10-11T06:55:26 | svc[LoadTest 5]: streaming started
+2026-10-11T06:55:26 | svc[LoadTest 4]: streaming started
+2026-10-11T06:55:29 | open_stream: transport=udp
+2026-10-11T06:55:29 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-11T06:55:31 | open_stream: transport=udp
+2026-10-11T06:55:34 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:55:34 | ffmpeg-pipe: starting
+2026-10-11T06:55:36 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:55:36 | ffmpeg-pipe: starting
+2026-10-11T06:55:39 | open_stream: falling back to default backend
+2026-10-11T06:55:41 | open_stream: falling back to default backend
+2026-10-11T06:55:44 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:55:44 | svc[LoadTest 3]: source opened codec=fmp4 live=False
+2026-10-11T06:55:44 | svc[LoadTest 3]: streaming started
+2026-10-11T06:55:46 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:55:50 | crossing rejected: track 1 bus Entry — line par khadi gaadi ka box hil raha hai (jitter): sirf 5px paar, saaf paar ke liye 65px chahiye (box (303, 82, 629, 275))
+2026-10-11T06:55:50 | crossing rejected: track 1 bus Entry — line par khadi gaadi ka box hil raha hai (jitter): sirf 5px paar, saaf paar ke liye 65px chahiye (box (303, 82, 629, 275))
+2026-10-11T06:55:51 | crossing rejected: track 1 bus Entry — line par khadi gaadi ka box hil raha hai (jitter): sirf 5px paar, saaf paar ke liye 65px chahiye (box (303, 82, 629, 275))
+2026-10-11T06:55:52 | crossing rejected: track 1 bus Entry — line par khadi gaadi ka box hil raha hai (jitter): sirf 5px paar, saaf paar ke liye 65px chahiye (box (303, 82, 629, 275))
+2026-10-11T06:55:54 | event: Entry bus track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_bus_06-55-54-358.jpg
+2026-10-11T06:55:54 | svc[Back Camera]: loading AI model
+2026-10-11T06:55:54 | svc[Front Camera]: loading AI model
+2026-10-11T06:55:55 | event: Entry bus track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_bus_06-55-55-444.jpg
+2026-10-11T06:55:55 | svc[Front Camera]: AI model loaded
+2026-10-11T06:55:55 | svc[Back Camera]: AI model loaded
+2026-10-11T06:55:56 | event: Entry bus track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_bus_06-55-56-441.jpg
+2026-10-11T06:55:57 | crossing rejected: track 1 bus Entry — line par khadi gaadi ka box hil raha hai (jitter): sirf 5px paar, saaf paar ke liye 65px chahiye (box (303, 82, 629, 275))
+2026-10-11T06:55:57 | svc: camera deleted cam3
+2026-10-11T06:55:57 | svc[Front Camera]: loading AI model
+2026-10-11T06:55:57 | svc: cameras started: Front Camera, Back Camera
+2026-10-11T06:55:57 | svc[Back Camera]: loading AI model
+2026-10-11T06:55:57 | svc: camera deleted cam4
+2026-10-11T06:55:57 | svc: camera deleted cam5
+2026-10-11T06:55:57 | svc: camera deleted cam6
+2026-10-11T06:55:57 | svc: camera deleted cam7
+2026-10-11T06:55:57 | event: Entry bus track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_bus_06-55-57-445.jpg
+2026-10-11T06:55:57 | crossing rejected: track 1 bus Entry — line par khadi gaadi ka box hil raha hai (jitter): sirf 5px paar, saaf paar ke liye 65px chahiye (box (303, 82, 629, 275))
+2026-10-11T06:55:57 | svc[Front Camera]: AI model loaded
+2026-10-11T06:55:57 | svc[Back Camera]: AI model loaded
+2026-10-11T06:55:58 | crossing rejected: track 1 bus Entry — line par khadi gaadi ka box hil raha hai (jitter): sirf 5px paar, saaf paar ke liye 65px chahiye (box (303, 82, 629, 275))
+2026-10-11T06:55:58 | crossing rejected: track 1 bus Entry — line par khadi gaadi ka box hil raha hai (jitter): sirf 5px paar, saaf paar ke liye 65px chahiye (box (303, 82, 629, 275))
+2026-10-11T06:56:02 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 2508 ms, 0 dets on blank frame)
+2026-10-11T06:56:02 | svc[Front Camera]: accurate model too slow here (2508 ms > 350) -> yolov8n.pt
+2026-10-11T06:56:02 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 2594 ms, 0 dets on blank frame)
+2026-10-11T06:56:03 | svc[Back Camera]: accurate model too slow here (2594 ms > 350) -> yolov8n.pt
+2026-10-11T06:56:03 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 2214 ms, 0 dets on blank frame)
+2026-10-11T06:56:03 | svc[Front Camera]: accurate model too slow here (2214 ms > 350) -> yolov8n.pt
+2026-10-11T06:56:03 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 2196 ms, 0 dets on blank frame)
+2026-10-11T06:56:04 | svc[Back Camera]: accurate model too slow here (2196 ms > 350) -> yolov8n.pt
+2026-10-11T06:56:06 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 1303 ms, 0 dets on blank frame)
+2026-10-11T06:56:06 | open_stream: transport=tcp
+2026-10-11T06:56:06 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 1209 ms, 0 dets on blank frame)
+2026-10-11T06:56:06 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 1087 ms, 0 dets on blank frame)
+2026-10-11T06:56:06 | open_stream: transport=tcp
+2026-10-11T06:56:07 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 904 ms, 0 dets on blank frame)
+2026-10-11T06:56:11 | open_stream: transport=udp
+2026-10-11T06:56:11 | open_stream: transport=udp
+2026-10-11T06:56:12 | event: Entry bus track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_bus_06-56-12-056.jpg
+2026-10-11T06:56:16 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:56:16 | ffmpeg-pipe: starting
+2026-10-11T06:56:16 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:56:16 | ffmpeg-pipe: starting
+2026-10-11T06:56:21 | open_stream: falling back to default backend
+2026-10-11T06:56:21 | open_stream: falling back to default backend
+2026-10-11T06:56:26 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:56:26 | open_stream: transport=tcp
+2026-10-11T06:56:26 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:56:26 | open_stream: transport=tcp
+2026-10-11T06:56:28 | svc[Front Camera]: loading AI model
+2026-10-11T06:56:28 | svc[Front Camera]: AI model loaded
+2026-10-11T06:56:31 | open_stream: transport=udp
+2026-10-11T06:56:31 | open_stream: transport=udp
+2026-10-11T06:56:32 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 1702 ms, 0 dets on blank frame)
+2026-10-11T06:56:32 | svc[Front Camera]: accurate model too slow here (1702 ms > 350) -> yolov8n.pt
+2026-10-11T06:56:34 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 792 ms, 0 dets on blank frame)
+2026-10-11T06:56:34 | svc[Front Camera]: loading AI model
+2026-10-11T06:56:35 | svc[Front Camera]: AI model loaded
+2026-10-11T06:56:36 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 463 ms, 0 dets on blank frame)
+2026-10-11T06:56:36 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:56:36 | ffmpeg-pipe: starting
+2026-10-11T06:56:36 | svc[Front Camera]: accurate model too slow here (463 ms > 350) -> yolov8n.pt
+2026-10-11T06:56:36 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 180 ms, 0 dets on blank frame)
+2026-10-11T06:56:36 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:56:36 | ffmpeg-pipe: starting
+2026-10-11T06:56:41 | open_stream: falling back to default backend
+2026-10-11T06:56:41 | open_stream: falling back to default backend
+2026-10-11T06:56:46 | open_stream: transport=tcp
+2026-10-11T06:56:46 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:56:46 | open_stream: transport=tcp
+2026-10-11T06:56:46 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:56:51 | open_stream: transport=udp
+2026-10-11T06:56:51 | open_stream: transport=udp
+2026-10-11T06:56:56 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:56:56 | ffmpeg-pipe: starting
+2026-10-11T06:56:56 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:56:56 | ffmpeg-pipe: starting
+2026-10-11T06:57:01 | open_stream: falling back to default backend
+2026-10-11T06:57:01 | open_stream: falling back to default backend
+2026-10-11T06:57:06 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:57:07 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:57:08 | svc[Front Camera]: loading AI model
+2026-10-11T06:57:08 | svc[Back Camera]: loading AI model
+2026-10-11T06:57:08 | svc[Front Camera]: AI model loaded
+2026-10-11T06:57:08 | svc[Back Camera]: AI model loaded
+2026-10-11T06:57:09 | svc: camera added cam3 'LoadTest 1' gate='LT-1'
+2026-10-11T06:57:09 | svc[LoadTest 1]: loading AI model
+2026-10-11T06:57:09 | svc: cameras started: LoadTest 1
+2026-10-11T06:57:09 | svc[LoadTest 1]: AI model loaded
+2026-10-11T06:57:10 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 925 ms, 0 dets on blank frame)
+2026-10-11T06:57:10 | svc[Front Camera]: accurate model too slow here (925 ms > 350) -> yolov8n.pt
+2026-10-11T06:57:10 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 924 ms, 0 dets on blank frame)
+2026-10-11T06:57:10 | svc[Back Camera]: accurate model too slow here (924 ms > 350) -> yolov8n.pt
+2026-10-11T06:57:11 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 408 ms, 0 dets on blank frame)
+2026-10-11T06:57:11 | open_stream: transport=tcp
+2026-10-11T06:57:11 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 437 ms, 0 dets on blank frame)
+2026-10-11T06:57:11 | svc[LoadTest 1]: AI self-test OK (yolov8s.pt, 574 ms, 0 dets on blank frame)
+2026-10-11T06:57:11 | svc[LoadTest 1]: accurate model too slow here (574 ms > 350) -> yolov8n.pt
+2026-10-11T06:57:12 | svc[LoadTest 1]: AI self-test OK (yolov8n.pt, 205 ms, 0 dets on blank frame)
+2026-10-11T06:57:14 | svc[LoadTest 1]: loading AI model
+2026-10-11T06:57:14 | svc[Back Camera]: loading AI model
+2026-10-11T06:57:14 | svc[Front Camera]: loading AI model
+2026-10-11T06:57:15 | svc[Front Camera]: AI model loaded
+2026-10-11T06:57:15 | svc[LoadTest 1]: AI model loaded
+2026-10-11T06:57:15 | svc[Back Camera]: AI model loaded
+2026-10-11T06:57:16 | open_stream: transport=udp
+2026-10-11T06:57:17 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 981 ms, 0 dets on blank frame)
+2026-10-11T06:57:17 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 1107 ms, 0 dets on blank frame)
+2026-10-11T06:57:17 | svc[Front Camera]: accurate model too slow here (981 ms > 350) -> yolov8n.pt
+2026-10-11T06:57:17 | svc[LoadTest 1]: AI self-test OK (yolov8s.pt, 1129 ms, 0 dets on blank frame)
+2026-10-11T06:57:17 | svc[Back Camera]: accurate model too slow here (1107 ms > 350) -> yolov8n.pt
+2026-10-11T06:57:17 | svc[LoadTest 1]: accurate model too slow here (1129 ms > 350) -> yolov8n.pt
+2026-10-11T06:57:18 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 404 ms, 0 dets on blank frame)
+2026-10-11T06:57:18 | open_stream: transport=tcp
+2026-10-11T06:57:18 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 371 ms, 0 dets on blank frame)
+2026-10-11T06:57:18 | svc[LoadTest 1]: AI self-test OK (yolov8n.pt, 374 ms, 0 dets on blank frame)
+2026-10-11T06:57:21 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:57:21 | ffmpeg-pipe: starting
+2026-10-11T06:57:23 | open_stream: transport=udp
+2026-10-11T06:57:26 | open_stream: falling back to default backend
+2026-10-11T06:57:28 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:57:28 | ffmpeg-pipe: starting
+2026-10-11T06:57:31 | open_stream: transport=tcp
+2026-10-11T06:57:31 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:57:33 | open_stream: falling back to default backend
+2026-10-11T06:57:36 | open_stream: transport=udp
+2026-10-11T06:57:38 | open_stream: transport=tcp
+2026-10-11T06:57:38 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:57:41 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:57:41 | ffmpeg-pipe: starting
+2026-10-11T06:57:43 | open_stream: transport=udp
+2026-10-11T06:57:46 | open_stream: falling back to default backend
+2026-10-11T06:57:48 | svc[Front Camera]: loading AI model
+2026-10-11T06:57:48 | svc[Front Camera]: AI model loaded
+2026-10-11T06:57:48 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:57:48 | ffmpeg-pipe: starting
+2026-10-11T06:57:49 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 499 ms, 0 dets on blank frame)
+2026-10-11T06:57:49 | svc[Front Camera]: accurate model too slow here (499 ms > 350) -> yolov8n.pt
+2026-10-11T06:57:49 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 240 ms, 0 dets on blank frame)
+2026-10-11T06:57:51 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:57:51 | svc[LoadTest 1]: source opened codec=fmp4 live=False
+2026-10-11T06:57:51 | open_stream: transport=tcp
+2026-10-11T06:57:51 | svc[LoadTest 1]: streaming started
+2026-10-11T06:57:53 | open_stream: falling back to default backend
+2026-10-11T06:57:54 | svc: auto-connect — Front Camera se connect kar raha hai
+2026-10-11T06:57:54 | svc[Front Camera]: loading AI model
+2026-10-11T06:57:54 | svc[Front Camera]: AI model loaded
+2026-10-11T06:57:54 | svc: camera deleted cam3
+2026-10-11T06:57:54 | svc: cameras started: Back Camera
+2026-10-11T06:57:54 | svc[Back Camera]: loading AI model
+2026-10-11T06:57:55 | svc[Back Camera]: AI model loaded
+2026-10-11T06:57:56 | open_stream: transport=udp
+2026-10-11T06:57:56 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 636 ms, 0 dets on blank frame)
+2026-10-11T06:57:56 | svc[Front Camera]: accurate model too slow here (636 ms > 350) -> yolov8n.pt
+2026-10-11T06:57:56 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 651 ms, 0 dets on blank frame)
+2026-10-11T06:57:56 | svc[Back Camera]: accurate model too slow here (651 ms > 350) -> yolov8n.pt
+2026-10-11T06:57:57 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 290 ms, 0 dets on blank frame)
+2026-10-11T06:57:57 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 254 ms, 0 dets on blank frame)
+2026-10-11T06:57:58 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:57:58 | open_stream: transport=tcp
+2026-10-11T06:57:58 | svc[Camera]: source opened codec=fmp4 live=False
+2026-10-11T06:57:58 | svc[Camera]: streaming started
+2026-10-11T06:58:01 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:58:01 | ffmpeg-pipe: starting
+2026-10-11T06:58:01 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-11T06:58:03 | event: Entry bus track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_bus_06-58-03-706.jpg
+2026-10-11T06:58:03 | open_stream: transport=udp
+2026-10-11T06:58:06 | open_stream: falling back to default backend
+2026-10-11T06:58:08 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:58:08 | ffmpeg-pipe: starting
+2026-10-11T06:58:11 | open_stream: transport=tcp
+2026-10-11T06:58:11 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:58:13 | open_stream: falling back to default backend
+2026-10-11T06:58:16 | open_stream: transport=udp
+2026-10-11T06:58:17 | event: Exit bus track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Exit_bus_06-58-17-507.jpg
+2026-10-11T06:58:18 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:58:21 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:58:21 | ffmpeg-pipe: starting
+2026-10-11T06:58:21 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-11T06:58:24 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (349, 0, 628, 133))
+2026-10-11T06:58:26 | open_stream: falling back to default backend
+2026-10-11T06:58:27 | event: Entry bus track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_bus_06-58-27-759.jpg
+2026-10-11T06:58:28 | svc[Front Camera]: loading AI model
+2026-10-11T06:58:28 | svc[Front Camera]: AI model loaded
+2026-10-11T06:58:30 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 1018 ms, 0 dets on blank frame)
+2026-10-11T06:58:30 | svc[Front Camera]: accurate model too slow here (1018 ms > 350) -> yolov8n.pt
+2026-10-11T06:58:31 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:58:31 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 480 ms, 0 dets on blank frame)
+2026-10-11T06:58:31 | open_stream: transport=tcp
+2026-10-11T06:58:34 | svc[Front Camera]: loading AI model
+2026-10-11T06:58:34 | svc[Back Camera]: loading AI model
+2026-10-11T06:58:35 | svc[Front Camera]: AI model loaded
+2026-10-11T06:58:35 | svc[Back Camera]: AI model loaded
+2026-10-11T06:58:36 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 620 ms, 0 dets on blank frame)
+2026-10-11T06:58:36 | svc[Front Camera]: accurate model too slow here (620 ms > 350) -> yolov8n.pt
+2026-10-11T06:58:36 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 656 ms, 0 dets on blank frame)
+2026-10-11T06:58:36 | svc[Back Camera]: accurate model too slow here (656 ms > 350) -> yolov8n.pt
+2026-10-11T06:58:36 | open_stream: transport=udp
+2026-10-11T06:58:37 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 281 ms, 0 dets on blank frame)
+2026-10-11T06:58:37 | open_stream: transport=tcp
+2026-10-11T06:58:37 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 261 ms, 0 dets on blank frame)
+2026-10-11T06:58:41 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:58:41 | ffmpeg-pipe: starting
+2026-10-11T06:58:42 | open_stream: transport=udp
+2026-10-11T06:58:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:58:47 | ffmpeg-pipe: starting
+2026-10-11T06:58:47 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-10-11T06:58:47 | purge: 0 old events removed (retention 7d, cutoff 2026-10-04)
+2026-10-11T06:58:51 | svc[Front Camera]: loading AI model
+2026-10-11T06:58:51 | svc: auto-connect — Front Camera, Back Camera se connect kar raha hai
+2026-10-11T06:58:51 | svc[Back Camera]: loading AI model
+2026-10-11T06:58:52 | open_stream: falling back to default backend
+2026-10-11T06:58:54 | svc[Front Camera]: AI model loaded
+2026-10-11T06:58:54 | svc[Back Camera]: AI model loaded
+2026-10-11T06:58:55 | svc: camera added cam3 'LoadTest 1' gate='LT-1'
+2026-10-11T06:58:55 | svc: cameras started: LoadTest 1
+2026-10-11T06:58:55 | svc[LoadTest 1]: loading AI model
+2026-10-11T06:58:55 | svc: camera added cam4 'LoadTest 2' gate='LT-2'
+2026-10-11T06:58:55 | svc: cameras started: LoadTest 2
+2026-10-11T06:58:55 | svc[LoadTest 2]: loading AI model
+2026-10-11T06:58:55 | svc: camera added cam5 'LoadTest 3' gate='LT-3'
+2026-10-11T06:58:55 | svc: cameras started: LoadTest 3
+2026-10-11T06:58:55 | svc[LoadTest 3]: loading AI model
+2026-10-11T06:58:55 | svc: camera added cam6 'LoadTest 4' gate='LT-4'
+2026-10-11T06:58:55 | svc: cameras started: LoadTest 4
+2026-10-11T06:58:55 | svc[LoadTest 4]: loading AI model
+2026-10-11T06:58:55 | svc: camera added cam7 'LoadTest 5' gate='LT-5'
+2026-10-11T06:58:55 | svc: cameras started: LoadTest 5
+2026-10-11T06:58:55 | svc[LoadTest 5]: loading AI model
+2026-10-11T06:58:56 | svc[LoadTest 1]: AI model loaded
+2026-10-11T06:58:56 | svc[LoadTest 2]: AI model loaded
+2026-10-11T06:58:56 | svc[LoadTest 3]: AI model loaded
+2026-10-11T06:58:56 | svc[LoadTest 4]: AI model loaded
+2026-10-11T06:58:56 | svc[LoadTest 5]: AI model loaded
+2026-10-11T06:58:57 | open_stream: transport=tcp
+2026-10-11T06:58:57 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:59:01 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 4638 ms, 0 dets on blank frame)
+2026-10-11T06:59:01 | svc[Front Camera]: accurate model too slow here (4638 ms > 350) -> yolov8n.pt
+2026-10-11T06:59:01 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 4421 ms, 0 dets on blank frame)
+2026-10-11T06:59:01 | svc[Back Camera]: accurate model too slow here (4421 ms > 350) -> yolov8n.pt
+2026-10-11T06:59:02 | svc[LoadTest 1]: AI self-test OK (yolov8s.pt, 4228 ms, 0 dets on blank frame)
+2026-10-11T06:59:02 | svc[LoadTest 1]: accurate model too slow here (4228 ms > 350) -> yolov8n.pt
+2026-10-11T06:59:02 | open_stream: transport=udp
+2026-10-11T06:59:02 | svc[LoadTest 2]: AI self-test OK (yolov8s.pt, 4015 ms, 0 dets on blank frame)
+2026-10-11T06:59:02 | svc[LoadTest 2]: accurate model too slow here (4015 ms > 350) -> yolov8n.pt
+2026-10-11T06:59:03 | svc[LoadTest 3]: AI self-test OK (yolov8s.pt, 3798 ms, 0 dets on blank frame)
+2026-10-11T06:59:03 | svc[LoadTest 3]: accurate model too slow here (3798 ms > 350) -> yolov8n.pt
+2026-10-11T06:59:03 | svc[LoadTest 4]: AI self-test OK (yolov8s.pt, 3607 ms, 0 dets on blank frame)
+2026-10-11T06:59:03 | svc[LoadTest 4]: accurate model too slow here (3607 ms > 350) -> yolov8n.pt
+2026-10-11T06:59:04 | svc[LoadTest 5]: AI self-test OK (yolov8s.pt, 3386 ms, 0 dets on blank frame)
+2026-10-11T06:59:04 | svc[LoadTest 5]: accurate model too slow here (3386 ms > 350) -> yolov8n.pt
+2026-10-11T06:59:06 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 1723 ms, 0 dets on blank frame)
+2026-10-11T06:59:06 | open_stream: transport=tcp
+2026-10-11T06:59:06 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 1656 ms, 0 dets on blank frame)
+2026-10-11T06:59:06 | svc[LoadTest 1]: AI self-test OK (yolov8n.pt, 1596 ms, 0 dets on blank frame)
+2026-10-11T06:59:06 | svc[LoadTest 2]: AI self-test OK (yolov8n.pt, 1522 ms, 0 dets on blank frame)
+2026-10-11T06:59:06 | svc[LoadTest 3]: AI self-test OK (yolov8n.pt, 1442 ms, 0 dets on blank frame)
+2026-10-11T06:59:07 | svc[LoadTest 4]: AI self-test OK (yolov8n.pt, 1386 ms, 0 dets on blank frame)
+2026-10-11T06:59:07 | svc[LoadTest 5]: AI self-test OK (yolov8n.pt, 1330 ms, 0 dets on blank frame)
+2026-10-11T06:59:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:59:07 | ffmpeg-pipe: starting
+2026-10-11T06:59:11 | open_stream: transport=udp
+2026-10-11T06:59:12 | open_stream: falling back to default backend
+2026-10-11T06:59:14 | svc[Front Camera]: loading AI model
+2026-10-11T06:59:14 | svc[LoadTest 1]: loading AI model
+2026-10-11T06:59:14 | svc[LoadTest 2]: loading AI model
+2026-10-11T06:59:14 | svc[LoadTest 3]: loading AI model
+2026-10-11T06:59:14 | svc[LoadTest 4]: loading AI model
+2026-10-11T06:59:14 | svc[LoadTest 5]: loading AI model
+2026-10-11T06:59:15 | svc[Front Camera]: AI model loaded
+2026-10-11T06:59:15 | svc[LoadTest 2]: AI model loaded
+2026-10-11T06:59:15 | svc[LoadTest 1]: AI model loaded
+2026-10-11T06:59:15 | svc[LoadTest 4]: AI model loaded
+2026-10-11T06:59:15 | svc[LoadTest 5]: AI model loaded
+2026-10-11T06:59:15 | svc[LoadTest 3]: AI model loaded
+2026-10-11T06:59:16 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:59:16 | ffmpeg-pipe: starting
+2026-10-11T06:59:17 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:59:19 | svc[LoadTest 1]: AI self-test OK (yolov8s.pt, 1704 ms, 0 dets on blank frame)
+2026-10-11T06:59:19 | svc[LoadTest 1]: accurate model too slow here (1704 ms > 350) -> yolov8n.pt
+2026-10-11T06:59:20 | svc[LoadTest 2]: AI self-test OK (yolov8s.pt, 1905 ms, 0 dets on blank frame)
+2026-10-11T06:59:20 | svc[LoadTest 2]: accurate model too slow here (1905 ms > 350) -> yolov8n.pt
+2026-10-11T06:59:20 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 2081 ms, 0 dets on blank frame)
+2026-10-11T06:59:20 | svc[LoadTest 4]: AI self-test OK (yolov8s.pt, 1992 ms, 0 dets on blank frame)
+2026-10-11T06:59:20 | svc[LoadTest 3]: AI self-test OK (yolov8s.pt, 1909 ms, 0 dets on blank frame)
+2026-10-11T06:59:20 | svc[LoadTest 5]: AI self-test OK (yolov8s.pt, 1950 ms, 0 dets on blank frame)
+2026-10-11T06:59:20 | svc[Front Camera]: accurate model too slow here (2081 ms > 350) -> yolov8n.pt
+2026-10-11T06:59:20 | svc[LoadTest 4]: accurate model too slow here (1992 ms > 350) -> yolov8n.pt
+2026-10-11T06:59:20 | svc[LoadTest 3]: accurate model too slow here (1909 ms > 350) -> yolov8n.pt
+2026-10-11T06:59:20 | svc[LoadTest 5]: accurate model too slow here (1950 ms > 350) -> yolov8n.pt
+2026-10-11T06:59:21 | svc[LoadTest 1]: AI self-test OK (yolov8n.pt, 409 ms, 0 dets on blank frame)
+2026-10-11T06:59:21 | svc[LoadTest 1]: source opened codec=fmp4 live=False
+2026-10-11T06:59:21 | svc[LoadTest 1]: streaming started
+2026-10-11T06:59:21 | open_stream: falling back to default backend
+2026-10-11T06:59:22 | svc[LoadTest 2]: AI self-test OK (yolov8n.pt, 729 ms, 0 dets on blank frame)
+2026-10-11T06:59:22 | svc[LoadTest 2]: source opened codec=fmp4 live=False
+2026-10-11T06:59:22 | svc[LoadTest 2]: streaming started
+2026-10-11T06:59:22 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 786 ms, 0 dets on blank frame)
+2026-10-11T06:59:22 | open_stream: transport=tcp
+2026-10-11T06:59:22 | svc[LoadTest 3]: AI self-test OK (yolov8n.pt, 802 ms, 0 dets on blank frame)
+2026-10-11T06:59:23 | svc[LoadTest 5]: AI self-test OK (yolov8n.pt, 790 ms, 0 dets on blank frame)
+2026-10-11T06:59:23 | svc[LoadTest 4]: AI self-test OK (yolov8n.pt, 809 ms, 0 dets on blank frame)
+2026-10-11T06:59:26 | open_stream: transport=tcp
+2026-10-11T06:59:26 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:59:27 | open_stream: transport=udp
+2026-10-11T06:59:28 | event: Entry bus track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_bus_06-59-28-601.jpg
+2026-10-11T06:59:28 | event: Entry bus track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_bus_06-59-28-983.jpg
+2026-10-11T06:59:29 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-11T06:59:31 | open_stream: transport=udp
+2026-10-11T06:59:31 | svc[Front Camera]: loading AI model
+2026-10-11T06:59:31 | svc[Front Camera]: AI model loaded
+2026-10-11T06:59:32 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:59:32 | ffmpeg-pipe: starting
+2026-10-11T06:59:35 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 1491 ms, 0 dets on blank frame)
+2026-10-11T06:59:35 | svc[Front Camera]: accurate model too slow here (1491 ms > 350) -> yolov8n.pt
+2026-10-11T06:59:36 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:59:36 | ffmpeg-pipe: starting
+2026-10-11T06:59:37 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 624 ms, 0 dets on blank frame)
+2026-10-11T06:59:37 | open_stream: falling back to default backend
+2026-10-11T06:59:41 | open_stream: falling back to default backend
+2026-10-11T06:59:42 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T06:59:42 | svc[LoadTest 3]: source opened codec=fmp4 live=False
+2026-10-11T06:59:42 | svc[LoadTest 3]: streaming started
+2026-10-11T06:59:42 | svc[LoadTest 5]: source opened codec=fmp4 live=False
+2026-10-11T06:59:42 | svc[LoadTest 5]: streaming started
+2026-10-11T06:59:42 | svc[LoadTest 4]: source opened codec=fmp4 live=False
+2026-10-11T06:59:42 | svc[LoadTest 4]: streaming started
+2026-10-11T06:59:46 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T06:59:46 | svc[LoadTest 2]: source opened codec=fmp4 live=False
+2026-10-11T06:59:46 | svc[LoadTest 2]: streaming started
+2026-10-11T06:59:46 | svc[LoadTest 1]: source opened codec=fmp4 live=False
+2026-10-11T06:59:46 | svc[LoadTest 1]: streaming started
+2026-10-11T06:59:46 | svc[LoadTest 3]: source opened codec=fmp4 live=False
+2026-10-11T06:59:46 | svc[LoadTest 3]: streaming started
+2026-10-11T06:59:46 | svc[LoadTest 4]: source opened codec=fmp4 live=False
+2026-10-11T06:59:46 | svc[LoadTest 4]: streaming started
+2026-10-11T06:59:46 | svc[LoadTest 5]: source opened codec=fmp4 live=False
+2026-10-11T06:59:46 | open_stream: transport=tcp
+2026-10-11T06:59:46 | svc[LoadTest 5]: streaming started
+2026-10-11T06:59:49 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-11T06:59:51 | open_stream: transport=udp
+2026-10-11T06:59:54 | svc[Front Camera]: loading AI model
+2026-10-11T06:59:54 | svc[Back Camera]: loading AI model
+2026-10-11T06:59:55 | svc[Front Camera]: AI model loaded
+2026-10-11T06:59:55 | svc[Back Camera]: AI model loaded
+2026-10-11T06:59:56 | open_stream: trying FFmpeg engine fallback
+2026-10-11T06:59:56 | ffmpeg-pipe: starting
+2026-10-11T06:59:59 | crossing rejected: track 1 bus Exit — line par khadi gaadi ka box hil raha hai (jitter): sirf 13px paar, saaf paar ke liye 65px chahiye (box (303, 49, 628, 257))
+2026-10-11T07:00:00 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 2185 ms, 0 dets on blank frame)
+2026-10-11T07:00:00 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 2126 ms, 0 dets on blank frame)
+2026-10-11T07:00:01 | svc[Front Camera]: accurate model too slow here (2185 ms > 350) -> yolov8n.pt
+2026-10-11T07:00:01 | svc[Back Camera]: accurate model too slow here (2126 ms > 350) -> yolov8n.pt
+2026-10-11T07:00:01 | crossing rejected: track 1 bus Exit — line par khadi gaadi ka box hil raha hai (jitter): sirf 13px paar, saaf paar ke liye 65px chahiye (box (303, 49, 628, 257))
+2026-10-11T07:00:01 | open_stream: falling back to default backend
+2026-10-11T07:00:02 | crossing rejected: track 1 bus Entry — line par khadi gaadi ka box hil raha hai (jitter): sirf 5px paar, saaf paar ke liye 65px chahiye (box (303, 82, 629, 275))
+2026-10-11T07:00:02 | crossing rejected: track 1 bus Entry — line par khadi gaadi ka box hil raha hai (jitter): sirf 5px paar, saaf paar ke liye 65px chahiye (box (303, 82, 629, 275))
+2026-10-11T07:00:03 | event: Exit bus track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Exit_bus_07-00-03-857.jpg
+2026-10-11T07:00:03 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 1125 ms, 0 dets on blank frame)
+2026-10-11T07:00:03 | open_stream: transport=tcp
+2026-10-11T07:00:04 | crossing rejected: track 1 bus Entry — line par khadi gaadi ka box hil raha hai (jitter): sirf 5px paar, saaf paar ke liye 65px chahiye (box (303, 82, 629, 275))
+2026-10-11T07:00:04 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 1125 ms, 0 dets on blank frame)
+2026-10-11T07:00:05 | event: Entry bus track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_bus_07-00-05-564.jpg
+2026-10-11T07:00:05 | event: Exit bus track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Exit_bus_07-00-05-573.jpg
+2026-10-11T07:00:05 | event: Entry bus track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_bus_07-00-05-945.jpg
+2026-10-11T07:00:06 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:00:06 | event: Entry bus track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_bus_07-00-06-747.jpg
+2026-10-11T07:00:09 | open_stream: transport=udp
+2026-10-11T07:00:10 | svc: camera deleted cam3
+2026-10-11T07:00:10 | svc: cameras started: Front Camera, Back Camera
+2026-10-11T07:00:10 | svc[Back Camera]: loading AI model
+2026-10-11T07:00:10 | svc[Front Camera]: loading AI model
+2026-10-11T07:00:10 | svc: camera deleted cam4
+2026-10-11T07:00:10 | svc: camera deleted cam5
+2026-10-11T07:00:10 | svc: camera deleted cam6
+2026-10-11T07:00:10 | svc: camera deleted cam7
+2026-10-11T07:00:11 | svc[Front Camera]: AI model loaded
+2026-10-11T07:00:11 | svc[Back Camera]: AI model loaded
+2026-10-11T07:00:14 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:00:14 | ffmpeg-pipe: starting
+2026-10-11T07:00:19 | open_stream: falling back to default backend
+2026-10-11T07:00:22 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 4901 ms, 0 dets on blank frame)
+2026-10-11T07:00:23 | svc[Front Camera]: accurate model too slow here (4901 ms > 350) -> yolov8n.pt
+2026-10-11T07:00:24 | open_stream: transport=tcp
+2026-10-11T07:00:24 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:00:24 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 4107 ms, 0 dets on blank frame)
+2026-10-11T07:00:25 | svc[Back Camera]: accurate model too slow here (4107 ms > 350) -> yolov8n.pt
+2026-10-11T07:00:26 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 723 ms, 0 dets on blank frame)
+2026-10-11T07:00:26 | open_stream: transport=tcp
+2026-10-11T07:00:28 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 880 ms, 0 dets on blank frame)
+2026-10-11T07:00:29 | open_stream: transport=udp
+2026-10-11T07:00:29 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (349, 0, 628, 133))
+2026-10-11T07:00:31 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (349, 0, 628, 133))
+2026-10-11T07:00:31 | open_stream: transport=udp
+2026-10-11T07:00:34 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:00:34 | ffmpeg-pipe: starting
+2026-10-11T07:00:34 | svc[Front Camera]: loading AI model
+2026-10-11T07:00:35 | svc[Front Camera]: AI model loaded
+2026-10-11T07:00:36 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 465 ms, 0 dets on blank frame)
+2026-10-11T07:00:36 | svc[Front Camera]: accurate model too slow here (465 ms > 350) -> yolov8n.pt
+2026-10-11T07:00:36 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:00:36 | ffmpeg-pipe: starting
+2026-10-11T07:00:36 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 186 ms, 0 dets on blank frame)
+2026-10-11T07:00:39 | open_stream: falling back to default backend
+2026-10-11T07:00:41 | open_stream: falling back to default backend
+2026-10-11T07:00:44 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:00:44 | open_stream: transport=tcp
+2026-10-11T07:00:46 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:00:46 | open_stream: transport=tcp
+2026-10-11T07:00:49 | open_stream: transport=udp
+2026-10-11T07:00:51 | open_stream: transport=udp
+2026-10-11T07:00:54 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:00:54 | ffmpeg-pipe: starting
+2026-10-11T07:00:56 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:00:56 | ffmpeg-pipe: starting
+2026-10-11T07:00:56 | svc[Front Camera]: loading AI model
+2026-10-11T07:00:56 | svc[Front Camera]: AI model loaded
+2026-10-11T07:00:58 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 467 ms, 0 dets on blank frame)
+2026-10-11T07:00:58 | svc[Front Camera]: accurate model too slow here (467 ms > 350) -> yolov8n.pt
+2026-10-11T07:00:58 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 193 ms, 0 dets on blank frame)
+2026-10-11T07:00:59 | open_stream: falling back to default backend
+2026-10-11T07:01:01 | open_stream: falling back to default backend
+2026-10-11T07:01:04 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:01:06 | open_stream: transport=tcp
+2026-10-11T07:01:06 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:01:11 | open_stream: transport=udp
+2026-10-11T07:01:14 | svc[Back Camera]: loading AI model
+2026-10-11T07:01:14 | svc[Front Camera]: loading AI model
+2026-10-11T07:01:15 | svc[Back Camera]: AI model loaded
+2026-10-11T07:01:15 | svc[Front Camera]: AI model loaded
+2026-10-11T07:01:16 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 649 ms, 0 dets on blank frame)
+2026-10-11T07:01:16 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 823 ms, 0 dets on blank frame)
+2026-10-11T07:01:16 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:01:16 | ffmpeg-pipe: starting
+2026-10-11T07:01:16 | svc[Front Camera]: accurate model too slow here (823 ms > 350) -> yolov8n.pt
+2026-10-11T07:01:16 | svc[Back Camera]: accurate model too slow here (649 ms > 350) -> yolov8n.pt
+2026-10-11T07:01:17 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 282 ms, 0 dets on blank frame)
+2026-10-11T07:01:17 | open_stream: transport=tcp
+2026-10-11T07:01:17 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 292 ms, 0 dets on blank frame)
+2026-10-11T07:01:21 | open_stream: falling back to default backend
+2026-10-11T07:01:22 | open_stream: transport=udp
+2026-10-11T07:01:26 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:01:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:01:27 | ffmpeg-pipe: starting
+2026-10-11T07:01:32 | open_stream: falling back to default backend
+2026-10-11T07:01:36 | svc[Front Camera]: loading AI model
+2026-10-11T07:01:36 | svc[Back Camera]: loading AI model
+2026-10-11T07:01:36 | svc[Front Camera]: AI model loaded
+2026-10-11T07:01:36 | svc[Back Camera]: AI model loaded
+2026-10-11T07:01:37 | open_stream: transport=tcp
+2026-10-11T07:01:37 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:01:38 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 1177 ms, 0 dets on blank frame)
+2026-10-11T07:01:38 | svc[Front Camera]: accurate model too slow here (1177 ms > 350) -> yolov8n.pt
+2026-10-11T07:01:39 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 963 ms, 0 dets on blank frame)
+2026-10-11T07:01:39 | svc[Back Camera]: accurate model too slow here (963 ms > 350) -> yolov8n.pt
+2026-10-11T07:01:42 | open_stream: transport=udp
+2026-10-11T07:01:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:01:47 | ffmpeg-pipe: starting
+2026-10-11T07:01:52 | open_stream: falling back to default backend
+2026-10-11T07:01:54 | svc[Front Camera]: loading AI model
+2026-10-11T07:01:55 | svc[Front Camera]: AI model loaded
+2026-10-11T07:01:56 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 479 ms, 0 dets on blank frame)
+2026-10-11T07:01:56 | svc[Front Camera]: accurate model too slow here (479 ms > 350) -> yolov8n.pt
+2026-10-11T07:01:56 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 193 ms, 0 dets on blank frame)
+2026-10-11T07:01:57 | open_stream: transport=tcp
+2026-10-11T07:01:57 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:02:02 | open_stream: transport=udp
+2026-10-11T07:02:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:02:07 | ffmpeg-pipe: starting
+2026-10-11T07:02:12 | open_stream: falling back to default backend
+2026-10-11T07:02:17 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:02:34 | svc[Back Camera]: loading AI model
+2026-10-11T07:02:34 | svc[Front Camera]: loading AI model
+2026-10-11T07:02:35 | svc[Front Camera]: AI model loaded
+2026-10-11T07:02:35 | svc[Back Camera]: AI model loaded
+2026-10-11T07:02:39 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 2101 ms, 0 dets on blank frame)
+2026-10-11T07:02:39 | svc[Front Camera]: accurate model too slow here (2101 ms > 350) -> yolov8n.pt
+2026-10-11T07:02:39 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 2204 ms, 0 dets on blank frame)
+2026-10-11T07:02:39 | svc[Back Camera]: accurate model too slow here (2204 ms > 350) -> yolov8n.pt
+2026-10-11T07:02:41 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 1001 ms, 0 dets on blank frame)
+2026-10-11T07:02:41 | open_stream: transport=tcp
+2026-10-11T07:02:42 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 895 ms, 0 dets on blank frame)
+2026-10-11T07:02:47 | open_stream: transport=udp
+2026-10-11T07:02:52 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:02:52 | ffmpeg-pipe: starting
+2026-10-11T07:02:57 | open_stream: falling back to default backend
+2026-10-11T07:03:02 | open_stream: transport=tcp
+2026-10-11T07:03:02 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:03:07 | open_stream: transport=udp
+2026-10-11T07:03:12 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:03:12 | ffmpeg-pipe: starting
+2026-10-11T07:03:14 | svc: auto-connect — Front Camera se connect kar raha hai
+2026-10-11T07:03:14 | svc[Front Camera]: loading AI model
+2026-10-11T07:03:15 | svc[Front Camera]: AI model loaded
+2026-10-11T07:03:16 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 684 ms, 0 dets on blank frame)
+2026-10-11T07:03:16 | svc[Front Camera]: accurate model too slow here (684 ms > 350) -> yolov8n.pt
+2026-10-11T07:03:17 | open_stream: falling back to default backend
+2026-10-11T07:03:17 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 301 ms, 0 dets on blank frame)
+2026-10-11T07:03:22 | open_stream: transport=tcp
+2026-10-11T07:03:22 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:03:27 | open_stream: transport=udp
+2026-10-11T07:03:32 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:03:32 | ffmpeg-pipe: starting
+2026-10-11T07:03:37 | open_stream: falling back to default backend
+2026-10-11T07:03:42 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:03:54 | svc[Front Camera]: loading AI model
+2026-10-11T07:03:54 | svc[Back Camera]: loading AI model
+2026-10-11T07:03:55 | svc[Back Camera]: AI model loaded
+2026-10-11T07:03:55 | svc[Front Camera]: AI model loaded
+2026-10-11T07:03:57 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 623 ms, 0 dets on blank frame)
+2026-10-11T07:03:57 | svc[Back Camera]: accurate model too slow here (623 ms > 350) -> yolov8n.pt
+2026-10-11T07:03:57 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 660 ms, 0 dets on blank frame)
+2026-10-11T07:03:57 | svc[Front Camera]: accurate model too slow here (660 ms > 350) -> yolov8n.pt
+2026-10-11T07:03:57 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 280 ms, 0 dets on blank frame)
+2026-10-11T07:03:57 | open_stream: transport=tcp
+2026-10-11T07:03:58 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 264 ms, 0 dets on blank frame)
+2026-10-11T07:04:02 | open_stream: transport=udp
+2026-10-11T07:04:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:04:07 | ffmpeg-pipe: starting
+2026-10-11T07:04:12 | open_stream: falling back to default backend
+2026-10-11T07:04:18 | open_stream: transport=tcp
+2026-10-11T07:04:18 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:04:23 | open_stream: transport=udp
+2026-10-11T07:04:27 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-10-11T07:04:27 | purge: 0 old events removed (retention 7d, cutoff 2026-10-04)
+2026-10-11T07:04:28 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:04:28 | ffmpeg-pipe: starting
+2026-10-11T07:04:31 | svc[Front Camera]: loading AI model
+2026-10-11T07:04:31 | svc: auto-connect — Front Camera, Back Camera se connect kar raha hai
+2026-10-11T07:04:31 | svc[Back Camera]: loading AI model
+2026-10-11T07:04:33 | open_stream: falling back to default backend
+2026-10-11T07:04:33 | svc[Front Camera]: AI model loaded
+2026-10-11T07:04:33 | svc[Back Camera]: AI model loaded
+2026-10-11T07:04:34 | svc[Back Camera]: loading AI model
+2026-10-11T07:04:35 | svc[Back Camera]: AI model loaded
+2026-10-11T07:04:35 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 930 ms, 0 dets on blank frame)
+2026-10-11T07:04:35 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 928 ms, 0 dets on blank frame)
+2026-10-11T07:04:35 | svc[Front Camera]: accurate model too slow here (930 ms > 350) -> yolov8n.pt
+2026-10-11T07:04:35 | svc[Back Camera]: accurate model too slow here (928 ms > 350) -> yolov8n.pt
+2026-10-11T07:04:36 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 411 ms, 0 dets on blank frame)
+2026-10-11T07:04:36 | open_stream: transport=tcp
+2026-10-11T07:04:36 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 414 ms, 0 dets on blank frame)
+2026-10-11T07:04:37 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 744 ms, 0 dets on blank frame)
+2026-10-11T07:04:37 | svc[Back Camera]: accurate model too slow here (744 ms > 350) -> yolov8n.pt
+2026-10-11T07:04:37 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 235 ms, 0 dets on blank frame)
+2026-10-11T07:04:38 | open_stream: transport=tcp
+2026-10-11T07:04:38 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:04:41 | open_stream: transport=udp
+2026-10-11T07:04:43 | open_stream: transport=udp
+2026-10-11T07:04:46 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:04:46 | ffmpeg-pipe: starting
+2026-10-11T07:04:48 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:04:48 | ffmpeg-pipe: starting
+2026-10-11T07:04:51 | open_stream: falling back to default backend
+2026-10-11T07:04:53 | open_stream: falling back to default backend
+2026-10-11T07:04:57 | open_stream: transport=tcp
+2026-10-11T07:04:57 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:04:58 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:05:00 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-11T07:05:02 | open_stream: transport=udp
+2026-10-11T07:05:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:05:07 | ffmpeg-pipe: starting
+2026-10-11T07:05:11 | svc[Front Camera]: loading AI model
+2026-10-11T07:05:11 | svc[Front Camera]: AI model loaded
+2026-10-11T07:05:12 | open_stream: falling back to default backend
+2026-10-11T07:05:12 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 495 ms, 0 dets on blank frame)
+2026-10-11T07:05:12 | svc[Front Camera]: accurate model too slow here (495 ms > 350) -> yolov8n.pt
+2026-10-11T07:05:13 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 218 ms, 0 dets on blank frame)
+2026-10-11T07:05:14 | svc[Front Camera]: loading AI model
+2026-10-11T07:05:14 | svc[Back Camera]: loading AI model
+2026-10-11T07:05:15 | svc[Front Camera]: AI model loaded
+2026-10-11T07:05:15 | svc[Back Camera]: AI model loaded
+2026-10-11T07:05:16 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 723 ms, 0 dets on blank frame)
+2026-10-11T07:05:16 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 874 ms, 0 dets on blank frame)
+2026-10-11T07:05:17 | svc[Back Camera]: accurate model too slow here (874 ms > 350) -> yolov8n.pt
+2026-10-11T07:05:17 | svc[Front Camera]: accurate model too slow here (723 ms > 350) -> yolov8n.pt
+2026-10-11T07:05:17 | open_stream: transport=tcp
+2026-10-11T07:05:17 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:05:17 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 267 ms, 0 dets on blank frame)
+2026-10-11T07:05:17 | open_stream: transport=tcp
+2026-10-11T07:05:17 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 296 ms, 0 dets on blank frame)
+2026-10-11T07:05:20 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-11T07:05:22 | open_stream: transport=udp
+2026-10-11T07:05:22 | open_stream: transport=udp
+2026-10-11T07:05:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:05:27 | ffmpeg-pipe: starting
+2026-10-11T07:05:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:05:27 | ffmpeg-pipe: starting
+2026-10-11T07:05:32 | open_stream: falling back to default backend
+2026-10-11T07:05:32 | open_stream: falling back to default backend
+2026-10-11T07:05:37 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:05:37 | open_stream: transport=tcp
+2026-10-11T07:05:37 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:05:42 | open_stream: transport=udp
+2026-10-11T07:05:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:05:47 | ffmpeg-pipe: starting
+2026-10-11T07:05:51 | svc[Front Camera]: loading AI model
+2026-10-11T07:05:51 | svc[Back Camera]: loading AI model
+2026-10-11T07:05:51 | svc[Back Camera]: AI model loaded
+2026-10-11T07:05:51 | svc[Front Camera]: AI model loaded
+2026-10-11T07:05:52 | open_stream: falling back to default backend
+2026-10-11T07:05:53 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 675 ms, 0 dets on blank frame)
+2026-10-11T07:05:53 | svc[Front Camera]: accurate model too slow here (675 ms > 350) -> yolov8n.pt
+2026-10-11T07:05:53 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 710 ms, 0 dets on blank frame)
+2026-10-11T07:05:53 | svc[Back Camera]: accurate model too slow here (710 ms > 350) -> yolov8n.pt
+2026-10-11T07:05:53 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 302 ms, 0 dets on blank frame)
+2026-10-11T07:05:53 | open_stream: transport=tcp
+2026-10-11T07:05:53 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 260 ms, 0 dets on blank frame)
+2026-10-11T07:05:54 | svc[Front Camera]: loading AI model
+2026-10-11T07:05:55 | svc[Front Camera]: AI model loaded
+2026-10-11T07:05:56 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 612 ms, 0 dets on blank frame)
+2026-10-11T07:05:56 | svc[Front Camera]: accurate model too slow here (612 ms > 350) -> yolov8n.pt
+2026-10-11T07:05:57 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 252 ms, 0 dets on blank frame)
+2026-10-11T07:05:57 | open_stream: transport=tcp
+2026-10-11T07:05:57 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:05:58 | open_stream: transport=udp
+2026-10-11T07:06:02 | open_stream: transport=udp
+2026-10-11T07:06:03 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:06:03 | ffmpeg-pipe: starting
+2026-10-11T07:06:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:06:07 | ffmpeg-pipe: starting
+2026-10-11T07:06:08 | open_stream: falling back to default backend
+2026-10-11T07:06:12 | open_stream: falling back to default backend
+2026-10-11T07:06:14 | open_stream: transport=tcp
+2026-10-11T07:06:14 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:06:17 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:06:19 | open_stream: transport=udp
+2026-10-11T07:06:24 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:06:24 | ffmpeg-pipe: starting
+2026-10-11T07:06:29 | open_stream: falling back to default backend
+2026-10-11T07:06:31 | svc[Front Camera]: loading AI model
+2026-10-11T07:06:31 | svc[Front Camera]: AI model loaded
+2026-10-11T07:06:33 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 627 ms, 0 dets on blank frame)
+2026-10-11T07:06:33 | svc[Front Camera]: accurate model too slow here (627 ms > 350) -> yolov8n.pt
+2026-10-11T07:06:33 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 244 ms, 0 dets on blank frame)
+2026-10-11T07:06:34 | open_stream: transport=tcp
+2026-10-11T07:06:34 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:06:34 | svc[Front Camera]: loading AI model
+2026-10-11T07:06:34 | svc[Back Camera]: loading AI model
+2026-10-11T07:06:35 | svc[Front Camera]: AI model loaded
+2026-10-11T07:06:35 | svc[Back Camera]: AI model loaded
+2026-10-11T07:06:36 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 732 ms, 0 dets on blank frame)
+2026-10-11T07:06:36 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 744 ms, 0 dets on blank frame)
+2026-10-11T07:06:36 | svc[Front Camera]: accurate model too slow here (732 ms > 350) -> yolov8n.pt
+2026-10-11T07:06:36 | svc[Back Camera]: accurate model too slow here (744 ms > 350) -> yolov8n.pt
+2026-10-11T07:06:37 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 380 ms, 0 dets on blank frame)
+2026-10-11T07:06:37 | open_stream: transport=tcp
+2026-10-11T07:06:37 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 415 ms, 0 dets on blank frame)
+2026-10-11T07:06:39 | open_stream: transport=udp
+2026-10-11T07:06:42 | open_stream: transport=udp
+2026-10-11T07:06:44 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:06:44 | ffmpeg-pipe: starting
+2026-10-11T07:06:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:06:47 | ffmpeg-pipe: starting
+2026-10-11T07:06:49 | open_stream: falling back to default backend
+2026-10-11T07:06:52 | open_stream: falling back to default backend
+2026-10-11T07:06:54 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:06:57 | open_stream: transport=tcp
+2026-10-11T07:06:57 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:07:01 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-11T07:07:01 | person ignored: baitha hua aur tez (2.0 body-height/s, box 70x80) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T07:07:01 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-11T07:07:01 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_07-07-01-115.jpg
+2026-10-11T07:07:01 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_07-07-01-159.jpg
+2026-10-11T07:07:01 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_07-07-01-204.jpg
+2026-10-11T07:07:01 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T07:07:01 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_motorcycle_07-07-01-254.jpg
+2026-10-11T07:07:01 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_07-07-01-334.jpg
+2026-10-11T07:07:01 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_07-07-01-383.jpg
+2026-10-11T07:07:01 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_motorcycle_07-07-01-425.jpg
+2026-10-11T07:07:01 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T07:07:01 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T07:07:01 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_truck_07-07-01-518.jpg
+2026-10-11T07:07:01 | person ignored: truck (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-11T07:07:01 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_07-07-01-579.jpg
+2026-10-11T07:07:01 | person ignored: car (track 2) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-11T07:07:01 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_07-07-01-628.jpg
+2026-10-11T07:07:01 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_07-07-01-674.jpg
+2026-10-11T07:07:01 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_motorcycle_07-07-01-713.jpg
+2026-10-11T07:07:01 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_07-07-01-758.jpg
+2026-10-11T07:07:01 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_07-07-01-795.jpg
+2026-10-11T07:07:01 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_person_07-07-01-807.jpg
+2026-10-11T07:07:01 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-11T07:07:01 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-10-11/Entry_car_07-07-01-844.jpg
+2026-10-11T07:07:01 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-10-11T07:07:01 | svc[Back]: standby khatam — stream khol raha hai
+2026-10-11T07:07:01 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-10-11T07:07:01 | svc[Back]: streaming started
+2026-10-11T07:07:02 | open_stream: transport=udp
+2026-10-11T07:07:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:07:07 | ffmpeg-pipe: starting
+2026-10-11T07:07:11 | svc[Front Camera]: loading AI model
+2026-10-11T07:07:11 | svc[Back Camera]: loading AI model
+2026-10-11T07:07:11 | svc[Front Camera]: AI model loaded
+2026-10-11T07:07:11 | svc[Back Camera]: AI model loaded
+2026-10-11T07:07:12 | open_stream: falling back to default backend
+2026-10-11T07:07:13 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 852 ms, 0 dets on blank frame)
+2026-10-11T07:07:13 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 857 ms, 0 dets on blank frame)
+2026-10-11T07:07:13 | svc[Front Camera]: accurate model too slow here (852 ms > 350) -> yolov8n.pt
+2026-10-11T07:07:13 | svc[Back Camera]: accurate model too slow here (857 ms > 350) -> yolov8n.pt
+2026-10-11T07:07:14 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 269 ms, 0 dets on blank frame)
+2026-10-11T07:07:14 | open_stream: transport=tcp
+2026-10-11T07:07:14 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 277 ms, 0 dets on blank frame)
+2026-10-11T07:07:14 | svc[Back Camera]: loading AI model
+2026-10-11T07:07:15 | svc[Back Camera]: AI model loaded
+2026-10-11T07:07:16 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 480 ms, 0 dets on blank frame)
+2026-10-11T07:07:16 | svc[Back Camera]: accurate model too slow here (480 ms > 350) -> yolov8n.pt
+2026-10-11T07:07:16 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 182 ms, 0 dets on blank frame)
+2026-10-11T07:07:17 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:07:17 | open_stream: transport=tcp
+2026-10-11T07:07:19 | open_stream: transport=udp
+2026-10-11T07:07:22 | open_stream: transport=udp
+2026-10-11T07:07:24 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:07:24 | ffmpeg-pipe: starting
+2026-10-11T07:07:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:07:27 | ffmpeg-pipe: starting
+2026-10-11T07:07:29 | open_stream: falling back to default backend
+2026-10-11T07:07:30 | svc: camera saved cam1 'Front Camera' gate='Main Gate' monitor=True window=off
+2026-10-11T07:07:30 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=20:00-08:00
+2026-10-11T07:07:30 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=20:00-08:00
+2026-10-11T07:07:30 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=False window=20:00-08:00
+2026-10-11T07:07:32 | open_stream: falling back to default backend
+2026-10-11T07:07:33 | svc: cameras started: Back Camera
+2026-10-11T07:07:33 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=20:00-08:00
+2026-10-11T07:07:33 | svc[Back Camera]: loading AI model
+2026-10-11T07:07:33 | svc[Back Camera]: AI model loaded
+2026-10-11T07:07:34 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:07:34 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 499 ms, 0 dets on blank frame)
+2026-10-11T07:07:35 | svc[Back Camera]: accurate model too slow here (499 ms > 350) -> yolov8n.pt
+2026-10-11T07:07:35 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 281 ms, 0 dets on blank frame)
+2026-10-11T07:07:35 | open_stream: transport=tcp
+2026-10-11T07:07:37 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:07:40 | open_stream: transport=udp
+2026-10-11T07:07:45 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:07:45 | ffmpeg-pipe: starting
+2026-10-11T07:07:50 | open_stream: falling back to default backend
+2026-10-11T07:07:51 | svc[Front Camera]: loading AI model
+2026-10-11T07:07:51 | svc[Front Camera]: AI model loaded
+2026-10-11T07:07:52 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 467 ms, 0 dets on blank frame)
+2026-10-11T07:07:52 | svc[Front Camera]: accurate model too slow here (467 ms > 350) -> yolov8n.pt
+2026-10-11T07:07:53 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 180 ms, 0 dets on blank frame)
+2026-10-11T07:07:54 | svc[Front Camera]: loading AI model
+2026-10-11T07:07:54 | svc[Back Camera]: loading AI model
+2026-10-11T07:07:55 | svc[Back Camera]: AI model loaded
+2026-10-11T07:07:55 | svc[Front Camera]: AI model loaded
+2026-10-11T07:07:55 | open_stream: transport=tcp
+2026-10-11T07:07:55 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:07:56 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 646 ms, 0 dets on blank frame)
+2026-10-11T07:07:56 | svc[Back Camera]: accurate model too slow here (646 ms > 350) -> yolov8n.pt
+2026-10-11T07:07:56 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 664 ms, 0 dets on blank frame)
+2026-10-11T07:07:56 | svc[Front Camera]: accurate model too slow here (664 ms > 350) -> yolov8n.pt
+2026-10-11T07:07:57 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 299 ms, 0 dets on blank frame)
+2026-10-11T07:07:57 | open_stream: transport=tcp
+2026-10-11T07:07:57 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 270 ms, 0 dets on blank frame)
+2026-10-11T07:08:00 | open_stream: transport=udp
+2026-10-11T07:08:02 | open_stream: transport=udp
+2026-10-11T07:08:05 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:08:05 | ffmpeg-pipe: starting
+2026-10-11T07:08:07 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:08:07 | ffmpeg-pipe: starting
+2026-10-11T07:08:08 | svc: viewing camera -> cam2 'Back Camera' gate='Back Gate'
+2026-10-11T07:08:08 | svc: cameras started: Back Camera
+2026-10-11T07:08:08 | svc[Back Camera]: loading AI model
+2026-10-11T07:08:08 | svc: viewing camera -> cam1 'Front Camera' gate='Main Gate'
+2026-10-11T07:08:08 | svc[Back Camera]: AI model loaded
+2026-10-11T07:08:10 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 465 ms, 0 dets on blank frame)
+2026-10-11T07:08:10 | svc[Back Camera]: accurate model too slow here (465 ms > 350) -> yolov8n.pt
+2026-10-11T07:08:10 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 184 ms, 0 dets on blank frame)
+2026-10-11T07:08:10 | open_stream: falling back to default backend
+2026-10-11T07:08:12 | open_stream: falling back to default backend
+2026-10-11T07:08:15 | open_stream: transport=tcp
+2026-10-11T07:08:15 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:08:17 | open_stream: transport=tcp
+2026-10-11T07:08:17 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:08:20 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-11T07:08:20 | open_stream: transport=udp
+2026-10-11T07:08:22 | open_stream: transport=udp
+2026-10-11T07:08:23 | svc: cameras started: Front Camera
+2026-10-11T07:08:23 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=00:00-23:59
+2026-10-11T07:08:23 | svc[Front Camera]: loading AI model
+2026-10-11T07:08:24 | svc[Front Camera]: AI model loaded
+2026-10-11T07:08:25 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 456 ms, 0 dets on blank frame)
+2026-10-11T07:08:25 | svc[Front Camera]: accurate model too slow here (456 ms > 350) -> yolov8n.pt
+2026-10-11T07:08:25 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 185 ms, 0 dets on blank frame)
+2026-10-11T07:08:25 | svc[Front Camera]: loading AI model
+2026-10-11T07:08:25 | svc: camera added cam3 'TEST_Cam' gate='Side'
+2026-10-11T07:08:25 | svc: cameras started: TEST_Cam
+2026-10-11T07:08:25 | svc[TEST_Cam]: loading AI model
+2026-10-11T07:08:25 | svc: camera deleted cam3
+2026-10-11T07:08:25 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:08:25 | ffmpeg-pipe: starting
+2026-10-11T07:08:25 | svc: camera saved cam1 'Front Camera' gate='Main Gate' monitor=True window=off
+2026-10-11T07:08:25 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=20:00-08:00
+2026-10-11T07:08:25 | svc[Front Camera]: AI model loaded
+2026-10-11T07:08:25 | svc[Camera]: AI model loaded
+2026-10-11T07:08:25 | svc: camera added cam3 'TEST_Cam' gate='TEST_Gate'
+2026-10-11T07:08:25 | svc: cameras started: TEST_Cam
+2026-10-11T07:08:25 | svc[TEST_Cam]: loading AI model
+2026-10-11T07:08:25 | svc: camera saved cam3 'TEST_Cam2' gate='TEST_Gate2' monitor=True window=off
+2026-10-11T07:08:25 | svc: viewing camera -> cam3 'TEST_Cam2' gate='TEST_Gate2'
+2026-10-11T07:08:26 | svc[TEST_Cam2]: AI model loaded
+2026-10-11T07:08:26 | svc: viewing camera -> cam1 'Front Camera' gate='Main Gate'
+2026-10-11T07:08:27 | svc: viewing camera -> cam3 'TEST_Cam2' gate='TEST_Gate2'
+2026-10-11T07:08:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:08:27 | ffmpeg-pipe: starting
+2026-10-11T07:08:27 | svc: viewing camera -> cam1 'Front Camera' gate='Main Gate'
+2026-10-11T07:08:27 | svc: camera deleted cam3
+2026-10-11T07:08:27 | svc: camera added cam3 'TEST_L0' gate='G'
+2026-10-11T07:08:27 | svc: cameras started: TEST_L0
+2026-10-11T07:08:27 | svc[TEST_L0]: loading AI model
+2026-10-11T07:08:27 | svc: camera added cam4 'TEST_L1' gate='G'
+2026-10-11T07:08:27 | svc: cameras started: TEST_L1
+2026-10-11T07:08:27 | svc[TEST_L1]: loading AI model
+2026-10-11T07:08:27 | svc: camera added cam5 'TEST_L2' gate='G'
+2026-10-11T07:08:27 | svc: cameras started: TEST_L2
+2026-10-11T07:08:27 | svc[TEST_L2]: loading AI model
+2026-10-11T07:08:27 | svc: camera added cam6 'TEST_L3' gate='G'
+2026-10-11T07:08:27 | svc[TEST_L3]: loading AI model
+2026-10-11T07:08:27 | svc: cameras started: TEST_L3
+2026-10-11T07:08:28 | svc: camera added cam7 'TEST_L4' gate='G'
+2026-10-11T07:08:28 | svc: cameras started: TEST_L4
+2026-10-11T07:08:28 | svc[TEST_L4]: loading AI model
+2026-10-11T07:08:28 | svc: camera added cam8 'TEST_L5' gate='G'
+2026-10-11T07:08:28 | svc: cameras started: TEST_L5
+2026-10-11T07:08:28 | svc[TEST_L5]: loading AI model
+2026-10-11T07:08:28 | svc: camera deleted cam3
+2026-10-11T07:08:28 | svc: camera deleted cam4
+2026-10-11T07:08:28 | svc: camera deleted cam5
+2026-10-11T07:08:28 | svc: camera deleted cam6
+2026-10-11T07:08:28 | svc: camera deleted cam7
+2026-10-11T07:08:28 | svc: camera deleted cam8
+2026-10-11T07:08:28 | svc[Camera]: AI self-test OK (yolov8s.pt, 1234 ms, 0 dets on blank frame)
+2026-10-11T07:08:28 | svc: camera added cam3 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN' gate='GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG'
+2026-10-11T07:08:28 | svc: cameras started: NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+2026-10-11T07:08:28 | svc[NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN]: loading AI model
+2026-10-11T07:08:28 | svc: camera deleted cam3
+2026-10-11T07:08:28 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 1241 ms, 0 dets on blank frame)
+2026-10-11T07:08:28 | svc[Camera]: AI self-test OK (yolov8s.pt, 1327 ms, 0 dets on blank frame)
+2026-10-11T07:08:29 | svc[Camera]: AI model loaded
+2026-10-11T07:08:29 | svc[Camera]: AI model loaded
+2026-10-11T07:08:29 | svc[Camera]: AI model loaded
+2026-10-11T07:08:29 | svc[Camera]: AI model loaded
+2026-10-11T07:08:29 | svc[Camera]: AI model loaded
+2026-10-11T07:08:29 | svc[Camera]: AI model loaded
+2026-10-11T07:08:29 | svc[Camera]: accurate model too slow here (1234 ms > 350) -> yolov8n.pt
+2026-10-11T07:08:29 | svc[Camera]: AI model loaded
+2026-10-11T07:08:29 | svc[Camera]: accurate model too slow here (1327 ms > 350) -> yolov8n.pt
+2026-10-11T07:08:29 | svc[Front Camera]: accurate model too slow here (1241 ms > 350) -> yolov8n.pt
+2026-10-11T07:08:30 | open_stream: falling back to default backend
+2026-10-11T07:08:32 | open_stream: falling back to default backend
+2026-10-11T07:08:33 | svc[Camera]: AI self-test OK (yolov8n.pt, 1407 ms, 0 dets on blank frame)
+2026-10-11T07:08:33 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 1383 ms, 0 dets on blank frame)
+2026-10-11T07:08:33 | svc[Camera]: AI self-test OK (yolov8n.pt, 1293 ms, 0 dets on blank frame)
+2026-10-11T07:08:34 | svc: auto-connect — Back Camera se connect kar raha hai
+2026-10-11T07:08:34 | svc[Back Camera]: loading AI model
+2026-10-11T07:08:35 | svc[Back Camera]: AI model loaded
+2026-10-11T07:08:35 | svc[Camera]: AI self-test OK (yolov8s.pt, 2400 ms, 0 dets on blank frame)
+2026-10-11T07:08:35 | svc[Camera]: accurate model too slow here (2400 ms > 350) -> yolov8n.pt
+2026-10-11T07:08:35 | svc[Camera]: AI self-test OK (yolov8s.pt, 2301 ms, 0 dets on blank frame)
+2026-10-11T07:08:35 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:08:35 | open_stream: transport=tcp
+2026-10-11T07:08:36 | svc[Camera]: AI self-test OK (yolov8s.pt, 2496 ms, 0 dets on blank frame)
+2026-10-11T07:08:36 | svc[Camera]: AI self-test OK (yolov8s.pt, 2399 ms, 0 dets on blank frame)
+2026-10-11T07:08:36 | svc[Camera]: accurate model too slow here (2301 ms > 350) -> yolov8n.pt
+2026-10-11T07:08:36 | svc[Camera]: AI self-test OK (yolov8s.pt, 2223 ms, 0 dets on blank frame)
+2026-10-11T07:08:36 | svc[Camera]: AI self-test OK (yolov8s.pt, 2290 ms, 0 dets on blank frame)
+2026-10-11T07:08:36 | svc[Camera]: AI self-test OK (yolov8s.pt, 2295 ms, 0 dets on blank frame)
+2026-10-11T07:08:36 | svc[Camera]: accurate model too slow here (2496 ms > 350) -> yolov8n.pt
+2026-10-11T07:08:37 | svc[Camera]: accurate model too slow here (2399 ms > 350) -> yolov8n.pt
+2026-10-11T07:08:37 | svc[Camera]: accurate model too slow here (2223 ms > 350) -> yolov8n.pt
+2026-10-11T07:08:37 | svc[Camera]: accurate model too slow here (2290 ms > 350) -> yolov8n.pt
+2026-10-11T07:08:37 | svc[Camera]: accurate model too slow here (2295 ms > 350) -> yolov8n.pt
+2026-10-11T07:08:37 | svc[Camera]: AI self-test OK (yolov8n.pt, 518 ms, 0 dets on blank frame)
+2026-10-11T07:08:37 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:08:38 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 1063 ms, 0 dets on blank frame)
+2026-10-11T07:08:38 | svc[Back Camera]: accurate model too slow here (1063 ms > 350) -> yolov8n.pt
+2026-10-11T07:08:39 | svc[Camera]: AI self-test OK (yolov8n.pt, 1080 ms, 0 dets on blank frame)
+2026-10-11T07:08:39 | svc[Camera]: AI self-test OK (yolov8n.pt, 1088 ms, 0 dets on blank frame)
+2026-10-11T07:08:40 | svc[Camera]: AI self-test OK (yolov8n.pt, 1084 ms, 0 dets on blank frame)
+2026-10-11T07:08:40 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 897 ms, 0 dets on blank frame)
+2026-10-11T07:08:40 | open_stream: transport=tcp
+2026-10-11T07:08:40 | svc[Camera]: AI self-test OK (yolov8n.pt, 920 ms, 0 dets on blank frame)
+2026-10-11T07:08:40 | svc[Camera]: AI self-test OK (yolov8n.pt, 833 ms, 0 dets on blank frame)
+2026-10-11T07:08:40 | svc[Camera]: AI self-test OK (yolov8n.pt, 901 ms, 0 dets on blank frame)
+2026-10-11T07:08:40 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-11T07:08:40 | open_stream: transport=udp
+2026-10-11T07:08:45 | open_stream: transport=udp
+2026-10-11T07:08:45 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:08:45 | ffmpeg-pipe: starting
+2026-10-11T07:08:46 | svc[Back Camera]: loading AI model
+2026-10-11T07:08:46 | svc[Back Camera]: AI model loaded
+2026-10-11T07:08:47 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 482 ms, 0 dets on blank frame)
+2026-10-11T07:08:47 | svc[Back Camera]: accurate model too slow here (482 ms > 350) -> yolov8n.pt
+2026-10-11T07:08:48 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 200 ms, 0 dets on blank frame)
+2026-10-11T07:08:50 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:08:50 | ffmpeg-pipe: starting
+2026-10-11T07:08:50 | open_stream: falling back to default backend
+2026-10-11T07:08:55 | open_stream: falling back to default backend
+2026-10-11T07:08:56 | open_stream: transport=tcp
+2026-10-11T07:08:56 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:09:00 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:09:01 | open_stream: transport=udp
+2026-10-11T07:09:06 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:09:06 | ffmpeg-pipe: starting
+2026-10-11T07:09:11 | open_stream: falling back to default backend
+2026-10-11T07:09:14 | svc[Front Camera]: loading AI model
+2026-10-11T07:09:14 | svc[Back Camera]: loading AI model
+2026-10-11T07:09:15 | svc[Back Camera]: AI model loaded
+2026-10-11T07:09:15 | svc[Front Camera]: AI model loaded
+2026-10-11T07:09:16 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-11T07:09:16 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 668 ms, 0 dets on blank frame)
+2026-10-11T07:09:16 | svc[Front Camera]: accurate model too slow here (668 ms > 350) -> yolov8n.pt
+2026-10-11T07:09:16 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 677 ms, 0 dets on blank frame)
+2026-10-11T07:09:16 | svc[Back Camera]: accurate model too slow here (677 ms > 350) -> yolov8n.pt
+2026-10-11T07:09:17 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 322 ms, 0 dets on blank frame)
+2026-10-11T07:09:17 | open_stream: transport=tcp
+2026-10-11T07:09:17 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 291 ms, 0 dets on blank frame)
+2026-10-11T07:09:22 | open_stream: transport=udp
+2026-10-11T07:09:26 | svc[Front Camera]: loading AI model
+2026-10-11T07:09:26 | svc[Back Camera]: loading AI model
+2026-10-11T07:09:26 | svc[Front Camera]: AI model loaded
+2026-10-11T07:09:26 | svc[Back Camera]: AI model loaded
+2026-10-11T07:09:27 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:09:27 | ffmpeg-pipe: starting
+2026-10-11T07:09:28 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 662 ms, 0 dets on blank frame)
+2026-10-11T07:09:28 | svc[Front Camera]: accurate model too slow here (662 ms > 350) -> yolov8n.pt
+2026-10-11T07:09:28 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 680 ms, 0 dets on blank frame)
+2026-10-11T07:09:28 | svc[Back Camera]: accurate model too slow here (680 ms > 350) -> yolov8n.pt
+2026-10-11T07:09:28 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 294 ms, 0 dets on blank frame)
+2026-10-11T07:09:28 | open_stream: transport=tcp
+2026-10-11T07:09:28 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 284 ms, 0 dets on blank frame)
+2026-10-11T07:09:32 | open_stream: falling back to default backend
+2026-10-11T07:09:33 | open_stream: transport=udp
+2026-10-11T07:09:37 | open_stream: transport=tcp
+2026-10-11T07:09:37 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:09:38 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:09:38 | ffmpeg-pipe: starting
+2026-10-11T07:09:42 | open_stream: transport=udp
+2026-10-11T07:09:43 | open_stream: falling back to default backend
+2026-10-11T07:09:47 | open_stream: trying FFmpeg engine fallback
+2026-10-11T07:09:47 | ffmpeg-pipe: starting
+2026-10-11T07:09:48 | open_stream: transport=tcp
+2026-10-11T07:09:48 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-11T07:09:52 | open_stream: falling back to default backend

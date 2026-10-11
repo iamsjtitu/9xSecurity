@@ -96,6 +96,27 @@ export default function DiagnosticsTab({ showToast }) {
         </div>
       </div>
 
+      {(d.cameras || []).length > 0 && (
+        <div className="rounded-lg border border-slate-200 p-4" data-testid="diag-load">
+          <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+            PC Load · CPU {d.load?.cpu_pct ?? '?'}% · RAM {d.load?.ram_pct ?? '?'}% · engine {d.load?.app_ram_mb ?? '?'} MB · {d.load?.cores ?? '?'} cores · level {d.load?.level ?? '?'}
+          </div>
+          <table className="w-full text-xs">
+            <thead><tr className="text-left text-slate-400"><th className="py-1">Camera</th><th>Status</th><th>FPS</th><th>AI ms</th><th>Skip %</th><th>AI frames</th><th>Codec</th><th>Load</th></tr></thead>
+            <tbody>
+              {d.cameras.map((c) => (
+                <tr key={c.id} className="border-t border-slate-100 font-mono" data-testid={`diag-load-cam-${c.id}`}>
+                  <td className="py-1 font-sans font-medium text-slate-800">{c.name}</td>
+                  <td>{c.monitor === false ? 'OFF' : c.standby ? 'standby' : c.connected ? 'connected' : 'idle'}</td>
+                  <td>{c.fps ?? '—'}</td><td>{c.ai_ms ?? '—'}</td><td>{c.drop_pct ?? '—'}</td><td>{c.ai_frames ?? 0}</td><td>{c.codec || '—'}</td><td>{c.load || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {d.load?.hint && <div className="mt-2 text-xs text-amber-800" data-testid="diag-load-hint">{d.load.hint}</div>}
+        </div>
+      )}
+
       {[['camera_log.txt (AI / camera)', d.camera_log, 'diag-camera-log'], ['wa_log.txt (WhatsApp)', d.wa_log, 'diag-wa-log'], ['engine_out.log + app_log.txt (crash / library output)', [d.engine_out_log, d.app_log].filter(Boolean).join('\n---\n'), 'diag-engine-log']].map(([title, body, tid]) => (
         <div key={tid}>
           <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">{title}</div>

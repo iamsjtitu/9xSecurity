@@ -59,6 +59,10 @@ def _check(request: Request):
 
 
 AUTO_MODEL_MAX_MS = int(os.environ.get("AUTO_MODEL_MAX_MS", "350"))  # accurate model budget per frame
+# PC Load meter thresholds (dashboard card): a camera whose AI sees < 4 frames/s can miss a fast vehicle
+LOAD_FPS_WARN, LOAD_FPS_BAD = 8.0, 4.0
+LOAD_AI_MS_WARN, LOAD_AI_MS_BAD = 250, 400
+LOAD_CPU_WARN, LOAD_CPU_BAD = 70, 85
 
 
 class SharedPlateReader:
@@ -128,6 +132,8 @@ class Worker:
         self.last_event = None    # latest captured event (for the UI capture toast)
         self.codec = ""           # stream codec (hevc/h264/...) for diagnostics
         self.frames_dropped = 0   # live frames skipped because the AI was busy (normal, keeps lag ~0)
+        self.fps = None           # frames/s the AI loop actually processed (2 s window) — load meter
+        self.drop_pct = None      # % of camera frames skipped in that window (camera faster than the AI)
 
     # ---- per-camera config -------------------------------------------------
     def camera(self, cfg=None):
@@ -421,6 +427,8 @@ class Worker:
         self.last_frame_ts = last_ok
         last_sched_check = 0.0
         to_standby = False
+        self.fps, self.drop_pct = None, None
+        win_t0, win_n, win_drop0 = time.time(), 0, getattr(cap, "dropped", 0)
         while self._alive(gen):
             ok, frame = cap.read()
             if not self._alive(gen):
@@ -450,6 +458,12 @@ class Worker:
             last_ok = time.time()
             self.last_frame_ts = last_ok
             self.frames_dropped = getattr(cap, "dropped", 0)
+            win_n += 1
+            if last_ok - win_t0 >= 2.0:  # load meter: processed fps + skipped share over the last 2 s
+                dd = max(0, self.frames_dropped - win_drop0)
+                self.fps = round(win_n / (last_ok - win_t0), 1)
+                self.drop_pct = round(100.0 * dd / (dd + win_n)) if (dd + win_n) else 0
+                win_t0, win_n, win_drop0 = last_ok, 0, self.frames_dropped
             small = cv2.resize(frame, (config.DISPLAY_WIDTH, config.DISPLAY_HEIGHT))
             live_cfg = self.engine.cfg if self.engine else cfg
             cam = self.camera()
@@ -673,6 +687,7 @@ def state(request: Request):
         "rtsp_url_main": cfg.get("rtsp_url_main", ""),
         "last_event": pool.last_event(),
         "cameras_running": sum(1 for w in pool.all() if w.connected and not w.standby),
+        "load": _load_summary(cfg),
         "update_available": _update_info["available"],
         "update_latest": _update_info["latest"],
         "update_job": {"state": _update_job["state"], "percent": _update_job["percent"]},
@@ -706,6 +721,24 @@ def camera_connect(body: dict, request: Request):
 
 
 # ---- saved cameras (all run together, one is VIEWED) ---------------------
+def _camera_load(w):
+    """Load meter level of one camera: None (not running) | idle (no AI) | warming | ok | warn | bad."""
+    if not w or not w.connected or w.standby:
+        return None
+    if w.engine is None or w.capture_paused:
+        return "idle"
+    if not w.last_frame_ts or time.time() - w.last_frame_ts > 10:
+        return "connecting"
+    if w.fps is None:
+        return "warming"
+    ai = w.ai_ms or 0
+    if w.fps < LOAD_FPS_BAD or ai > LOAD_AI_MS_BAD:
+        return "bad"
+    if w.fps < LOAD_FPS_WARN or ai > LOAD_AI_MS_WARN:
+        return "warn"
+    return "ok"
+
+
 def _camera_status(cam):
     w = pool.workers.get(cam["id"])
     sch = config.camera_schedule(cam)
@@ -717,7 +750,62 @@ def _camera_status(cam):
         "standby": bool(w and w.standby),
         "capture_paused": bool(w and w.capture_paused),
         "status": (w.status if w else ("Monitoring OFF" if not cam.get("monitor", True) else "Idle")),
+        # load meter (dashboard card + diagnostics)
+        "ai_ms": (round(w.ai_ms) if w and w.ai_ms is not None else None),
+        "ai_frames": w.ai_frames if w else 0,
+        "ai_errors": w.ai_errors if w else 0,
+        "ai_model": (w.engine.detector.model_name if w and w.engine else None),
+        "codec": w.codec if w else "",
+        "frames_dropped": w.frames_dropped if w else 0,
+        "fps": w.fps if w else None,
+        "drop_pct": w.drop_pct if w else None,
+        "possible_misses": getattr(w.engine, "possible_misses", 0) if w and w.engine else 0,
+        "frame_age": (round(time.time() - w.last_frame_ts, 1) if w and w.connected and w.last_frame_ts else None),
+        "load": _camera_load(w),
     }
+
+
+_sys_load = {"cpu_pct": None, "ram_pct": None, "app_ram_mb": None, "cores": os.cpu_count()}
+
+
+def _load_sampler():
+    """Every 2 s: PC CPU %, RAM %, this engine's RAM (psutil; values stay None when unavailable)."""
+    try:
+        import psutil
+    except Exception:
+        clog("svc: psutil nahi mila — PC Load meter me CPU/RAM nahi dikhega")
+        return
+    proc = psutil.Process()
+    psutil.cpu_percent(interval=None)
+    while True:
+        time.sleep(2.0)
+        try:
+            _sys_load["cpu_pct"] = round(psutil.cpu_percent(interval=None))
+            _sys_load["ram_pct"] = round(psutil.virtual_memory().percent)
+            _sys_load["app_ram_mb"] = round(proc.memory_info().rss / 1e6)
+        except Exception:
+            pass
+
+
+def _load_summary(cfg):
+    """Dashboard 'PC Load' card: PC CPU/RAM + overall level + Hinglish hint naming the slow cameras."""
+    cams = cfg.get("cameras") or []
+    levels = {c["id"]: _camera_load(pool.workers.get(c["id"])) for c in cams}
+    slow = [c.get("name") or c["id"] for c in cams if levels[c["id"]] in ("warn", "bad")]
+    cpu = _sys_load["cpu_pct"]
+    level = "ok"
+    if (cpu is not None and cpu >= LOAD_CPU_BAD) or "bad" in levels.values():
+        level = "bad"
+    elif (cpu is not None and cpu >= LOAD_CPU_WARN) or "warn" in levels.values():
+        level = "warn"
+    hint = ""
+    if level != "ok":
+        hint = ("PC par load zyada hai" + (f" — {', '.join(slow)} ka detection dheema hai" if slow else "")
+                + ": us camera ko sub-stream URL dein, time window lagayein (Standby = 0 load), "
+                "ya Detection Controls me AI Model 'fast' chunein")
+    running = [w for w in pool.all() if w.connected and not w.standby]
+    return {**_sys_load, "level": level, "hint": hint, "running": len(running),
+            "ai_total_ms": round(sum((w.ai_ms or 0) * (w.fps or 0) for w in running))}  # AI ms spent per second
 
 
 def _cameras_public(cfg):
@@ -1382,14 +1470,10 @@ def diagnostics(request: Request):
             {
                 "id": c["id"], "name": c.get("name"), "gate": c.get("gate"), "viewed": c["id"] == cfg.get("active_camera_id"),
                 **_camera_status(c),
-                "ai_ms": (round(w.ai_ms) if w and w.ai_ms is not None else None),
-                "ai_frames": w.ai_frames if w else 0, "ai_errors": w.ai_errors if w else 0,
-                "codec": w.codec if w else "", "frames_dropped": w.frames_dropped if w else 0,
-                "possible_misses": getattr(w.engine, "possible_misses", 0) if w and w.engine else 0,
-                "frame_age": (round(time.time() - w.last_frame_ts, 1) if w and w.connected and w.last_frame_ts else None),
             }
-            for c in cfg.get("cameras") or [] for w in [pool.workers.get(c["id"])]
+            for c in cfg.get("cameras") or []
         ],
+        "load": _load_summary(cfg),
         "whatsapp": {
             "enabled": bool(cfg.get("wa_enabled")),
             "api_key_set": bool(cfg.get("wa_api_key")),
@@ -1743,6 +1827,7 @@ def main():
         os._exit(3)
     threading.Thread(target=_purge_loop, daemon=True).start()
     threading.Thread(target=_outbox_loop, daemon=True).start()
+    threading.Thread(target=_load_sampler, daemon=True).start()
     threading.Thread(target=_update_check_loop, daemon=True).start()
     threading.Thread(target=_auto_connect_loop, daemon=True).start()
     # any crash must leave a trace in camera_log (the UI only sees 'fetch failed')

@@ -115,6 +115,7 @@ jobs:
           --collect-all scipy
           --collect-binaries imageio_ffmpeg
           --collect-binaries torchvision
+          --hidden-import psutil
           --exclude-module tkinter
           --exclude-module IPython
           --exclude-module pytest

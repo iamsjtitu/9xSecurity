@@ -687,6 +687,7 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 
 - DONE (#59): Vehicle lingering on the line no longer double counts (clear-side rule + 5-min memory)
 - DONE (#61): Separate Person/Bike line (magenta) — vehicles on the yellow line only
+- DONE (#62): Two-wheeler group alert + twin-track merge (4 photos for 2 cycles -> 1 photo '— 2 bikes')
 - P1: CSV/Excel export of event log
 - DONE (#52): Multi-camera saved list / one active / Gate Name
 - P2: Plate-based search + email/Telegram alert on entry
@@ -1111,3 +1112,26 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   activated first. A file camera REPLAYS when the file ends (watchdog reconnect) -> make E2E videos longer than the wait.
 - AWAITING USER (new build): draw the magenta line on the person/bike path; bike+rider = 1 two-wheeler alert on it,
   car/truck only on the yellow line, nothing double.
+
+## Implemented (update 2026-06 #62) — 4 WhatsApp photos for 2 bicycles: two-wheeler GROUP alert + twin merge (iteration_36: 100%)
+- USER (11-10, 4 screenshots): two people pushing two bicycles out of the gate -> four 'Exit — BICYCLE' photos in 3 s
+  (two identical in the same second on cycle 1, cycle 2 at +2 s, cycle 1 again at +3 s). Reproduced with
+  tests/repro_two_bikes.py (2 slow cycles 60 px apart + walkers, YOLO flicker/twin boxes): 2-3 alerts per run.
+  Cause: identical slow adjacent objects -> twin tracks and ID swaps in the centroid tracker; every extra track
+  crossing became its own photo (the identity-based dedupe cannot see a twin that moved or was re-born).
+- ENGINE: two-wheelers now form ONE group alert like persons (_queue_group / flush_pending per (category,
+  direction)): quiet time TW_GROUP_S 4 s after the last cycle, never longer than GROUP_MAX_S 15 s since the first
+  (steady traffic still alerts), caption '🏍️ Two-wheeler Exit — 2 bikes' (count shown only when > 1), all boxes on
+  the photo, UI shows ×N. Inside a group and against members alerted in the last GROUP_RECENT_S 8 s a crossing is
+  MERGED (camera_log '… crossing merged: …') when it is the same object: same track, same spot within SAME_SPOT_S 1 s
+  (IoU > 0.2), a box born on that member around its crossing (appeared-at-line later), or it lands where the member
+  has moved to (box shifted by its own velocity x elapsed; IoU > 0.2 or centre within 0.5 box-size). Two cycles side
+  by side stay 2 (count correct); a follower 1.5-2.6 s behind on the same path is still the NEXT one (prediction says
+  the leader has moved on). Vehicles are untouched: immediate event, tailgating cars still each count.
+- TRACKER: CentroidTracker(merge_twins=True) for tracker2 only — an UNCOUNTED live track glued (IoU >= 0.55) to a
+  COUNTED one for 4 consecutive updates inherits its state (crossings/last direction) so the twin box can never count
+  the same cycle again. OFF for the vehicle tracker (a queued car behind another overlaps in a front view and is the
+  next car). Track.born_ts / twin_frames added.
+- Result: repro 80/80 runs across jitter levels -> exactly 1 alert with count 2 (one split into 2 legit alerts 6.7 s
+  apart). Tests: test_two_bikes_group.py 10; full regression 160 + live API 54 green (testing agent iteration_36, no
+  issues). AWAITING USER: next time two people walk cycles through the gate -> ONE photo '— 2 bikes'.

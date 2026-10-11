@@ -34,3 +34,7 @@
   observation window or crossings get counted once per replay (looks like duplicates but is not).
 - Engine has TWO trackers since #61: eng.tracker (car/truck/bus, main line) and eng.tracker2 (person/two-wheeler/
   animal, line2 or main line). Tests that inject tracks for persons/bikes must use tracker2.
+- Since #62 two-wheeler events are GROUPED (emitted at flush_pending, 4 s quiet / 15 s cap) exactly like persons:
+  tests must call e.flush_pending(force=True) (test_categories._drive already does) — only VEHICLE events are
+  returned by process_frame on the crossing frame. Testing-agent API suites leave cam1's line/entry_direction at
+  defaults (0.1,0.5-0.9,0.5 / neg): restore {0.1,0.2,0.9,0.8}/pos via /api/line + /api/options afterwards.

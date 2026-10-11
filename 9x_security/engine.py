@@ -513,6 +513,7 @@ class SecurityEngine:
         # (+ animals as context) cross the person/bike line — or the main line when none is drawn.
         # Every object lives in exactly one tracker, so it can never be counted on both lines.
         self.tracker = CentroidTracker()
+        # merge_twins only here: a cycle often carries two live boxes; a queued CAR behind another must stay countable
         self.tracker2 = CentroidTracker(merge_twins=True)
         self.plate_reader = plate_reader
         if self.cfg.get("enable_plate") and self.plate_reader is None:

@@ -1,0 +1,28 @@
+{
+  "summary": "Iteration 36 — two-wheeler duplicate WhatsApp alert fix (grouping + tracker merge_twins). Ran the full backend pytest suite requested by main agent: 160 passed in process 1 (unit/engine/tracker/categories/etc.) and 54 passed + 1 skipped in process 2 against the live service on 127.0.0.1:8971 (service was already running). Also executed /app/9x_security/tests/repro_two_bikes.py: all 12 random-seed runs produced EXACTLY ONE two_wheeler Entry alert with count==2 and ZERO person events — matching the acceptance criteria. All scripted-detector scenarios (user scene, lone bike, grouped vs separated motorcycles, Entry+Exit split, 24s stream GROUP_MAX_S cap, person regression, rider-only, vehicle immediacy & tailgating, category off) are covered by test_two_bikes_group.py / test_categories.py / tests/test_iter34_rider_scenarios.py and all pass. Tracker merge_twins vs plain, resumed_from no re-count, WhatsApp caption variants (count 1 vs count 2 with '🏍️ Two-wheeler Exit — 2 bikes'), /api/health, /api/state, /api/events count column all verified. No code changes needed.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/test_two_bikes_group.py",
+    "/app/9x_security/test_categories.py",
+    "/app/9x_security/tests/test_iter34_rider_scenarios.py",
+    "/app/9x_security/test_service_api.py",
+    "/app/9x_security/tests/test_iter35_line2.py",
+    "/app/9x_security/tests/test_iter32_live_api.py",
+    "/app/9x_security/tests/repro_two_bikes.py"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "engine.py grouping constants (TW_GROUP_S=4, GROUP_MAX_S=15, GROUP_RECENT_S=8, SAME_SPOT_S=1, SAME_MEMBER_IOU, SAME_MEMBER_DIST) are hard-coded module-level — consider moving to config.json to allow site-level tuning without a redeploy.",
+    "tracker.py merge_twins is intentionally OFF for the vehicle tracker (so queued cars still count) — this asymmetry is correct but worth a one-line code comment at the construction site in engine.py for future maintainers.",
+    "_same_member() velocity-projection path assumes stable per-track velocity; may misfire on jittery YOLO flicker — current random-seed tests pass but a worst-case fuzz with large frame skips could be added later."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "N/A (skipped per request)"},
+  "test_credentials": "admin / 9xsecurity (unchanged, not modified)",
+  "seed_data_creation": "None — only pytest fixtures; events DB left clean (no new persisted events from these pure-pytest runs).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "214 backend tests green across both processes. Service was already up on 8971. repro_two_bikes.py reliably produces 1 alert/count=2 across 12 seeds — use it as a quick regression gate for any future tracker/engine change. Config/events.db untouched; cam1 line and line2 state not modified by these tests.",
+  "rca of the issue": "User saw 4 identical WhatsApp 'Exit — BICYCLE' photos within 3s when 2 people pushed 2 bicycles side by side. RCA: in the centroid tracker, two slow adjacent objects with YOLO flicker produce twin tracks / ID swaps; each extra track crossing the line emitted its own WhatsApp alert. FIX (verified green): (1) two-wheeler crossings now flow through _queue_group() like persons — one alert per (category,direction) after TW_GROUP_S=4s quiet (max GROUP_MAX_S=15s), with N count and all boxes rendered; caption switches to '🏍️ Two-wheeler Exit — 2 bikes' when N>1. (2) _same_member() merges a new crossing into an active or recent (GROUP_RECENT_S=8s) group by same track id, same spot within SAME_SPOT_S=1s (IoU>0.2), born-on-member-track within 1s, or velocity-projected member location (IoU>0.2 or centre within 0.5 box-size). (3) tracker2 is built with merge_twins=True so an uncounted twin glued (IoU>=0.55) to a counted track for 4 updates inherits counted state (vehicle tracker keeps merge_twins=False so a queued car still counts). Reproduction via tests/repro_two_bikes.py: before=2-3 alerts, after=1 alert count=2 across all seeds."
+}

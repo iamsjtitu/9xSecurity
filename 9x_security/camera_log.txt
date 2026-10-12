@@ -18970,3 +18970,8 @@ RuntimeError: no AI in test
 2026-10-12T16:35:17 | svc[Front Camera]: accurate model too slow here (464 ms > 350) -> yolov8n.pt
 2026-10-12T16:35:17 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 159 ms, 0 dets on blank frame)
 2026-10-12T16:35:17 | open_stream: transport=tcp
+2026-10-12T16:35:22 | open_stream: transport=udp
+2026-10-12T16:35:27 | open_stream: trying FFmpeg engine fallback
+2026-10-12T16:35:27 | ffmpeg-pipe: starting
+2026-10-12T16:35:32 | open_stream: falling back to default backend
+2026-10-12T16:35:37 | svc[Front Camera]: source opened codec=unknown live=True

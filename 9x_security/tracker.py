@@ -4,6 +4,9 @@ import time
 from collections import Counter
 
 HEAVY = ("bus", "truck")
+HEAVY_VOTE = 0.35    # confidence-weighted share of heavy (truck/bus) votes that makes a track heavy
+BUS_MIN_SHARE = 0.2  # inside 'heavy': 'bus' only when truck votes are below this share (decorated Indian trucks
+                     # are called 'bus' by YOLO in many frames; a real bus almost never gets 'truck' votes)
 ANIMAL_LABELS = ("dog", "cat", "cow", "horse", "sheep", "bird")
 ANIMAL_VOTE = 0.25   # >= this share of frames called it an animal -> it is an animal, never a person
 TWO_WHEELER_LABELS = ("motorcycle", "bicycle")
@@ -14,6 +17,7 @@ CLEAR_FRAC = 0.20    # 'clearly past the line' = this fraction of the box's larg
 RUN_HOLD_S = 1.0     # momentum (monotone progress towards one side) dies after this long without motion
 RESUME_S = 300.0     # a counted vehicle lost standing at the gate is remembered this long (user: 5 min)
 RESUME_IOU = 0.6     # a new box this similar to a counted vehicle's box IS that vehicle
+GLITCH_RATIO_LO, GLITCH_RATIO_HI = 0.6, 1.67  # box width/height change in ONE step beyond this = detection glitch, not a move
 TWIN_IOU = 0.55      # two LIVE tracks glued together this much (merge_twins trackers) = one object, two boxes
 TWIN_FRAMES = 4      # ... for this many consecutive updates before the uncounted twin inherits the counted state
 
@@ -66,11 +70,12 @@ def _hits_segment(p, q, a, b, margin=0.15):
 
 
 class Track:
-    def __init__(self, tid, centroid, bbox, label, side, dist=0.0, ts=0.0):
+    def __init__(self, tid, centroid, bbox, label, side, dist=0.0, ts=0.0, conf=1.0):
         self.id = tid
         self.centroid = centroid
         self.bbox = bbox
         self.labels = Counter([label])
+        self.label_w = Counter({label: conf})  # votes weighted by YOLO confidence (a hesitant 'truck' on a SUV weighs little)
         self.side = side          # COMMITTED side sign (-1 / 1), 0 = born on the line, side not yet known
         self.start_side = side
         self.start_dist = dist    # signed px distance to line when first seen
@@ -100,16 +105,20 @@ class Track:
 
     @property
     def label(self):
-        """Voted label over the track's life. YOLO often calls a truck 'car' for a
-        few frames — if a heavy class shows up in >=30% of frames, trust it. Likewise a
-        dog/cow called 'person' in a few frames is an ANIMAL if >=25% of frames said so."""
+        """Voted label over the track's life, votes weighted by confidence. YOLO often calls a
+        truck 'car' for a few frames (confidently 'truck' otherwise) and a SUV 'truck' in a few
+        hesitant frames — the heavy class wins only when its WEIGHTED share is >= HEAVY_VOTE.
+        Within heavy, 'truck' is preferred unless 'bus' is nearly unanimous. A dog/cow called
+        'person' in a few frames is an ANIMAL if >=25% of frames said so."""
         total = sum(self.labels.values()) or 1
         animal = {k: v for k, v in self.labels.items() if k in ANIMAL_LABELS}
         if animal and sum(animal.values()) / total >= ANIMAL_VOTE:
             return max(animal, key=animal.get)
-        for heavy in HEAVY:
-            if self.labels.get(heavy, 0) / total >= 0.30:
-                return heavy
+        w = self.label_w
+        total_w = sum(w.values()) or 1.0
+        heavy_w = sum(w.get(h, 0.0) for h in HEAVY)
+        if heavy_w / total_w >= HEAVY_VOTE:
+            return "truck" if w.get("truck", 0.0) >= BUS_MIN_SHARE * heavy_w else "bus"
         top = self.labels.most_common(1)[0][0]
         if top == "person":
             # a bike + rider is often boxed as 'person' most of the time: if YOLO saw a two-wheeler
@@ -336,14 +345,23 @@ class CentroidTracker:
                 steady = jump_eff <= max_jump
                 if edge:
                     steady = False  # partly outside the picture and we never saw it whole: position unknown
+                # the box suddenly doubled / halved: it swallowed the guard standing in front (or lost half
+                # the vehicle behind a pole) — its bottom-centre is not where the wheels are. Not a move.
+                pw, ph = max(tr.bbox[2] - tr.bbox[0], 8), max(tr.bbox[3] - tr.bbox[1], 8)
+                glitch = not (GLITCH_RATIO_LO <= (x2 - x1) / pw <= GLITCH_RATIO_HI
+                              and GLITCH_RATIO_LO <= (y2 - y1) / ph <= GLITCH_RATIO_HI)
+                if glitch:
+                    steady = False
                 if steady and dt > 1e-3:
                     v = ((c[0] - prev_c[0]) / dt, (c[1] - prev_c[1]) / dt)
                     tr.vel = v if tr.vel is None else (0.5 * tr.vel[0] + 0.5 * v[0], 0.5 * tr.vel[1] + 0.5 * v[1])
                 tr.centroid = c
                 tr.bbox = d["bbox"]
-                tr.ref = cur_ref
-                tr.dist = cur_dist
+                if not glitch:
+                    tr.ref = cur_ref  # a glitch keeps the last good reference: the next real step is judged from there
+                    tr.dist = cur_dist
                 tr.labels[d["label"]] += 1
+                tr.label_w[d["label"]] += float(d.get("conf", 1.0))
                 tr.disappeared = 0
                 tr.last_ts = now
                 if steady:
@@ -397,7 +415,7 @@ class CentroidTracker:
                     tr.seg_hit = False
                 elif raw_flip:
                     tr.last_reject = self._reject_reason(edge, steady, sure, cur_dist, clear, jump, max_jump,
-                                                         on_segment, tr, gap_ok, repeat)
+                                                         on_segment, tr, gap_ok, repeat, glitch)
                     self.rejects.append({"track_id": best_id, "label": tr.label, "bbox": d["bbox"],
                                          "to_side": cur_sign, "reason": tr.last_reject,
                                          "kind": "jitter" if steady and not sure else "reject"})
@@ -412,7 +430,7 @@ class CentroidTracker:
                 # birth is far enough from the line to trust its side.
                 unsure_r = min(clear, self.near_band) if self.near_band > 0 else 0.0
                 side0 = cur_sign if abs(cur_dist) >= unsure_r else 0
-                tr = Track(tid, c, d["bbox"], d["label"], side0, cur_dist, ts=now)
+                tr = Track(tid, c, d["bbox"], d["label"], side0, cur_dist, ts=now, conf=float(d.get("conf", 1.0)))
                 tr.start_edge = _touches_edge(d["bbox"], frame_size)
                 if not tr.start_edge:
                     tr.full_w = d["bbox"][2] - d["bbox"][0]
@@ -462,9 +480,12 @@ class CentroidTracker:
                                      "reason": "", "kind": "resumed", "from": src.id})
 
     @staticmethod
-    def _reject_reason(edge, steady, sure, cur_dist, clear, jump, max_jump, on_segment, tr, gap_ok, repeat):
+    def _reject_reason(edge, steady, sure, cur_dist, clear, jump, max_jump, on_segment, tr, gap_ok, repeat,
+                       glitch=False):
         if edge:
             return "box picture ke kinare ko chhoo raha tha (aadhi gaadi bahar)"
+        if glitch:
+            return "box ka size ek step me dugna/aadha ho gaya (saath khade aadmi/gate ko box me le liya?) — position bharosemand nahi"
         if not steady:
             return f"ek step me {jump:.0f}px jump (limit {max_jump:.0f}px) — teleport/galat match"
         if not sure:

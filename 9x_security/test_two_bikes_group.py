@@ -1,7 +1,7 @@
 """USER (11-10): 4 WhatsApp photos 'Exit — BICYCLE' within 3 s for TWO people pushing TWO bicycles
-side by side (two identical photos in the same second, then each cycle again). Two-wheelers now form
-ONE group alert ('— 2 bikes') and a box that is the same cycle again (twin box, ID swap, re-born
-track) is merged — never a second photo."""
+side by side (two identical photos in the same second, then each cycle again). USER (12-10): the
+photo must be taken RIGHT at the crossing. So: a two-wheeler alert goes out immediately, and a box
+that is the same cycle again (twin box, ID swap, re-born track) is merged — never a second photo."""
 import os
 import random
 import sys
@@ -56,12 +56,14 @@ def _bikes_at(xs, step=10, start_y=100, n=40, labels=None):
     return out
 
 
-def test_two_people_two_bicycles_is_one_alert_with_count_two(tmp_path):
+def test_two_people_two_bicycles_is_one_photo_per_cycle(tmp_path):
     for seed in range(6):
         e = _eng(tmp_path)
         ev = _drive(e, _two_bikes(seed))
         tw = [x for x in ev if x["category"] == "two_wheeler"]
-        assert len(tw) == 1 and tw[0]["count"] == 2, (seed, [(x["category"], x["count"]) for x in ev])
+        assert len(tw) == 2 and all(x["count"] == 1 for x in tw), (seed, [(x["category"], x["count"]) for x in ev])
+        xs = sorted((x["bbox"][0] + x["bbox"][2]) // 2 for x in tw)
+        assert xs[1] - xs[0] > 30, ("the two photos are the two different cycles", xs)
         assert not [x for x in ev if x["category"] == "person"], "walkers beside their cycles are not lone persons"
         _cleanup(ev)
 
@@ -90,14 +92,32 @@ def test_same_cycle_reborn_after_crossing_is_merged(tmp_path):
     _cleanup(ev)
 
 
-def test_two_bikes_in_single_file_two_seconds_apart_are_both_counted_in_one_alert(tmp_path):
+def test_two_bikes_in_single_file_two_seconds_apart_are_two_alerts(tmp_path):
     e = _eng(tmp_path)
     lead = _bikes_at([480], step=10, n=30)
     follow = [[]] * 16 + _bikes_at([480], step=10, n=30)  # same path, 2 s behind
     frames = [a + b for a, b in zip(lead + [[]] * 16, follow)]
     ev = _drive(e, frames)
-    assert [(x["category"], x["count"]) for x in ev] == [("two_wheeler", 2)], [(x["category"], x["count"]) for x in ev]
+    assert [(x["category"], x["count"]) for x in ev] == [("two_wheeler", 1), ("two_wheeler", 1)], \
+        [(x["category"], x["count"]) for x in ev]
     _cleanup(ev)
+
+
+def test_two_wheeler_photo_is_taken_on_the_crossing_frame(tmp_path):
+    """USER 12-10: 'bike door chala gaya tab Exit ka capture hua' — the event comes out of
+    process_frame on the crossing frame itself, box == the bike's box in that frame."""
+    e = _eng(tmp_path)
+    frame = np.zeros((540, 960, 3), np.uint8)
+    got = []
+    for dets in _bikes_at([480], step=10, n=30):
+        e.detector.dets = dets
+        _, evs = e.process_frame(frame)
+        for ev in evs:
+            got.append((ev, dets[0]["bbox"]))
+    assert len(got) == 1, got
+    ev, box = got[0]
+    assert ev["category"] == "two_wheeler" and tuple(ev["bbox"]) == tuple(box)
+    _cleanup([ev])
 
 
 def test_bikes_far_apart_in_time_are_separate_alerts(tmp_path):
@@ -108,14 +128,14 @@ def test_bikes_far_apart_in_time_are_separate_alerts(tmp_path):
     _cleanup(ev)
 
 
-def test_group_alert_not_delayed_forever_by_steady_traffic(tmp_path):
-    """A bike every 3 s keeps the group 'busy'; the alert still goes out within GROUP_MAX_S."""
+def test_steady_bike_traffic_every_bike_alerted(tmp_path):
+    """A bike every 3 s on the same path: each is the NEXT bike (the previous one has moved on)."""
     e = _eng(tmp_path)
     frames = []
     for k in range(8):
         frames += _bikes_at([480], step=20, n=14) + [[]] * 10  # one crossing every 3 s
     ev = _drive(e, frames)
-    assert len(ev) >= 2 and sum(x["count"] for x in ev) == 8, [(x["category"], x["count"]) for x in ev]
+    assert len(ev) == 8 and all(x["count"] == 1 for x in ev), [(x["category"], x["count"]) for x in ev]
     _cleanup(ev)
 
 
@@ -164,15 +184,17 @@ def test_person_group_still_counts_single_file_walkers(tmp_path):
 
 
 def test_identical_twin_crossings_same_second_are_one(tmp_path):
-    """The user's pair: two tracks fire on the same cycle box in the same second -> one member."""
+    """The user's pair: two tracks fire on the same cycle box in the same second -> one alert."""
     e = _eng(tmp_path)
     now = 1000.0
     cr1 = {"track_id": 1, "label": "bicycle", "bbox": (575, 195, 605, 265), "to_side": 1, "via": "cross", "which": 2}
     cr2 = {"track_id": 2, "label": "bicycle", "bbox": (575, 195, 605, 265), "to_side": 1, "via": "cross", "which": 2}
-    frame = np.zeros((540, 960, 3), np.uint8)
-    e._queue_group("two_wheeler", frame, cr1, "Exit", now)
-    e._queue_group("two_wheeler", frame, cr2, "Exit", now + 0.4)
-    assert len(e._groups[("two_wheeler", "Exit")]["crs"]) == 1
-    ev = e.flush_pending(now=now + eng.TW_GROUP_S + 1)
-    assert [(x["category"], x["count"], x["direction"]) for x in ev] == [("two_wheeler", 1, "Exit")]
-    _cleanup(ev)
+    assert e._seen_again("two_wheeler", cr1, "Exit", now) == ""
+    assert "same spot" in e._seen_again("two_wheeler", cr2, "Exit", now + 0.4)
+    # a different cycle 60 px to the right 2 s later is NOT the same one
+    cr3 = {"track_id": 3, "label": "bicycle", "bbox": (635, 190, 667, 262), "to_side": 1, "via": "cross", "which": 2}
+    assert e._seen_again("two_wheeler", cr3, "Exit", now + 2.0) == ""
+    # the Entry direction has its own memory
+    cr4 = {"track_id": 4, "label": "bicycle", "bbox": (575, 195, 605, 265), "to_side": -1, "via": "cross", "which": 2}
+    assert e._seen_again("two_wheeler", cr4, "Entry", now + 0.5) == ""
+    assert eng.GROUP_RECENT_S >= 8

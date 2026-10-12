@@ -25,12 +25,14 @@ DEDUPE_S = float(os.environ.get("CROSS_DEDUPE_S", "20"))  # window for same-vehi
 SAME_VEHICLE_S = float(os.environ.get("SAME_VEHICLE_S", "3"))  # two YOLO boxes on ONE vehicle cross within this
 TWIN_APPEAR_S = 6.0  # a 2nd box born ON a crossing vehicle may 'appear at the line' this long after the 1st box crossed
 PERSON_GROUP_S = float(os.environ.get("PERSON_GROUP_S", "2.5"))  # people crossing within this = one 'N persons' alert
-TW_GROUP_S = float(os.environ.get("TW_GROUP_S", "4"))  # two-wheelers crossing within this = one 'N bikes' alert
-GROUP_MAX_S = 15.0       # a group never waits longer than this since its first member (steady traffic)
-GROUP_RECENT_S = 8.0     # an alerted member is remembered this long: a late twin of it is merged, not re-alerted
+GROUP_MAX_S = 15.0       # a person group never waits longer than this since its first member (steady traffic)
+GROUP_RECENT_S = 8.0     # an alerted person/two-wheeler is remembered this long: a late twin box of it is merged, not re-alerted
 SAME_MEMBER_IOU = 0.2    # a new crossing overlapping a member (or where it has moved to) this much = same object
 SAME_MEMBER_DIST = 0.5   # ... or its centre within this many box-sizes of the member's predicted centre
 SAME_SPOT_S = 1.0        # the plain 'same spot' test only within this: later, the same spot is the NEXT one in line
+PERSON_MIN_ASPECT = 1.3  # a standing/walking human box is at least this much taller than wide (dog/cat ~0.8-1.2)
+PERSON_SMALL_H = 0.08    # a 'person' shorter than this fraction of the frame needs a confident detection...
+PERSON_SMALL_CONF = 0.45  # ... (far dogs/cats/bags at night come as hesitant small 'person' boxes)
 PERSON_VEHICLE_S = float(os.environ.get("PERSON_VEHICLE_S", "6"))  # person crossing within this of a vehicle at the same spot = rider/driver
 RIDER_GROW = 0.25       # vehicle box grown by this fraction when testing 'person ON/WITH the vehicle'
 RIDER_MIN_OVERLAP = 0.2  # >= this fraction of the person's box inside the grown vehicle box
@@ -523,8 +525,9 @@ class SecurityEngine:
         self._best_crops = {}
         self._ocr_q = None  # single OCR worker queue (created on first crossing)
         self._recent_cross = {1: [], 2: []}  # per tracker: (ts, to_side, bbox, tid) of counted crossings for de-duplication
-        self._groups = {}  # (category, direction) -> pending group (persons / two-wheelers crossing together)
-        self._group_recent = []  # members already alerted: a late twin box of one of them is merged, not re-alerted
+        self._groups = {}  # (category, direction) -> pending group (people crossing together)
+        self._group_recent = []  # persons/two-wheelers already alerted: a late twin box of one of them is merged, not re-alerted
+        self._person_drop_log_ts = 0.0
         self._recent_vehicle_cross = []  # (ts, direction, bbox, label) — riders/drivers are not lone persons
         self._motion = {}  # (tracker no, track id) -> [last_move_ts, ref_point]
         self._det_ts = time.time()
@@ -612,14 +615,27 @@ class SecurityEngine:
         return keep
 
     def _sanitize_persons(self, dets, frame_h):
-        """A standing/walking human is taller than wide. A 'person' box wider than tall (dog, cow,
-        lying object) or tinier than 4% of the frame height can never become a person alert."""
+        """A standing/walking human is clearly taller than wide. A 'person' box that is squat
+        (dog, cat, cow, lying object: h < 1.3 w), tinier than 4% of the frame, or small AND
+        hesitant (far animal at night) can never become a person alert."""
         out = []
+        now = time.time()
         for d in dets:
             if d["label"] == "person":
                 x1, y1, x2, y2 = d["bbox"]
-                w, h = x2 - x1, y2 - y1
-                if h <= w or h < 0.04 * frame_h:
+                w, h = max(1, x2 - x1), y2 - y1
+                conf = float(d.get("conf", 1.0))
+                why = ""
+                if h < 0.04 * frame_h:
+                    why = "bahut chhota"
+                elif h < PERSON_MIN_ASPECT * w:
+                    why = f"janwar jaisa aakar ({w}x{h}, insaan ki lambai chaudai se {PERSON_MIN_ASPECT}x hoti hai)"
+                elif h < PERSON_SMALL_H * frame_h and conf < PERSON_SMALL_CONF:
+                    why = f"chhota aur ansure ({w}x{h}, conf {conf:.2f})"
+                if why:
+                    if now - self._person_drop_log_ts > 30:
+                        self._person_drop_log_ts = now
+                        clog(f"person box ignored: {why} — dog/cat/bag, insaan nahi (box {d['bbox']})")
                     continue
             out.append(d)
         return out
@@ -798,11 +814,13 @@ class SecurityEngine:
                     continue
                 self._mark_twins(cr, now)
                 if cat == "two_wheeler":
-                    # bikes/cycles pushed or ridden together (and the same cycle seen as two boxes)
-                    # -> ONE alert '🏍️ Two-wheeler Exit — 2 bikes', never one photo per box
-                    self._queue_group(cat, frame, cr, direction, now)
-                else:
-                    events += self._emit_crossing(frame, original, cr, cat, w, h)
+                    # photo RIGHT at the crossing (user 12-10) — but the same cycle seen again as another
+                    # track (twin box, ID swap, re-born track) within seconds is never a second photo
+                    why = self._seen_again(cat, cr, direction, now)
+                    if why:
+                        clog(f"two-wheeler crossing merged: {why} — dobara photo nahi (track {cr['track_id']} {cr['label']})")
+                        continue
+                events += self._emit_crossing(frame, original, cr, cat, w, h)
         events += self.flush_pending(now=now)
 
         annotated = self._annotate(frame, a, b, a2, b2)
@@ -868,25 +886,38 @@ class SecurityEngine:
         m = self._motion.get(key)
         return m is not None and now - m[0] < MOVING_S
 
-    def _queue_group(self, cat, frame, cr, direction, now):
-        """People (and two-wheelers) pass a gate in a loose group (0.5-3 s apart). Hold the alert
-        a quiet time after the LAST one so the group becomes ONE alert with the right count —
-        and merge boxes that are the same object again (a cycle tracked twice after an ID swap,
-        a bicycle + motorcycle box on one bike): they must never inflate the count or re-alert."""
+    def _member(self, cat, cr, direction, now):
         tr = self.tracker2.tracks.get(cr["track_id"])
-        member = {"cr": cr, "ts": now, "bbox": cr["bbox"], "vel": getattr(tr, "vel", None), "cat": cat,
-                  "direction": direction, "start_ref": getattr(tr, "start_ref", None),
-                  "born_ts": getattr(tr, "born_ts", now)}
+        return {"cr": cr, "ts": now, "bbox": cr["bbox"], "vel": getattr(tr, "vel", None), "cat": cat,
+                "direction": direction, "start_ref": getattr(tr, "start_ref", None),
+                "born_ts": getattr(tr, "born_ts", now)}
+
+    def _seen_again(self, cat, cr, direction, now):
+        """Already alerted (last GROUP_RECENT_S) as another track? Remembers the new one otherwise."""
+        self._group_recent = [m for m in self._group_recent if now - m["ts"] < GROUP_RECENT_S]
+        member = self._member(cat, cr, direction, now)
+        same = self._same_member([m for m in self._group_recent if m["cat"] == cat and m["direction"] == direction],
+                                 member, now)
+        if not same:
+            self._group_recent.append(member)
+        return same
+
+    def _queue_group(self, cat, frame, cr, direction, now):
+        """People pass a gate in a loose group (0.5-3 s apart). Hold the alert a quiet time after
+        the LAST one so the group becomes ONE alert with the right count — and merge boxes that
+        are the same person again (a track re-created after an ID swap, a second box on one
+        walker): they must never inflate the count or re-alert."""
+        member = self._member(cat, cr, direction, now)
         self._group_recent = [m for m in self._group_recent if now - m["ts"] < GROUP_RECENT_S]
         g = self._groups.setdefault((cat, direction), {"crs": [], "frame": None, "last": now, "first": now})
         same = self._same_member(g["crs"], member, now) or self._same_member(
             [m for m in self._group_recent if m["cat"] == cat and m["direction"] == direction], member, now)
         if same:
             clog(f"{cat} crossing merged: {same} — dobara count/alert nahi (track {cr['track_id']} {cr['label']})")
-        else:
-            g["crs"].append(member)
+            return  # the photo stays the real members' crossing frame
+        g["crs"].append(member)
         g["frame"] = frame.copy()
-        g["last"] = now  # a twin box keeps the group open too: the scene is still busy
+        g["last"] = now
 
     @staticmethod
     def _same_member(members, new, now):
@@ -920,15 +951,14 @@ class SecurityEngine:
         return ""
 
     def flush_pending(self, now=None, force=False):
-        """Emit groups whose quiet time is over (or all of them when force=True, e.g. the worker
-        is stopping)."""
+        """Emit person groups whose quiet time is over (or all of them when force=True, e.g. the
+        worker is stopping)."""
         now = time.time() if now is None else now
         out = []
         for key in list(self._groups):
             g = self._groups[key]
             cat, direction = key
-            quiet = PERSON_GROUP_S if cat == "person" else TW_GROUP_S
-            if force or now - g["last"] >= quiet or now - g["first"] >= GROUP_MAX_S:
+            if force or now - g["last"] >= PERSON_GROUP_S or now - g["first"] >= GROUP_MAX_S:
                 del self._groups[key]
                 crs = []
                 for m in g["crs"]:
@@ -964,6 +994,7 @@ class SecurityEngine:
             "vehicle_type": cr["label"],
             "category": cat,
             "count": 1,
+            "bbox": [int(v) for v in cr["bbox"]],
             "gate": gate,
             "direction": direction,
             "plate": "",
@@ -1011,6 +1042,7 @@ class SecurityEngine:
             "vehicle_type": label,
             "category": cat,
             "count": count,
+            "bbox": [int(v) for v in lead["bbox"]],
             "gate": gate,
             "direction": direction,
             "plate": "",

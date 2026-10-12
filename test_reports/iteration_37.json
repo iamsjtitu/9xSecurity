@@ -1,0 +1,27 @@
+{
+  "summary": "Iter 37 backend-only verification for 9x Security tracker glitch-guard, label voting, person sanitize, two-wheeler immediacy. Ran the two requested pytest batches and the optional real-YOLO check. Also authored /app/9x_security/tests/test_iter37_glitch_guard.py with 5 extra tracker scenarios (incl. the risky occlusion case). All green.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/tests/test_iter37_glitch_guard.py"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "tracker.py update() is ~200 lines in a single method; readability would benefit from splitting glitch/jump/seg checks into helper functions, but no functional issue.",
+    "engine._sanitize_persons rate-limit log (once per 30s) looks fine; consider including per-reason counters to make debugging field reports easier."
+  ],
+  "updated_files": ["/app/9x_security/tests/test_iter37_glitch_guard.py"],
+  "test_results": {
+    "batch1 (20 files, offline)": "178 passed, 0 failed, 1 warning (10.45s)",
+    "batch2 (service_api + iter35_line2 + iter32_live_api, service on 8971)": "54 passed, 1 skipped (44.91s)",
+    "iter37 extra tracker scenarios": "5 passed (a car-glitch-then-real-cross, b occlusion half-box across line, c growing vehicle 25-30%/step, d slow PC 0.8s dt @150 px/s, e jittery bicycle +-15%)",
+    "line2_real_yolo_check.py": "PASS (CASE A bus Entry once over MAIN line, CASE B bus Entry once with line2 off segment)"
+  },
+  "success_rate": {"backend": "100%", "frontend": "n/a (skipped per request)"},
+  "test_credentials": "service login admin / 9xsecurity at http://127.0.0.1:8971 (not needed for pytest; used only by live_api suites via session fixture).",
+  "seed_data_creation": "None. No DB rows written outside what the existing tests manage. config.json/cam1 line left untouched by tests (test_iter35_line2 restores line2 null itself). Verified /api/health=200 before batch2.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Occlusion scenario (b) with half-height box across the line passes: ratio 60/120=0.5 is below GLITCH_RATIO_LO=0.6 so the tracker flags glitch and keeps the last good ref/dist; next full-size frame past the line produces exactly one 'cross' event, no 'possible-miss'. If tweaking GLITCH_RATIO_LO upward (e.g., 0.65), rerun tests/test_iter37_glitch_guard.py — scenarios (b) and (e) are the first to break. All other suites (178 + 54 + 1 skipped + 5 new = 237 passed, 1 skipped) are stable at ~55 s total.",
+  "rca of the issue": "N/A — all reported fixes behave as specified. Glitch guard correctly intercepts the user's reported Case 4 (one-step size doubling) without harming the occlusion case because when the full box returns the ratio is within [0.6, 1.67] and the retained last-good ref drives the real crossing."
+}

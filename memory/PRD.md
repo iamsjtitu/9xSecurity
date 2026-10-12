@@ -688,6 +688,8 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - DONE (#59): Vehicle lingering on the line no longer double counts (clear-side rule + 5-min memory)
 - DONE (#61): Separate Person/Bike line (magenta) — vehicles on the yellow line only
 - DONE (#62): Two-wheeler group alert + twin-track merge (4 photos for 2 cycles -> 1 photo '— 2 bikes')
+- DONE (#63): Instant bike photo + dedupe memory, dog-shaped person boxes dropped, confidence-weighted TRUCK/BUS vote,
+  box-size glitch guard (Exit-while-entering)
 - P1: CSV/Excel export of event log
 - DONE (#52): Multi-camera saved list / one active / Gate Name
 - P2: Plate-based search + email/Telegram alert on entry
@@ -1134,4 +1136,30 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   next car). Track.born_ts / twin_frames added.
 - Result: repro 80/80 runs across jitter levels -> exactly 1 alert with count 2 (one split into 2 legit alerts 6.7 s
   apart). Tests: test_two_bikes_group.py 10; full regression 160 + live API 54 green (testing agent iteration_36, no
-  issues). AWAITING USER: next time two people walk cycles through the gate -> ONE photo '— 2 bikes'.
+  issues). SUPERSEDED for two-wheelers by #63 (user wants the photo at the crossing instant).
+
+## Implemented (update 2026-06 #63) — Instant bike photo, dog≠person, BUS→TRUCK voting, Exit-while-entering glitch guard (iteration_37: 100%)
+- USER (12-10, 4 screenshots): (1) 'bike door chala gaya tab Exit ka capture hua — line cross karte hi capture hona
+  chahiye' (the #62 group hold delayed the photo and a merged late twin had replaced the group frame); (2) far dog at
+  night (35x40 px) sent as 'Entry — PERSON'; (3) decorated truck captioned 'BUS'; (4) a SUV ENTERING captioned
+  'Exit — TRUCK' (other camera 'IP Camera', guard standing right in front of the car at the gate).
+- (1) ENGINE: two-wheelers alert IMMEDIATELY on the crossing frame again (like vehicles); duplicates are blocked by a
+  memory instead of a hold: _seen_again() keeps alerted members GROUP_RECENT_S 8 s and merges a crossing that is the
+  same cycle (same track / same spot within 1 s / box born on that member / lands where it has moved to). Two cycles
+  side by side = 2 instant photos (one per cycle), never 4. Person groups unchanged; a merged twin no longer replaces
+  the group photo frame. Events now carry 'bbox'.
+- (2) ENGINE _sanitize_persons: 'person' box dropped when squat (h < 1.3 w — dog/cat/cow), tiny (< 4% frame) or small
+  AND hesitant (h < 8% frame and conf < 0.45); camera_log 'person box ignored: janwar jaisa aakar …' once / 30 s.
+- (3) TRACKER label vote weighted by YOLO confidence (Track.label_w): heavy (truck/bus) wins at weighted share >= 0.35
+  (a SUV with hesitant 'truck' frames stays car; a truck called 'car' head-on stays truck); inside heavy 'truck' is
+  preferred unless truck votes < 20% of the heavy weight (decorated Indian trucks are 'bus' to YOLO; a real bus stays
+  bus). Scripted votes without conf behave as before.
+- (4) TRACKER glitch guard: a one-step box width/height change outside [0.6, 1.67] (GLITCH_RATIO_LO/HI) is a detection
+  glitch (box swallowed the guard / lost half behind a pole): not steady, the last good ref/dist is kept so the next
+  real step is judged from there; reject reason 'box ka size ek step me dugna/aadha ho gaya …'. Hypothesis for (4) —
+  NOT confirmed by logs (user's camera_log around 04:42:38 requested); on the old single-tracker build a car<->guard
+  ID swap could also explain it, which the #61 two-tracker build already prevents.
+- Tests: test_labels_and_animals.py 11, test_two_bikes_group.py 11 (updated), tests/test_iter37_glitch_guard.py 5
+  (agent: incl. occlusion-while-crossing still counted once); regression 175 + live API 54 green; real-YOLO bus E2E
+  PASS. AWAITING USER: dog photos stop, trucks say TRUCK, bike photo at the line; send camera_log if an entering car
+  is ever captioned Exit again.

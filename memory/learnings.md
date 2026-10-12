@@ -38,3 +38,9 @@
   tests must call e.flush_pending(force=True) (test_categories._drive already does) — only VEHICLE events are
   returned by process_frame on the crossing frame. Testing-agent API suites leave cam1's line/entry_direction at
   defaults (0.1,0.5-0.9,0.5 / neg): restore {0.1,0.2,0.9,0.8}/pos via /api/line + /api/options afterwards.
+  UPDATE #63: two-wheelers are IMMEDIATE again (user wants the photo at the crossing); only PERSON groups are held.
+- The local service.py (nohup) dies between turns in this environment: `curl /api/health || nohup python service.py`
+  before any live API work.
+- Scripted detections may carry "conf"; the tracker's label vote is confidence-weighted (Track.label_w). Boxes whose
+  width/height change > 1.67x / < 0.6x in one step are a 'glitch' (not steady, ref kept) — scripted scenarios that
+  teleport box SIZES will not count on that step.

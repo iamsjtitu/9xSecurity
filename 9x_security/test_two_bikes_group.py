@@ -77,6 +77,7 @@ def test_twin_boxes_on_one_bicycle_is_one_alert_count_one(tmp_path):
         frames.append(f + [{"bbox": (b[0] + 3, b[1] - 2, b[2] - 3, b[3] + 2), "label": "motorcycle"}])
     ev = _drive(e, frames)
     assert [(x["category"], x["count"]) for x in ev] == [("two_wheeler", 1)], ev
+    _cleanup(ev)
 
 
 def test_same_cycle_reborn_after_crossing_is_merged(tmp_path):

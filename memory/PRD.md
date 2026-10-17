@@ -690,6 +690,7 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - DONE (#62): Two-wheeler group alert + twin-track merge (4 photos for 2 cycles -> 1 photo '— 2 bikes')
 - DONE (#63): Instant bike photo + dedupe memory, dog-shaped person boxes dropped, confidence-weighted TRUCK/BUS vote,
   box-size glitch guard (Exit-while-entering)
+- DONE (#64): Zoomed second look — night dogs (tall/narrow, 'person' at full-frame scale) never alert; sticky verdict
 - P1: CSV/Excel export of event log
 - DONE (#52): Multi-camera saved list / one active / Gate Name
 - P2: Plate-based search + email/Telegram alert on entry
@@ -1163,3 +1164,27 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   (agent: incl. occlusion-while-crossing still counted once); regression 175 + live API 54 green; real-YOLO bus E2E
   PASS. AWAITING USER: dog photos stop, trucks say TRUCK, bike photo at the line; send camera_log if an entering car
   is ever captioned Exit again.
+
+## Implemented (update 2026-06 #64) — Night dogs sent as PERSON: zoomed second look (iteration_38 → fixes → iteration_39: 100%)
+- USER (17-10, 3 screenshots, very upset: 'i already told u many times we dont need animal photos'): stray dogs at
+  night STILL captioned 'Entry — PERSON'. Boxes 53x60, 28x64, 30x80 px: a dog walking towards/away from the camera is
+  TALL AND NARROW, so the #63 shape rule (h >= 1.3 w) cannot catch it, and at full-frame scale (640 px input) a 30x80
+  blob is 'person' to YOLO. Reproduced with a generated night scene (tests/assets/night_dog_sitting.jpg): fast model
+  says 'person' 0.49 at 33x64 px — and the engine without the fix sent 'Entry person' (A/B script).
+- DETECTOR second_opinion(frame, bbox): square crop (3x the box) around the candidate, same YOLO model at imgsz 320
+  with person + ALL COCO animals (bird cat dog horse sheep cow elephant bear zebra giraffe), boxes on the object
+  (IoU >= 0.3, or containing its centre and <= 3x its area) -> {person conf, animal conf, animal_label}. Measured:
+  dog crops at every scale -> animal 0.5-0.9, person 0.0; person crops -> person 0.9, animal 0.0 (both yolov8n/s).
+- ENGINE: _zoom_patrol — every 1 s each 'person' track within 1.5x the near band of the line gets a zoomed look while
+  approaching (several looks before the crossing); _animal_on_zoom — one more look right before the person alert;
+  flush_pending re-reads the live label of queued group members. Evidence ACCUMULATES per track (_zoom_record:
+  Track.zoom_animal/zoom_person sums) -> Track.verdict ('dog') which Track.label returns before any frame vote, so
+  'person' frames can never outvote it (iteration_38 HIGH: the first version's vote injection wore off after ~2x
+  frames — fixed). Several clear person looks still correct one marginal animal look (track jumped dog -> man).
+  Uses the full-res frame crop when available. A failed/absent second look never blocks a real person.
+  camera_log: 'track N person nahi — zoom karke dekha: dog 0.52 vs person 0.45 (kul …) — janwar, alert nahi hoga'
+  (once per track) / 'zoom par ab saaf insaan dikha'. Cost: one 320-px inference per approaching person per second.
+- Tests: test_zoom_animal.py 9 (real model on tests/assets + stubs), tests/test_iter38_zoom_animal.py 21 (agent),
+  tests/test_iter39_zoom_verdict.py 10 (agent), regression 213 green, live API 54; A/B tests/zoom_offline_ab_check.py
+  (zoom off = 1 person event, zoom on = 0); live E2E tests/zoom_real_yolo_check.py PASS (dog 0, person 1).
+- AWAITING USER: no more dog/cat PERSON photos at night; a real person at night must still alert (zoom confirms).

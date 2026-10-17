@@ -74,7 +74,7 @@
       },
       "entry_direction": "pos",
       "ignore_zones": [],
-      "monitor": true,
+      "monitor": false,
       "schedule": {
         "enabled": false,
         "start": "20:00",
@@ -114,8 +114,8 @@
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "572ea650fea1cc759d85de67d0ae1cdd",
-  "auth_hash": "b70cd5fa4b67c00bff65026513437a2a55f439e0cada361171a36257745b1ec1",
+  "auth_salt": "8ca304f428b9a61f8787651a9c12da6e",
+  "auth_hash": "147ed6b844d7ead3505233d80723aae1fc2780c8bde51d4ee6ee0aae638c8948",
   "github_repo": "",
   "gh_token": "TEST_GH",
   "rtsp_url_main": ""

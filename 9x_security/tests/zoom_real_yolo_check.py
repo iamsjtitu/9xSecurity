@@ -35,6 +35,8 @@ def make_video(name, scale, path, seconds=36, fps=12):
 
 
 def run(H, video, want, label):
+    log_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "camera_log.txt")
+    log_mark = os.path.getsize(log_path) if os.path.exists(log_path) else 0
     r = requests.post(f"{BASE}/api/cameras", headers=H,
                       json={"name": "Zoom E2E", "gate": "ZOOME2E", "rtsp_url": video}, timeout=10).json()
     cid = r["cameras"][-1]["id"]
@@ -54,8 +56,9 @@ def run(H, video, want, label):
         evs = requests.get(f"{BASE}/api/events?all=1", headers=H, timeout=10).json()["events"]
         mine = [e for e in evs if e.get("gate") == "ZOOME2E"]
         print(f"{label}: ai_frames={cam.get('ai_frames')} events={[(e['direction'], e['vehicle_type']) for e in mine]} want={want}")
-        log = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "camera_log.txt"), encoding="utf-8").read()
-        print("    zoom log lines:", log.count("zoom karke dekha"))
+        with open(log_path, encoding="utf-8") as f:
+            f.seek(log_mark)
+            print("    zoom log lines (this run):", f.read().count("zoom karke dekha"))
         return len(mine) == want, mine
     finally:
         requests.delete(f"{BASE}/api/cameras/{cid}", headers=H, timeout=10)

@@ -44,3 +44,7 @@
 - Scripted detections may carry "conf"; the tracker's label vote is confidence-weighted (Track.label_w). Boxes whose
   width/height change > 1.67x / < 0.6x in one step are a 'glitch' (not steady, ref kept) — scripted scenarios that
   teleport box SIZES will not count on that step.
+- Zoomed animal check (#64): FakeDetectors have no second_opinion -> engine skips it (tests unaffected). To stub it,
+  set e.detector.second_opinion = callable(frame, bbox) -> {person, animal, animal_label}. Track.verdict (from zoom
+  evidence) beats frame votes. Real-model test assets: /app/9x_security/tests/assets/night_*.jpg (generated);
+  night_dog_sitting.jpg @ scale 1.0 is the one the fast model calls 'person' (discriminating A/B).

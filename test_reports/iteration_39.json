@@ -1,0 +1,32 @@
+{
+  "summary": "Backend-only retest of iteration_38 (the zoomed animal verdict must be sticky). Requested suite: 98 of 98 pass. New file tests/test_iter39_zoom_verdict.py: 10 of 10 pass. (1) Verdict persistence: a stub says DOG on look 1 and NOTHING afterwards. The track crosses in, lingers ~12.5 s just past the line, goes back out and crosses in again: 0 events, all labels stay 'dog', the patrol keeps looking (>= 8 looks), and the log has exactly 1 'zoom karke dekha' line. MARGINAL (person 0.5 / animal 0.4) once, then PERSON 0.9 -> 1 person event plus the 'zoom par ab saaf insaan dikha' log line. DOG on every look, 2 dog tracks lingering about 5 s -> 0 events and exactly 2 'zoom karke dekha' lines (one per track, no spam). (2) flush_pending: a member is queued (zoom said nothing at the crossing), then the patrol sees DOG during the 2.5 s hold -> no event, log 'zoom ne dog bataya'. (3) The second_opinion on_object rule was tested with a fake model returning synthetic boxes. A cow 5x the subject area containing the centre (IoU 0.2) is ignored and a person box with IoU 0.875 is counted. A dog box with IoU 0.51 counts. A cow 2.5x the area containing the centre counts. A cow 3.9x the area is ignored, and so is a far box. A cow 2.5x the area with IoU 0.4 counts. (4) A/B check `zoom_offline_ab_check.py 1.0 night_dog_sitting.jpg 0.35`: zoom=False gives 1 Entry person; zoom=True gives 0 events with the log 'dog 0.52 vs person 0.45 (kul 0.52 vs 0.45)'. The A/B is now discriminating. Live E2E `zoom_real_yolo_check.py`: PASS (dog 0 events, person 1 Entry). camera_log has a '(kul' line at 08:54:04 from the service run. (5) Regression: glitch guard, iter33 tracker, engine, missed vehicles, false crossings, standing vehicle and custom scenarios: 76 of 76 pass. Service API suites (test_service_api + tests/test_iter35_line2, run in a separate process): 35 of 35 pass.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "engine._zoom_record (accumulation)", "issue": "The evidence never decays. If clear PERSON looks come first (e.g. 3 x 0.9 before the crossing), one later DOG look (0.7) cannot flip the verdict, because 0.7 < 0.7 x 2.8. So the flush_pending re-check only drops a member when the earlier looks were weak or empty. This was confirmed by the informational test test_flush_after_clear_person_looks_then_one_dog_look_info: the person was still sent. It is arguably the intended behaviour (a person is not vetoed by one look). The same weight also works the other way: a long-lived person track (many 0.9 looks) that an ID swap hands to a dog needs about as many dog looks to flip."},
+      {"endpoint": "A/B dog margin", "issue": "The real-model zoomed look on night_dog_sitting gives dog 0.52 vs person 0.45. The threshold is 0.7 x 0.45 = 0.315, so it passes, but a slightly different crop could tip it. The many-looks accumulation reduces this risk."},
+      {"endpoint": "tests/zoom_real_yolo_check.py", "issue": "'zoom log lines: 47' counts 'zoom karke dekha' over the WHOLE camera_log.txt, so the number is cumulative and does not belong to this run. It should count only lines written after the run started."},
+      {"endpoint": "test_two_bikes_group.py (pre-existing)", "issue": "It leaves a real snapshot file in snapshots/<date>/ (Entry_bicycle_*.jpg) even though it uses a temp DB. The unit tests also write clog lines into the real camera_log.txt. I deleted the leaked snapshot."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/9x_security/tests/test_iter39_zoom_verdict.py", "/app/9x_security/tests/test_iter38_zoom_animal.py", "/app/9x_security/tests/zoom_offline_ab_check.py", "/app/9x_security/tests/zoom_real_yolo_check.py", "/app/test_reports/pytest/iteration_39_service.xml"],
+  "action_items": [
+    "Optional: decide whether zoom evidence should be weighted towards recent looks (or capped) so a late clear-dog look can still drop a queued member after strong person looks.",
+    "Optional: make zoom_real_yolo_check.py count only log lines from its own run.",
+    "Optional: stop test_two_bikes_group.py leaking snapshots into the real snapshots folder."
+  ],
+  "critical_code_review_comments": [
+    "Track.label returns verdict first, so _make_animal dilution is gone. The patrol includes verdict tracks and logs only on change. Verified.",
+    "flush_pending drops a member whenever category_of(live.label) == 'animal', which also covers frame-vote animals. If the track is gone (live is None) the member is still sent, which is acceptable.",
+    "second_opinion: a large box with IoU >= 0.3 still counts even above 3x the area. This is correct: a box 3x the area or more can only reach IoU >= 0.3 if it covers the subject heavily."
+  ],
+  "updated_files": ["/app/9x_security/tests/test_iter39_zoom_verdict.py (new)"],
+  "success_rate": {"backend": "100% (98 + 10 + 76 + 35 pytest, A/B and live E2E pass)", "frontend": "N/A"},
+  "test_credentials": "admin / 9xsecurity (unchanged)",
+  "seed_data_creation": "None. The events table has 0 rows, and the snapshots/2026-10-17 files created by the tests were removed. Settings were restored through the API: cam1 line {0.1,0.2,0.9,0.8}, entry_direction pos, line2 null, detector_model auto, enable_person false, confidence 0.35. cam1 'monitor' false and a different auth_salt/hash were already in the git diff before my restore; login with 9xsecurity works.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Zoom verdict tests are in tests/test_iter39_zoom_verdict.py. It uses a persistent _Clock driver for multi-phase runs (do not call test_categories._drive twice: its clock restarts). The fake YOLO results (_B/_R) unit-test the second_opinion on_object rule. The A/B dog check at scale 1.0 is discriminating. Restore entry_direction with POST /api/swap (it toggles); the settings endpoint did not change it.",
+  "rca of the issue": "iteration_38 HIGH (verdict wore off) is fixed: the verdict is stored in Track.verdict and evaluated on the accumulated zoom sums. Frame votes no longer affect it."
+}

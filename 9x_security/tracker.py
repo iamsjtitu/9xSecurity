@@ -98,6 +98,11 @@ class Track:
         self.resumed_from = None  # id of the counted vehicle this track continues (lost / second box)
         self.born_ts = ts         # when this track was created (twin-box tests in the engine)
         self.twin_frames = 0      # consecutive updates glued to a counted track (merge_twins)
+        self.verdict = None       # label decided by the engine's zoomed looks ('dog'): frame votes never outvote it
+        self.zoom_animal = 0.0    # accumulated zoomed-look evidence (engine): sum of animal / person confidences
+        self.zoom_person = 0.0
+        self.zoom_label = ""      # strongest animal class seen on the zoomed looks
+        self.zoom_best = 0.0
 
     @property
     def counted(self):
@@ -110,6 +115,8 @@ class Track:
         hesitant frames — the heavy class wins only when its WEIGHTED share is >= HEAVY_VOTE.
         Within heavy, 'truck' is preferred unless 'bus' is nearly unanimous. A dog/cow called
         'person' in a few frames is an ANIMAL if >=25% of frames said so."""
+        if self.verdict:
+            return self.verdict
         total = sum(self.labels.values()) or 1
         animal = {k: v for k, v in self.labels.items() if k in ANIMAL_LABELS}
         if animal and sum(animal.values()) / total >= ANIMAL_VOTE:

@@ -54,6 +54,8 @@ def run(H, video, want, label):
         evs = requests.get(f"{BASE}/api/events?all=1", headers=H, timeout=10).json()["events"]
         mine = [e for e in evs if e.get("gate") == "ZOOME2E"]
         print(f"{label}: ai_frames={cam.get('ai_frames')} events={[(e['direction'], e['vehicle_type']) for e in mine]} want={want}")
+        log = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "camera_log.txt"), encoding="utf-8").read()
+        print("    zoom log lines:", log.count("zoom karke dekha"))
         return len(mine) == want, mine
     finally:
         requests.delete(f"{BASE}/api/cameras/{cid}", headers=H, timeout=10)
@@ -61,7 +63,9 @@ def run(H, video, want, label):
 
 
 def main():
-    make_video("night_dog.jpg", 0.45, "/tmp/nx_zoom_dog.mp4")
+    # night_dog_sitting at full scale: the fast model calls it 'person' 0.49, 33x64 px (tall enough to pass
+    # the shape/size rules) -> only the zoomed look can stop it (A/B: tests/zoom_offline_ab_check.py)
+    make_video("night_dog_sitting.jpg", 1.0, "/tmp/nx_zoom_dog.mp4")
     make_video("night_person.jpg", 0.6, "/tmp/nx_zoom_person.mp4")
     tok = requests.post(f"{BASE}/api/login", json={"username": "admin", "password": "9xsecurity"}, timeout=5).json()["token"]
     H = {"X-Auth-Token": tok}

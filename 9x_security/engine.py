@@ -918,13 +918,23 @@ class SecurityEngine:
     def _zoom_says_animal(op):
         return bool(op) and op["animal"] >= ZOOM_ANIMAL_CONF and op["animal"] >= ZOOM_ANIMAL_RATIO * op["person"]
 
-    def _make_animal(self, tr, op):
-        """Turn the whole track into an animal: no crossing of it can alert from now on."""
+    def _zoom_record(self, tr, op):
+        """Add one zoomed look to the track's evidence and decide its verdict from ALL looks so far:
+        animal when the summed animal confidence is >= ZOOM_ANIMAL_CONF and >= ZOOM_ANIMAL_RATIO x
+        the summed person confidence. The verdict overrides frame votes (a dog called 'person' in
+        every frame stays a dog), yet a track that later shows a clear person on several looks
+        (the track jumped from the dog to a man) is a person again. Returns True when animal."""
+        if not op:
+            return False
         if tr is None:
-            return
-        n = sum(tr.labels.values())
-        tr.labels[op["animal_label"]] += n
-        tr.label_w[op["animal_label"]] += op["animal"] * n
+            return self._zoom_says_animal(op)
+        tr.zoom_animal += op["animal"]
+        tr.zoom_person += op["person"]
+        if op["animal"] > tr.zoom_best:
+            tr.zoom_best, tr.zoom_label = op["animal"], op["animal_label"]
+        animal = bool(tr.zoom_label) and tr.zoom_animal >= ZOOM_ANIMAL_CONF and tr.zoom_animal >= ZOOM_ANIMAL_RATIO * tr.zoom_person
+        tr.verdict = tr.zoom_label if animal else None
+        return animal
 
     def _zoom_patrol(self, frame, original, w, h, now):
         """Every ZOOM_EVERY_S, every 'person' track near the line gets a zoomed second look while it
@@ -934,25 +944,31 @@ class SecurityEngine:
             return
         band = 1.5 * self.tracker2.near_band
         for tid, tr in self.tracker2.tracks.items():
-            if tr.disappeared or category_of(tr.label) != "person" or abs(tr.dist) > band:
+            # 'person' tracks — and tracks already judged animal, so clear person looks can still correct them
+            if tr.disappeared or (category_of(tr.label) != "person" and not tr.verdict) or abs(tr.dist) > band:
                 continue
             if now - getattr(tr, "zoom_ts", 0.0) < ZOOM_EVERY_S:
                 continue
             tr.zoom_ts = now
             op = self._zoom_look(frame, original, tr.bbox, w, h)
-            if self._zoom_says_animal(op):
-                self._make_animal(tr, op)
+            had = tr.verdict
+            if self._zoom_record(tr, op) and not had:
                 clog(f"track {tid} 'person' nahi — zoom karke dekha: {op['animal_label']} {op['animal']:.2f} "
-                     f"vs person {op['person']:.2f} — janwar, alert nahi hoga (box {tr.bbox})")
+                     f"vs person {op['person']:.2f} (kul {tr.zoom_animal:.2f} vs {tr.zoom_person:.2f}) — janwar, "
+                     f"alert nahi hoga (box {tr.bbox})")
+            elif had and not tr.verdict:
+                clog(f"track {tid} zoom par ab saaf insaan dikha (kul person {tr.zoom_person:.2f} vs janwar "
+                     f"{tr.zoom_animal:.2f}) — person maana jayega")
 
     def _animal_on_zoom(self, frame, original, cr, w, h):
         """Last zoomed look right before a person alert (user 17-10: dogs at night sent as PERSON —
         tall and narrow when walking towards the camera, so the shape test cannot catch them)."""
         op = self._zoom_look(frame, original, cr["bbox"], w, h)
-        if not self._zoom_says_animal(op):
+        tr = self.tracker2.tracks.get(cr["track_id"])
+        if not self._zoom_record(tr, op):
             return ""
-        self._make_animal(self.tracker2.tracks.get(cr["track_id"]), op)
-        return f"zoom karke dekha: {op['animal_label']} {op['animal']:.2f} vs person {op['person']:.2f}"
+        label = tr.zoom_label if tr is not None else op["animal_label"]
+        return f"zoom karke dekha: {label} {op['animal']:.2f} vs person {op['person']:.2f}"
 
     def _member(self, cat, cr, direction, now):
         tr = self.tracker2.tracks.get(cr["track_id"])
@@ -1030,6 +1046,10 @@ class SecurityEngine:
                 del self._groups[key]
                 crs = []
                 for m in g["crs"]:
+                    live = self.tracker2.tracks.get(m["cr"]["track_id"])
+                    if live is not None and category_of(live.label) == "animal":  # a zoomed look during the hold
+                        clog(f"person ignored: zoom ne {live.label} bataya — janwar hai (track {m['cr']['track_id']})")
+                        continue
                     # a vehicle may have crossed right AFTER the person was queued (driver sits ahead of the wheels)
                     why = self._with_vehicle(m["cr"]) if cat == "person" else ""
                     if why:

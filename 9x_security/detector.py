@@ -125,7 +125,11 @@ class VehicleDetector:
                 continue
             for box in r.boxes:
                 bx = tuple(map(int, box.xyxy[0].tolist()))
-                on_object = _iou(bx, obj) >= 0.3 or (bx[0] <= ocx <= bx[2] and bx[1] <= ocy <= bx[3])
+                # on the object: real overlap, or it contains the object's centre without being a much
+                # bigger neighbour (a cow beside a child must not veto the child)
+                area_ratio = ((bx[2] - bx[0]) * (bx[3] - bx[1])) / max(1, (obj[2] - obj[0]) * (obj[3] - obj[1]))
+                on_object = _iou(bx, obj) >= 0.3 or (
+                    bx[0] <= ocx <= bx[2] and bx[1] <= ocy <= bx[3] and area_ratio <= 3.0)
                 if not on_object:
                     continue
                 cid, c = int(box.cls[0]), float(box.conf[0])

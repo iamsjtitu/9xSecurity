@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="20" time="10.575" timestamp="2026-10-17T08:36:12.531396+00:00" hostname="agent-env-32b6130e-aa37-4e39-adf4-80664b6ba9ec"><testcase classname="tests.test_iter38_zoom_animal" name="test_dog_zoom_is_animal[fast-1.0]" time="2.328" /><testcase classname="tests.test_iter38_zoom_animal" name="test_dog_zoom_is_animal[fast-0.7]" time="0.176" /><testcase classname="tests.test_iter38_zoom_animal" name="test_dog_zoom_is_animal[fast-0.45]" time="0.129" /><testcase classname="tests.test_iter38_zoom_animal" name="test_person_zoom_is_person[fast-1.0]" time="0.398" /><testcase classname="tests.test_iter38_zoom_animal" name="test_person_zoom_is_person[fast-0.6]" time="0.395" /><testcase classname="tests.test_iter38_zoom_animal" name="test_robust_bboxes[fast]" time="0.983" /><testcase classname="tests.test_iter38_zoom_animal" name="test_dog_zoom_is_animal[accurate-1.0]" time="0.527" /><testcase classname="tests.test_iter38_zoom_animal" name="test_dog_zoom_is_animal[accurate-0.7]" time="0.363" /><testcase classname="tests.test_iter38_zoom_animal" name="test_dog_zoom_is_animal[accurate-0.45]" time="0.489" /><testcase classname="tests.test_iter38_zoom_animal" name="test_person_zoom_is_person[accurate-1.0]" time="1.304" /><testcase classname="tests.test_iter38_zoom_animal" name="test_person_zoom_is_person[accurate-0.6]" time="1.351" /><testcase classname="tests.test_iter38_zoom_animal" name="test_robust_bboxes[accurate]" time="1.565" /><testcase classname="tests.test_iter38_zoom_animal" name="test_patrol_only_within_band_and_throttled" time="0.079" /><testcase classname="tests.test_iter38_zoom_animal" name="test_person_with_dog_beside" time="0.031" /><testcase classname="tests.test_iter38_zoom_animal" name="test_group_count_ignores_zoom_animal" time="0.035" /><testcase classname="tests.test_iter38_zoom_animal" name="test_animal_verdict_blocks_later_crossing_short" time="0.032"><failure message="AssertionError: [{'id': 1, 'vehicle_type': 'person', 'category': 'person', 'count': 1, ...}]&#10;assert [{'id': 1, 'v...unt': 1, ...}] == []&#10;  &#10;  Left contains one more item: {'id': 1, 'vehicle_type': 'person', 'category': 'person', 'count': 1, ...}&#10;  Use -v to get more diff">tmp_path = PosixPath('/tmp/pytest-of-root/pytest-5/test_animal_verdict_blocks_lat0')
+
+    def test_animal_verdict_blocks_later_crossing_short(tmp_path):
+        """Dog verdict on the first look only; afterwards the zoom says person. Track crosses in and
+        straight back out: no Entry and no Exit."""
+        e = _engine(tmp_path, line=LINE, enable_person=True)
+        e.detector.second_opinion = _Zoom(lambda b, n: DOG if n == 1 else PERSON)
+        ys = list(range(150, 360, 6)) + list(range(360, 150, -6))
+        ev = _drive(e, [[d] for d in _walk(ys)])
+&gt;       assert [x for x in ev if x["category"] == "person"] == [], ev
+E       AssertionError: [{'id': 1, 'vehicle_type': 'person', 'category': 'person', 'count': 1, ...}]
+E       assert [{'id': 1, 'v...unt': 1, ...}] == []
+E         
+E         Left contains one more item: {'id': 1, 'vehicle_type': 'person', 'category': 'person', 'count': 1, ...}
+E         Use -v to get more diff
+
+tests/test_iter38_zoom_animal.py:152: AssertionError</failure></testcase><testcase classname="tests.test_iter38_zoom_animal" name="test_animal_verdict_blocks_later_crossing_lingering" time="0.041"><failure message="AssertionError: ([{'id': 1, 'vehicle_type': 'person', 'category': 'person', 'count': 1, ...}], ['person'], [(460, 92, 500, 192), (460, 194, 500, 294), (460, 242, 500, 342), (460, 248, 500, 348), (460, 200, 500, 300), (460, 164, 500, 264), ...])&#10;assert [{'id': 1, 'v...unt': 1, ...}] == []&#10;  &#10;  Left contains one more item: {'id': 1, 'vehicle_type': 'person', 'category': 'person', 'count': 1, ...}&#10;  Use -v to get more diff">tmp_path = PosixPath('/tmp/pytest-of-root/pytest-5/test_animal_verdict_blocks_lat1')
+
+    def test_animal_verdict_blocks_later_crossing_lingering(tmp_path):
+        """Same, but the dog lingers below the line ~10 s before going back out: the verdict must not be
+        diluted away by later 'person' frames (whole track = animal)."""
+        e = _engine(tmp_path, line=LINE, enable_person=True)
+        e.detector.second_opinion = _Zoom(lambda b, n: DOG if n == 1 else PERSON)
+        ys = list(range(150, 360, 6)) + [360] * 80 + list(range(360, 150, -6))
+        ev = _drive(e, [[d] for d in _walk(ys)])
+        tr_labels = [t.label for t in e.tracker2.tracks.values()]
+&gt;       assert [x for x in ev if x["category"] == "person"] == [], (ev, tr_labels, e.detector.second_opinion.calls)
+E       AssertionError: ([{'id': 1, 'vehicle_type': 'person', 'category': 'person', 'count': 1, ...}], ['person'], [(460, 92, 500, 192), (460, 194, 500, 294), (460, 242, 500, 342), (460, 248, 500, 348), (460, 200, 500, 300), (460, 164, 500, 264), ...])
+E       assert [{'id': 1, 'v...unt': 1, ...}] == []
+E         
+E         Left contains one more item: {'id': 1, 'vehicle_type': 'person', 'category': 'person', 'count': 1, ...}
+E         Use -v to get more diff
+
+tests/test_iter38_zoom_animal.py:164: AssertionError</failure></testcase><testcase classname="tests.test_iter38_zoom_animal" name="test_vehicle_never_zoomed_and_immediate" time="0.028" /><testcase classname="tests.test_iter38_zoom_animal" name="test_zoom_returns_none_does_not_block" time="0.025" /><testcase classname="tests.test_iter38_zoom_animal" name="test_full_res_original_box_scaled" time="0.019" /></testsuite></testsuites>

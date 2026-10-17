@@ -1,0 +1,35 @@
+{
+  "summary": "Backend-only testing of the zoomed animal second look (detector.second_opinion + engine _zoom_patrol/_animal_on_zoom). Main regression suite: 186 passed. Service suites (test_service_api, iter35_line2, iter32_live_api): 54 passed, 1 skipped. Real-YOLO E2E tests/zoom_real_yolo_check.py: PASS (dog 0 events, person 1 Entry). New file tests/test_iter38_zoom_animal.py: 18 of 20 pass. The real model works on BOTH tiers (yolov8n + yolov8s): dog crop at scales 1.0/0.7/0.45 gives animal >= 0.3 and person < 0.3; person crop at 1.0/0.6 gives person >= 0.5 and is not called an animal; boxes touching the edge, a box shifted 10 px, 10x10 and 2x2 boxes do not crash. Engine wiring with stubs: animal/person/raise/absent/None/hesitant all behave as specified; the patrol is throttled and only runs inside 1.5x the band; vehicles and motorcycles never call the zoom; person + dog beside it gives 1 alert; group of 2 persons + 1 zoom-animal gives count 2; the original frame is used at full resolution with the box scaled. Two problems: (1) the animal verdict is NOT sticky — later 'person' frames outvote it, so a later crossing of the same dog track alerts. (2) The E2E dog case proves nothing about the zoom: an A/B run of the same video with the zoom turned off also gives 0 events.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "engine._make_animal / tracker.Track.label (animal vote)", "issue": "The zoomed animal verdict wears off. _make_animal adds n = the current vote total to the animal label (50% share). Every later frame adds a 'person' vote, so once the track has about 2x more frames the share drops below ANIMAL_VOTE 25% and the label goes back to 'person'. Reproduced with a stub that says dog on the first look and person after that (an unlucky later look). The track crosses in and straight back out: no Entry, but the Exit IS sent as PERSON. Labels at the Exit were {person:52, dog:8}. The same thing happens when the dog stays below the line for 10 s. This breaks the spec rule that the whole track becomes an animal so no crossing of it can alert. Failing tests: test_animal_verdict_blocks_later_crossing_short and test_animal_verdict_blocks_later_crossing_lingering.", "priority": "HIGH"}
+    ],
+    "minor": [
+      {"endpoint": "tests/zoom_real_yolo_check.py (dog case)", "issue": "The dog case does not test the zoom. tests/zoom_offline_ab_check.py runs the real engine on the same dog video with second_opinion disabled and with it enabled, at scales 0.45, 0.7 and 1.0 and confidence 0.3 or 0.2. Both give 0 events. After sanitising, only 4-12 frames contain a 'person', so no person track ever crosses. The only log line was the old 'person box ignored: chhota aur ansure (18x33, conf 0.31)'. No 'zoom karke dekha' line ever appeared. The PASS is vacuous for the new feature."},
+      {"endpoint": "engine.flush_pending", "issue": "A queued person-group member is not re-checked against the live track label at flush time. If the patrol makes the track an animal after it was queued (during PERSON_GROUP_S), the event is still sent."},
+      {"endpoint": "engine._zoom_patrol", "issue": "The docstring says 'while approaching', but there is no direction check. Looks also run after the crossing while the track is still in the band. This only costs CPU."},
+      {"endpoint": "detector.second_opinion on_object test", "issue": "A box counts as 'on the object' if it contains the subject's centre. A big animal box next to a small person (a child beside a cow or horse, a person leading a horse) can contain the person's centre. Then animal >= 0.7 x person and the real person is rejected. Possible false negative; there is no test asset for it."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/9x_security/tests/test_iter38_zoom_animal.py", "/app/9x_security/tests/zoom_offline_ab_check.py", "/app/test_reports/pytest/iteration_38.xml"],
+  "action_items": [
+    "Make the zoom animal verdict sticky. Example: in _make_animal set tr.zoom_animal = op['animal_label'], and have Track.label return it whenever it is set. Or skip person votes after the verdict. Then rerun tests/test_iter38_zoom_animal.py::test_animal_verdict_blocks_later_crossing_*.",
+    "Make the E2E dog scenario discriminating: a video where, with the zoom disabled, the dog does produce a person crossing. Verify with tests/zoom_offline_ab_check.py (zoom=False must give 1 event and zoom=True 0). Also check that camera_log shows 'zoom karke dekha'.",
+    "In flush_pending, re-read the live tracker2 label for each queued person member and drop members that are now an animal.",
+    "Optional: limit on_object to IoU >= 0.3 (or require the animal box to overlap the subject box mostly) so a large neighbouring animal box cannot veto a real person."
+  ],
+  "critical_code_review_comments": [
+    "engine.py is 1300 lines; split the zoom/person logic into its own module.",
+    "_make_animal with n=0 is a no-op (cannot happen today, since a Track starts with 1 vote).",
+    "The second_opinion crop is a square with half-side = grow x max(w,h), so the side is 3x the box, not 1.5x. Fine for accuracy, but the docstring/spec wording differs."
+  ],
+  "updated_files": ["/app/9x_security/tests/test_iter38_zoom_animal.py (new)", "/app/9x_security/tests/zoom_offline_ab_check.py (new)"],
+  "success_rate": {"backend": "~99% of existing suites (240/240 + E2E PASS); new iter38 tests 18/20 (90%)", "frontend": "not tested (backend only)"},
+  "test_credentials": "admin / 9xsecurity (unchanged; test_service_api re-hashes it, so auth_salt/hash differ in git diff but login works)",
+  "seed_data_creation": "None. The temp camera 'Zoom E2E' was deleted by the harness. events.db has 0 events. All snapshot files created during this session were deleted (snapshots/ removed). cam1 was restored to line {0.1,0.2,0.9,0.8}, entry pos, line2 null, detector_model auto, enable_person false, confidence 0.35.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run tests/test_iter38_zoom_animal.py: the 2 later-crossing tests must pass after the sticky-verdict fix. Use tests/zoom_offline_ab_check.py <scale> <image> <conf> to check whether a real-video scenario actually depends on the zoom. Service on 8971 was up the whole time. test_service_api flips entry_direction to 'neg' and moves the line; restore with POST /api/swap and /api/line.",
+  "rca of the issue": "Track.label decides 'animal' by share of frame votes (ANIMAL_VOTE 0.25). _make_animal injects a one-off boost equal to the votes so far, while tracker.update keeps adding a 'person' vote for every frame. Once later frames exceed ~2x the frames before the verdict, the share is under 25%. The label flips back to person, the patrol looks again (only labels that read 'person' are looked at), and the final pre-alert look is the only guard left. Repro: the stub returns dog on look #1 and person afterwards, and the walker goes y 150->360->150 over a line at y=270, giving Exit PERSON. Fix: keep a permanent per-track flag."
+}

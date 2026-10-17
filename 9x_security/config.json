@@ -9,7 +9,7 @@
   "entry_direction": "pos",
   "line2": null,
   "entry_direction2": "",
-  "confidence": 0.4,
+  "confidence": 0.35,
   "detector_model": "auto",
   "detect_frame_skip": 2,
   "enable_plate": false,

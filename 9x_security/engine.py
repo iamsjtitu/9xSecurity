@@ -33,6 +33,9 @@ SAME_SPOT_S = 1.0        # the plain 'same spot' test only within this: later, t
 PERSON_MIN_ASPECT = 1.3  # a standing/walking human box is at least this much taller than wide (dog/cat ~0.8-1.2)
 PERSON_SMALL_H = 0.08    # a 'person' shorter than this fraction of the frame needs a confident detection...
 PERSON_SMALL_CONF = 0.45  # ... (far dogs/cats/bags at night come as hesitant small 'person' boxes)
+ZOOM_ANIMAL_CONF = 0.30   # zoomed second look: an animal class at least this sure ...
+ZOOM_ANIMAL_RATIO = 0.7   # ... and at least this fraction of the zoomed 'person' score => it IS an animal
+ZOOM_EVERY_S = 1.0        # a 'person' track approaching the line gets a zoomed look this often
 PERSON_VEHICLE_S = float(os.environ.get("PERSON_VEHICLE_S", "6"))  # person crossing within this of a vehicle at the same spot = rider/driver
 RIDER_GROW = 0.25       # vehicle box grown by this fraction when testing 'person ON/WITH the vehicle'
 RIDER_MIN_OVERLAP = 0.2  # >= this fraction of the person's box inside the grown vehicle box
@@ -783,6 +786,7 @@ class SecurityEngine:
             crossings += self._dedupe_crossings(crs, which)
         self._log_rejects()
         self._update_motion(time.time())
+        self._zoom_patrol(frame, original, w, h, time.time())
         self._update_line_hints(a, b, w, h, a2, b2)
         if self.cfg.get("enable_plate") and self.plate_reader is not None:
             self._update_best_crops(frame, original, w, h)
@@ -791,6 +795,9 @@ class SecurityEngine:
         now = time.time()
         self._recent_vehicle_cross = [r for r in self._recent_vehicle_cross if now - r[0] < PERSON_VEHICLE_S]
         for cr in crossings:
+            live = self._tracker(cr["which"]).tracks.get(cr["track_id"])
+            if live is not None:
+                cr["label"] = live.label  # latest vote (a zoomed look this frame may have made it an animal)
             cat = category_of(cr["label"])
             direction = self._direction_for(cr["to_side"], cr["which"])
             if cat in ("vehicle", "two_wheeler"):
@@ -805,6 +812,10 @@ class SecurityEngine:
                 why = self._with_vehicle(cr)
                 if why:
                     clog(f"person ignored: {why} — gaadi/bike ke saath hai, akela paidal nahi (track {cr['track_id']})")
+                    continue
+                why = self._animal_on_zoom(frame, original, cr, w, h)
+                if why:
+                    clog(f"person ignored: {why} — janwar hai, insaan nahi (track {cr['track_id']})")
                     continue
                 self._queue_group(cat, frame, cr, direction, now)
             else:
@@ -885,6 +896,63 @@ class SecurityEngine:
     def _is_moving(self, key, now):
         m = self._motion.get(key)
         return m is not None and now - m[0] < MOVING_S
+
+    def _zoom_look(self, frame, original, bbox, w, h):
+        """Run detector.second_opinion on the sharpest source we have (full-res frame if any)."""
+        look = getattr(self.detector, "second_opinion", None)
+        if look is None:
+            return None
+        x1, y1, x2, y2 = bbox
+        src, box = frame, bbox
+        if original is not None:  # full-res crop = even clearer animal
+            oh, ow = original.shape[:2]
+            sx, sy = ow / w, oh / h
+            src, box = original, (int(x1 * sx), int(y1 * sy), int(x2 * sx), int(y2 * sy))
+        try:
+            return look(src, box)
+        except Exception as ex:  # a failed second look must never block a real person alert
+            clog(f"zoom check failed: {ex}")
+            return None
+
+    @staticmethod
+    def _zoom_says_animal(op):
+        return bool(op) and op["animal"] >= ZOOM_ANIMAL_CONF and op["animal"] >= ZOOM_ANIMAL_RATIO * op["person"]
+
+    def _make_animal(self, tr, op):
+        """Turn the whole track into an animal: no crossing of it can alert from now on."""
+        if tr is None:
+            return
+        n = sum(tr.labels.values())
+        tr.labels[op["animal_label"]] += n
+        tr.label_w[op["animal_label"]] += op["animal"] * n
+
+    def _zoom_patrol(self, frame, original, w, h, now):
+        """Every ZOOM_EVERY_S, every 'person' track near the line gets a zoomed second look while it
+        is still approaching — several looks before the crossing, so one unlucky frame cannot let
+        a dog through."""
+        if not self.cfg.get("enable_person"):
+            return
+        band = 1.5 * self.tracker2.near_band
+        for tid, tr in self.tracker2.tracks.items():
+            if tr.disappeared or category_of(tr.label) != "person" or abs(tr.dist) > band:
+                continue
+            if now - getattr(tr, "zoom_ts", 0.0) < ZOOM_EVERY_S:
+                continue
+            tr.zoom_ts = now
+            op = self._zoom_look(frame, original, tr.bbox, w, h)
+            if self._zoom_says_animal(op):
+                self._make_animal(tr, op)
+                clog(f"track {tid} 'person' nahi — zoom karke dekha: {op['animal_label']} {op['animal']:.2f} "
+                     f"vs person {op['person']:.2f} — janwar, alert nahi hoga (box {tr.bbox})")
+
+    def _animal_on_zoom(self, frame, original, cr, w, h):
+        """Last zoomed look right before a person alert (user 17-10: dogs at night sent as PERSON —
+        tall and narrow when walking towards the camera, so the shape test cannot catch them)."""
+        op = self._zoom_look(frame, original, cr["bbox"], w, h)
+        if not self._zoom_says_animal(op):
+            return ""
+        self._make_animal(self.tracker2.tracks.get(cr["track_id"]), op)
+        return f"zoom karke dekha: {op['animal_label']} {op['animal']:.2f} vs person {op['person']:.2f}"
 
     def _member(self, cat, cr, direction, now):
         tr = self.tracker2.tracks.get(cr["track_id"])

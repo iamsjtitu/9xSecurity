@@ -7,7 +7,7 @@ HEAVY = ("bus", "truck")
 HEAVY_VOTE = 0.35    # confidence-weighted share of heavy (truck/bus) votes that makes a track heavy
 BUS_MIN_SHARE = 0.2  # inside 'heavy': 'bus' only when truck votes are below this share (decorated Indian trucks
                      # are called 'bus' by YOLO in many frames; a real bus almost never gets 'truck' votes)
-ANIMAL_LABELS = ("dog", "cat", "cow", "horse", "sheep", "bird")
+ANIMAL_LABELS = ("dog", "cat", "cow", "horse", "sheep", "bird", "elephant", "bear", "zebra", "giraffe")
 ANIMAL_VOTE = 0.25   # >= this share of frames called it an animal -> it is an animal, never a person
 TWO_WHEELER_LABELS = ("motorcycle", "bicycle")
 TWO_WHEELER_VOTE = 0.25  # a 'person' that was a motorcycle/bicycle in >= 25% of frames is the two-wheeler

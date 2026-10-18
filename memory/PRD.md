@@ -1267,3 +1267,22 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - ReportRangeCard moved under the camera (left column) for balance; .btn/.input/.card classes moved into
   @layer components so utilities (!pl-9 etc.) win. Tests: tests/test_iter44_range_search.py 6, agent
   tests/test_iter45_range_search_live.py 21 (live), all 85 report/plate tests green.
+
+## Implemented (update 2026-06 #68) — Daily/range reports = 4-wheelers only + vehicle-wise plate detail (self-tested: 88 report tests + 20 service API green, PDF rendered & inspected)
+- User: "Daily Report sirf 4 wheeler ka (truck, car..) — paidal / 2-wheeler nahi" + "detail me Car: ke neeche car number
+  entry - entry time, exit - exit time; same for trucks".
+- report.vehicles_only(events) / is_vehicle: row_key in VEHICLE_KEYS (truck/car/bus/tractor/other). generate() (daily WhatsApp
+  PDF + /api/report/daily) always filters; generate_range(..., include_all=False) filters by default, `all=1` on
+  /api/report/range(.pdf/.xlsx) includes persons & two-wheelers (file name gets `_all`). summary["vehicles_only"] flag;
+  caption + PDF/Excel header line "Sirf 4-wheeler … paidal aur 2-wheeler shamil nahi" / "Only 4-wheelers …".
+- PDF detail page replaced "All events": "Detail (N events)" grouped per type heading "Truck (n)" / "Car (n)" with columns
+  Number plate | Entry / Exit | Time | Gate; _detail_order = known plates first, same plate together (chronological ->
+  Entry then Exit), then "Not detected" by time. Time shows the date ("16-10 05:00 PM") whenever the window touches two
+  calendar dates (_spans_days: 09 PM->09 PM daily window, partial, ranges); time only for a 00:00 full-day report.
+  Day-wise table: Truck/Car/Bus/Tractor E/X (+2-whl/Person only with include_all). Excel Events sheet now Type | Plate |
+  Direction | Date | Time | Gate | Qty | Plate source | Photo, sorted type -> plate -> time; Day-wise sheet 13 cols (17 with all).
+- UI: DailyReportCard text + rows (no 2-wheeler/person rows); ReportRangeCard checkbox "Paidal / 2-wheeler bhi shamil karo"
+  (data-testid report-range-all-toggle) -> &all=1. Build OK.
+- Tests updated: iter42 (+test_vehicles_only_filter_and_detail_grouping), iter43 live (Entry 3 / Exit 2), iter44
+  (+test_generate_range_include_all), iter45 live (+test_range_all_types_option, xlsx 13 cols / 6 rows).
+- AWAITING USER: next scheduled PDF on Windows should list only trucks/cars etc. with plate-wise Entry/Exit detail.

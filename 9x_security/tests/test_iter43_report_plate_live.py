@@ -70,19 +70,19 @@ def test_report_summary_math(H):
     assert r.status_code == 200, r.text
     j = r.json()
     s = j["summary"]
-    assert s["date"] == DAY and s["events"] == 8
+    assert s["date"] == DAY and s["events"] == 5 and s["vehicles_only"] is True  # person + 2 two-wheelers dropped
     g = s["gates"]
     assert set(g) == {"Main Gate", "Back Gate", "Gate"}
     assert g["Main Gate"]["truck"] == {"Entry": 1, "Exit": 1}
-    assert g["Main Gate"]["person"] == {"Entry": 3, "Exit": 0}
-    assert g["Back Gate"]["two_wheeler"] == {"Entry": 1, "Exit": 1}
+    assert g["Main Gate"]["person"] == {"Entry": 0, "Exit": 0}
+    assert g["Back Gate"]["two_wheeler"] == {"Entry": 0, "Exit": 0}
     assert g["Gate"]["other"] == {"Entry": 1, "Exit": 0}
-    assert (s["entry"], s["exit"]) == (7, 3)
+    assert (s["entry"], s["exit"]) == (3, 2)
     assert j["pdf_url"] == f"/api/report/daily.pdf?date={DAY}"
     assert os.path.isfile(j["pdf_path"])
     cap = j["caption"]
-    assert "Total: Entry 7 / Exit 3" in cap and "tak ka hisaab" not in cap
-    assert "Tractor" not in cap  # zero rows omitted
+    assert "Total: Entry 3 / Exit 2" in cap and "tak ka hisaab" not in cap and "Sirf 4-wheeler" in cap
+    assert "Tractor" not in cap and "Person" not in cap and "Two-wheeler" not in cap  # zero rows omitted
 
 
 def test_report_today_partial_caption(H):
@@ -103,8 +103,10 @@ def test_report_pdf_content(tok):
     assert r.status_code == 200 and r.headers["content-type"].startswith("application/pdf")
     assert r.content.startswith(b"%PDF-") and len(r.content) > 1500
     text = "".join(p.get_text() for p in fitz.open(stream=r.content, filetype="pdf"))
-    for s in ("9x Security - Daily Report", "Gate: Main Gate", "MH12AB1234", "Not detected", "All events (8)", "All gates"):
+    for s in ("9x Security - Daily Report", "Gate: Main Gate", "MH12AB1234", "Not detected", "Detail (5 events)", "All gates",
+              "Truck (2)", "Car (1)", "Bus (1)", "Only 4-wheelers"):
         assert s in text, s
+    assert "Person" not in text and "Two-wheeler" not in text
 
 
 def test_report_pdf_single_gate_omits_all_gates(tok):
@@ -137,7 +139,7 @@ def test_report_send_no_wa_key(H):
     assert j["ok"] is False and j["detail"].startswith("API key khaali hai") and j["date"] == DAY
     assert j["pdf_path"].endswith(f"9x_Report_{DAY}.pdf")
     log = open(os.path.join(ROOT, "camera_log.txt"), encoding="utf-8", errors="ignore").read()[-20000:]
-    assert re.search(rf"daily report {DAY} \(manual\) \[.*\]: Entry 7 / Exit 3 -> PROBLEM", log), log[-600:]
+    assert re.search(rf"daily report {DAY} \(manual\) \[.*\]: Entry 3 / Exit 2 -> PROBLEM", log), log[-600:]
 
 
 # ---- settings

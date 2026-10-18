@@ -1,10 +1,10 @@
 {
   "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
   "line": {
-    "x1": 0.05,
-    "y1": 0.5,
-    "x2": 0.45,
-    "y2": 0.5
+    "x1": 0.1,
+    "y1": 0.2,
+    "x2": 0.9,
+    "y2": 0.8
   },
   "entry_direction": "neg",
   "line2": null,
@@ -54,8 +54,8 @@
   "capture_start": "18:00",
   "capture_end": "06:00",
   "daily_report_enabled": false,
-  "daily_report_time": "21:00",
-  "daily_report_last": "2026-10-17",
+  "daily_report_time": "13:28",
+  "daily_report_last": "2026-10-18",
   "person_chime_enabled": true,
   "vehicle_chime_enabled": true,
   "two_wheeler_chime_enabled": true,
@@ -74,14 +74,14 @@
       "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
       "rtsp_url_main": "",
       "line": {
-        "x1": 0.05,
-        "y1": 0.5,
-        "x2": 0.45,
-        "y2": 0.5
+        "x1": 0.1,
+        "y1": 0.2,
+        "x2": 0.9,
+        "y2": 0.8
       },
       "entry_direction": "neg",
       "ignore_zones": [],
-      "monitor": true,
+      "monitor": false,
       "schedule": {
         "enabled": false,
         "start": "20:00",
@@ -121,9 +121,9 @@
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "936e6468f01b40eb4e38525edb53e756",
-  "auth_hash": "ced0c0693eecd17c088a0bf07b144fe461b0dabddf4bbcbd3305b715b3181fbb",
+  "auth_salt": "dfabc471ab04c8d6c1e90c18eec54467",
+  "auth_hash": "5a0d2471c02770ca73d7c43b971e5414aa694b55df1bcbaa4e04e24109a19656",
   "github_repo": "",
-  "gh_token": "",
+  "gh_token": "TEST_GH",
   "rtsp_url_main": ""
 }

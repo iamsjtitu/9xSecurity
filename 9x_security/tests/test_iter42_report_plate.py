@@ -65,7 +65,7 @@ def test_build_pdf_has_tables_and_event_list(tmp_path):
     evs = [_ev("truck", "Entry", plate="MH12AB1234"), _ev("truck", "Exit"), _ev("person", "Entry", "Back", count=2),
            _ev("car", "Entry", gate="Gate \u0915")]  # non-latin gate name must not crash the core font
     s = report.summarize(evs, "2026-10-18", datetime(2026, 10, 17, 21), datetime(2026, 10, 18, 9), partial=True)
-    p = report.build_pdf(s, evs, str(tmp_path / "r.pdf"))
+    p = report.build_pdf(s, evs, str(tmp_path / "r.pdf"), include_all=True)
     raw = open(p, "rb").read()
     assert raw[:5] == b"%PDF-" and len(raw) > 1500
     import fitz
@@ -74,7 +74,41 @@ def test_build_pdf_has_tables_and_event_list(tmp_path):
     text = "\n".join(pg.get_text() for pg in doc)
     assert "9x Security - Daily Report" in text and "All gates" in text and "Gate: Main Gate" in text
     assert "MH12AB1234" in text and "Not detected" in text  # truck without plate
-    assert "All events (4)" in text and "now (09:00 AM)" in text and "Period:" in text
+    assert "Detail (4 events)" in text and "now (09:00 AM)" in text and "Period:" in text
+    assert "Truck (2)" in text and "Car (1)" in text and "Person (1)" in text and "2 together" in text  # include_all
+
+
+def test_vehicles_only_filter_and_detail_grouping(tmp_path):
+    """Daily report = 4-wheelers only; detail grouped per type, same plate's Entry+Exit together, times shown."""
+    evs = [_ev("car", "Exit", plate="MH12AB1234", ts="2026-10-18T18:30:00"), _ev("truck", "Entry", ts="2026-10-18T07:00:00"),
+           _ev("car", "Entry", plate="MH12AB1234", ts="2026-10-18T08:10:00"), _ev("motorcycle", "Entry"), _ev("person", "Exit", count=3),
+           _ev("car", "Entry", ts="2026-10-18T09:00:00"), _ev("truck", "Exit", plate="KA01MJ4567", ts="2026-10-18T17:00:00")]
+    kept = report.vehicles_only(evs)
+    assert [e["vehicle_type"] for e in kept] == ["car", "truck", "car", "car", "truck"]
+    s = report.summarize(kept, "2026-10-18", datetime(2026, 10, 17, 21), datetime(2026, 10, 18, 21), vehicles=True)
+    assert s["vehicles_only"] and s["events"] == 5 and (s["entry"], s["exit"]) == (3, 2)
+    assert s["total"]["person"] == {"Entry": 0, "Exit": 0} and s["total"]["two_wheeler"] == {"Entry": 0, "Exit": 0}
+    cap = report.caption(s)
+    assert "Sirf 4-wheeler" in cap and "Person" not in cap and "Two-wheeler" not in cap
+    p = report.build_pdf(s, kept, str(tmp_path / "v.pdf"))
+    import fitz
+
+    text = "\n".join(pg.get_text() for pg in fitz.open(p))
+    assert "Only 4-wheelers" in text and "Person" not in text and "Two-wheeler" not in text and "2-whl" not in text
+    assert "Truck (2)" in text and "Car (3)" in text and "Detail (5 events)" in text
+    # same car: Entry row then Exit row, before the unknown-plate car; truck block before car block
+    i_truck, i_car = text.index("Truck (2)"), text.index("Car (3)")
+    assert i_truck < i_car
+    car_part = text[i_car:]
+    # window 17th 09 PM -> 18th 09 PM touches two dates, so the date is shown with the time
+    e1, x1, nd = car_part.index("MH12AB1234\nEntry\n18-10 08:10 AM"), car_part.index("MH12AB1234\nExit\n18-10 06:30 PM"), car_part.index("Not detected")
+    assert e1 < x1 < nd
+    truck_part = text[i_truck:i_car]
+    assert "KA01MJ4567\nExit\n18-10 05:00 PM" in truck_part and truck_part.index("KA01MJ4567") < truck_part.index("Not detected")
+    # report time 00:00 = one calendar day -> time only
+    s0 = report.summarize(kept, "2026-10-18", datetime(2026, 10, 18, 0), datetime(2026, 10, 19, 0), vehicles=True)
+    text0 = "\n".join(pg.get_text() for pg in fitz.open(report.build_pdf(s0, kept, str(tmp_path / "v0.pdf"))))
+    assert "MH12AB1234\nEntry\n08:10 AM" in text0 and "18-10 08:10 AM" not in text0
 
 
 def test_build_pdf_single_gate_skips_all_gates_table(tmp_path):

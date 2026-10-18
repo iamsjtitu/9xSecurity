@@ -1730,35 +1730,38 @@ def _range_days(start, end):
 
 
 @app.get("/api/report/range")
-def report_range(request: Request, start: str = "", end: str = "", fmt: str = "pdf"):
-    """Summary + per-day breakdown for whole days start..end; writes the PDF/Excel into the reports
-    folder and returns its path (Electron opens it) plus download URLs (browser)."""
+def report_range(request: Request, start: str = "", end: str = "", fmt: str = "pdf", all: int = 0):  # noqa: A002
+    """Summary + per-day breakdown for whole days start..end (4-wheelers only; all=1 adds persons and
+    two-wheelers); writes the PDF/Excel into the reports folder and returns its path (Electron opens it)
+    plus download URLs (browser)."""
     _check(request)
     s, e = _range_days(start, end)
     fmt = "xlsx" if fmt == "xlsx" else "pdf"
+    inc = bool(all)
     with _report_lock:
-        summary, days, path = report.generate_range(_db, s, e, fmt)
-    clog(f"range report {s}..{e} ({fmt}): {summary['events']} events, Entry {summary['entry']} / Exit {summary['exit']}")
+        summary, days, path = report.generate_range(_db, s, e, fmt, include_all=inc)
+    clog(f"range report {s}..{e} ({fmt}{', all types' if inc else ''}): {summary['events']} events, "
+         f"Entry {summary['entry']} / Exit {summary['exit']}")
+    q = f"start={s}&end={e}" + ("&all=1" if inc else "")
     return {"summary": summary, "days": days, "period": report.period_text(summary), "path": path,
-            "folder": report.REPORT_DIR, "pdf_url": f"/api/report/range.pdf?start={s}&end={e}",
-            "xlsx_url": f"/api/report/range.xlsx?start={s}&end={e}"}
+            "folder": report.REPORT_DIR, "pdf_url": f"/api/report/range.pdf?{q}", "xlsx_url": f"/api/report/range.xlsx?{q}"}
 
 
 @app.get("/api/report/range.pdf")
-def report_range_pdf(request: Request, start: str = "", end: str = ""):
+def report_range_pdf(request: Request, start: str = "", end: str = "", all: int = 0):  # noqa: A002
     _check(request)
     s, e = _range_days(start, end)
     with _report_lock:
-        _summary, _days, path = report.generate_range(_db, s, e, "pdf")
+        _summary, _days, path = report.generate_range(_db, s, e, "pdf", include_all=bool(all))
     return FileResponse(path, media_type="application/pdf", filename=os.path.basename(path))
 
 
 @app.get("/api/report/range.xlsx")
-def report_range_xlsx(request: Request, start: str = "", end: str = ""):
+def report_range_xlsx(request: Request, start: str = "", end: str = "", all: int = 0):  # noqa: A002
     _check(request)
     s, e = _range_days(start, end)
     with _report_lock:
-        _summary, _days, path = report.generate_range(_db, s, e, "xlsx")
+        _summary, _days, path = report.generate_range(_db, s, e, "xlsx", include_all=bool(all))
     return FileResponse(path, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         filename=os.path.basename(path))
 

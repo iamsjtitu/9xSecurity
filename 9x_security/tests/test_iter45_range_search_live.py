@@ -84,20 +84,28 @@ def test_range_summary_and_days(H):
     assert r.status_code == 200, r.text
     j = r.json()
     s = j["summary"]
-    assert s["events"] == 7 and s["entry"] == 4 and s["exit"] == 4  # person x2
+    assert s["events"] == 5 and s["entry"] == 3 and s["exit"] == 2 and s["vehicles_only"]  # bike + 2 persons dropped
     assert s["start_day"] == START and s["end_day"] == END
     assert s["total"]["truck"] == {"Entry": 2, "Exit": 1}
-    assert s["total"]["two_wheeler"]["Entry"] == 1
-    assert s["gates"]["Back"]["person"]["Exit"] == 2
+    assert s["total"]["two_wheeler"]["Entry"] == 0
+    assert s["gates"]["Back"]["person"]["Exit"] == 0
     days = j["days"]
     assert [d["date"] for d in days] == list(reversed(D))
-    assert days[0]["events"] == 2 and days[1]["events"] == 0 and days[1]["entry"] == 0 and days[2]["events"] == 2
-    assert days[4]["exit"] == 2 and days[6]["entry"] == 1 and days[6]["exit"] == 1
-    assert sum(d["events"] for d in days) == 7
+    assert days[0]["events"] == 2 and days[1]["events"] == 0 and days[1]["entry"] == 0 and days[2]["events"] == 1
+    assert days[4]["exit"] == 0 and days[6]["entry"] == 1 and days[6]["exit"] == 1
+    assert sum(d["events"] for d in days) == 5
     assert "se" in j["period"] and "(7 din)" in j["period"]
     assert j["path"].endswith(f"9x_Report_{START}_to_{END}.pdf") and os.path.exists(j["path"])
     assert j["pdf_url"] == f"/api/report/range.pdf?start={START}&end={END}"
     assert j["xlsx_url"] == f"/api/report/range.xlsx?start={START}&end={END}"
+
+
+def test_range_all_types_option(H):
+    j = requests.get(f"{BASE}/api/report/range", params={"start": START, "end": END, "all": 1}, headers=H, timeout=60).json()
+    s = j["summary"]
+    assert s["events"] == 7 and s["entry"] == 4 and s["exit"] == 4 and not s["vehicles_only"]  # person x2
+    assert s["total"]["two_wheeler"]["Entry"] == 1 and s["gates"]["Back"]["person"]["Exit"] == 2
+    assert j["pdf_url"].endswith("&all=1") and j["path"].endswith("_all.pdf")
 
 
 def test_range_xlsx_fmt_path(H):
@@ -134,8 +142,9 @@ def test_range_pdf_download(tok):
     import fitz
 
     text = "\n".join(p.get_text() for p in fitz.open(stream=r.content, filetype="pdf"))
-    assert "9x Security - Report" in text and "Day-wise (7 days)" in text and "All events (7)" in text
+    assert "9x Security - Report" in text and "Day-wise (7 days)" in text and "Detail (5 events)" in text
     assert "TQ45AB9876" in text and "TQ45CD9876" in text and "Not detected" in text
+    assert "Truck (3)" in text and "Car (2)" in text and "Person" not in text and "Only 4-wheelers" in text
     dd = datetime.strptime(D[6], "%Y-%m-%d").strftime("%d-%m")
     assert f"{dd} 09:30 AM" in text
 
@@ -158,12 +167,14 @@ def test_range_xlsx_download(tok):
     rows = [[c.value for c in row] for row in wb["Summary"].iter_rows()]
     assert ["Gate", "Type", "Entry", "Exit", "Total"] in rows
     assert any(r_ and r_[0] == "All gates" for r_ in rows)
-    assert ["Main", "TOTAL", 2, 1, 3] in rows and ["Back", "TOTAL", 2, 3, 5] in rows
+    assert ["Main", "TOTAL", 2, 1, 3] in rows and ["Back", "TOTAL", 1, 1, 2] in rows
     wd = wb["Day-wise"]
-    assert wd.max_row == 8 and wd.max_column == 17
+    assert wd.max_row == 8 and wd.max_column == 13  # no 2-wheeler / person columns
     we = wb["Events"]
-    assert [c.value for c in we[1]] == ["Date", "Time", "Gate", "Type", "Direction", "Qty", "Plate", "Plate source", "Photo"]
-    assert we.max_row == 8 and we.freeze_panes == "A2"
+    assert [c.value for c in we[1]] == ["Type", "Plate", "Direction", "Date", "Time", "Gate", "Qty", "Plate source", "Photo"]
+    assert we.max_row == 6 and we.freeze_panes == "A2"
+    assert [we.cell(r, 2).value for r in range(2, 5)] == ["TQ45AB9876", "TQ45AB9876", "TQ45AB9876"]  # same truck together
+    assert [we.cell(r, 3).value for r in range(2, 5)] == ["Entry", "Exit", "Entry"]  # chronological within the plate
     # column widths bounded
     for ws in wb.worksheets:
         for k, dim in ws.column_dimensions.items():

@@ -15,13 +15,14 @@ export default function ReportRangeCard({ showToast }) {
   const [[start, end], setRange] = useState(PRESETS[1][1]());
   const [busy, setBusy] = useState('');
   const [last, setLast] = useState(null);
+  const [all, setAll] = useState(false);
 
   const download = async (fmt) => {
     if (!start || !end) return;
     if (end < start) { showToast("'Se' date 'Tak' date se pehle honi chahiye", 'error'); return; }
     setBusy(fmt);
     try {
-      const r = await api(`/api/report/range?start=${start}&end=${end}&fmt=${fmt}`, { timeout: 180000 });
+      const r = await api(`/api/report/range?start=${start}&end=${end}&fmt=${fmt}${all ? '&all=1' : ''}`, { timeout: 180000 });
       setLast(r);
       if (window.native?.openFile) {
         const res = await window.native.openFile(r.path);
@@ -68,11 +69,22 @@ export default function ReportRangeCard({ showToast }) {
       </div>
       {last && (
         <div className="text-xs text-slate-500" data-testid="report-range-result">
-          {last.period}: <b>{last.summary.entry}</b> Entry / <b>{last.summary.exit}</b> Exit · {last.summary.events} events
+          {last.period}: <b>{last.summary.entry}</b> Entry / <b>{last.summary.exit}</b> Exit · {last.summary.events} gaadiyan
           {last.summary.total?.truck && ` · Truck ${last.summary.total.truck.Entry}/${last.summary.total.truck.Exit}`}
+          {last.summary.total?.car && ` · Car ${last.summary.total.car.Entry}/${last.summary.total.car.Exit}`}
         </div>
       )}
-      <p className="text-[11px] text-slate-400">Gate-wise aur din-wise ginti + har gaadi ki list (time, gate, number). Excel me photo ka path bhi hai.</p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[11px] text-slate-400">
+          Sirf 4-wheeler (Truck / Car / Bus / Tractor): gate-wise aur din-wise ginti + har gaadi ka number, Entry/Exit aur time
+          (ek hi gaadi ki Entry-Exit saath me). Excel me photo ka path bhi hai.
+        </p>
+        <label className="flex items-center gap-1.5 text-[11px] text-slate-500 cursor-pointer">
+          <input type="checkbox" className="h-3.5 w-3.5 accent-[#1f6feb]" checked={all} onChange={(e) => setAll(e.target.checked)}
+            data-testid="report-range-all-toggle" />
+          Paidal / 2-wheeler bhi shamil karo
+        </label>
+      </div>
     </div>
   );
 }

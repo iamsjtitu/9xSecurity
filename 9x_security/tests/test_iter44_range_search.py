@@ -39,17 +39,30 @@ def test_range_window_validation():
 
 def test_generate_range_month_pdf(db):
     summary, days, path = report.generate_range(db, "2026-10-01", "2026-10-31", "pdf")
-    assert summary["events"] == 5 and summary["entry"] == 3 and summary["exit"] == 3  # person x2 exit counts members
-    assert summary["total"]["truck"] == {"Entry": 1, "Exit": 1} and summary["gates"]["Back"]["person"]["Exit"] == 2
+    assert summary["events"] == 3 and summary["entry"] == 2 and summary["exit"] == 1  # 4-wheelers only: bike + persons dropped
+    assert summary["vehicles_only"] and summary["total"]["truck"] == {"Entry": 1, "Exit": 1} and "Back" not in summary["gates"]
     assert len(days) == 31 and days[0]["date"] == "2026-10-01" and days[0]["entry"] == 1 and days[0]["exit"] == 1
-    assert days[30]["events"] == 2 and days[14]["total"]["car"]["Entry"] == 1 and days[1]["events"] == 0
+    assert days[30]["events"] == 0 and days[14]["total"]["car"]["Entry"] == 1 and days[1]["events"] == 0
     assert report.period_text(summary) == "01-10-2026 se 31-10-2026 tak (31 din)"
     assert path.endswith("9x_Report_2026-10-01_to_2026-10-31.pdf") and open(path, "rb").read(5) == b"%PDF-"
     import fitz
 
     text = "\n".join(p.get_text() for p in fitz.open(path))
-    assert "9x Security - Report" in text and "Day-wise (31 days)" in text and "All events (5)" in text
+    assert "9x Security - Report" in text and "Day-wise (31 days)" in text and "Detail (3 events)" in text
     assert "MH12AB1234" in text and "KA01MJ4567" not in text and "01-10 09:00 AM" in text  # date shown in multi-day lists
+    assert "Truck (2)" in text and "Car (1)" in text and "Person" not in text and "2-whl" not in text
+
+
+def test_generate_range_include_all(db):
+    summary, days, path = report.generate_range(db, "2026-10-01", "2026-10-31", "pdf", include_all=True)
+    assert summary["events"] == 5 and summary["entry"] == 3 and summary["exit"] == 3  # person x2 exit counts members
+    assert not summary["vehicles_only"] and summary["gates"]["Back"]["person"]["Exit"] == 2 and days[30]["events"] == 2
+    assert path.endswith("9x_Report_2026-10-01_to_2026-10-31_all.pdf")
+    import fitz
+
+    text = "\n".join(p.get_text() for p in fitz.open(path))
+    assert "Detail (5 events)" in text and "Person (1)" in text and "Two-wheeler (1)" in text and "2-whl E/X" in text
+    assert "Only 4-wheelers" not in text
 
 
 def test_generate_range_single_day_is_daily(db):
@@ -62,7 +75,7 @@ def test_generate_range_single_day_is_daily(db):
 
 
 def test_generate_range_xlsx(db):
-    summary, days, path = report.generate_range(db, "2026-10-01", "2026-10-31", "xlsx")
+    summary, days, path = report.generate_range(db, "2026-10-01", "2026-10-31", "xlsx", include_all=True)
     assert path.endswith(".xlsx") and os.path.getsize(path) > 4000
     from openpyxl import load_workbook
 
@@ -77,8 +90,11 @@ def test_generate_range_xlsx(db):
     wd = wb["Day-wise"]
     assert wd.max_row == 32 and wd["A2"].value == "01-10-2026" and wd["B2"].value == 1 and wd["D2"].value == 1
     we = wb["Events"]
-    assert we.max_row == 6 and we["G2"].value == "MH12AB1234" and we["H2"].value == "cloud" and we["I2"].value == "/s/1.jpg"
-    assert we["G4"].value == "Not detected" and we["G5"].value == "-"  # car without plate / two-wheeler
+    assert [c.value for c in we[1]] == ["Type", "Plate", "Direction", "Date", "Time", "Gate", "Qty", "Plate source", "Photo"]
+    assert we.max_row == 6 and we["B2"].value == "MH12AB1234" and we["H2"].value == "cloud" and we["I2"].value == "/s/1.jpg"
+    assert [we.cell(r, 1).value for r in range(2, 7)] == ["Truck", "Truck", "Car", "Two-wheeler", "Person"]  # type-wise
+    assert we["C2"].value == "Entry" and we["C3"].value == "Exit"  # same plate: Entry then Exit
+    assert we["B4"].value == "Not detected" and we["B5"].value == "-"  # car without plate / two-wheeler
     assert we.freeze_panes == "A2"
 
 

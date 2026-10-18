@@ -4,8 +4,7 @@ import { api, BASE, getToken } from '../api';
 import TimeField from './TimeField.jsx';
 
 const ROWS = [
-  ['truck', '🚛 Truck'], ['car', '🚗 Car'], ['bus', '🚌 Bus'], ['tractor', '🚜 Tractor'],
-  ['two_wheeler', '🏍️ Two-wheeler'], ['person', '👤 Person'], ['other', '🚙 Other'],
+  ['truck', '🚛 Truck'], ['car', '🚗 Car'], ['bus', '🚌 Bus'], ['tractor', '🚜 Tractor'], ['other', '🚙 Other'],
 ];
 
 export default function DailyReportCard({ s, set, showToast }) {
@@ -62,9 +61,10 @@ export default function DailyReportCard({ s, set, showToast }) {
         <FileText size={15} className="text-[#1f6feb]" /> Daily PDF Report — din bhar ki Entry/Exit ginti WhatsApp par
       </div>
       <p className="text-xs text-slate-400 -mt-1">
-        Roz set kiye time par ek PDF jayegi: har gate ke liye Truck / Car / Bus / Two-wheeler / Person ki Entry aur Exit ginti,
-        saath me poori event list (time, gate, number). Har report <b>pichhle 24 ghante</b> (kal is time se aaj is time tak) cover
-        karti hai — koi gaadi chhootti nahi, koi do baar nahi ginti. Upar wale numbers/groups par jayegi.
+        Roz set kiye time par ek PDF jayegi — <b>sirf 4-wheeler</b> (Truck / Car / Bus / Tractor; paidal aur 2-wheeler nahi):
+        har gate ki Entry aur Exit ginti, aur neeche gaadi-wise detail — Car / Truck ke neeche har gaadi ka number, Entry ya Exit
+        aur time (ek hi gaadi ki Entry-Exit saath me; number na mila to "Not detected"). Har report <b>pichhle 24 ghante</b>
+        (kal is time se aaj is time tak) cover karti hai — koi gaadi chhootti nahi, koi do baar nahi ginti. Upar wale numbers/groups par jayegi.
       </p>
       <label className="flex items-center gap-2.5 text-sm text-slate-700 cursor-pointer">
         <input type="checkbox" className="h-4 w-4 accent-[#1f6feb]" checked={on}

@@ -1,0 +1,39 @@
+{
+  "summary": "Iteration 42 features tested: Daily PDF report, Plate Recognizer cloud settings and key check, and the startup card. Backend unit/regression: test_iter42_report_plate (37) + iter40 + iter41 = 79 passed; test_plate_fmt/test_outbox/test_wa_phototest passed; test_engine.py (run alone) 19 passed. New live API suite tests/test_iter43_report_plate_live.py: 18/20 passed. Its 2 failures come from one real bug: daily_report_time '25:99' passes the HH:MM regex, then report.mark_baseline raises ValueError and POST /api/settings returns HTTP 500. Summary math was exact (person count=3, motorcycle+bicycle -> two_wheeler, van -> other, blank gate -> 'Gate'). Caption and PDF content were also correct (title, Gate: Main Gate, MH12AB1234, Not detected, All events (8), All gates omitted with a single gate). Invalid dates return 400; requests without auth return 401. report/send with no WA key -> ok:false 'API key khaali hai' plus the camera_log line. FAKEKEY123 -> 'HTTP 403: API key galat hai'; an empty key -> 'API key khaali hai'. pr_mode coercion and visible-key clearing work. Frontend (localhost:5173): login and force password change work. Number Plate tab: key check button disabled when the key is empty; a fake key shows the red result and an error toast; the help box and link are present; toggle + key + fallback persist after reload; restore saved with toast. WhatsApp tab daily-report-card: the today box shows only non-zero rows plus truck/car. The time field is disabled while the feature is off, and 11:30 PM is saved. After saving, daily-report-next showed 'agli PDF aaj 11:30 PM' and persisted after reload. 'Aaj ki PDF dekho' opens a new tab requesting /api/report/daily.pdf?date=today&t=... with no error toast. The send button shows 'API key khaali hai' and an error toast. Timing tab: startup-card text mentions the watchdog and netplwiz, auto-start-toggle is disabled, and no status chips are shown. No console errors on these tabs; the only 404s are /api/frame from the dashboard live view while the camera is offline, which is pre-existing.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "POST /api/settings", "issue": "daily_report_time like '25:99' or '24:00' passes the regex ^\\d{1,2}:\\d{2}$. With daily_report_enabled on, report.mark_baseline calls now.replace(hour=25), raises ValueError, and the server returns HTTP 500. With the feature off, the invalid time is saved silently; due_days then returns [] and next_run returns '', so no report is ever sent.", "priority": "HIGH"}
+    ],
+    "minor": [
+      {"endpoint": "report.due_days / design", "issue": "Today's report is sent at the set time as a partial report ('aaj HH:MM tak'). No report ever covers events between the report time and midnight, so every day's late-evening entries are missing. Consider sending yesterday's full-day report, or a delta report."},
+      {"endpoint": "GET /api/report/daily?date=2026-1-5", "issue": "strptime accepts dates without zero padding, but the DB filters on the exact string 'date = ?', so the result is an empty report instead of a 400 or a normalised date."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Settings > WhatsApp > Daily PDF Report", "issues": ["'Aakhri report: 2026-10-17' appears right after the feature is enabled, but that date is only the baseline written by mark_baseline; no report was sent. Hide it or relabel it.", "The 'Aaj ab tak' box loads once on mount and does not refresh after 'Abhi bhejo' or over time."]}
+    ]
+  },
+  "test_report_links": ["/app/9x_security/tests/test_iter43_report_plate_live.py", "/app/test_reports/pytest/iter43.xml"],
+  "action_items": [
+    "Validate daily_report_time range (00-23 : 00-59) in save_settings and return 400; make report.mark_baseline robust (catch ValueError around now.replace).",
+    "Decide on and handle the gap between report time and midnight (e.g. the day's full PDF next morning, or note the cut-off in the caption).",
+    "Normalise or strictly validate the report date (zero-padded YYYY-MM-DD).",
+    "Do not show the baseline daily_report_last as 'Aakhri report' when nothing was sent."
+  ],
+  "critical_code_review_comments": [
+    "service.py is about 2000 lines and engine.py about 1400; consider splitting the report and plate routes into modules.",
+    "The PDF is opened with the auth token in the URL query (?t=); acceptable for a local app, but the token ends up in browser history.",
+    "In _daily_report_loop a failed send still marks the day as sent (by design). The failure is only in camera_log and there is no UI indicator."
+  ],
+  "updated_files": ["/app/9x_security/tests/test_iter43_report_plate_live.py"],
+  "success_rate": {"backend": "95% (18/20 live, 2 failures are the same 25:99 bug; 100% of existing unit suites)", "frontend": "100%"},
+  "seed_data_creation": "Seeded rows with image_path '/tmp/TEST_iter43.jpg' for 2026-09-14, 2026-09-15, today and yesterday; all deleted afterwards (the 9 pre-existing rows are untouched). The live test file seeds and cleans up by itself.",
+  "test_credentials": "admin / 9xsecurity (restored; must_change_password=true again as expected)",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Container clock is 2026-10-18. Settings restored: daily_report_enabled=false, daily_report_time=21:00, pr_enabled=false, pr_api_key='', pr_mode=always. Run tests/test_iter43_report_plate_live.py against the live service. After the 25:99 fix it should pass 20/20. Headless chromium shows the PDF popup URL as ':' (download), so verify via the request URL instead.",
+  "rca of the issue": "save_settings checks daily_report_time only with the regex ^\\d{1,2}:\\d{2}$, never the range. report.mark_baseline's try only wraps the int() parse, not now.replace(hour=hh, minute=mm), so an out-of-range time raises ValueError and becomes HTTP 500. Repro: POST /api/settings {daily_report_enabled:true, daily_report_time:'25:99'} -> 500. Fix: validate 0<=hh<=23, 0<=mm<=59 and return 400; wrap replace() in try."
+}

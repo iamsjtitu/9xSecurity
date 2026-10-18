@@ -1329,6 +1329,7 @@ def get_settings(request: Request):
     out["enable_two_wheeler"] = bool(cfg.get("enable_two_wheeler"))
     out["gh_token_builtin"] = bool(updater.DEFAULT_TOKEN)
     out["daily_report_last"] = cfg.get("daily_report_last", "")
+    out["daily_report_sent_at"] = cfg.get("daily_report_sent_at", "")
     out["daily_report_next"] = report.next_run(cfg) if cfg.get("daily_report_enabled") else ""
     return out
 
@@ -1364,8 +1365,8 @@ def save_settings(body: dict, request: Request):
     for k in ("person_chime_start", "person_chime_end"):
         if k in body and not re.match(r"^\d{1,2}:\d{2}$", str(body[k])):
             cfg[k] = config.DEFAULTS[k]  # garbage time -> default, never a broken window
-    if "daily_report_time" in body and not re.match(r"^\d{1,2}:\d{2}$", str(body["daily_report_time"])):
-        raise HTTPException(400, "Report ka time HH:MM me hona chahiye (jaise 21:00)")
+    if "daily_report_time" in body and report.parse_time(body["daily_report_time"], default=None) is None:
+        raise HTTPException(400, "Report ka time HH:MM (00:00-23:59) me hona chahiye, jaise 21:00")
     if "daily_report_enabled" in body:
         cfg["daily_report_enabled"] = bool(body["daily_report_enabled"])
     if "pr_enabled" in body:
@@ -1645,11 +1646,16 @@ _report_lock = threading.Lock()
 def _send_daily_report(day, manual=False):
     """Build the PDF for `day` and WhatsApp it to every recipient. Returns (ok, detail, pdf_path)."""
     with _report_lock:
-        summary, path, text = report.generate(_db, day)
-        _outbox_sender.update(_cfg())
+        cfg = _cfg()
+        summary, path, text = report.generate(_db, day, cfg)
+        _outbox_sender.update(cfg)
         ok, detail = _outbox_sender.send_report(text, path)
-    clog(f"daily report {day}{' (manual)' if manual else ''}: Entry {summary['entry']} / Exit {summary['exit']} "
-         f"-> {'SENT' if ok else 'PROBLEM'}: {' | '.join(detail.splitlines())[:300]}")
+    clog(f"daily report {day}{' (manual)' if manual else ''} [{report.period_text(summary)}]: Entry {summary['entry']} / "
+         f"Exit {summary['exit']} -> {'SENT' if ok else 'PROBLEM'}: {' | '.join(detail.splitlines())[:300]}")
+    if ok or "queue me" in detail:
+        cfg = _cfg()
+        cfg["daily_report_sent_at"] = datetime.now().isoformat(timespec="seconds")
+        config.save_config(cfg)
     return ok, detail, path
 
 
@@ -1678,21 +1684,21 @@ def _daily_report_loop():
 def _report_day(date):
     day = str(date or "").strip() or datetime.now().strftime("%Y-%m-%d")
     try:
-        datetime.strptime(day, "%Y-%m-%d")
+        return datetime.strptime(day, "%Y-%m-%d").strftime("%Y-%m-%d")  # normalised (2026-1-5 -> 2026-01-05)
     except ValueError:
         raise HTTPException(400, "date YYYY-MM-DD me hona chahiye")
-    return day
 
 
 @app.get("/api/report/daily")
 def report_daily(request: Request, date: str = ""):
-    """Summary + freshly written PDF for one day (default today, so far)."""
+    """Summary + freshly written PDF for one day's report window (default today — 'abhi tak' if the
+    report time has not come yet)."""
     _check(request)
     day = _report_day(date)
     with _report_lock:
-        summary, path, text = report.generate(_db, day)
-    return {"summary": summary, "pdf_path": path, "folder": report.REPORT_DIR, "caption": text,
-            "pdf_url": f"/api/report/daily.pdf?date={day}"}
+        summary, path, text = report.generate(_db, day, _cfg())
+    return {"summary": summary, "period": report.period_text(summary), "pdf_path": path, "folder": report.REPORT_DIR,
+            "caption": text, "pdf_url": f"/api/report/daily.pdf?date={day}"}
 
 
 @app.get("/api/report/daily.pdf")
@@ -1700,7 +1706,7 @@ def report_daily_pdf(request: Request, date: str = ""):
     _check(request)
     day = _report_day(date)
     with _report_lock:
-        _summary, path, _text = report.generate(_db, day)
+        _summary, path, _text = report.generate(_db, day, _cfg())
     return FileResponse(path, media_type="application/pdf", filename=os.path.basename(path))
 
 

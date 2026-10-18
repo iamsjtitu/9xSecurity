@@ -44,25 +44,28 @@ def test_blank_gate_is_named_gate():
 
 
 def test_caption_lists_nonzero_rows_and_totals():
-    s = report.summarize([_ev("truck", "Entry"), _ev("truck", "Entry"), _ev("car", "Exit")], "2026-10-18")
+    s = report.summarize([_ev("truck", "Entry"), _ev("truck", "Entry"), _ev("car", "Exit")], "2026-10-18",
+                         datetime(2026, 10, 17, 21), datetime(2026, 10, 18, 21))
     c = report.caption(s)
-    assert "Daily Report" in c and "18-10-2026" in c
+    assert "Daily Report" in c and "17-10-2026 09:00 PM se 18-10-2026 09:00 PM tak" in c
     assert "Truck: Entry 2 / Exit 0" in c and "Car: Entry 0 / Exit 1" in c
     assert "Bus" not in c and "Total: Entry 2 / Exit 1" in c
-    assert "(aaj" not in c
-    assert "(aaj 09:30 PM tak" in report.caption(s, partial_until="09:30 PM")
+    s2 = report.summarize([], "2026-10-18", datetime(2026, 10, 17, 21), datetime(2026, 10, 18, 10, 12), partial=True)
+    assert "se abhi (10:12 AM) tak" in report.caption(s2)
+    s3 = report.summarize([], "2026-10-18", datetime(2026, 10, 17, 0), datetime(2026, 10, 18, 0))
+    assert "17-10-2026 (Saturday) (poora din)" in report.caption(s3)  # report time 00:00 = full calendar day
 
 
 def test_caption_empty_day():
     c = report.caption(report.summarize([], "2026-10-18"))
-    assert "koi Entry/Exit record nahi" in c and "Total: Entry 0 / Exit 0" in c
+    assert "koi Entry/Exit record nahi" in c and "Total: Entry 0 / Exit 0" in c and "18-10-2026" in c
 
 
 def test_build_pdf_has_tables_and_event_list(tmp_path):
     evs = [_ev("truck", "Entry", plate="MH12AB1234"), _ev("truck", "Exit"), _ev("person", "Entry", "Back", count=2),
            _ev("car", "Entry", gate="Gate \u0915")]  # non-latin gate name must not crash the core font
-    s = report.summarize(evs, "2026-10-18")
-    p = report.build_pdf(s, evs, str(tmp_path / "r.pdf"), partial_until="09:00 PM")
+    s = report.summarize(evs, "2026-10-18", datetime(2026, 10, 17, 21), datetime(2026, 10, 18, 9), partial=True)
+    p = report.build_pdf(s, evs, str(tmp_path / "r.pdf"))
     raw = open(p, "rb").read()
     assert raw[:5] == b"%PDF-" and len(raw) > 1500
     import fitz
@@ -71,7 +74,7 @@ def test_build_pdf_has_tables_and_event_list(tmp_path):
     text = "\n".join(pg.get_text() for pg in doc)
     assert "9x Security - Daily Report" in text and "All gates" in text and "Gate: Main Gate" in text
     assert "MH12AB1234" in text and "Not detected" in text  # truck without plate
-    assert "All events (4)" in text and "(till 09:00 PM)" in text
+    assert "All events (4)" in text and "now (09:00 AM)" in text and "Period:" in text
 
 
 def test_build_pdf_single_gate_skips_all_gates_table(tmp_path):
@@ -83,19 +86,37 @@ def test_build_pdf_single_gate_skips_all_gates_table(tmp_path):
     assert "All gates" not in text and "Gate: Main Gate" in text
 
 
-def test_generate_uses_db_rows_and_marks_today_partial(tmp_path, monkeypatch):
+def test_generate_uses_24h_window_ending_at_report_time(tmp_path, monkeypatch):
     db = database.EventDB(db_path=str(tmp_path / "e.db"))
-    now = datetime(2026, 10, 18, 21, 0, 0)
-    db.add_event("truck", "Entry", "KA01MJ4567", "/x.jpg", ts=now.replace(hour=9), plate_status="done", gate="G1")
-    db.add_event("car", "Exit", "", "/x.jpg", ts=now.replace(hour=10), gate="G1")
-    db.add_event("truck", "Entry", "", "/x.jpg", ts=now.replace(day=17, hour=9), gate="G1")  # yesterday: excluded
+    cfg = {"daily_report_time": "21:00"}
+    db.add_event("truck", "Entry", "KA01MJ4567", "/x.jpg", ts=datetime(2026, 10, 18, 9), plate_status="done", gate="G1")
+    db.add_event("car", "Exit", "", "/x.jpg", ts=datetime(2026, 10, 18, 20, 59), gate="G1")
+    db.add_event("bus", "Exit", "", "/x.jpg", ts=datetime(2026, 10, 17, 22, 30), gate="G1")   # last evening: IN (after yesterday's 21:00)
+    db.add_event("truck", "Entry", "", "/x.jpg", ts=datetime(2026, 10, 17, 20, 30), gate="G1")  # before yesterday's 21:00: OUT
+    db.add_event("truck", "Exit", "", "/x.jpg", ts=datetime(2026, 10, 18, 21, 0), gate="G1")    # exactly 21:00 today: next report
     monkeypatch.setattr(report, "REPORT_DIR", str(tmp_path / "reports"))
-    summary, path, text = report.generate(db, "2026-10-18", now=now)
-    assert summary["total"]["truck"]["Entry"] == 1 and summary["exit"] == 1 and summary["events"] == 2
+    now = datetime(2026, 10, 18, 21, 0, 5)
+    summary, path, text = report.generate(db, "2026-10-18", cfg, now=now)
+    assert summary["events"] == 3 and summary["total"]["truck"]["Entry"] == 1 and summary["total"]["bus"]["Exit"] == 1
+    assert summary["start"] == "2026-10-17T21:00:00" and summary["end"] == "2026-10-18T21:00:00" and not summary["partial"]
     assert path.endswith("9x_Report_2026-10-18.pdf") and os.path.exists(path)
-    assert "(aaj 09:00 PM tak" in text and "KA01MJ4567" not in text  # caption has totals, PDF has plates
-    _s, _p, text_y = report.generate(db, "2026-10-17", now=now)
-    assert "(aaj" not in text_y and "Truck: Entry 1" in text_y
+    assert "17-10-2026 09:00 PM se 18-10-2026 09:00 PM tak" in text and "KA01MJ4567" not in text
+    # the report time still ahead -> window ends now ('abhi tak')
+    s2, _p, t2 = report.generate(db, "2026-10-18", cfg, now=datetime(2026, 10, 18, 10, 0))
+    assert s2["partial"] and s2["events"] == 2 and "se abhi (10:00 AM) tak" in t2
+    # tomorrow's report picks up the 21:00 exit — nothing lost, nothing double
+    s3, _p, _t = report.generate(db, "2026-10-19", cfg, now=datetime(2026, 10, 19, 21, 1))
+    assert s3["events"] == 1 and s3["total"]["truck"]["Exit"] == 1
+
+
+def test_window_and_parse_time():
+    assert report.parse_time("21:00") == (21, 0) and report.parse_time("9:5") == (9, 5)
+    assert report.parse_time("25:99", default=None) is None and report.parse_time("24:00", default=None) is None
+    assert report.parse_time("9pm", default=None) is None and report.parse_time(None) == (21, 0)
+    start, end, partial = report.window_for({"daily_report_time": "06:30"}, "2026-10-18", now=datetime(2026, 10, 18, 7))
+    assert (start, end, partial) == (datetime(2026, 10, 17, 6, 30), datetime(2026, 10, 18, 6, 30), False)
+    start, end, partial = report.window_for({"daily_report_time": "06:30"}, "2026-10-18", now=datetime(2026, 10, 18, 5, 0, 7))
+    assert (start, end, partial) == (datetime(2026, 10, 17, 6, 30), datetime(2026, 10, 18, 5, 0, 7), True)
 
 
 @pytest.mark.parametrize("now, last, due", [
@@ -114,6 +135,8 @@ def test_due_days_off_or_bad_time():
     assert report.due_days({"daily_report_enabled": False, "daily_report_time": "21:00"}, now=datetime(2026, 10, 18, 22)) == []
     assert report.due_days({"daily_report_enabled": True, "daily_report_time": "9pm"}, now=datetime(2026, 10, 18, 22)) == []
     assert report.due_days({"daily_report_enabled": True, "daily_report_time": "25:00"}, now=datetime(2026, 10, 18, 22)) == []
+    assert report.next_run({"daily_report_time": "25:99"}) == ""
+    assert report.mark_baseline({"daily_report_time": "25:99"}, now=datetime(2026, 10, 18, 22)) == "2026-10-18"  # falls back to 21:00, no crash
 
 
 def test_mark_baseline_and_next_run():
@@ -441,8 +464,9 @@ def test_stamp_plate_not_detected_and_missing_file(tmp_path):
     assert after[:28, 700:].max() > 100 and after[40:, :].max() == 0
 
 
-def test_ocr_only_for_vehicles(tmp_path):
+def test_ocr_only_for_vehicles(tmp_path, monkeypatch):
     """persons / two-wheelers never queue OCR -> never reach the cloud."""
+    monkeypatch.setattr(config, "SNAPSHOT_DIR", str(tmp_path / "snaps"))  # snapshots stay out of the product folder
     e = _eng(tmp_path, pr_enabled=True, pr_api_key="k", enable_person=True, enable_two_wheeler=True)
     e.cloud_reader = _Cloud("MH12AB1234")
     queued = []

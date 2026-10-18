@@ -1212,3 +1212,43 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   Agent exploratory: night person shrunk to 16x38 px (frame conf 0.54) still zooms person 0.90 -> not dropped.
 - AWAITING USER: install the new build (Diagnostics shows version 1.0.<build>), then no dog PERSON photos; a real
   night walker must still alert. If a dog still comes: camera_log lines with 'zoom' around that time + the image.
+
+## Implemented (update 2026-06 #66) — Daily PDF report + Plate Recognizer cloud plates + "software kabhi band na ho" (iteration_41 + fixes)
+- USER: (1) 'aaj din bhar me kitna truck entry/exit hua sabka ek PDF, mai jo time set karunga us time par automatic';
+  (2) 'software kabhi kahi band ho jata hai … exit ho hi na … restart par 100% automatic on'; (3) number plate 100%
+  (honest answer: impossible) -> chose Plate Recognizer (paid, own API key in Settings, 4-wheelers ONLY), number must
+  show in the WhatsApp photo + text and in the PDF.
+- report.py (fpdf2, --collect-all fpdf in the Windows build): the report of day D covers the 24 h window
+  [D-1 @ T, D @ T) (gapless, no double count; T = daily_report_time; T=00:00 => full calendar day; before T => 'abhi tak').
+  Per gate table Truck/Car/Bus/Tractor/Two-wheeler/Person Entry/Exit/Total (+ 'All gates' when >1 gate) + full event
+  list (time, gate, type, dir, qty, plate / 'Not detected'). Caption text carries the totals (sent even if the PDF is
+  rejected). due_days(): yesterday + today catch-up (PC off at T); mark_baseline() on enable/time change = nothing
+  retroactive; daily_report_last (day sent) + daily_report_sent_at. service: _daily_report_loop (30 s),
+  GET /api/report/daily[.pdf]?date=, POST /api/report/send; settings keys daily_report_enabled/time (HH:MM 00:00-23:59
+  validated -> 400). db.events_between(). whatsapp.send_report(): outbox-queued when offline; _deliver sends .pdf as
+  application/pdf even with photos off. UI: WhatsApp tab DailyReportCard (toggle, TimeField, next run, last sent,
+  'Abhi tak' box refreshing every 60 s, 'PDF dekho' (Electron: opens the file; browser: new tab), 'Abhi bhejo (test)').
+- cloud_plate.py: Plate Recognizer Snapshot (POST /v1/plate-reader/, 'Authorization: Token', multipart 'upload',
+  regions=in, config region strict; GET /v1/statistics/ for the key check + monthly usage). Fail closed: valid Indian
+  format via repair_plate (0 fixes & score>=0.60 or 1 fix & >=0.85), dscore>=0.40; largest crop first, 2nd lookup only
+  when the 1st found nothing; 401/403/offline/5xx fatal (no credit burn), 429 retried once, 1.2 s gap (free plan 1/s).
+  engine._read_plate(): pr_mode 'always' = cloud first then local EasyOCR, 'fallback' = local first; OCR is queued only
+  for category 'vehicle' (persons/bikes never go to the cloud). engine.stamp_plate() writes 'No: XX' / 'No: Not detected'
+  on the snapshot caption bar before the WhatsApp send; whatsapp caption gets 'Number: XX' only when a plate was read
+  (#40 'Not detected' line stays removed). Settings tab 'Number Plate' (PlateCloudCard: toggle, visible key, 'Key check
+  karo' -> used/limit/remaining, where-to-get-key help, mode radio). Live-verified with the user's key: synthetic
+  MH12AB1234 -> score 1.00, two-row KA01MJ4567 -> 0.99, blank -> 'no plate in photo'; wrong key -> 403 'Invalid token'.
+  THE USER'S KEY IS NOT STORED ANYWHERE IN THE REPO (they enter it in Settings on their PC).
+- electron-main.js: process uncaughtException/unhandledRejection + child-process-gone logged (never exit); engine spawn
+  'error' handler -> restart; renderer gone -> reload, unresponsive 30 s -> crash+reload, did-fail-load retry; tray Exit
+  asks for confirmation; auto-start = Run key + Startup-folder shortcut + Task Scheduler '9x Security Watchdog'
+  registered from XML (logon trigger + every 5 min, ExecutionTimeLimit PT0S, LeastPrivilege; falls back to 5-min-only
+  if the logon trigger is denied) running the app with --watchdog (single-instance lock => no-op while alive,
+  second-instance with --watchdog does not pop the window). Settings startup card shows the 3 mechanisms as chips
+  (packaged app only) and warns: Windows password login must happen before anything can start (netplwiz auto-login).
+- Tests: tests/test_iter42_report_plate.py 38, agent tests/test_iter43_report_plate_live.py 20 (live API), test_plate_fmt/
+  test_engine updated for the Number line; regression 444 + live API 62 + service API 20 green; UI verified on
+  localhost:5173 by the agent (Number Plate tab, Daily report card, Timing startup card).
+- AWAITING USER: new build; Settings > Number Plate: paste key, Key check, ON, Save; Settings > WhatsApp: Daily report ON
+  + time; a real truck/car -> WhatsApp photo with 'No: …' + 'Number:' line; first PDF at the set time. Electron
+  watchdog/auto-start can only be verified on Windows (engine_out.log lines 'watchdog task: OK').

@@ -26,9 +26,34 @@ def _empty():
     return {k: {"Entry": 0, "Exit": 0} for k in ROWS}
 
 
-def summarize(events, day):
-    """events = db rows of ONE date -> {date, gates: {gate: {row: {Entry, Exit}}}, total: {row: ...},
-    entry, exit, events}. Person/bike groups count every member (events.count)."""
+def parse_time(value, default=(21, 0)):
+    """'HH:MM' -> (hh, mm) or None when not a valid 24h time."""
+    try:
+        hh, mm = (int(x) for x in str(value if value is not None else "").split(":"))
+    except (TypeError, ValueError):
+        return None if default is None else default
+    if not (0 <= hh <= 23 and 0 <= mm <= 59):
+        return None if default is None else default
+    return hh, mm
+
+
+def window_for(cfg, day, now=None):
+    """The report for `day` covers the 24 h ending at the report time on that day:
+    [day-1 @ T, day @ T). Reports therefore never miss the evening after T, and never count a
+    vehicle twice. When day @ T is still in the future the window ends now (partial, 'abhi tak').
+    Returns (start, end, partial)."""
+    now = now or datetime.now()
+    hh, mm = parse_time(cfg.get("daily_report_time"))
+    end_full = datetime.strptime(day, "%Y-%m-%d").replace(hour=hh, minute=mm, second=0, microsecond=0)
+    start = end_full - timedelta(days=1)
+    if end_full > now:
+        return start, now.replace(microsecond=0), True
+    return start, end_full, False
+
+
+def summarize(events, day, start=None, end=None, partial=False):
+    """events = db rows inside the window -> {date, start, end, partial, gates: {gate: {row: {Entry, Exit}}},
+    total: {row: ...}, entry, exit, events}. Person/bike groups count every member (events.count)."""
     gates, total = OrderedDict(), _empty()
     for ev in events:
         gate = str(ev.get("gate") or "").strip() or "Gate"
@@ -41,6 +66,9 @@ def summarize(events, day):
         total[k][d] += n
     return {
         "date": day,
+        "start": start.isoformat(timespec="seconds") if start else "",
+        "end": end.isoformat(timespec="seconds") if end else "",
+        "partial": bool(partial),
         "gates": gates,
         "total": total,
         "entry": sum(r["Entry"] for r in total.values()),
@@ -56,11 +84,30 @@ def pretty_date(day):
         return day
 
 
-def caption(summary, partial_until=None):
+def _fmt(iso):
+    try:
+        return datetime.fromisoformat(iso).strftime("%d-%m-%Y %I:%M %p")
+    except (TypeError, ValueError):
+        return str(iso or "")
+
+
+def period_text(summary, pdf=False):
+    """'17-10-2026 09:00 PM se 18-10-2026 09:00 PM tak' / full calendar day when T is 00:00 /
+    '... se abhi (10:12 AM) tak' for a partial window."""
+    start, end = summary.get("start"), summary.get("end")
+    if not start or not end:
+        return pretty_date(summary["date"])
+    s, e = datetime.fromisoformat(start), datetime.fromisoformat(end)
+    if summary.get("partial"):
+        return f"{_fmt(start)} se abhi ({e.strftime('%I:%M %p')}) tak" if not pdf else f"{_fmt(start)} - now ({e.strftime('%I:%M %p')})"
+    if s.hour == 0 and s.minute == 0 and (e - s) == timedelta(days=1):
+        return pretty_date(s.strftime("%Y-%m-%d")) + (" (poora din)" if not pdf else " (full day)")
+    return f"{_fmt(start)} se {_fmt(end)} tak" if not pdf else f"{_fmt(start)} - {_fmt(end)}"
+
+
+def caption(summary):
     """WhatsApp text: totals per type (sent even when the PDF is rejected)."""
-    lines = ["📊 9x Security — Daily Report", f"Date: {pretty_date(summary['date'])}"]
-    if partial_until:
-        lines.append(f"(aaj {partial_until} tak ka hisaab)")
+    lines = ["📊 9x Security — Daily Report", f"Report: {period_text(summary)}"]
     for gate, rows in summary["gates"].items():
         lines.append(f"\n🚧 {gate}")
         for k, name in ROWS.items():
@@ -68,7 +115,7 @@ def caption(summary, partial_until=None):
             if r["Entry"] or r["Exit"]:
                 lines.append(f"{ICON[k]} {name}: Entry {r['Entry']} / Exit {r['Exit']}")
     if not summary["gates"]:
-        lines.append("\nAaj koi Entry/Exit record nahi hua.")
+        lines.append("\nIs dauran koi Entry/Exit record nahi hua.")
     lines.append(f"\n✅ Total: Entry {summary['entry']} / Exit {summary['exit']}")
     lines.append("Poori detail PDF me hai 📎")
     return "\n".join(lines)
@@ -79,7 +126,7 @@ def _pdf_safe(text):
     return "".join(ch if ord(ch) < 256 else "" for ch in str(text)).strip()
 
 
-def build_pdf(summary, events, path, partial_until=None):
+def build_pdf(summary, events, path):
     """Write the PDF (summary tables per gate + full event list). Returns path."""
     from fpdf import FPDF
 
@@ -92,10 +139,7 @@ def build_pdf(summary, events, path, partial_until=None):
     pdf.cell(0, 10, "9x Security - Daily Report", new_x="LMARGIN", new_y="NEXT")
     pdf.set_font("Helvetica", "", 11)
     pdf.set_text_color(60, 60, 60)
-    when = _pdf_safe(pretty_date(summary["date"]))
-    if partial_until:
-        when += f"  (till {partial_until})"
-    pdf.cell(0, 7, f"Date: {when}", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 7, f"Period: {_pdf_safe(period_text(summary, pdf=True))}", new_x="LMARGIN", new_y="NEXT")
     pdf.cell(0, 7, f"Generated: {datetime.now().strftime('%d-%m-%Y %I:%M %p')}", new_x="LMARGIN", new_y="NEXT")
     pdf.ln(2)
 
@@ -178,14 +222,15 @@ def report_path(day):
     return os.path.join(REPORT_DIR, f"9x_Report_{day}.pdf")
 
 
-def generate(db, day, now=None):
-    """Summary + PDF for one calendar day. Returns (summary, pdf_path, caption_text)."""
+def generate(db, day, cfg, now=None):
+    """Summary + PDF for the report of `day` (24 h ending at the report time; 'abhi tak' when that
+    time is still ahead). Returns (summary, pdf_path, caption_text)."""
     now = now or datetime.now()
-    events = db.get_events(date_filter=day, limit=100000)
-    summary = summarize(events, day)
-    partial = now.strftime("%I:%M %p") if day == now.strftime("%Y-%m-%d") else None
-    path = build_pdf(summary, events, report_path(day), partial_until=partial)
-    return summary, path, caption(summary, partial_until=partial)
+    start, end, partial = window_for(cfg, day, now)
+    events = db.events_between(start.isoformat(timespec="seconds"), end.isoformat(timespec="seconds"))
+    summary = summarize(events, day, start, end, partial)
+    path = build_pdf(summary, events, report_path(day))
+    return summary, path, caption(summary)
 
 
 def due_days(cfg, now=None):
@@ -194,11 +239,10 @@ def due_days(cfg, now=None):
     now = now or datetime.now()
     if not cfg.get("daily_report_enabled"):
         return []
-    try:
-        hh, mm = (int(x) for x in str(cfg.get("daily_report_time") or "21:00").split(":"))
-        datetime(2000, 1, 1, hh, mm)
-    except (TypeError, ValueError):
+    t = parse_time(cfg.get("daily_report_time"), default=None)
+    if t is None:
         return []
+    hh, mm = t
     last = str(cfg.get("daily_report_last") or "")
     out = []
     for d in (now.date() - timedelta(days=1), now.date()):
@@ -212,10 +256,7 @@ def mark_baseline(cfg, now=None):
     """Called when the feature is switched on / time changed: nothing retroactive gets sent — the
     first report goes out at the next scheduled time."""
     now = now or datetime.now()
-    try:
-        hh, mm = (int(x) for x in str(cfg.get("daily_report_time") or "21:00").split(":"))
-    except (TypeError, ValueError):
-        hh, mm = 21, 0
+    hh, mm = parse_time(cfg.get("daily_report_time"))
     today = now.date()
     cfg["daily_report_last"] = (today if now >= now.replace(hour=hh, minute=mm, second=0, microsecond=0)
                                 else today - timedelta(days=1)).isoformat()
@@ -223,13 +264,12 @@ def mark_baseline(cfg, now=None):
 
 
 def next_run(cfg, now=None):
-    """'today 09:00 PM' / 'kal 09:00 PM' for the settings card."""
+    """'aaj 09:00 PM' / 'kal 09:00 PM' for the settings card."""
     now = now or datetime.now()
-    try:
-        hh, mm = (int(x) for x in str(cfg.get("daily_report_time") or "21:00").split(":"))
-        at = now.replace(hour=hh, minute=mm, second=0, microsecond=0)
-    except (TypeError, ValueError):
+    t = parse_time(cfg.get("daily_report_time"), default=None)
+    if t is None:
         return ""
+    at = now.replace(hour=t[0], minute=t[1], second=0, microsecond=0)
     last = str(cfg.get("daily_report_last") or "")
     if now < at and last < now.date().isoformat():
         return "aaj " + at.strftime("%I:%M %p")
@@ -237,4 +277,4 @@ def next_run(cfg, now=None):
 
 
 __all__ = ["generate", "summarize", "caption", "build_pdf", "due_days", "mark_baseline", "next_run",
-           "report_path", "REPORT_DIR"]
+           "report_path", "window_for", "parse_time", "period_text", "REPORT_DIR"]

@@ -100,6 +100,15 @@ class EventDB:
             rows = self.conn.execute(q, params).fetchall()
         return [dict(r) for r in rows]
 
+    def events_between(self, start_iso, end_iso):
+        """All events with start <= timestamp < end (ISO strings), oldest first — daily report window."""
+        with self._lock:
+            rows = self.conn.execute(
+                "SELECT * FROM events WHERE timestamp >= ? AND timestamp < ? ORDER BY timestamp, id",
+                (start_iso, end_iso),
+            ).fetchall()
+        return [dict(r) for r in rows]
+
     def counts_today(self):
         today = datetime.now().strftime("%Y-%m-%d")
         with self._lock:

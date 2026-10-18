@@ -15,7 +15,11 @@ export default function DailyReportCard({ s, set, showToast }) {
   const on = !!s.daily_report_enabled;
 
   const loadToday = () => api('/api/report/daily').then(setToday).catch(() => setToday(null));
-  useEffect(() => { loadToday(); }, []); // eslint-disable-line
+  useEffect(() => {
+    loadToday();
+    const id = setInterval(loadToday, 60000);
+    return () => clearInterval(id);
+  }, []); // eslint-disable-line
 
   const sendNow = async () => {
     setBusy('send');
@@ -23,7 +27,8 @@ export default function DailyReportCard({ s, set, showToast }) {
     try {
       const r = await api('/api/report/send', { method: 'POST', body: JSON.stringify({}), timeout: 180000 });
       setResult(r.detail);
-      showToast(r.ok ? 'Aaj ki PDF report WhatsApp par SENT ✅' : 'Report bhejne me dikkat ❌ — neeche dekhein', r.ok ? 'success' : 'error');
+      showToast(r.ok ? 'PDF report WhatsApp par SENT ✅' : 'Report bhejne me dikkat ❌ — neeche dekhein', r.ok ? 'success' : 'error');
+      loadToday();
     } catch (e) {
       setResult(`Error: ${e.message}`);
       showToast(e.message, 'error');
@@ -58,7 +63,8 @@ export default function DailyReportCard({ s, set, showToast }) {
       </div>
       <p className="text-xs text-slate-400 -mt-1">
         Roz set kiye time par ek PDF jayegi: har gate ke liye Truck / Car / Bus / Two-wheeler / Person ki Entry aur Exit ginti,
-        saath me poori event list (time, gate, plate). Upar wale numbers/groups par jayegi.
+        saath me poori event list (time, gate, number). Har report <b>pichhle 24 ghante</b> (kal is time se aaj is time tak) cover
+        karti hai — koi gaadi chhootti nahi, koi do baar nahi ginti. Upar wale numbers/groups par jayegi.
       </p>
       <label className="flex items-center gap-2.5 text-sm text-slate-700 cursor-pointer">
         <input type="checkbox" className="h-4 w-4 accent-[#1f6feb]" checked={on}
@@ -72,19 +78,22 @@ export default function DailyReportCard({ s, set, showToast }) {
           <span className="text-xs font-medium text-[#1f6feb]" data-testid="daily-report-next">→ agli PDF {s.daily_report_next}</span>
         )}
       </div>
-      {s.daily_report_last && (
-        <p className="text-xs text-slate-500" data-testid="daily-report-last">Aakhri report: {s.daily_report_last}</p>
+      {s.daily_report_sent_at && (
+        <p className="text-xs text-slate-500" data-testid="daily-report-last">
+          Aakhri report bheji: {new Date(s.daily_report_sent_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+        </p>
       )}
       <p className="text-xs text-slate-400">
-        Save dabana na bhoolein. Computer report ke time band ho to on hote hi pichhle din ki PDF apne aap chali jayegi.
+        Save dabana na bhoolein. Computer report ke time band ho to on hote hi wo report apne aap chali jayegi.
       </p>
 
       {today?.summary && (
         <div className="rounded-md bg-slate-50 border border-slate-200 p-3" data-testid="daily-report-today">
           <div className="text-xs font-semibold text-slate-700 mb-1.5">
-            Aaj ab tak — Entry {today.summary.entry} / Exit {today.summary.exit}
+            {today.summary.partial ? 'Abhi tak' : 'Is report me'} — Entry {today.summary.entry} / Exit {today.summary.exit}
             {Object.keys(today.summary.gates || {}).length > 1 ? ` · ${Object.keys(today.summary.gates).length} gates` : ''}
           </div>
+          <div className="text-[11px] text-slate-400 mb-1.5" data-testid="daily-report-period">{today.period}</div>
           <div className="grid grid-cols-2 gap-x-6 gap-y-0.5 text-xs text-slate-600">
             {ROWS.filter(([k]) => (total[k]?.Entry || total[k]?.Exit || k === 'truck' || k === 'car')).map(([k, label]) => (
               <div key={k} className="flex justify-between" data-testid={`daily-report-row-${k}`}>
@@ -98,7 +107,7 @@ export default function DailyReportCard({ s, set, showToast }) {
 
       <div className="flex flex-wrap gap-3 pt-1">
         <button type="button" className="btn-ghost" onClick={openPdf} disabled={!!busy} data-testid="daily-report-open-btn">
-          <FolderOpen size={14} /> Aaj ki PDF dekho
+          <FolderOpen size={14} /> PDF dekho
         </button>
         <button type="button" className="btn-ghost" onClick={sendNow} disabled={!!busy} data-testid="daily-report-send-btn">
           <Send size={14} /> {busy === 'send' ? 'Bhej rahe hain…' : 'Abhi WhatsApp par bhejo (test)'}

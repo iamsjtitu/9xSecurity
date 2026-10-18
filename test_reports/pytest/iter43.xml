@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="20" time="1.535" timestamp="2026-10-18T10:17:45.146976+00:00" hostname="agent-env-32b6130e-aa37-4e39-adf4-80664b6ba9ec"><testcase classname="tests.test_iter43_report_plate_live" name="test_report_summary_math" time="0.441" /><testcase classname="tests.test_iter43_report_plate_live" name="test_report_today_partial_caption" time="0.012" /><testcase classname="tests.test_iter43_report_plate_live" name="test_report_yesterday_has_seed" time="0.010" /><testcase classname="tests.test_iter43_report_plate_live" name="test_report_pdf_content" time="0.086" /><testcase classname="tests.test_iter43_report_plate_live" name="test_report_pdf_single_gate_omits_all_gates" time="0.012" /><testcase classname="tests.test_iter43_report_plate_live" name="test_report_invalid_date[2026-13-01]" time="0.002" /><testcase classname="tests.test_iter43_report_plate_live" name="test_report_invalid_date[abc]" time="0.002" /><testcase classname="tests.test_iter43_report_plate_live" name="test_report_invalid_date[18-10-2026]" time="0.002" /><testcase classname="tests.test_iter43_report_plate_live" name="test_report_unauth" time="0.003" /><testcase classname="tests.test_iter43_report_plate_live" name="test_report_send_no_wa_key" time="0.013" /><testcase classname="tests.test_iter43_report_plate_live" name="test_settings_fields_present" time="0.002" /><testcase classname="tests.test_iter43_report_plate_live" name="test_settings_bad_time_400" time="0.002" /><testcase classname="tests.test_iter43_report_plate_live" name="test_settings_out_of_range_time_not_500" time="0.019"><failure message="AssertionError: 500&#10;assert 500 in (200, 400)&#10; +  where 500 = &lt;Response [500]&gt;.status_code">H = {'X-Auth-Token': '47f15093f3968fca566ae8856f1aef9ab7f3af8d3c8ecdb8'}
+
+    def test_settings_out_of_range_time_not_500(H):
+        # '25:99' passes the HH:MM regex — must not crash the save with a 500
+        r = requests.post(f"{BASE}/api/settings", json={"daily_report_enabled": True, "daily_report_time": "25:99"}, headers=H, timeout=10)
+        requests.post(f"{BASE}/api/settings", json={"daily_report_enabled": False, "daily_report_time": "21:00"}, headers=H, timeout=10)
+&gt;       assert r.status_code in (200, 400), r.status_code
+E       AssertionError: 500
+E       assert 500 in (200, 400)
+E        +  where 500 = &lt;Response [500]&gt;.status_code
+
+tests/test_iter43_report_plate_live.py:157: AssertionError</failure></testcase><testcase classname="tests.test_iter43_report_plate_live" name="test_settings_enable_baseline_and_next" time="0.013" /><testcase classname="tests.test_iter43_report_plate_live" name="test_settings_pr_roundtrip_and_restore" time="0.011" /><testcase classname="tests.test_iter43_report_plate_live" name="test_plate_cloud_fake_key" time="0.761" /><testcase classname="tests.test_iter43_report_plate_live" name="test_plate_cloud_empty_key" time="0.003" /><testcase classname="tests.test_iter43_report_plate_live" name="test_plate_cloud_unauth" time="0.002" /><testcase classname="tests.test_iter43_report_plate_live" name="test_next_run_and_due_days_edges" time="0.000" /><testcase classname="tests.test_iter43_report_plate_live" name="test_mark_baseline_invalid_hour_does_not_raise" time="0.005"><failure message="ValueError: hour must be in 0..23">def test_mark_baseline_invalid_hour_does_not_raise():
+        cfg = {"daily_report_time": "25:99"}
+&gt;       report.mark_baseline(cfg, datetime(2026, 10, 18, 20, 0))  # should not raise ValueError
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_iter43_report_plate_live.py:222: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cfg = {'daily_report_time': '25:99'}
+now = datetime.datetime(2026, 10, 18, 20, 0)
+
+    def mark_baseline(cfg, now=None):
+        """Called when the feature is switched on / time changed: nothing retroactive gets sent — the
+        first report goes out at the next scheduled time."""
+        now = now or datetime.now()
+        try:
+            hh, mm = (int(x) for x in str(cfg.get("daily_report_time") or "21:00").split(":"))
+        except (TypeError, ValueError):
+            hh, mm = 21, 0
+        today = now.date()
+&gt;       cfg["daily_report_last"] = (today if now &gt;= now.replace(hour=hh, minute=mm, second=0, microsecond=0)
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                    else today - timedelta(days=1)).isoformat()
+E       ValueError: hour must be in 0..23
+
+report.py:220: ValueError</failure></testcase></testsuite></testsuites>

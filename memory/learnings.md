@@ -53,3 +53,9 @@
   person alert fails closed when zoom never saw a person and frame conf < 0.70. Test real user frames, not only
   generated assets: tests/assets/user_dog_1..5.jpg (400x400 cuts) with boxes in tests/test_iter40_zoom_failclosed.py.
   Stubbed engine tests that expect a person event with a NOTHING zoom must use conf >= 0.7 boxes.
+- #66: Daily report window is [D-1 @ T, D @ T) — tests that seed events must put them inside that window (the agent's
+  calendar-day assumption broke once; config daily_report_time may be left changed by tests: restore 21:00).
+  Plate Recognizer answers 403 'Invalid token.' (not 401) for a bad key and throttles at 1/s counted from its answer
+  (MIN_GAP_S 1.2 after the response). Never commit the user's key; never store it in the tracked dev config.json.
+  Engine tests that call _emit_crossing write snapshots into config.SNAPSHOT_DIR -> monkeypatch it to tmp_path.
+  reports/ is gitignored (user data).

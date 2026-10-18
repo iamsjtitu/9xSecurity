@@ -102,6 +102,10 @@ def period_text(summary, pdf=False):
         return f"{_fmt(start)} se abhi ({e.strftime('%I:%M %p')}) tak" if not pdf else f"{_fmt(start)} - now ({e.strftime('%I:%M %p')})"
     if s.hour == 0 and s.minute == 0 and (e - s) == timedelta(days=1):
         return pretty_date(s.strftime("%Y-%m-%d")) + (" (poora din)" if not pdf else " (full day)")
+    if s.hour == 0 and s.minute == 0 and e.hour == 0 and e.minute == 0 and (e - s).days > 1:
+        last = (e - timedelta(days=1)).strftime("%d-%m-%Y")
+        n = (e - s).days
+        return f"{s.strftime('%d-%m-%Y')} se {last} tak ({n} din)" if not pdf else f"{s.strftime('%d-%m-%Y')} - {last} ({n} days)"
     return f"{_fmt(start)} se {_fmt(end)} tak" if not pdf else f"{_fmt(start)} - {_fmt(end)}"
 
 
@@ -126,8 +130,8 @@ def _pdf_safe(text):
     return "".join(ch if ord(ch) < 256 else "" for ch in str(text)).strip()
 
 
-def build_pdf(summary, events, path):
-    """Write the PDF (summary tables per gate + full event list). Returns path."""
+def build_pdf(summary, events, path, days=None, title="Daily Report"):
+    """Write the PDF (summary tables per gate [+ day-wise table for a range] + full event list)."""
     from fpdf import FPDF
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -136,7 +140,7 @@ def build_pdf(summary, events, path):
     pdf.add_page()
     pdf.set_font("Helvetica", "B", 18)
     pdf.set_text_color(31, 111, 235)
-    pdf.cell(0, 10, "9x Security - Daily Report", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 10, f"9x Security - {title}", new_x="LMARGIN", new_y="NEXT")
     pdf.set_font("Helvetica", "", 11)
     pdf.set_text_color(60, 60, 60)
     pdf.cell(0, 7, f"Period: {_pdf_safe(period_text(summary, pdf=True))}", new_x="LMARGIN", new_y="NEXT")
@@ -183,7 +187,36 @@ def build_pdf(summary, events, path):
         table(f"Gate: {gate}", rows)
     if not summary["gates"]:
         pdf.set_font("Helvetica", "I", 11)
-        pdf.cell(0, 8, "No Entry/Exit recorded on this day.", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(0, 8, "No Entry/Exit recorded in this period.", new_x="LMARGIN", new_y="NEXT")
+
+    if days:
+        pdf.add_page()
+        pdf.set_font("Helvetica", "B", 12)
+        pdf.set_text_color(20, 20, 20)
+        pdf.cell(0, 8, f"Day-wise ({len(days)} days)", new_x="LMARGIN", new_y="NEXT")
+        pdf.set_font("Helvetica", "B", 9)
+        pdf.set_fill_color(31, 111, 235)
+        pdf.set_text_color(255, 255, 255)
+        dcols = ((26, "Date"), (18, "Entry"), (18, "Exit"), (26, "Truck E/X"), (26, "Car E/X"), (26, "Bus E/X"),
+                 (26, "2-whl E/X"), (24, "Person E/X"))
+        for w, h in dcols:
+            pdf.cell(w, 7, h, border=1, fill=True, align="C")
+        pdf.ln()
+        pdf.set_font("Helvetica", "", 9)
+        pdf.set_text_color(30, 30, 30)
+        pdf.set_fill_color(245, 247, 250)
+        shade = False
+        for d in days:
+            t = d["total"]
+            vals = (datetime.strptime(d["date"], "%Y-%m-%d").strftime("%d-%m-%Y"), str(d["entry"]), str(d["exit"]),
+                    f"{t['truck']['Entry']} / {t['truck']['Exit']}", f"{t['car']['Entry']} / {t['car']['Exit']}",
+                    f"{t['bus']['Entry']} / {t['bus']['Exit']}", f"{t['two_wheeler']['Entry']} / {t['two_wheeler']['Exit']}",
+                    f"{t['person']['Entry']} / {t['person']['Exit']}")
+            for (w, _), v in zip(dcols, vals):
+                pdf.cell(w, 6.5, v, border=1, fill=shade, align="C")
+            pdf.ln()
+            shade = not shade
+        pdf.ln(4)
 
     if events:
         pdf.add_page()
@@ -193,7 +226,7 @@ def build_pdf(summary, events, path):
         pdf.set_font("Helvetica", "B", 9)
         pdf.set_fill_color(31, 111, 235)
         pdf.set_text_color(255, 255, 255)
-        cols = ((22, "Time"), (40, "Gate"), (40, "Type"), (18, "Dir"), (14, "Qty"), (46, "Plate"))
+        cols = ((30, "Date/Time"), (36, "Gate"), (38, "Type"), (16, "Dir"), (12, "Qty"), (48, "Plate"))
         for w, h in cols:
             pdf.cell(w, 7, h, border=1, fill=True)
         pdf.ln()
@@ -201,21 +234,133 @@ def build_pdf(summary, events, path):
         pdf.set_text_color(30, 30, 30)
         pdf.set_fill_color(245, 247, 250)
         shade = False
+        multi_day = bool(days) and len(days) > 1
         for ev in sorted(events, key=lambda e: str(e.get("timestamp", ""))):
             try:
-                t = datetime.fromisoformat(str(ev.get("timestamp", ""))).strftime("%I:%M %p")
+                ts = datetime.fromisoformat(str(ev.get("timestamp", "")))
+                t = ts.strftime("%d-%m %I:%M %p" if multi_day else "%I:%M %p")
             except ValueError:
                 t = str(ev.get("time", ""))[:8]
             k = row_key(ev.get("vehicle_type"))
             typ = ROWS[k].split(" (")[0] if k != "other" else str(ev.get("vehicle_type", "")).title()
             plate = str(ev.get("plate") or "") or ("-" if k in ("person", "two_wheeler") else "Not detected")
-            vals = (t, str(ev.get("gate") or "Gate")[:22], typ, str(ev.get("direction", "")), str(int(ev.get("count") or 1)), plate[:18])
+            vals = (t, str(ev.get("gate") or "Gate")[:20], typ, str(ev.get("direction", "")), str(int(ev.get("count") or 1)), plate[:18])
             for (w, _), v in zip(cols, vals):
                 pdf.cell(w, 6.5, _pdf_safe(v), border=1, fill=shade)
             pdf.ln()
             shade = not shade
     pdf.output(path)
     return path
+
+
+def build_xlsx(summary, events, path, days=None):
+    """Excel workbook: Summary (per gate), Day-wise, Events (one row per event with photo path)."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Font, PatternFill
+    from openpyxl.utils import get_column_letter
+
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    wb = Workbook()
+    head_font, head_fill = Font(bold=True, color="FFFFFF"), PatternFill("solid", fgColor="1F6FEB")
+    bold = Font(bold=True)
+
+    def header(ws, cells):
+        ws.append(cells)
+        for c in ws[ws.max_row]:
+            c.font, c.fill, c.alignment = head_font, head_fill, Alignment(horizontal="center")
+
+    def autosize(ws):
+        for i, col in enumerate(ws.columns, start=1):
+            width = max((len(str(c.value)) for c in col if c.value is not None), default=8)
+            ws.column_dimensions[get_column_letter(i)].width = min(max(10, width + 2), 48)
+
+    ws = wb.active
+    ws.title = "Summary"
+    ws.append(["9x Security - Report"])
+    ws["A1"].font = Font(bold=True, size=14, color="1F6FEB")
+    ws.append([f"Period: {period_text(summary, pdf=True)}"])
+    ws.append([f"Generated: {datetime.now().strftime('%d-%m-%Y %I:%M %p')}"])
+    ws.append([])
+    header(ws, ["Gate", "Type", "Entry", "Exit", "Total"])
+    blocks = ([("All gates", summary["total"])] if len(summary["gates"]) != 1 else []) + list(summary["gates"].items())
+    for gate, rows in blocks:
+        te = tx = 0
+        for k, name in ROWS.items():
+            r = rows[k]
+            if not (r["Entry"] or r["Exit"]) and k not in ("truck", "car"):
+                continue
+            ws.append([gate, name, r["Entry"], r["Exit"], r["Entry"] + r["Exit"]])
+            te, tx = te + r["Entry"], tx + r["Exit"]
+        ws.append([gate, "TOTAL", te, tx, te + tx])
+        for c in ws[ws.max_row]:
+            c.font = bold
+    autosize(ws)
+
+    if days:
+        wd = wb.create_sheet("Day-wise")
+        header(wd, ["Date", "Entry", "Exit", "Truck Entry", "Truck Exit", "Car Entry", "Car Exit", "Bus Entry", "Bus Exit",
+                    "Tractor Entry", "Tractor Exit", "2-wheeler Entry", "2-wheeler Exit", "Person Entry", "Person Exit",
+                    "Other Entry", "Other Exit"])
+        for d in days:
+            t = d["total"]
+            wd.append([datetime.strptime(d["date"], "%Y-%m-%d").strftime("%d-%m-%Y"), d["entry"], d["exit"]]
+                      + [t[k][x] for k in ("truck", "car", "bus", "tractor", "two_wheeler", "person", "other") for x in ("Entry", "Exit")])
+        autosize(wd)
+
+    we = wb.create_sheet("Events")
+    header(we, ["Date", "Time", "Gate", "Type", "Direction", "Qty", "Plate", "Plate source", "Photo"])
+    for ev in sorted(events, key=lambda e: str(e.get("timestamp", ""))):
+        try:
+            ts = datetime.fromisoformat(str(ev.get("timestamp", "")))
+            d, t = ts.strftime("%d-%m-%Y"), ts.strftime("%I:%M:%S %p")
+        except ValueError:
+            d, t = str(ev.get("date", "")), str(ev.get("time", ""))
+        k = row_key(ev.get("vehicle_type"))
+        typ = ROWS[k].split(" (")[0] if k != "other" else str(ev.get("vehicle_type", "")).title()
+        plate = str(ev.get("plate") or "") or ("-" if k in ("person", "two_wheeler") else "Not detected")
+        we.append([d, t, str(ev.get("gate") or "Gate"), typ, str(ev.get("direction", "")), int(ev.get("count") or 1),
+                   plate, str(ev.get("plate_source") or ""), str(ev.get("image_path") or "")])
+    we.freeze_panes = "A2"
+    autosize(we)
+    wb.save(path)
+    return path
+
+
+def range_window(start_day, end_day):
+    """Calendar days start..end inclusive -> (start_dt, end_dt_exclusive). Raises ValueError when bad."""
+    s = datetime.strptime(start_day, "%Y-%m-%d")
+    e = datetime.strptime(end_day, "%Y-%m-%d")
+    if e < s:
+        raise ValueError("'se' date 'tak' date ke baad hai")
+    if (e - s).days > 366:
+        raise ValueError("ek baar me zyada se zyada 1 saal (366 din)")
+    return s, e + timedelta(days=1)
+
+
+def generate_range(db, start_day, end_day, fmt="pdf"):
+    """Report for whole calendar days start..end: summary, per-day breakdown and a PDF or Excel file.
+    Returns (summary, days, path)."""
+    s, e = range_window(start_day, end_day)
+    events = db.events_between(s.isoformat(timespec="seconds"), e.isoformat(timespec="seconds"))
+    summary = summarize(events, start_day, s, e, partial=False)
+    summary["start_day"], summary["end_day"] = s.strftime("%Y-%m-%d"), (e - timedelta(days=1)).strftime("%Y-%m-%d")
+    by_day = {}
+    for ev in events:
+        by_day.setdefault(str(ev.get("date") or str(ev.get("timestamp", ""))[:10]), []).append(ev)
+    days = []
+    d = s
+    while d < e:
+        key = d.strftime("%Y-%m-%d")
+        ds = summarize(by_day.get(key, []), key)
+        days.append({"date": key, "entry": ds["entry"], "exit": ds["exit"], "events": ds["events"], "total": ds["total"]})
+        d += timedelta(days=1)
+    name = f"9x_Report_{summary['start_day']}_to_{summary['end_day']}"
+    if fmt == "xlsx":
+        path = build_xlsx(summary, events, os.path.join(REPORT_DIR, name + ".xlsx"), days=days)
+    else:
+        path = build_pdf(summary, events, os.path.join(REPORT_DIR, name + ".pdf"), days=days,
+                         title="Report" if len(days) > 1 else "Daily Report")
+    return summary, days, path
 
 
 def report_path(day):

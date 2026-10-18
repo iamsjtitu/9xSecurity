@@ -353,7 +353,7 @@ ipcMain.handle('open-file', (_e, p) => {
     const real = path.resolve(String(p || ''));
     const home = path.resolve(os.homedir());
     if ((real === home || real.startsWith(home + path.sep)) && fs.existsSync(real) && fs.statSync(real).isFile()
-      && /\.(pdf|jpe?g|png|txt|csv)$/i.test(real)) {
+      && /\.(pdf|xlsx|csv|jpe?g|png|txt)$/i.test(real)) {
       return shell.openPath(real);
     }
   } catch (_) { /* noop */ }

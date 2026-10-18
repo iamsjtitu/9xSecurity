@@ -4,8 +4,11 @@ import StatCards from './StatCards.jsx';
 import LoadMeter from './LoadMeter.jsx';
 import ControlsPanel from './ControlsPanel.jsx';
 import EventsTable from './EventsTable.jsx';
+import PlateSearchPanel from './PlateSearchPanel.jsx';
+import ReportRangeCard from './ReportRangeCard.jsx';
+import PlateCreditsCard from './PlateCreditsCard.jsx';
 
-export default function Dashboard({ state, refreshState, showToast, onManageCameras }) {
+export default function Dashboard({ state, refreshState, showToast, onManageCameras, onOpenSettings }) {
   const [drawMode, setDrawMode] = useState(false);
 
   return (
@@ -22,6 +25,7 @@ export default function Dashboard({ state, refreshState, showToast, onManageCame
       </div>
       <div className="lg:col-span-4 flex flex-col gap-6">
         <StatCards />
+        <PlateCreditsCard onOpenSettings={onOpenSettings} />
         <LoadMeter state={state} />
         <ControlsPanel
           state={state}
@@ -30,6 +34,10 @@ export default function Dashboard({ state, refreshState, showToast, onManageCame
           drawMode={drawMode}
           setDrawMode={setDrawMode}
         />
+        <ReportRangeCard showToast={showToast} />
+      </div>
+      <div className="lg:col-span-12">
+        <PlateSearchPanel />
       </div>
       <div className="lg:col-span-12">
         <EventsTable connected={state.connected} showToast={showToast} />

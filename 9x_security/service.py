@@ -1719,6 +1719,97 @@ def report_send(body: dict, request: Request):
     return {"ok": ok, "detail": detail, "pdf_path": path, "date": day}
 
 
+# ---- Range report (any dates, PDF or Excel) ----------------------------------------
+def _range_days(start, end):
+    s, e = _report_day(start), _report_day(end)
+    try:
+        report.range_window(s, e)
+    except ValueError as ex:
+        raise HTTPException(400, str(ex))
+    return s, e
+
+
+@app.get("/api/report/range")
+def report_range(request: Request, start: str = "", end: str = "", fmt: str = "pdf"):
+    """Summary + per-day breakdown for whole days start..end; writes the PDF/Excel into the reports
+    folder and returns its path (Electron opens it) plus download URLs (browser)."""
+    _check(request)
+    s, e = _range_days(start, end)
+    fmt = "xlsx" if fmt == "xlsx" else "pdf"
+    with _report_lock:
+        summary, days, path = report.generate_range(_db, s, e, fmt)
+    clog(f"range report {s}..{e} ({fmt}): {summary['events']} events, Entry {summary['entry']} / Exit {summary['exit']}")
+    return {"summary": summary, "days": days, "period": report.period_text(summary), "path": path,
+            "folder": report.REPORT_DIR, "pdf_url": f"/api/report/range.pdf?start={s}&end={e}",
+            "xlsx_url": f"/api/report/range.xlsx?start={s}&end={e}"}
+
+
+@app.get("/api/report/range.pdf")
+def report_range_pdf(request: Request, start: str = "", end: str = ""):
+    _check(request)
+    s, e = _range_days(start, end)
+    with _report_lock:
+        _summary, _days, path = report.generate_range(_db, s, e, "pdf")
+    return FileResponse(path, media_type="application/pdf", filename=os.path.basename(path))
+
+
+@app.get("/api/report/range.xlsx")
+def report_range_xlsx(request: Request, start: str = "", end: str = ""):
+    _check(request)
+    s, e = _range_days(start, end)
+    with _report_lock:
+        _summary, _days, path = report.generate_range(_db, s, e, "xlsx")
+    return FileResponse(path, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        filename=os.path.basename(path))
+
+
+# ---- Plate search (dashboard) -----------------------------------------------------
+@app.get("/api/plate/search")
+def plate_search(request: Request, q: str = ""):
+    """Every Entry/Exit of a vehicle number (partial match, e.g. last 4 digits) across all days."""
+    _check(request)
+    needle = re.sub(r"[^A-Z0-9]", "", str(q or "").upper())
+    if len(needle) < 2:
+        raise HTTPException(400, "Kam se kam 2 letters/digits likhein (jaise 1234 ya MH12)")
+    rows = _db.get_events(plate_filter=needle, limit=1000)
+    fuzzy = False
+    if not rows and len(needle) >= 4:  # 'MH121234' typed without the series letters -> MH12AB1234
+        rows = _db.get_events(plate_filter="%".join(needle), limit=1000)
+        fuzzy = bool(rows)
+    entries = sum(1 for r in rows if r.get("direction") == "Entry")
+    plates = sorted({r.get("plate") for r in rows if r.get("plate")})
+    return {"q": needle, "fuzzy": fuzzy, "events": rows, "entries": entries, "exits": len(rows) - entries, "plates": plates,
+            "first_seen": rows[-1]["timestamp"] if rows else "", "last_seen": rows[0]["timestamp"] if rows else ""}
+
+
+# ---- Plate Recognizer credits (dashboard) ------------------------------------------
+_usage_cache = {"at": 0.0, "key": "", "data": None}
+USAGE_CACHE_S = 15 * 60
+
+
+@app.get("/api/plate/cloud/usage")
+def plate_cloud_usage(request: Request, refresh: int = 0):
+    """Monthly lookups used/left for the dashboard card (cached 15 min; refresh=1 forces a check)."""
+    _check(request)
+    cfg = _cfg()
+    key = str(cfg.get("pr_api_key") or "").strip()
+    out = {"enabled": bool(cfg.get("pr_enabled")) and bool(key), "key_set": bool(key)}
+    if not key:
+        return {**out, "valid": False, "message": "API key nahi daali"}
+    fresh = _usage_cache["data"] is not None and _usage_cache["key"] == key and time.time() - _usage_cache["at"] < USAGE_CACHE_S
+    if refresh or not fresh:
+        from cloud_plate import CloudPlateReader
+
+        _usage_cache.update(at=time.time(), key=key, data=CloudPlateReader(key).statistics(key))
+    data = dict(_usage_cache["data"])
+    if data.get("valid"):
+        limit, remaining = int(data.get("limit") or 0), int(data.get("remaining") or 0)
+        data["low"] = remaining <= max(100, int(limit * 0.10)) if limit else False
+        data["critical"] = remaining <= max(25, int(limit * 0.02)) if limit else False
+    data["checked_at"] = datetime.fromtimestamp(_usage_cache["at"]).isoformat(timespec="seconds")
+    return {**out, **data}
+
+
 # ---- updates ----------------------------------------------------------------
 _update_info = {"available": False, "latest": "", "page": "", "checked_at": 0.0}
 

@@ -663,3 +663,9 @@
 2026-10-18T10:27:37 | outbox-queued | to=919999999999 | status=- | id=1 report reason=Internet/connection error: Name resolution failed
 2026-10-18T10:27:37 | pdf-error | to=120363012345678901@g.us | status=- | Name resolution failed
 2026-10-18T10:27:37 | outbox-queued | to=120363012345678901@g.us | status=- | id=2 report reason=Internet/connection error: Name resolution failed
+2026-10-18T10:47:46 | pdf | to=919999999999 | status=200 | {"data":{"messageId":"1"}}
+2026-10-18T10:47:46 | text | to=919999999999 | status=200 | {"data":{"messageId":"1"}}
+2026-10-18T10:47:46 | pdf-error | to=919999999999 | status=- | Name resolution failed
+2026-10-18T10:47:46 | outbox-queued | to=919999999999 | status=- | id=1 report reason=Internet/connection error: Name resolution failed
+2026-10-18T10:47:46 | pdf-error | to=120363012345678901@g.us | status=- | Name resolution failed
+2026-10-18T10:47:46 | outbox-queued | to=120363012345678901@g.us | status=- | id=2 report reason=Internet/connection error: Name resolution failed

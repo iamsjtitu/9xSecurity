@@ -1,5 +1,6 @@
 """9x Security - Vehicle detection using YOLOv8 (offline, free)."""
 import os
+import threading
 
 import config
 
@@ -26,6 +27,31 @@ MODEL_FILES = {"fast": "yolov8n.pt", "accurate": "yolov8s.pt"}
 # every COCO animal: a far dog at night is 'person' at full-frame scale, but zoomed in YOLO sees the animal
 ZOOM_ANIMALS = {14: "bird", 15: "cat", 16: "dog", 17: "horse", 18: "sheep", 19: "cow", 20: "elephant",
                 21: "bear", 22: "zebra", 23: "giraffe"}
+# zoomed looks, cheapest first; the next scale runs only while the verdict is still unclear
+# (user 17-10 WhatsApp dogs, 17-52 px wide at 960x540: 1.5x/320 names 5/5 'dog' on yolov8s, the
+# wider 3x crop catches the one the tight crop is unsure about)
+ZOOM_SCALES = ((1.5, 320), (1.5, 640), (3.0, 640))
+ZOOM_CLEAR_ANIMAL = 0.30  # a scale is conclusive when the animal is this sure (and beats the person score) ...
+ZOOM_CLEAR_PERSON = 0.50  # ... or the person is this sure with hardly any animal score
+_ZOOM_MODEL = None
+_ZOOM_LOCK = threading.Lock()
+
+
+def zoom_model_for(model, model_name):
+    """The sharpest model we have for zoomed looks. yolov8n is blind to a far night dog even
+    zoomed (0.0 person / 0.0 animal on the user's frames) while yolov8s names it, so fast-model
+    cameras share ONE yolov8s instance (loaded on first use, inference serialised) for the rare
+    second looks. Returns (model, name, lock-or-None)."""
+    global _ZOOM_MODEL
+    s_path = os.path.join(os.path.dirname(config.MODEL_PATH), MODEL_FILES["accurate"])
+    if model_name != MODEL_FILES["fast"] or not os.path.exists(s_path):
+        return model, model_name, None
+    with _ZOOM_LOCK:
+        if _ZOOM_MODEL is None:
+            from ultralytics import YOLO
+
+            _ZOOM_MODEL = YOLO(s_path)
+    return _ZOOM_MODEL, MODEL_FILES["accurate"], _ZOOM_LOCK
 
 
 def _iou(a, b):
@@ -102,11 +128,30 @@ class VehicleDetector:
                     )
         return dets
 
-    def second_opinion(self, frame, bbox, grow=1.5, imgsz=320):
-        """Zoomed second look at ONE 'person' box: a square crop around it (grow x its size) is run
-        through the model with person + every animal class. At full-frame scale a far dog is a
-        30x80 px blob YOLO calls 'person'; at crop scale it is a dog. Returns
-        {person: conf, animal: conf, animal_label} for boxes on the object, or None."""
+    def second_opinion(self, frame, bbox, scales=ZOOM_SCALES):
+        """Zoomed second look at ONE 'person' box with the sharpest model available (see
+        zoom_model_for): a square crop around it is run with person + every animal class, scale by
+        scale until the verdict is clear. At full-frame scale a far dog is a 30x80 px blob YOLO
+        calls 'person'; at crop scale it is a dog. Returns {person, animal, animal_label, model,
+        looks} — the best score per class over the looks made — or None when the box is off-frame."""
+        model, name, lock = zoom_model_for(self.model, getattr(self, "model_name", ""))
+        out = {"person": 0.0, "animal": 0.0, "animal_label": "", "model": name, "looks": 0}
+        for grow, imgsz in scales:
+            one = self._zoom_once(model, lock, frame, bbox, grow, imgsz)
+            if one is None:
+                continue
+            out["looks"] += 1
+            out["person"] = max(out["person"], one["person"])
+            if one["animal"] > out["animal"]:
+                out["animal"], out["animal_label"] = one["animal"], one["animal_label"]
+            clear_animal = out["animal"] >= ZOOM_CLEAR_ANIMAL and out["animal"] >= 0.7 * out["person"]
+            clear_person = out["person"] >= ZOOM_CLEAR_PERSON and out["animal"] < 0.35 * out["person"]
+            if clear_animal or clear_person:
+                break
+        return out if out["looks"] else None
+
+    @staticmethod
+    def _zoom_once(model, lock, frame, bbox, grow, imgsz):
         h, w = frame.shape[:2]
         x1, y1, x2, y2 = bbox
         cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
@@ -118,7 +163,11 @@ class VehicleDetector:
             return None
         obj = (x1 - cx1, y1 - cy1, x2 - cx1, y2 - cy1)
         ocx, ocy = (obj[0] + obj[2]) / 2, (obj[1] + obj[3]) / 2
-        results = self.model(crop, verbose=False, conf=0.15, classes=[0, *ZOOM_ANIMALS], agnostic_nms=False, imgsz=imgsz)
+        if lock is not None:
+            with lock:
+                results = model(crop, verbose=False, conf=0.15, classes=[0, *ZOOM_ANIMALS], agnostic_nms=False, imgsz=imgsz)
+        else:
+            results = model(crop, verbose=False, conf=0.15, classes=[0, *ZOOM_ANIMALS], agnostic_nms=False, imgsz=imgsz)
         out = {"person": 0.0, "animal": 0.0, "animal_label": ""}
         for r in results:
             if r.boxes is None:

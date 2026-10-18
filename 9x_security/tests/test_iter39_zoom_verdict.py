@@ -124,11 +124,11 @@ def test_flush_drops_member_that_patrol_turned_dog(tmp_path, logs):
     state = {"dog": False}
     e.detector.second_opinion = _Zoom(lambda b, n: DOG if state["dog"] else NOTHING)
     c = _Clock(e)
-    ev = c.feed([[_box(y)] for y in range(230, 290, 4)])
+    ev = c.feed([[_box(y, conf=0.8)] for y in range(230, 290, 4)])
     assert ev == [] and e._groups, ("member must be queued", ev, e._groups)
     state["dog"] = True
-    ev += c.feed([[_box(285 + (i % 2) * 3)] for i in range(18)])  # 2.25 s hold (< PERSON_GROUP_S)
-    ev += c.feed([[_box(287)] for _ in range(6)])  # quiet time over -> flush
+    ev += c.feed([[_box(285 + (i % 2) * 3, conf=0.8)] for i in range(18)])  # 2.25 s hold (< PERSON_GROUP_S)
+    ev += c.feed([[_box(287, conf=0.8)] for _ in range(6)])  # quiet time over -> flush
     ev += c.flush()
     assert [x for x in ev if x["category"] == "person"] == [], ev
     assert any("zoom ne dog bataya" in m for m in logs), logs[-10:]

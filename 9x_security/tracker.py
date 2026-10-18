@@ -103,6 +103,13 @@ class Track:
         self.zoom_person = 0.0
         self.zoom_label = ""      # strongest animal class seen on the zoomed looks
         self.zoom_best = 0.0
+        self.zoom_looks = 0       # zoomed looks that returned a result
+
+    @property
+    def person_conf(self):
+        """Average YOLO confidence of the frames that called this track 'person'."""
+        n = self.labels.get("person", 0)
+        return self.label_w.get("person", 0.0) / n if n else 0.0
 
     @property
     def counted(self):

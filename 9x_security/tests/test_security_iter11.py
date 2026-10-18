@@ -71,7 +71,7 @@ def test_settings_secrets_masked(token):
     r = requests.get(f"{BASE}/api/settings", headers=h)
     assert r.status_code == 200
     s = r.json()
-    assert s["wa_api_key"] == ""
+    assert s["wa_api_key"] == "SECRET_FAKE_KEY_123"  # deliberately visible (iteration 15, user request)
     assert s["gh_token"] == ""
     assert s["wa_api_key_set"] is True
     assert s["gh_token_set"] is True
@@ -83,7 +83,7 @@ def test_settings_secrets_masked(token):
     }, headers=h)
     assert r.status_code == 200
     c = cfg_mod.load_config()
-    assert c["wa_api_key"] == "SECRET_FAKE_KEY_123"
+    assert c["wa_api_key"] == ""  # visible key: an empty save clears it on purpose
     assert c["gh_token"] == "ghp_FAKE_TOKEN_XYZ"
 
     # cleanup: overwrite with empty via a non-empty then explicit wipe by inspecting - use direct config

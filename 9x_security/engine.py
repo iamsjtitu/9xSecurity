@@ -36,6 +36,8 @@ PERSON_SMALL_CONF = 0.45  # ... (far dogs/cats/bags at night come as hesitant sm
 ZOOM_ANIMAL_CONF = 0.30   # zoomed second look: an animal class at least this sure ...
 ZOOM_ANIMAL_RATIO = 0.7   # ... and at least this fraction of the zoomed 'person' score => it IS an animal
 ZOOM_EVERY_S = 1.0        # a 'person' track approaching the line gets a zoomed look this often
+ZOOM_PERSON_MIN = 0.25    # the zoomed looks must have seen at least this much 'person' in total before a person alert ...
+PERSON_SURE_CONF = 0.70   # ... unless the full-frame detections themselves averaged this confident (zoom blind spot)
 PERSON_VEHICLE_S = float(os.environ.get("PERSON_VEHICLE_S", "6"))  # person crossing within this of a vehicle at the same spot = rider/driver
 RIDER_GROW = 0.25       # vehicle box grown by this fraction when testing 'person ON/WITH the vehicle'
 RIDER_MIN_OVERLAP = 0.2  # >= this fraction of the person's box inside the grown vehicle box
@@ -531,6 +533,7 @@ class SecurityEngine:
         self._groups = {}  # (category, direction) -> pending group (people crossing together)
         self._group_recent = []  # persons/two-wheelers already alerted: a late twin box of one of them is merged, not re-alerted
         self._person_drop_log_ts = 0.0
+        self._zoom_model_logged = False
         self._recent_vehicle_cross = []  # (ts, direction, bbox, label) — riders/drivers are not lone persons
         self._motion = {}  # (tracker no, track id) -> [last_move_ts, ref_point]
         self._det_ts = time.time()
@@ -909,10 +912,14 @@ class SecurityEngine:
             sx, sy = ow / w, oh / h
             src, box = original, (int(x1 * sx), int(y1 * sy), int(x2 * sx), int(y2 * sy))
         try:
-            return look(src, box)
+            op = look(src, box)
         except Exception as ex:  # a failed second look must never block a real person alert
             clog(f"zoom check failed: {ex}")
             return None
+        if op and not self._zoom_model_logged:
+            self._zoom_model_logged = True
+            clog(f"zoom (doosri nazar) model: {op.get('model') or getattr(self.detector, 'model_name', '?')}")
+        return op
 
     @staticmethod
     def _zoom_says_animal(op):
@@ -928,6 +935,7 @@ class SecurityEngine:
             return False
         if tr is None:
             return self._zoom_says_animal(op)
+        tr.zoom_looks += 1
         tr.zoom_animal += op["animal"]
         tr.zoom_person += op["person"]
         if op["animal"] > tr.zoom_best:
@@ -962,13 +970,20 @@ class SecurityEngine:
 
     def _animal_on_zoom(self, frame, original, cr, w, h):
         """Last zoomed look right before a person alert (user 17-10: dogs at night sent as PERSON —
-        tall and narrow when walking towards the camera, so the shape test cannot catch them)."""
+        tall and narrow when walking towards the camera, so the shape test cannot catch them).
+        Fail closed: when the zoomed looks never saw a person either (yolov8n is blind to a far
+        night dog even zoomed) a hesitant full-frame 'person' is no alert — a real walker is a
+        clear person on the zoomed crop or a confident one on the full frame."""
         op = self._zoom_look(frame, original, cr["bbox"], w, h)
         tr = self.tracker2.tracks.get(cr["track_id"])
-        if not self._zoom_record(tr, op):
-            return ""
-        label = tr.zoom_label if tr is not None else op["animal_label"]
-        return f"zoom karke dekha: {label} {op['animal']:.2f} vs person {op['person']:.2f}"
+        if self._zoom_record(tr, op):
+            label = tr.zoom_label if tr is not None else op["animal_label"]
+            return f"zoom karke dekha: {label} {op['animal']:.2f} vs person {op['person']:.2f}"
+        if tr is not None and tr.zoom_looks and tr.zoom_person < ZOOM_PERSON_MIN and tr.person_conf < PERSON_SURE_CONF:
+            return (f"zoom par {tr.zoom_looks} baar dekha, insaan kahin nahi dikha (person {tr.zoom_person:.2f}, "
+                    f"janwar {tr.zoom_animal:.2f}; poore frame par bhi sirf {tr.person_conf:.2f} sure) — "
+                    f"chhota/dhundhla janwar ya saaya, insaan confirm nahi")
+        return ""
 
     def _member(self, cat, cr, direction, now):
         tr = self.tracker2.tracks.get(cr["track_id"])

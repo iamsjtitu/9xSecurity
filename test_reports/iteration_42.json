@@ -1,0 +1,54 @@
+{
+  "summary": "Tested the dashboard trio (Report Range, Plate Search, Plate Recognizer credits) in the backend (live API on :8971 plus unit tests) and the frontend (Vite UI at localhost:5173). Existing suites: iter44 6/6, iter42 38/38, iter43 19/20 (1 stale log-format assertion). New file tests/test_iter45_range_search_live.py: 20/21 passed. The only failure is a 366-day limit off-by-one. Every UI flow works and there are no console errors (apart from the /api/frame 404s, which happen because the container has no camera).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "report.range_window / GET /api/report/range", "issue": "Off-by-one: the check `(e - s).days > 366` lets 367 calendar days through (2025-01-01..2026-01-02 is accepted), but the message says 'zyada se zyada 1 saal (366 din)'. Fix: use `(e - s).days >= 366`, i.e. limit by inclusive day count > 366."},
+      {"endpoint": "tests/test_iter43_report_plate_live.py::test_report_send_no_wa_key", "issue": "Stale assertion. The clog line is now 'daily report {day} (manual) [period]: Entry ...' (changed in commit 7fead76), but the test still looks for 'daily report 2026-09-15 (manual): Entry 7 / Exit 3 -> PROBLEM'. Update the test to match the new format, e.g. with a regex."},
+      {"endpoint": "GET /api/plate/search", "issue": "'Newest first' relies on ORDER BY id DESC, not timestamp. Events inserted out of order (backfill, imports) would come back in the wrong order, and first_seen/last_seen would be wrong. Consider ORDER BY timestamp DESC, id DESC for the search."},
+      {"endpoint": "GET /api/plate/cloud/usage", "issue": "Transient results (connection error / timeout) are cached for 15 min, the same as real results. Consider caching only valid results or HTTP 4xx, or using a short TTL for network errors."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "PlateSearchPanel input (also the existing EventsTable small plate filter)", "issue": "The search icon overlaps the first characters of the placeholder and typed text. The `.input` class in index.css is declared after `@tailwind utilities` and is not in a layer, so its padding overrides `pl-9`: computed padding-left is 12px. Fix: use `!pl-9`, or move `.input` into `@layer components`.", "selector": "[data-testid='plate-search-main-input'], [data-testid='plate-search-input']", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Dashboard", "issues": [
+        "plate-credits-error shows the raw provider JSON (`[{\"detail\":\"Invalid token.\",\"status_code\":403}]`) after the Hindi message. Trim it for the dashboard card.",
+        "The plate-search placeholder is cut off at w-96 ('...jaise MH12AB1234 ya 1').",
+        "There is a large empty area in the left column under the camera, because the right column is now much taller (credits + load + controls + report card). Consider moving ReportRangeCard below the camera or into the left column."
+      ]}
+    ]
+  },
+  "test_report_links": ["/app/9x_security/tests/test_iter45_range_search_live.py", "/app/test_reports/pytest/iter45.xml"],
+  "action_items": [
+    "Fix the 366-day off-by-one in report.range_window (use >= 366).",
+    "Update the stale assertion in test_iter43_report_plate_live.py::test_report_send_no_wa_key to the new clog format.",
+    "Fix the search-icon overlap: .input padding overrides pl-9 (use !pl-9 or @layer components).",
+    "Optional: order plate search by timestamp; do not cache network errors for 15 min; strip the raw JSON from the credits error text."
+  ],
+  "critical_code_review_comments": [
+    "service.py is now 2098 lines; consider splitting the report/plate routes into a separate module.",
+    "The range PDF/XLSX endpoints regenerate the file on every GET. This is fine for now, but a 1-year range with many events runs under _report_lock and blocks other report calls.",
+    "In the browser path the token is passed in the window.open URL (?t=), the same pattern as the existing snapshots. Acceptable for a local app."
+  ],
+  "updated_files": ["/app/9x_security/tests/test_iter45_range_search_live.py"],
+  "success_rate": {"backend": "98% (83/85; 2 minor failures: off-by-one + stale test)", "frontend": "100% of the requested flows"},
+  "verified": [
+    "Range JSON: summary math (person count=2, motorcycle -> two_wheeler, gates), days list covers every day with zeros, period text for multi-day and single day, path/pdf_url/xlsx_url, 400 validation (end<start, >1 year, bad date), 401 without token",
+    "Range PDF: '9x Security - Report', 'Day-wise (7 days)', 'All events (7)', seeded plates, 'Not detected', 'DD-MM HH:MM AM'; a single day gives 'Daily Report'; an empty range gives 'No Entry/Exit recorded in this period'",
+    "Range XLSX: sheets Summary/Day-wise/Events, All gates block, per-gate TOTAL rows, Day-wise with 17 columns, Events header, freeze_panes A2, column widths within 10..48",
+    "Plate search: partial match, normalisation, fuzzy flag, newest-first ordering, ZZZZ returns nothing, <2 characters gives 400",
+    "Usage: no key, fake key gives HTTP 403 'API key galat hai', cache keeps the same checked_at, refresh=1 forces a re-check, changing the key misses the cache, enabled=false when pr_enabled is off",
+    "UI: preset chips set the dates correctly; PDF/Excel buttons call the API, window.open gets a URL that returns a real PDF/XLSX, the success toast shows, report-range-result shows the summary text; end<start shows the error toast",
+    "UI search: a 1-char query sends no request; 7777 returns 3 cards newest first with photo / 'photo nahi'; the modal shows the image and plate badge and closes via the X and the backdrop; Enter search, fuzzy hint, 'koi record nahi mila' for ZZZZ, clear button",
+    "UI credits: the card is hidden with no key; with the fake key it shows the error, the Settings link opens the Number Plate tab, the refresh spinner shows and sends ?refresh=1, and the OFF pill shows when disabled",
+    "Regression: the EventsTable plate filter, stat cards and load meter all work"
+  ],
+  "seed_data_creation": "Temporary sqlite rows (TEST_iter45_*, UI45AB7777) and images in snapshots/TEST_ui45_* were all removed. Generated range report files were deleted. pr_api_key='' and pr_enabled=false were restored, and the admin password was restored to 9xsecurity (login verified 200).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run with: cd /app/9x_security && python3 -m pytest -q -p no:cacheprovider tests/test_iter44_range_search.py tests/test_iter42_report_plate.py tests/test_iter43_report_plate_live.py tests/test_iter45_range_search_live.py. Expected failures until fixed: test_range_window_367_days_limit (off-by-one) and test_iter43::test_report_send_no_wa_key (stale log format). The /api/frame 404 console errors are expected because there is no camera. The container date is 2026-10-18."
+}

@@ -43,28 +43,28 @@ export default function ReportRangeCard({ showToast }) {
       <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
         <CalendarRange size={16} className="text-[#1f6feb]" /> Report Download — koi bhi date range
       </div>
-      <div className="flex flex-wrap gap-1.5">
-        {PRESETS.map(([label, fn]) => (
-          <button key={label} type="button" onClick={() => setRange(fn())}
-            className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
-            data-testid={`report-preset-${label.replace(/\s+/g, '-').toLowerCase()}`}>{label}</button>
-        ))}
-      </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="flex flex-wrap gap-1.5">
+          {PRESETS.map(([label, fn]) => (
+            <button key={label} type="button" onClick={() => setRange(fn())}
+              className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+              data-testid={`report-preset-${label.replace(/\s+/g, '-').toLowerCase()}`}>{label}</button>
+          ))}
+        </div>
         <label className="text-xs text-slate-500">Se
-          <input type="date" className="input mt-1" value={start} max={end || undefined} onChange={(e) => setRange([e.target.value, end])} data-testid="report-range-start" />
+          <input type="date" className="input !w-auto mt-1" value={start} max={end || undefined} onChange={(e) => setRange([e.target.value, end])} data-testid="report-range-start" />
         </label>
         <label className="text-xs text-slate-500">Tak
-          <input type="date" className="input mt-1" value={end} min={start || undefined} onChange={(e) => setRange([start, e.target.value])} data-testid="report-range-end" />
+          <input type="date" className="input !w-auto mt-1" value={end} min={start || undefined} onChange={(e) => setRange([start, e.target.value])} data-testid="report-range-end" />
         </label>
-      </div>
-      <div className="flex gap-2">
-        <button type="button" className="btn-primary flex-1 justify-center" onClick={() => download('pdf')} disabled={!!busy} data-testid="report-range-pdf-btn">
-          <FileText size={14} /> {busy === 'pdf' ? 'Ban rahi…' : 'PDF'}
-        </button>
-        <button type="button" className="btn-ghost flex-1 justify-center" onClick={() => download('xlsx')} disabled={!!busy} data-testid="report-range-xlsx-btn">
-          <FileSpreadsheet size={14} /> {busy === 'xlsx' ? 'Ban rahi…' : 'Excel'}
-        </button>
+        <div className="flex gap-2 ml-auto">
+          <button type="button" className="btn-primary" onClick={() => download('pdf')} disabled={!!busy} data-testid="report-range-pdf-btn">
+            <FileText size={14} /> {busy === 'pdf' ? 'Ban rahi…' : 'PDF'}
+          </button>
+          <button type="button" className="btn-ghost" onClick={() => download('xlsx')} disabled={!!busy} data-testid="report-range-xlsx-btn">
+            <FileSpreadsheet size={14} /> {busy === 'xlsx' ? 'Ban rahi…' : 'Excel'}
+          </button>
+        </div>
       </div>
       {last && (
         <div className="text-xs text-slate-500" data-testid="report-range-result">

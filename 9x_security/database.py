@@ -80,7 +80,7 @@ class EventDB:
             self.conn.commit()
             return cur.lastrowid
 
-    def get_events(self, date_filter=None, direction_filter=None, plate_filter=None, limit=500):
+    def get_events(self, date_filter=None, direction_filter=None, plate_filter=None, limit=500, by_time=False):
         q = "SELECT * FROM events"
         clauses, params = [], []
         if date_filter:
@@ -94,7 +94,7 @@ class EventDB:
             params.append(f"%{plate_filter}%")
         if clauses:
             q += " WHERE " + " AND ".join(clauses)
-        q += " ORDER BY id DESC LIMIT ?"
+        q += " ORDER BY timestamp DESC, id DESC LIMIT ?" if by_time else " ORDER BY id DESC LIMIT ?"
         params.append(limit)
         with self._lock:
             rows = self.conn.execute(q, params).fetchall()

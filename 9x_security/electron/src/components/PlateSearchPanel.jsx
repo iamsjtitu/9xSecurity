@@ -41,11 +41,11 @@ export default function PlateSearchPanel() {
     <div className="card" data-testid="plate-search-panel">
       <div className="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-slate-200">
         <h3 className="text-base font-semibold text-slate-800 mr-auto">Gaadi Number Search</h3>
-        <div className="relative w-full sm:w-96">
+        <div className="relative w-full sm:w-[28rem]">
           <Search size={16} className="absolute left-3 top-3 text-slate-400" />
           <input
-            className="input pl-9 font-mono uppercase tracking-wider"
-            placeholder="Number ya aakhri 4 digit, jaise MH12AB1234 ya 1234"
+            className="input !pl-10 font-mono uppercase tracking-wider"
+            placeholder="Number ya aakhri 4 digit (MH12AB1234 / 1234)"
             value={q}
             onChange={(e) => onInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && search(q)}

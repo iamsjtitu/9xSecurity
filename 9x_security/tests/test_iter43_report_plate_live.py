@@ -1,6 +1,7 @@
 """Iteration 43 (T1): live API checks for daily report, settings daily_report_*/pr_*, Plate Recognizer
 key test (FAKE key only) + extra edge cases. Run against the running service on 127.0.0.1:8971."""
 import os
+import re
 import sqlite3
 import sys
 from datetime import datetime, timedelta
@@ -136,7 +137,7 @@ def test_report_send_no_wa_key(H):
     assert j["ok"] is False and j["detail"].startswith("API key khaali hai") and j["date"] == DAY
     assert j["pdf_path"].endswith(f"9x_Report_{DAY}.pdf")
     log = open(os.path.join(ROOT, "camera_log.txt"), encoding="utf-8", errors="ignore").read()[-20000:]
-    assert f"daily report {DAY} (manual): Entry 7 / Exit 3 -> PROBLEM" in log
+    assert re.search(rf"daily report {DAY} \(manual\) \[.*\]: Entry 7 / Exit 3 -> PROBLEM", log), log[-600:]
 
 
 # ---- settings

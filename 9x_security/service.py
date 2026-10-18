@@ -1771,10 +1771,10 @@ def plate_search(request: Request, q: str = ""):
     needle = re.sub(r"[^A-Z0-9]", "", str(q or "").upper())
     if len(needle) < 2:
         raise HTTPException(400, "Kam se kam 2 letters/digits likhein (jaise 1234 ya MH12)")
-    rows = _db.get_events(plate_filter=needle, limit=1000)
+    rows = _db.get_events(plate_filter=needle, limit=1000, by_time=True)
     fuzzy = False
     if not rows and len(needle) >= 4:  # 'MH121234' typed without the series letters -> MH12AB1234
-        rows = _db.get_events(plate_filter="%".join(needle), limit=1000)
+        rows = _db.get_events(plate_filter="%".join(needle), limit=1000, by_time=True)
         fuzzy = bool(rows)
     entries = sum(1 for r in rows if r.get("direction") == "Entry")
     plates = sorted({r.get("plate") for r in rows if r.get("plate")})
@@ -1783,7 +1783,7 @@ def plate_search(request: Request, q: str = ""):
 
 
 # ---- Plate Recognizer credits (dashboard) ------------------------------------------
-_usage_cache = {"at": 0.0, "key": "", "data": None}
+_usage_cache = {"checked": 0.0, "ttl": 0.0, "key": "", "data": None}
 USAGE_CACHE_S = 15 * 60
 
 
@@ -1796,17 +1796,22 @@ def plate_cloud_usage(request: Request, refresh: int = 0):
     out = {"enabled": bool(cfg.get("pr_enabled")) and bool(key), "key_set": bool(key)}
     if not key:
         return {**out, "valid": False, "message": "API key nahi daali"}
-    fresh = _usage_cache["data"] is not None and _usage_cache["key"] == key and time.time() - _usage_cache["at"] < USAGE_CACHE_S
+    fresh = _usage_cache["data"] is not None and _usage_cache["key"] == key and time.time() < _usage_cache["ttl"]
     if refresh or not fresh:
         from cloud_plate import CloudPlateReader
 
-        _usage_cache.update(at=time.time(), key=key, data=CloudPlateReader(key).statistics(key))
+        data = CloudPlateReader(key).statistics(key)
+        now = time.time()
+        # a transient network failure must not hide the real numbers for 15 min: keep it 60 s only
+        _usage_cache.update(checked=now, key=key, data=data, ttl=now + (USAGE_CACHE_S if (data.get("valid") or data.get("status")) else 60))
     data = dict(_usage_cache["data"])
     if data.get("valid"):
         limit, remaining = int(data.get("limit") or 0), int(data.get("remaining") or 0)
         data["low"] = remaining <= max(100, int(limit * 0.10)) if limit else False
         data["critical"] = remaining <= max(25, int(limit * 0.02)) if limit else False
-    data["checked_at"] = datetime.fromtimestamp(_usage_cache["at"]).isoformat(timespec="seconds")
+    else:
+        data["message"] = re.sub(r"\s*\[.*\]$", "", str(data.get("message") or ""))  # no raw provider JSON on the card
+    data["checked_at"] = datetime.fromtimestamp(_usage_cache["checked"]).isoformat(timespec="seconds")
     return {**out, **data}
 
 

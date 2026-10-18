@@ -13,7 +13,7 @@ export default function Dashboard({ state, refreshState, showToast, onManageCame
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6" data-testid="dashboard">
-      <div className="lg:col-span-8">
+      <div className="lg:col-span-8 flex flex-col gap-6">
         <CameraPanel
           state={state}
           refreshState={refreshState}
@@ -22,6 +22,7 @@ export default function Dashboard({ state, refreshState, showToast, onManageCame
           setDrawMode={setDrawMode}
           onManageCameras={onManageCameras}
         />
+        <ReportRangeCard showToast={showToast} />
       </div>
       <div className="lg:col-span-4 flex flex-col gap-6">
         <StatCards />
@@ -34,7 +35,6 @@ export default function Dashboard({ state, refreshState, showToast, onManageCame
           drawMode={drawMode}
           setDrawMode={setDrawMode}
         />
-        <ReportRangeCard showToast={showToast} />
       </div>
       <div className="lg:col-span-12">
         <PlateSearchPanel />

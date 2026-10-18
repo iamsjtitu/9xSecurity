@@ -103,7 +103,7 @@ export default function EventsTable({ connected, showToast }) {
         <div className="relative">
           <Search size={15} className="absolute left-3 top-3 text-slate-400" />
           <input
-            className="input !w-52 pl-9 font-mono uppercase"
+            className="input !w-52 !pl-9 font-mono uppercase"
             placeholder="Plate search…"
             value={plateQ}
             onChange={(e) => onPlateInput(e.target.value)}

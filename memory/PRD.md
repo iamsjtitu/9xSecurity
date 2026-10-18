@@ -1252,3 +1252,18 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - AWAITING USER: new build; Settings > Number Plate: paste key, Key check, ON, Save; Settings > WhatsApp: Daily report ON
   + time; a real truck/car -> WhatsApp photo with 'No: …' + 'Number:' line; first PDF at the set time. Electron
   watchdog/auto-start can only be verified on Windows (engine_out.log lines 'watchdog task: OK').
+
+## Implemented (update 2026-06 #67) — Dashboard trio: Report Range (PDF/Excel), Gaadi Number Search, Plate credits card (iteration_42 + fixes)
+- report.generate_range(db, start, end, fmt): whole calendar days (<= 366), summary + per-day breakdown; PDF gets a
+  'Day-wise' table + dated event rows; build_xlsx (openpyxl, --collect-all openpyxl): sheets Summary / Day-wise / Events
+  (photo path column). period_text: '01-10-2026 se 31-10-2026 tak (31 din)'. API: GET /api/report/range?start&end&fmt
+  (writes reports/9x_Report_<s>_to_<e>.pdf|xlsx, returns path for Electron openFile + URLs), /range.pdf, /range.xlsx.
+- GET /api/plate/search?q= (>= 2 alnum, normalised; LIKE partial e.g. last 4 digits; fuzzy '%'.join fallback for
+  >= 4 chars; ORDER BY timestamp DESC) -> events + entries/exits/plates/first_seen/last_seen.
+  UI PlateSearchPanel (full width above the log): photo grid cards, click -> big image modal.
+- GET /api/plate/cloud/usage (cached 15 min per key, 60 s after a network failure; low = <= max(100, 10%), critical =
+  <= max(25, 2%); provider JSON stripped from the message). UI PlateCreditsCard in the right column (hidden without a
+  key; OFF pill when disabled; red card + Settings link when the key is invalid; refresh button).
+- ReportRangeCard moved under the camera (left column) for balance; .btn/.input/.card classes moved into
+  @layer components so utilities (!pl-9 etc.) win. Tests: tests/test_iter44_range_search.py 6, agent
+  tests/test_iter45_range_search_live.py 21 (live), all 85 report/plate tests green.

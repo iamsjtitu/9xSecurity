@@ -332,7 +332,7 @@ def range_window(start_day, end_day):
     e = datetime.strptime(end_day, "%Y-%m-%d")
     if e < s:
         raise ValueError("'se' date 'tak' date ke baad hai")
-    if (e - s).days > 366:
+    if (e - s).days >= 366:
         raise ValueError("ek baar me zyada se zyada 1 saal (366 din)")
     return s, e + timedelta(days=1)
 

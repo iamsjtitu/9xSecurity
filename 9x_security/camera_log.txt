@@ -26667,3 +26667,30 @@ RuntimeError: no AI in test
 2026-10-18T11:03:21 | svc[Front Camera]: accurate model too slow here (443 ms > 350) -> yolov8n.pt
 2026-10-18T11:03:22 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 183 ms, 0 dets on blank frame)
 2026-10-18T11:03:22 | open_stream: transport=tcp
+2026-10-18T11:03:27 | open_stream: transport=udp
+2026-10-18T11:03:32 | open_stream: trying FFmpeg engine fallback
+2026-10-18T11:03:32 | ffmpeg-pipe: starting
+2026-10-18T11:03:37 | open_stream: falling back to default backend
+2026-10-18T11:03:42 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-18T11:04:00 | svc[Front Camera]: loading AI model
+2026-10-18T11:04:00 | svc[Front Camera]: AI model loaded
+2026-10-18T11:04:01 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 442 ms, 0 dets on blank frame)
+2026-10-18T11:04:01 | svc[Front Camera]: accurate model too slow here (442 ms > 350) -> yolov8n.pt
+2026-10-18T11:04:01 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 173 ms, 0 dets on blank frame)
+2026-10-18T11:04:01 | open_stream: transport=tcp
+2026-10-18T11:04:06 | open_stream: transport=udp
+2026-10-18T11:04:11 | open_stream: trying FFmpeg engine fallback
+2026-10-18T11:04:11 | ffmpeg-pipe: starting
+2026-10-18T11:04:16 | open_stream: falling back to default backend
+2026-10-18T11:04:21 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-18T11:04:40 | svc[Front Camera]: loading AI model
+2026-10-18T11:04:40 | svc[Front Camera]: AI model loaded
+2026-10-18T11:04:41 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 455 ms, 0 dets on blank frame)
+2026-10-18T11:04:41 | svc[Front Camera]: accurate model too slow here (455 ms > 350) -> yolov8n.pt
+2026-10-18T11:04:41 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 170 ms, 0 dets on blank frame)
+2026-10-18T11:04:41 | open_stream: transport=tcp
+2026-10-18T11:04:47 | open_stream: transport=udp
+2026-10-18T11:04:52 | open_stream: trying FFmpeg engine fallback
+2026-10-18T11:04:52 | ffmpeg-pipe: starting
+2026-10-18T11:04:57 | open_stream: falling back to default backend
+2026-10-18T11:05:02 | svc[Front Camera]: source opened codec=unknown live=True

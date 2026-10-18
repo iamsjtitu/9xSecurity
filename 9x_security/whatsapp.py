@@ -238,6 +238,9 @@ class WhatsAppNotifier:
         else:
             head = f"🚗 {direction} - {str(ev.get('vehicle_type', '')).upper()}"
         lines = ["🚨 9x Security", head, f"Time: {when}"]
+        plate = str(ev.get("plate") or "").strip()
+        if plate and category not in ("person", "two_wheeler"):
+            lines.append(f"Number: {plate}")  # (#40 removed the noisy 'Not detected' line; a read plate is wanted — user 18-10)
         if gate:
             lines.append(f"Gate: {gate}")
         return "\n".join(lines)
@@ -252,18 +255,43 @@ class WhatsAppNotifier:
                 self._log(to, "outbox-queued", "-", f"id={oid} reason={err}")
 
     def _deliver(self, to, caption, img):
-        """One full delivery attempt: photo first, text fallback if provider
-        rejects the photo. Returns (ok, error_detail)."""
-        if self.send_image and img and os.path.exists(img):
-            ok, err = self._send_image(to, caption, img)
+        """One full delivery attempt: photo/PDF first, text fallback if provider
+        rejects the file. Returns (ok, error_detail). A report PDF goes even when
+        'photo ke saath bhejo' is off (the user asked for the PDF itself)."""
+        want_file = bool(img) and (self.send_image or str(img).lower().endswith(".pdf"))
+        if want_file and os.path.exists(img):
+            ok, err = self._send_file(to, caption, img)
             if ok:
                 return True, ""
             if self._is_network_error(err):
                 return False, err  # offline: queue full alert, retry later with photo
             self._log(to, "image-rejected->text", "-", err)
-        elif self.send_image and img:
+        elif want_file:
             self._log(to, "image-missing->text", "-", img)
         return self._send_text(to, caption)
+
+    def send_report(self, caption, pdf_path):
+        """Daily report to every recipient now; offline -> outbox (retried with the PDF when
+        internet returns). Returns (all_ok, per-recipient detail text)."""
+        if not self.api_key:
+            return False, "API key khaali hai. Settings > WhatsApp me API key daalein."
+        if not self.recipients:
+            return False, "Koi recipient nahi mila. Settings > WhatsApp me number ya group daalein."
+        lines, all_ok = [], True
+        for to in self.recipients:
+            label = f"Group {to.split('@')[0]}" if _is_group(to) else to
+            ok, err = self._deliver(to, caption, pdf_path)
+            if ok:
+                lines.append(f"{label}: SENT ✅")
+            else:
+                all_ok = False
+                if self.db is not None and self._is_network_error(err):
+                    oid = self.db.outbox_add(to, caption, pdf_path)
+                    self._log(to, "outbox-queued", "-", f"id={oid} report reason={err}")
+                    lines.append(f"{label}: internet nahi — queue me ({err}); net aate hi PDF jayega")
+                else:
+                    lines.append(f"{label}: FAILED ❌ ({err})")
+        return all_ok, "\n".join(lines)
 
     def _headers(self):
         return {"Authorization": f"Bearer {self.api_key}"}
@@ -300,6 +328,10 @@ class WhatsAppNotifier:
             return False, f"Internet/connection error: {e}"
 
     def _send_image(self, to, caption, path):
+        return self._send_file(to, caption, path)
+
+    def _send_file(self, to, caption, path):
+        """Photo (image/jpeg) or document (application/pdf) through the provider's file endpoint."""
         try:
             with open(path, "rb") as f:
                 raw = f.read()
@@ -307,20 +339,22 @@ class WhatsAppNotifier:
             self._log(to, "image-read-error", "-", str(e))
             return False, str(e)
         name = os.path.basename(path)
+        mime = "application/pdf" if name.lower().endswith(".pdf") else "image/jpeg"
+        kind = "pdf" if mime == "application/pdf" else "image"
         group = _is_group(to)
         try:
             r = requests.post(
                 f"{self.base}/api/v2/{'sendGroupFile' if group else 'sendMessageFile'}",
                 headers=self._headers(),
                 data={("groupId" if group else "phonenumber"): to, "caption": caption, "filename": name},
-                files={"file": (name, raw, "image/jpeg")},
-                timeout=45,
+                files={"file": (name, raw, mime)},
+                timeout=90 if kind == "pdf" else 45,
             )
-            self._log(to, "group-image" if group else "image", r.status_code, r.text)
+            self._log(to, f"group-{kind}" if group else kind, r.status_code, r.text)
             self.last_response = r.text
             return r.ok, self._explain(r)
         except Exception as e:
-            self._log(to, "image-error", "-", str(e))
+            self._log(to, f"{kind}-error", "-", str(e))
             return False, f"Internet/connection error: {e}"
 
     def _log(self, to, kind, status, body):

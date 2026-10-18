@@ -57,6 +57,34 @@ def draw_line2(img, a, b):
     cv2.putText(img, "PERSON / BIKE", (mx + 6, max(12, my - 6)), cv2.FONT_HERSHEY_SIMPLEX, 0.45, LINE2_COLOR, 1, cv2.LINE_AA)
 
 
+def stamp_plate(image_path, plate):
+    """Write the number (or 'Not detected') on the right of the snapshot's black caption bar once
+    OCR is done, so the photo that goes to WhatsApp carries the plate too. Returns True if written."""
+    if not image_path or not os.path.exists(image_path):
+        return False
+    try:
+        img = cv2.imread(image_path)
+        if img is None:
+            return False
+        text = f"No: {plate}" if plate else "No: Not detected"
+        scale = 0.6 if plate else 0.5
+        (tw, th), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, scale, 2)
+        x = max(8, img.shape[1] - tw - 10)
+        cv2.rectangle(img, (x - 6, 0), (img.shape[1], 28), (0, 0, 0), -1)
+        color = (80, 230, 120) if plate else (160, 160, 160)
+        cv2.putText(img, text, (x, 20), cv2.FONT_HERSHEY_SIMPLEX, scale, color, 2 if plate else 1, cv2.LINE_AA)
+        ok, buf = cv2.imencode(".jpg", img, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+        if not ok:
+            return False
+        with open(image_path, "wb") as f:
+            f.write(buf.tobytes())
+        return True
+    except Exception as e:
+        clog(f"plate stamp failed: {e}")
+        return False
+
+
+
 def line2_px(cfg, w, h):
     """Pixel endpoints of cfg['line2'] or None when not drawn."""
     ln = cfg.get("line2")
@@ -527,6 +555,7 @@ class SecurityEngine:
             from plate_reader import PlateReader
 
             self.plate_reader = PlateReader()
+        self.cloud_reader = None  # Plate Recognizer (user's own key) — built from cfg on first use
         self._best_crops = {}
         self._ocr_q = None  # single OCR worker queue (created on first crossing)
         self._recent_cross = {1: [], 2: []}  # per tracker: (ts, to_side, bbox, tid) of counted crossings for de-duplication
@@ -1228,24 +1257,57 @@ class SecurityEngine:
             lst.sort(key=lambda e: -e[0])
             del lst[3:]
 
-    def _ocr_and_notify(self, eid, tid, ev, crops):
-        plate, detail = "", "OCR unavailable"
-        try:
-            if hasattr(self.plate_reader, "read_many"):
-                plate, detail = self.plate_reader.read_many(crops, budget_s=float(self.cfg.get("ocr_budget_s", 8)))
-            else:  # simple readers (tests/plugins): first non-empty wins
-                for c in crops:
-                    plate = self.plate_reader.read(c) or ""
+    def _cloud(self):
+        """Plate Recognizer reader for the current key (Settings > Number Plate), or None when off.
+        Used ONLY for 4-wheeler events (car/truck/bus/tractor): persons and two-wheelers are never
+        sent to the cloud — _emit_crossing queues OCR for category 'vehicle' alone."""
+        if not self.cfg.get("pr_enabled") or not str(self.cfg.get("pr_api_key") or "").strip():
+            return None
+        if self.cloud_reader is None:
+            from cloud_plate import CloudPlateReader
+
+            self.cloud_reader = CloudPlateReader(self.cfg.get("pr_api_key"), self.cfg.get("pr_region", "in"))
+        else:
+            self.cloud_reader.update(self.cfg.get("pr_api_key"), self.cfg.get("pr_region", "in"))
+        return self.cloud_reader
+
+    def _read_plate(self, crops):
+        """(plate, detail, source). Cloud first when the user chose 'sabse sahi' (pr_mode always),
+        local EasyOCR first when saving credits (fallback); the other one runs only if the first
+        found nothing. Both fail closed -> '' = Not detected."""
+        cloud = self._cloud()
+        order = ["local"] if cloud is None else (["local", "cloud"] if self.cfg.get("pr_mode") == "fallback" else ["cloud", "local"])
+        notes = []
+        for src in order:
+            try:
+                if src == "cloud":
+                    plate, d = cloud.read_many(crops)
+                    notes.append(f"cloud: {d}")
                     if plate:
-                        break
-                detail = "single-read"
-        except Exception as e:
-            detail = f"error: {e}"
+                        return plate, " | ".join(notes), "cloud"
+                elif self.plate_reader is not None:
+                    if hasattr(self.plate_reader, "read_many"):
+                        plate, d = self.plate_reader.read_many(crops, budget_s=float(self.cfg.get("ocr_budget_s", 8)))
+                    else:  # simple readers (tests/plugins): first non-empty wins
+                        plate, d = "", "single-read"
+                        for c in crops:
+                            plate = self.plate_reader.read(c) or ""
+                            if plate:
+                                break
+                    notes.append(f"local: {d}")
+                    if plate:
+                        return plate, " | ".join(notes), "ocr"
+            except Exception as e:
+                notes.append(f"{src} error: {e}")
+        return "", " | ".join(notes) or "OCR unavailable", ""
+
+    def _ocr_and_notify(self, eid, tid, ev, crops):
+        plate, detail, source = self._read_plate(crops) if crops else ("", "no crops", "")
         try:
-            self.db.update_event_plate(eid, plate, source="ocr", status="done")
+            self.db.update_event_plate(eid, plate, source=source or "ocr", status="done")
         except Exception:
             pass
-        ev = {**ev, "plate": plate, "plate_status": "done", "plate_source": "ocr" if plate else ""}
+        ev = {**ev, "plate": plate, "plate_status": "done", "plate_source": source}
         clog(f"plate OCR: track {tid} event {eid} -> '{plate or 'Not detected'}' ({detail}, {len(crops)} crops)")
         if not plate and getattr(self.plate_reader, "last_trace", None):
             clog("plate OCR raw reads: " + " | ".join(self.plate_reader.last_trace)[:400])
@@ -1253,6 +1315,7 @@ class SecurityEngine:
             if 0 < px < MIN_PLATE_PX:
                 clog(f"plate OCR hint: plate sirf ~{px}px chaudi hai (chahiye >= {MIN_PLATE_PX}px) — camera gate ke "
                      "aur paas/zoom karein ya camera ka main stream 2560x1440 par set karein")
+        stamp_plate(ev.get("image_path", ""), plate)  # the WhatsApp photo itself shows the number
         if self.on_event:
             try:
                 self.on_event(ev)  # same id: UI updates the capture toast with the number

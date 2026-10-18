@@ -130,3 +130,9 @@ frozen-mode print works now
 stderr works too
 frozen-mode print works now
 stderr works too
+frozen-mode print works now
+stderr works too
+frozen-mode print works now
+stderr works too
+frozen-mode print works now
+stderr works too

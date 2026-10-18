@@ -66,6 +66,11 @@ DEFAULTS = {
     "detector_model": "auto",        # auto | fast (yolov8n) | accurate (yolov8s)
     "detect_frame_skip": 2,          # run detector every N frames (CPU friendly)
     "enable_plate": True,
+    # ---- Plate Recognizer cloud (user's own key; 4-wheelers only — persons/bikes never go to the cloud) ----
+    "pr_enabled": False,
+    "pr_api_key": "",
+    "pr_mode": "always",       # always = cloud first (sabse sahi) | fallback = local EasyOCR first (credits bachao)
+    "pr_region": "in",
     "vehicle_classes": ["car", "truck", "bus"],
     "enable_person": False,        # tick => person Entry/Exit alerts
     "enable_two_wheeler": False,   # tick => motorcycle/bicycle Entry/Exit alerts
@@ -89,6 +94,10 @@ DEFAULTS = {
     "capture_schedule_enabled": False,  # True => detection/capture only in window (video always on)
     "capture_start": "18:00",
     "capture_end": "06:00",
+    # ---- Daily WhatsApp report (PDF: per-gate Entry/Exit totals per vehicle type) ----
+    "daily_report_enabled": False,
+    "daily_report_time": "21:00",   # HH:MM (24h) the PDF goes out every day
+    "daily_report_last": "",        # YYYY-MM-DD of the last day reported (catch-up after a PC-off night)
     # ---- Lone-person chime (engine-side sound, works while UI is minimised/locked) ----
     "person_chime_enabled": True,
     "vehicle_chime_enabled": True,           # deeper 'bong-bong' for car/truck/bus

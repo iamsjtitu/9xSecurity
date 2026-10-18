@@ -23,6 +23,7 @@ from fastapi.staticfiles import StaticFiles
 import auth
 import chime
 import config
+import report
 import updater
 from database import EventDB
 from engine import (
@@ -1296,14 +1297,16 @@ _SETTINGS_KEYS = (
     "wa_account_email", "wa_account_password", "gh_token",
     "wa_schedule_enabled", "wa_start", "wa_end",
     "capture_schedule_enabled", "capture_start", "capture_end",
+    "daily_report_enabled", "daily_report_time",
+    "pr_enabled", "pr_api_key", "pr_mode",
     "person_chime_enabled", "vehicle_chime_enabled", "two_wheeler_chime_enabled",
     "person_chime_schedule_enabled", "person_chime_start", "person_chime_end",
     "auto_delete_enabled",
 )
-_SECRET_KEYS = ("wa_api_key", "gh_token", "wa_account_password")
+_SECRET_KEYS = ("wa_api_key", "gh_token", "wa_account_password", "pr_api_key")
 # The WhatsApp API key stays visible in Settings (user request: hidden key made it impossible
 # to verify what is saved → failed sends). Other secrets remain write-only.
-_VISIBLE_SECRETS = ("wa_api_key",)
+_VISIBLE_SECRETS = ("wa_api_key", "pr_api_key")
 
 
 @app.get("/api/settings")
@@ -1325,6 +1328,8 @@ def get_settings(request: Request):
     out["enable_person"] = bool(cfg.get("enable_person"))
     out["enable_two_wheeler"] = bool(cfg.get("enable_two_wheeler"))
     out["gh_token_builtin"] = bool(updater.DEFAULT_TOKEN)
+    out["daily_report_last"] = cfg.get("daily_report_last", "")
+    out["daily_report_next"] = report.next_run(cfg) if cfg.get("daily_report_enabled") else ""
     return out
 
 
@@ -1332,6 +1337,7 @@ def get_settings(request: Request):
 def save_settings(body: dict, request: Request):
     _check(request)
     cfg = _cfg()
+    old_cfg = {"daily_report_enabled": cfg.get("daily_report_enabled"), "daily_report_time": cfg.get("daily_report_time")}
     if "wa_recipients" in body:
         # '8598800000, 9166175477' typed on one line must become two numbers, never one 20-digit one
         numbers, bad = parse_recipients(body["wa_recipients"])
@@ -1358,6 +1364,20 @@ def save_settings(body: dict, request: Request):
     for k in ("person_chime_start", "person_chime_end"):
         if k in body and not re.match(r"^\d{1,2}:\d{2}$", str(body[k])):
             cfg[k] = config.DEFAULTS[k]  # garbage time -> default, never a broken window
+    if "daily_report_time" in body and not re.match(r"^\d{1,2}:\d{2}$", str(body["daily_report_time"])):
+        raise HTTPException(400, "Report ka time HH:MM me hona chahiye (jaise 21:00)")
+    if "daily_report_enabled" in body:
+        cfg["daily_report_enabled"] = bool(body["daily_report_enabled"])
+    if "pr_enabled" in body:
+        cfg["pr_enabled"] = bool(body["pr_enabled"])
+    if "pr_mode" in body and body["pr_mode"] not in ("always", "fallback"):
+        cfg["pr_mode"] = "always"
+    if cfg.get("daily_report_enabled") and (
+        (not old_cfg.get("daily_report_enabled")) or old_cfg.get("daily_report_time") != cfg.get("daily_report_time")
+    ):
+        # switched on / time changed: the first PDF goes at the NEXT scheduled time, nothing retroactive
+        report.mark_baseline(cfg)
+        clog(f"daily report: ON at {cfg.get('daily_report_time')} — pehli PDF {report.next_run(cfg)}")
     if "person_chime_volume" in body:
         try:
             cfg["person_chime_volume"] = max(0, min(100, int(body["person_chime_volume"])))
@@ -1379,6 +1399,19 @@ def save_settings(body: dict, request: Request):
     config.save_config(cfg)
     pool.apply_cfg(cfg)
     return {"ok": True}
+
+
+@app.post("/api/plate/cloud/test")
+def plate_cloud_test(body: dict, request: Request):
+    """Settings 'Key check karo': validates the Plate Recognizer token (typed or saved) and returns
+    this month's usage. Costs no lookup."""
+    _check(request)
+    from cloud_plate import CloudPlateReader
+
+    key = str((body or {}).get("pr_api_key") or _cfg().get("pr_api_key") or "").strip()
+    res = CloudPlateReader(key).statistics(key)
+    clog(f"plate cloud: key check -> {'OK' if res.get('valid') else 'FAIL'} {res.get('message', '')[:120]}")
+    return res
 
 
 @app.post("/api/chime/test")
@@ -1603,6 +1636,81 @@ def _outbox_loop():
             import traceback
 
             clog("outbox loop error:\n" + traceback.format_exc())
+
+
+# ---- Daily PDF report (per gate: Entry/Exit per vehicle type) -------------------
+_report_lock = threading.Lock()
+
+
+def _send_daily_report(day, manual=False):
+    """Build the PDF for `day` and WhatsApp it to every recipient. Returns (ok, detail, pdf_path)."""
+    with _report_lock:
+        summary, path, text = report.generate(_db, day)
+        _outbox_sender.update(_cfg())
+        ok, detail = _outbox_sender.send_report(text, path)
+    clog(f"daily report {day}{' (manual)' if manual else ''}: Entry {summary['entry']} / Exit {summary['exit']} "
+         f"-> {'SENT' if ok else 'PROBLEM'}: {' | '.join(detail.splitlines())[:300]}")
+    return ok, detail, path
+
+
+def _daily_report_loop():
+    """Every 30 s: send the report for any day that is due (today at the set time; yesterday too
+    when the PC was off at that time). Each day is sent once (daily_report_last)."""
+    time.sleep(int(os.environ.get("REPORT_LOOP_DELAY", "40")))
+    while True:
+        try:
+            cfg = _cfg()
+            for day in report.due_days(cfg):
+                try:
+                    _send_daily_report(day)
+                except Exception as e:
+                    clog(f"daily report {day}: FAILED {e!r}")
+                cfg = _cfg()
+                cfg["daily_report_last"] = day  # once per day — a failed send is logged, not retried every 30 s
+                config.save_config(cfg)
+        except Exception:
+            import traceback
+
+            clog("daily report loop error:\n" + traceback.format_exc())
+        time.sleep(int(os.environ.get("REPORT_LOOP_SECONDS", "30")))
+
+
+def _report_day(date):
+    day = str(date or "").strip() or datetime.now().strftime("%Y-%m-%d")
+    try:
+        datetime.strptime(day, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(400, "date YYYY-MM-DD me hona chahiye")
+    return day
+
+
+@app.get("/api/report/daily")
+def report_daily(request: Request, date: str = ""):
+    """Summary + freshly written PDF for one day (default today, so far)."""
+    _check(request)
+    day = _report_day(date)
+    with _report_lock:
+        summary, path, text = report.generate(_db, day)
+    return {"summary": summary, "pdf_path": path, "folder": report.REPORT_DIR, "caption": text,
+            "pdf_url": f"/api/report/daily.pdf?date={day}"}
+
+
+@app.get("/api/report/daily.pdf")
+def report_daily_pdf(request: Request, date: str = ""):
+    _check(request)
+    day = _report_day(date)
+    with _report_lock:
+        _summary, path, _text = report.generate(_db, day)
+    return FileResponse(path, media_type="application/pdf", filename=os.path.basename(path))
+
+
+@app.post("/api/report/send")
+def report_send(body: dict, request: Request):
+    """'Abhi bhejo' button: today's (or the given day's) PDF to every WhatsApp recipient now."""
+    _check(request)
+    day = _report_day((body or {}).get("date"))
+    ok, detail, path = _send_daily_report(day, manual=True)
+    return {"ok": ok, "detail": detail, "pdf_path": path, "date": day}
 
 
 # ---- updates ----------------------------------------------------------------
@@ -1873,6 +1981,7 @@ def main():
         os._exit(3)
     threading.Thread(target=_purge_loop, daemon=True).start()
     threading.Thread(target=_outbox_loop, daemon=True).start()
+    threading.Thread(target=_daily_report_loop, daemon=True).start()
     threading.Thread(target=_load_sampler, daemon=True).start()
     threading.Thread(target=_update_check_loop, daemon=True).start()
     threading.Thread(target=_auto_connect_loop, daemon=True).start()

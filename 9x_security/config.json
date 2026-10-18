@@ -1,18 +1,22 @@
 {
   "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
   "line": {
-    "x1": 0.1,
-    "y1": 0.2,
-    "x2": 0.9,
-    "y2": 0.8
+    "x1": 0.05,
+    "y1": 0.5,
+    "x2": 0.45,
+    "y2": 0.5
   },
-  "entry_direction": "pos",
+  "entry_direction": "neg",
   "line2": null,
   "entry_direction2": "",
   "confidence": 0.35,
   "detector_model": "auto",
   "detect_frame_skip": 2,
   "enable_plate": false,
+  "pr_enabled": false,
+  "pr_api_key": "",
+  "pr_mode": "always",
+  "pr_region": "in",
   "vehicle_classes": [
     "car",
     "truck",
@@ -49,6 +53,9 @@
   "capture_schedule_enabled": false,
   "capture_start": "18:00",
   "capture_end": "06:00",
+  "daily_report_enabled": false,
+  "daily_report_time": "21:00",
+  "daily_report_last": "2026-10-17",
   "person_chime_enabled": true,
   "vehicle_chime_enabled": true,
   "two_wheeler_chime_enabled": true,
@@ -67,14 +74,14 @@
       "rtsp_url": "rtsp://u:p@192.0.2.1:554/s",
       "rtsp_url_main": "",
       "line": {
-        "x1": 0.1,
-        "y1": 0.2,
-        "x2": 0.9,
-        "y2": 0.8
+        "x1": 0.05,
+        "y1": 0.5,
+        "x2": 0.45,
+        "y2": 0.5
       },
-      "entry_direction": "pos",
+      "entry_direction": "neg",
       "ignore_zones": [],
-      "monitor": false,
+      "monitor": true,
       "schedule": {
         "enabled": false,
         "start": "20:00",
@@ -114,9 +121,9 @@
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "8ca304f428b9a61f8787651a9c12da6e",
-  "auth_hash": "147ed6b844d7ead3505233d80723aae1fc2780c8bde51d4ee6ee0aae638c8948",
+  "auth_salt": "c3c62690e413c69808b52f8ab51e37ab",
+  "auth_hash": "ecbf91d8f8677af6e03545ed928f50fc1a59119a7d79f9ae7aba829be785a8b2",
   "github_repo": "",
-  "gh_token": "TEST_GH",
+  "gh_token": "",
   "rtsp_url_main": ""
 }

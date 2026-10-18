@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MessageCircle, User, Lock, Download, Send, Clock, Activity, Eye, EyeOff, Cctv } from 'lucide-react';
+import { MessageCircle, User, Lock, Download, Send, Clock, Activity, Eye, EyeOff, Cctv, ScanLine } from 'lucide-react';
 import { api } from '../api';
 import DiagnosticsTab from './DiagnosticsTab.jsx';
 import UpdateProgress from './UpdateProgress.jsx';
@@ -7,10 +7,13 @@ import WaGroupsPicker from './WaGroupsPicker.jsx';
 import CamerasTab from './CamerasTab.jsx';
 import TimeField, { describeWindow } from './TimeField.jsx';
 import PersonChimeCard from './PersonChimeCard.jsx';
+import DailyReportCard from './DailyReportCard.jsx';
+import PlateCloudCard from './PlateCloudCard.jsx';
 
 const TABS = [
   { id: 'cameras', label: 'Cameras', icon: Cctv },
   { id: 'whatsapp', label: 'WhatsApp Alerts', icon: MessageCircle },
+  { id: 'plate', label: 'Number Plate', icon: ScanLine },
   { id: 'timing', label: 'Timing', icon: Clock },
   { id: 'account', label: 'Account', icon: User },
   { id: 'security', label: 'Login / Security', icon: Lock },
@@ -172,6 +175,7 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
       <div className={`card p-6 flex-1 ${['diagnostics', 'cameras', 'timing'].includes(tab) ? 'max-w-4xl' : 'max-w-2xl'}`}>
         {tab === 'diagnostics' && <DiagnosticsTab showToast={showToast} />}
         {tab === 'cameras' && <CamerasTab showToast={showToast} />}
+        {tab === 'plate' && <PlateCloudCard s={s} set={set} showToast={showToast} save={save} busy={busy} />}
         {tab === 'whatsapp' && (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-slate-900">WhatsApp Alerts (wa.9x.design)</h3>
@@ -224,6 +228,7 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
                 onChange={(e) => set('wa_send_image', e.target.checked)} data-testid="wa-send-image-toggle" />
               Photo ke saath bhejo
             </label>
+            <DailyReportCard s={s} set={set} showToast={showToast} />
             <div className="flex gap-3 pt-2">
               <button className="btn-primary" onClick={save} disabled={busy} data-testid="settings-save-btn">Save</button>
               <button className="btn-ghost" onClick={waTest} disabled={busy} data-testid="wa-test-btn">
@@ -359,12 +364,24 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
               <label className={`flex items-center gap-3 text-sm cursor-pointer ${autoStart?.supported ? 'text-slate-700' : 'text-slate-400'}`}>
                 <input type="checkbox" checked={!!autoStart?.enabled} disabled={!autoStart?.supported}
                   onChange={async (e) => {
-                    try { const r = await window.native.setAutoStart(e.target.checked); setAutoStart({ supported: true, enabled: r.enabled }); showToast(r.enabled ? 'Windows start hone par software automatic chalu hoga ✔' : 'Auto-start band', 'success'); }
+                    try { const r = await window.native.setAutoStart(e.target.checked); setAutoStart({ supported: true, ...r }); showToast(r.enabled ? 'Windows start hone par software automatic chalu hoga ✔' : 'Auto-start band', 'success'); }
                     catch (err) { showToast(err.message, 'error'); }
                   }} data-testid="auto-start-toggle" />
                 Windows start hone par software automatic chalu {autoStart?.supported ? '' : '(sirf installed Windows app me)'}
               </label>
-              <p className="text-xs text-slate-400">Dono ON = bijli/computer band hone ke baad wapas on hote hi monitoring apne aap shuru.</p>
+              {autoStart?.supported && autoStart?.enabled && (
+                <div className="flex flex-wrap gap-1.5 pl-7 text-[11px]" data-testid="auto-start-status">
+                  {[['runKey', 'Windows Startup entry'], ['shortcut', 'Startup folder shortcut'], ['watchdog', 'Watchdog (har 5 min check, band ho to wapas on)']].map(([k, label]) => (
+                    <span key={k} className={`rounded-full px-2 py-0.5 ${autoStart[k] ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}
+                      data-testid={`auto-start-${k}`}>{autoStart[k] ? '✔' : '✖'} {label}</span>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-slate-400">
+                Dono ON = bijli/computer band hone ke baad wapas on hote hi monitoring apne aap shuru. Software crash ho ya koi band kar de
+                to watchdog 5 minute me dobara chalu kar deta hai. <b>Zaroori:</b> Windows me password login ho to login ke baad hi koi
+                software chal sakta hai — gate PC par Windows auto-login (netplwiz) ya bina password rakhein.
+              </p>
             </div>
 
             <div className="rounded-lg border border-slate-200 p-4 flex items-center justify-between gap-4" data-testid="wizard-card">

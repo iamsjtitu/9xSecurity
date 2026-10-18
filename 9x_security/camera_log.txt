@@ -22871,3 +22871,1103 @@ RuntimeError: no AI in test
 2026-10-18T06:33:07 | svc[Back Camera]: accurate model too slow here (541 ms > 350) -> yolov8n.pt
 2026-10-18T06:33:08 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 393 ms, 0 dets on blank frame)
 2026-10-18T06:33:08 | open_stream: transport=tcp
+2026-10-18T06:33:13 | open_stream: transport=udp
+2026-10-18T06:33:18 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:33:18 | ffmpeg-pipe: starting
+2026-10-18T06:33:23 | open_stream: falling back to default backend
+2026-10-18T06:33:28 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:33:46 | svc: auto-connect — Back Camera se connect kar raha hai
+2026-10-18T06:33:46 | svc[Back Camera]: loading AI model
+2026-10-18T06:33:46 | svc[Back Camera]: AI model loaded
+2026-10-18T06:33:47 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 612 ms, 0 dets on blank frame)
+2026-10-18T06:33:47 | svc[Back Camera]: accurate model too slow here (612 ms > 350) -> yolov8n.pt
+2026-10-18T06:33:48 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 237 ms, 0 dets on blank frame)
+2026-10-18T06:33:48 | open_stream: transport=tcp
+2026-10-18T06:33:53 | open_stream: transport=udp
+2026-10-18T06:33:58 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:33:58 | ffmpeg-pipe: starting
+2026-10-18T06:34:03 | open_stream: falling back to default backend
+2026-10-18T06:34:08 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:34:10 | zoom (doosri nazar) model: ?
+2026-10-18T06:34:10 | track 1 'person' nahi — zoom karke dekha: dog 0.60 vs person 0.00 (kul 0.60 vs 0.00) — janwar, alert nahi hoga (box (460, 92, 500, 192))
+2026-10-18T06:34:10 | zoom (doosri nazar) model: ?
+2026-10-18T06:34:10 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-10-089.jpg
+2026-10-18T06:34:10 | zoom check failed: model busy
+2026-10-18T06:34:10 | zoom check failed: model busy
+2026-10-18T06:34:10 | zoom check failed: model busy
+2026-10-18T06:34:10 | zoom check failed: model busy
+2026-10-18T06:34:10 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-10-118.jpg
+2026-10-18T06:34:10 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-10-128.jpg
+2026-10-18T06:34:10 | zoom (doosri nazar) model: ?
+2026-10-18T06:34:10 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-10-156.jpg
+2026-10-18T06:34:10 | zoom (doosri nazar) model: ?
+2026-10-18T06:34:10 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-10-207.jpg
+2026-10-18T06:34:26 | svc[Back Camera]: loading AI model
+2026-10-18T06:34:26 | svc[Back Camera]: AI model loaded
+2026-10-18T06:34:28 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 1011 ms, 0 dets on blank frame)
+2026-10-18T06:34:28 | svc[Back Camera]: accurate model too slow here (1011 ms > 350) -> yolov8n.pt
+2026-10-18T06:34:29 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 423 ms, 0 dets on blank frame)
+2026-10-18T06:34:29 | open_stream: transport=tcp
+2026-10-18T06:34:32 | zoom (doosri nazar) model: ?
+2026-10-18T06:34:32 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-32-958.jpg
+2026-10-18T06:34:32 | person box ignored: janwar jaisa aakar (35x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (600, 20, 635, 60))
+2026-10-18T06:34:32 | zoom (doosri nazar) model: ?
+2026-10-18T06:34:32 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-32-986.jpg
+2026-10-18T06:34:33 | person box ignored: janwar jaisa aakar (35x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (700, 20, 735, 60))
+2026-10-18T06:34:33 | zoom (doosri nazar) model: ?
+2026-10-18T06:34:33 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-33-021.jpg
+2026-10-18T06:34:33 | zoom (doosri nazar) model: ?
+2026-10-18T06:34:33 | track 1 'person' nahi — zoom karke dekha: dog 0.70 vs person 0.10 (kul 0.70 vs 0.10) — janwar, alert nahi hoga (box (460, 92, 500, 192))
+2026-10-18T06:34:33 | zoom (doosri nazar) model: ?
+2026-10-18T06:34:33 | track 1 'person' nahi — zoom karke dekha: dog 0.70 vs person 0.10 (kul 0.70 vs 0.10) — janwar, alert nahi hoga (box (460, 92, 500, 192))
+2026-10-18T06:34:33 | zoom (doosri nazar) model: ?
+2026-10-18T06:34:33 | track 1 'person' nahi — zoom karke dekha: dog 0.40 vs person 0.50 (kul 0.40 vs 0.50) — janwar, alert nahi hoga (box (460, 92, 500, 192))
+2026-10-18T06:34:33 | track 1 zoom par ab saaf insaan dikha (kul person 1.40 vs janwar 0.40) — person maana jayega
+2026-10-18T06:34:33 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-33-113.jpg
+2026-10-18T06:34:33 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_car_06-34-33-140.jpg
+2026-10-18T06:34:33 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-33-170.jpg
+2026-10-18T06:34:33 | zoom (doosri nazar) model: ?
+2026-10-18T06:34:33 | person box ignored: janwar jaisa aakar (35x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (656, 224, 691, 264))
+2026-10-18T06:34:33 | person box ignored: janwar jaisa aakar (35x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (660, 20, 695, 60))
+2026-10-18T06:34:33 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-33-426.jpg
+2026-10-18T06:34:33 | person box ignored: janwar jaisa aakar (35x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (656, 224, 691, 264))
+2026-10-18T06:34:33 | person box ignored: janwar jaisa aakar (120x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (720, 30, 840, 70))
+2026-10-18T06:34:33 | person box ignored: bahut chhota — dog/cat/bag, insaan nahi (box (778, 48, 782, 62))
+2026-10-18T06:34:33 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-33-507.jpg
+2026-10-18T06:34:33 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-33-538.jpg
+2026-10-18T06:34:33 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-33-566.jpg
+2026-10-18T06:34:33 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:34:33 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:34:33 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_truck_06-34-33-623.jpg
+2026-10-18T06:34:33 | person ignored: truck (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:34:33 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_car_06-34-33-657.jpg
+2026-10-18T06:34:33 | person ignored: car (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:34:33 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-33-696.jpg
+2026-10-18T06:34:33 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-33-731.jpg
+2026-10-18T06:34:33 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-33-765.jpg
+2026-10-18T06:34:33 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-33-801.jpg
+2026-10-18T06:34:33 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-33-833.jpg
+2026-10-18T06:34:33 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-33-843.jpg
+2026-10-18T06:34:33 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-18T06:34:33 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_car_06-34-33-873.jpg
+2026-10-18T06:34:33 | event: Entry bicycle track 2 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_bicycle_06-34-33-917.jpg
+2026-10-18T06:34:33 | event: Entry bicycle track 5 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_bicycle_06-34-33-922.jpg
+2026-10-18T06:34:33 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 4)
+2026-10-18T06:34:33 | track 6 = wahi gaadi jo pehle count ho chuki hai (purana track 5, line par khadi/doosra box) — dobara count nahi hogi (box (601, 174, 637, 240))
+2026-10-18T06:34:33 | person ignored: bicycle (track 2) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:34:33 | person ignored: bicycle (track 5) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 3)
+2026-10-18T06:34:33 | event: Entry bicycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_bicycle_06-34-33-962.jpg
+2026-10-18T06:34:33 | event: Entry bicycle track 3 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_bicycle_06-34-33-968.jpg
+2026-10-18T06:34:33 | crossing rejected: track 5 bicycle Entry — line par khadi gaadi ka box hil raha hai (jitter): sirf 2px paar, saaf paar ke liye 27px chahiye (box (599, 179, 635, 245))
+2026-10-18T06:34:33 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 5)
+2026-10-18T06:34:33 | track 6 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (542, 177, 578, 243))
+2026-10-18T06:34:33 | person ignored: bicycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:34:33 | person ignored: bicycle (track 3) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 4)
+2026-10-18T06:34:34 | event: Entry bicycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_bicycle_06-34-34-008.jpg
+2026-10-18T06:34:34 | event: Entry bicycle track 5 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_bicycle_06-34-34-013.jpg
+2026-10-18T06:34:34 | track 3 = wahi gaadi jo pehle count ho chuki hai (purana track 5, line par khadi/doosra box) — dobara count nahi hogi (box (607, 171, 639, 241))
+2026-10-18T06:34:34 | person ignored: bicycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:34:34 | person ignored: bicycle (track 3) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 4)
+2026-10-18T06:34:34 | track 6 = wahi gaadi jo pehle count ho chuki hai (purana track 5, line par khadi/doosra box) — dobara count nahi hogi (box (602, 261, 638, 327))
+2026-10-18T06:34:34 | event: Entry bicycle track 2 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_bicycle_06-34-34-053.jpg
+2026-10-18T06:34:34 | event: Entry bicycle track 5 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_bicycle_06-34-34-058.jpg
+2026-10-18T06:34:34 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 1)
+2026-10-18T06:34:34 | person ignored: bicycle (track 2) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 3)
+2026-10-18T06:34:34 | person ignored: bicycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 6)
+2026-10-18T06:34:34 | event: Entry bicycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_bicycle_06-34-34-095.jpg
+2026-10-18T06:34:34 | event: Entry bicycle track 4 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_bicycle_06-34-34-101.jpg
+2026-10-18T06:34:34 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 3)
+2026-10-18T06:34:34 | person ignored: bicycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:34:34 | person ignored: bicycle (track 3) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 5)
+2026-10-18T06:34:34 | crossing rejected: track 3 bicycle Entry — ek step me 66px jump (limit 56px) — teleport/galat match (box (541, 174, 573, 244))
+2026-10-18T06:34:34 | event: Entry bicycle track 5 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_bicycle_06-34-34-141.jpg
+2026-10-18T06:34:34 | person ignored: bicycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:34:34 | person ignored: bicycle (track 5) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 4)
+2026-10-18T06:34:34 | event: Entry bicycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_bicycle_06-34-34-148.jpg
+2026-10-18T06:34:34 | track 3 = wahi gaadi jo pehle count ho chuki hai (purana track 5, line par khadi/doosra box) — dobara count nahi hogi (box (600, 191, 636, 257))
+2026-10-18T06:34:34 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 2)
+2026-10-18T06:34:34 | event: Entry bicycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_bicycle_06-34-34-195.jpg
+2026-10-18T06:34:34 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-227.jpg
+2026-10-18T06:34:34 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-260.jpg
+2026-10-18T06:34:34 | event: Entry motorcycle track 2 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-268.jpg
+2026-10-18T06:34:34 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-296.jpg
+2026-10-18T06:34:34 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-325.jpg
+2026-10-18T06:34:34 | event: Entry motorcycle track 2 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-338.jpg
+2026-10-18T06:34:34 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-368.jpg
+2026-10-18T06:34:34 | event: Entry motorcycle track 2 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-377.jpg
+2026-10-18T06:34:34 | event: Entry motorcycle track 3 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-385.jpg
+2026-10-18T06:34:34 | event: Entry motorcycle track 4 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-395.jpg
+2026-10-18T06:34:34 | event: Entry motorcycle track 5 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-403.jpg
+2026-10-18T06:34:34 | event: Entry motorcycle track 6 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-411.jpg
+2026-10-18T06:34:34 | event: Entry motorcycle track 7 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-420.jpg
+2026-10-18T06:34:34 | event: Entry motorcycle track 8 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-429.jpg
+2026-10-18T06:34:34 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-34-464.jpg
+2026-10-18T06:34:34 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:34:34 | person box ignored: janwar jaisa aakar (70x80, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (700, -15, 770, 65))
+2026-10-18T06:34:34 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:34:34 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-34-557.jpg
+2026-10-18T06:34:34 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-34-584.jpg
+2026-10-18T06:34:34 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-34-612.jpg
+2026-10-18T06:34:34 | person box ignored: janwar jaisa aakar (90x70, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (735, 10, 825, 80))
+2026-10-18T06:34:34 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:34:34 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-640.jpg
+2026-10-18T06:34:34 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_car_06-34-34-674.jpg
+2026-10-18T06:34:34 | crossing rejected: track 1 car Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (660, 196, 780, 276))
+2026-10-18T06:34:34 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-34-736.jpg
+2026-10-18T06:34:34 | crossing rejected: track 1 person Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (220, 176, 260, 276))
+2026-10-18T06:34:34 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-789.jpg
+2026-10-18T06:34:34 | crossing rejected: track 1 motorcycle Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (205, 216, 275, 276))
+2026-10-18T06:34:34 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-34-844.jpg
+2026-10-18T06:34:34 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-34-855.jpg
+2026-10-18T06:34:34 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_car_06-34-34-894.jpg
+2026-10-18T06:34:34 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-34-906.jpg
+2026-10-18T06:34:34 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-34-34-948.jpg
+2026-10-18T06:34:34 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_car_06-34-34-964.jpg
+2026-10-18T06:34:34 | open_stream: transport=udp
+2026-10-18T06:34:35 | event: Exit person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Exit_person_06-34-35-008.jpg
+2026-10-18T06:34:35 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_car_06-34-35-024.jpg
+2026-10-18T06:34:35 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-35-067.jpg
+2026-10-18T06:34:35 | crossing ignored: same object: motorcycle ke roop me 0s pehle alert ho chuka (doosri line) (track 1 car)
+2026-10-18T06:34:35 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-34-35-107.jpg
+2026-10-18T06:34:35 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 2)
+2026-10-18T06:34:35 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_car_06-34-35-139.jpg
+2026-10-18T06:34:35 | person ignored: car (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:34:39 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:34:39 | ffmpeg-pipe: starting
+2026-10-18T06:34:45 | open_stream: falling back to default backend
+2026-10-18T06:34:46 | svc: camera added cam3 'Zoom E2E' gate='ZOOME2E'
+2026-10-18T06:34:46 | svc: cameras started: Zoom E2E
+2026-10-18T06:34:46 | svc[Zoom E2E]: loading AI model
+2026-10-18T06:34:46 | svc: viewing camera -> cam3 'Zoom E2E' gate='ZOOME2E'
+2026-10-18T06:34:46 | person/bike line removed — person & two-wheeler ab main line par count honge
+2026-10-18T06:34:46 | svc[Zoom E2E]: AI model loaded
+2026-10-18T06:34:46 | svc[Zoom E2E]: AI self-test OK (yolov8n.pt, 163 ms, 0 dets on blank frame)
+2026-10-18T06:34:50 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:34:50 | svc[Zoom E2E]: source opened codec=fmp4 live=False
+2026-10-18T06:34:50 | svc[Zoom E2E]: streaming started
+2026-10-18T06:35:01 | zoom (doosri nazar) model: yolov8s.pt
+2026-10-18T06:35:01 | track 1 'person' nahi — zoom karke dekha: dog 0.53 vs person 0.00 (kul 0.53 vs 0.00) — janwar, alert nahi hoga (box (473, 127, 505, 192))
+2026-10-18T06:35:06 | svc[Back Camera]: loading AI model
+2026-10-18T06:35:06 | svc[Back Camera]: AI model loaded
+2026-10-18T06:35:06 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 238 ms, 0 dets on blank frame)
+2026-10-18T06:35:06 | open_stream: transport=tcp
+2026-10-18T06:35:12 | open_stream: transport=udp
+2026-10-18T06:35:14 | svc: camera deleted cam3 (was active)
+2026-10-18T06:35:14 | svc: camera added cam3 'Zoom E2E' gate='ZOOME2E'
+2026-10-18T06:35:14 | svc: cameras started: Zoom E2E
+2026-10-18T06:35:14 | svc[Zoom E2E]: loading AI model
+2026-10-18T06:35:14 | svc: viewing camera -> cam3 'Zoom E2E' gate='ZOOME2E'
+2026-10-18T06:35:14 | person/bike line removed — person & two-wheeler ab main line par count honge
+2026-10-18T06:35:14 | svc[Zoom E2E]: AI model loaded
+2026-10-18T06:35:15 | svc[Zoom E2E]: AI self-test OK (yolov8n.pt, 177 ms, 0 dets on blank frame)
+2026-10-18T06:35:17 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:35:17 | ffmpeg-pipe: starting
+2026-10-18T06:35:22 | open_stream: falling back to default backend
+2026-10-18T06:35:27 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:35:27 | svc[Zoom E2E]: source opened codec=fmp4 live=False
+2026-10-18T06:35:27 | svc[Zoom E2E]: streaming started
+2026-10-18T06:35:36 | zoom (doosri nazar) model: yolov8s.pt
+2026-10-18T06:35:43 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-35-43-085.jpg
+2026-10-18T06:35:46 | svc[Back Camera]: loading AI model
+2026-10-18T06:35:46 | svc[Back Camera]: AI model loaded
+2026-10-18T06:35:47 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 239 ms, 0 dets on blank frame)
+2026-10-18T06:35:47 | open_stream: transport=tcp
+2026-10-18T06:35:48 | svc: camera deleted cam3 (was active)
+2026-10-18T06:35:52 | open_stream: transport=udp
+2026-10-18T06:35:57 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:35:57 | ffmpeg-pipe: starting
+2026-10-18T06:36:02 | open_stream: falling back to default backend
+2026-10-18T06:36:07 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:36:26 | svc[Back Camera]: loading AI model
+2026-10-18T06:36:26 | svc[Back Camera]: AI model loaded
+2026-10-18T06:36:27 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 707 ms, 0 dets on blank frame)
+2026-10-18T06:36:27 | svc[Back Camera]: accurate model too slow here (707 ms > 350) -> yolov8n.pt
+2026-10-18T06:36:28 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 419 ms, 0 dets on blank frame)
+2026-10-18T06:36:28 | open_stream: transport=tcp
+2026-10-18T06:36:33 | open_stream: transport=udp
+2026-10-18T06:36:38 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:36:38 | ffmpeg-pipe: starting
+2026-10-18T06:36:43 | open_stream: falling back to default backend
+2026-10-18T06:36:48 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:37:06 | svc[Back Camera]: loading AI model
+2026-10-18T06:37:06 | svc[Back Camera]: AI model loaded
+2026-10-18T06:37:07 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 489 ms, 0 dets on blank frame)
+2026-10-18T06:37:07 | svc[Back Camera]: accurate model too slow here (489 ms > 350) -> yolov8n.pt
+2026-10-18T06:37:08 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 248 ms, 0 dets on blank frame)
+2026-10-18T06:37:08 | open_stream: transport=tcp
+2026-10-18T06:37:13 | open_stream: transport=udp
+2026-10-18T06:37:18 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:37:18 | ffmpeg-pipe: starting
+2026-10-18T06:37:23 | open_stream: falling back to default backend
+2026-10-18T06:37:28 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:37:46 | svc[Back Camera]: loading AI model
+2026-10-18T06:37:46 | svc[Back Camera]: AI model loaded
+2026-10-18T06:37:47 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 494 ms, 0 dets on blank frame)
+2026-10-18T06:37:47 | svc[Back Camera]: accurate model too slow here (494 ms > 350) -> yolov8n.pt
+2026-10-18T06:37:48 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 239 ms, 0 dets on blank frame)
+2026-10-18T06:37:48 | open_stream: transport=tcp
+2026-10-18T06:37:53 | open_stream: transport=udp
+2026-10-18T06:37:58 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:37:58 | ffmpeg-pipe: starting
+2026-10-18T06:38:03 | open_stream: falling back to default backend
+2026-10-18T06:38:08 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:38:26 | svc[Back Camera]: loading AI model
+2026-10-18T06:38:26 | svc[Back Camera]: AI model loaded
+2026-10-18T06:38:27 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 497 ms, 0 dets on blank frame)
+2026-10-18T06:38:27 | svc[Back Camera]: accurate model too slow here (497 ms > 350) -> yolov8n.pt
+2026-10-18T06:38:28 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 307 ms, 0 dets on blank frame)
+2026-10-18T06:38:28 | open_stream: transport=tcp
+2026-10-18T06:38:29 | event: Exit car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Exit_car_06-38-29-427.jpg
+2026-10-18T06:38:29 | plate OCR: track 1 Exit queued (2 crops)
+2026-10-18T06:38:30 | plate OCR: track 1 event 1 -> 'MH12AB1234' (single-read, 2 crops)
+2026-10-18T06:38:31 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_car_06-38-31-105.jpg
+2026-10-18T06:38:31 | svc AI self-test error (#1):
+Traceback (most recent call last):
+  File "/app/9x_security/test_ai_health.py", line 48, in test_selftest_failure_disables_ai_and_marks_error
+    w._ai_selftest()
+  File "/app/9x_security/service.py", line 336, in _ai_selftest
+    self.engine.detector.detect(blank)  # warm-up (lazy torch init)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_ai_health.py", line 16, in detect
+    raise RuntimeError("operator torchvision::nms does not exist")
+RuntimeError: operator torchvision::nms does not exist
+
+2026-10-18T06:38:31 | svc: AI self-test OK (?, 0 ms, 0 dets on blank frame)
+2026-10-18T06:38:33 | open_stream: transport=udp
+2026-10-18T06:38:38 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:38:38 | ffmpeg-pipe: starting
+2026-10-18T06:38:43 | open_stream: falling back to default backend
+2026-10-18T06:38:48 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:38:49 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpqfq5xzgd/snaps/2026-10-18') path=/tmp/tmpqfq5xzgd/snaps/2026-10-18/Exit_car_06-38-49-353.jpg
+2026-10-18T06:38:49 | person box ignored: janwar jaisa aakar (120x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (720, 30, 840, 70))
+2026-10-18T06:38:49 | person box ignored: bahut chhota — dog/cat/bag, insaan nahi (box (778, 48, 782, 62))
+2026-10-18T06:38:49 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-38-49-451.jpg
+2026-10-18T06:38:49 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-38-49-478.jpg
+2026-10-18T06:38:49 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-38-49-504.jpg
+2026-10-18T06:38:49 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:38:49 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:38:49 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_truck_06-38-49-558.jpg
+2026-10-18T06:38:49 | person ignored: truck (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:38:49 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_car_06-38-49-588.jpg
+2026-10-18T06:38:49 | person ignored: car (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:38:49 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-38-49-625.jpg
+2026-10-18T06:38:49 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-38-49-662.jpg
+2026-10-18T06:38:49 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-38-49-698.jpg
+2026-10-18T06:38:49 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-38-49-733.jpg
+2026-10-18T06:38:49 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-38-49-760.jpg
+2026-10-18T06:38:49 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-38-49-769.jpg
+2026-10-18T06:38:49 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-18T06:38:49 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_car_06-38-49-799.jpg
+2026-10-18T06:38:49 | chime: person Entry — ghanti bajayi (event 7)
+2026-10-18T06:38:49 | chime: vehicle Entry — ghanti bajayi (event 8)
+2026-10-18T06:38:49 | chime: two_wheeler Exit — ghanti bajayi (event 9)
+2026-10-18T06:38:49 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_truck_06-38-49-913.jpg
+2026-10-18T06:38:49 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_truck_06-38-49-925.jpg
+2026-10-18T06:38:49 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_truck_06-38-49-953.jpg
+2026-10-18T06:38:49 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (720, 144, 840, 224))
+2026-10-18T06:38:49 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_truck_06-38-49-984.jpg
+2026-10-18T06:38:49 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (720, 210, 840, 290))
+2026-10-18T06:38:50 | event: Exit car track 2 (cross) -> /app/9x_security/snapshots/2026-10-18/Exit_car_06-38-49-998.jpg
+2026-10-18T06:38:50 | event: Exit car track 1 (cross) -> /tmp/tmptff23_6o/snaps/2026-10-18/Exit_car_06-38-50-613.jpg
+2026-10-18T06:38:51 | === PROBE start: notaurl
+2026-10-18T06:38:51 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-10-18T06:38:54 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-18T06:38:54 | ffmpeg-pipe: starting
+2026-10-18T06:38:54 | capture attempt transport=tcp wait=0.5s
+2026-10-18T06:38:59 | capture tcp: open FAILED
+2026-10-18T06:38:59 | UNIT_TEST_LINE_iter5
+2026-10-18T06:38:59 | MARKER_1792305539424
+2026-10-18T06:38:59 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-10-18T06:39:02 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-18T06:39:02 | ffmpeg-pipe: starting
+2026-10-18T06:39:02 | ffmpeg-pipe: starting
+2026-10-18T06:39:02 | ffmpeg-pipe: starting
+2026-10-18T06:39:02 | ffmpeg-pipe: OK first frame in 0.0s
+2026-10-18T06:39:02 | ffmpeg-pipe: starting
+2026-10-18T06:39:06 | svc: auto-connect — Back Camera se connect kar raha hai
+2026-10-18T06:39:06 | svc[Back Camera]: loading AI model
+2026-10-18T06:39:06 | svc[Back Camera]: AI model loaded
+2026-10-18T06:39:07 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 460 ms, 0 dets on blank frame)
+2026-10-18T06:39:07 | svc[Back Camera]: accurate model too slow here (460 ms > 350) -> yolov8n.pt
+2026-10-18T06:39:07 | ffmpeg-pipe: no frames (process exited)
+2026-10-18T06:39:07 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-10-18T06:39:08 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 238 ms, 0 dets on blank frame)
+2026-10-18T06:39:08 | open_stream: transport=tcp
+2026-10-18T06:39:10 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-18T06:39:11 | person box ignored: janwar jaisa aakar (35x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (656, 224, 691, 264))
+2026-10-18T06:39:11 | person box ignored: janwar jaisa aakar (35x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (660, 20, 695, 60))
+2026-10-18T06:39:11 | event: Entry person track 1 (cross) -> /tmp/tmptff23_6o/snaps/2026-10-18/Entry_person_06-39-11-667.jpg
+2026-10-18T06:39:11 | person box ignored: janwar jaisa aakar (35x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (656, 224, 691, 264))
+2026-10-18T06:39:11 | svc: loading AI model
+2026-10-18T06:39:11 | svc: AI model loaded
+2026-10-18T06:39:12 | svc: AI self-test OK (yolov8n.pt, 151 ms, 0 dets on blank frame)
+2026-10-18T06:39:12 | svc: source opened codec=hevc live=True
+2026-10-18T06:39:12 | svc: HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein
+2026-10-18T06:39:12 | svc: streaming started
+2026-10-18T06:39:13 | open_stream: transport=udp
+2026-10-18T06:39:15 | event: Exit bus track 1 (cross) -> /tmp/tmpr7djv3ht/snaps/2026-10-18/Exit_bus_06-39-15-400.jpg
+2026-10-18T06:39:18 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:39:18 | ffmpeg-pipe: starting
+2026-10-18T06:39:23 | open_stream: falling back to default backend
+2026-10-18T06:39:23 | event: Entry bus track 1 (cross) -> /tmp/tmpr7djv3ht/snaps/2026-10-18/Entry_bus_06-39-23-270.jpg
+2026-10-18T06:39:26 | svc: source opened codec=unknown live=True
+2026-10-18T06:39:26 | svc: source opened codec=unknown live=False
+2026-10-18T06:39:26 | event: Entry truck track 1 (cross) -> /tmp/tmptff23_6o/snaps/2026-10-18/Entry_truck_06-39-26-437.jpg
+2026-10-18T06:39:26 | event: Entry truck track 2 (cross) -> /tmp/tmptff23_6o/snaps/2026-10-18/Entry_truck_06-39-26-449.jpg
+2026-10-18T06:39:26 | event: Entry truck track 1 (cross) -> /tmp/tmptff23_6o/snaps/2026-10-18/Entry_truck_06-39-26-460.jpg
+2026-10-18T06:39:26 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 2)
+2026-10-18T06:39:26 | event: Entry truck track 1 (cross) -> /tmp/tmptff23_6o/snaps/2026-10-18/Entry_truck_06-39-26-496.jpg
+2026-10-18T06:39:26 | event: Entry truck track 2 (cross) -> /tmp/tmptff23_6o/snaps/2026-10-18/Entry_truck_06-39-26-507.jpg
+2026-10-18T06:39:26 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-10-18T06:39:26 | svc[Back]: standby khatam — stream khol raha hai
+2026-10-18T06:39:26 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-10-18T06:39:26 | svc[Back]: streaming started
+2026-10-18T06:39:26 | event: Exit car track 1 (cross) -> /tmp/tmptff23_6o/snaps/2026-10-18/Exit_car_06-39-26-655.jpg
+2026-10-18T06:39:26 | plate OCR: track 1 Exit queued (2 crops)
+2026-10-18T06:39:26 | plate OCR: track 1 event 1 -> 'KA01MJ2022' (fake, 2 crops)
+2026-10-18T06:39:27 | plate manual: event 102 -> 'MH12AB1234'
+2026-10-18T06:39:27 | plate manual: event 102 -> '(cleared)'
+2026-10-18T06:39:28 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:39:31 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-18T06:39:36 | plate OCR: track 1 event 1 -> 'MH12AB1234' (fake, 1 crops)
+2026-10-18T06:39:36 | plate OCR: track 2 event 2 -> 'MH12AB1234' (fake, 1 crops)
+2026-10-18T06:39:36 | plate OCR: track 3 event 3 -> 'MH12AB1234' (fake, 1 crops)
+2026-10-18T06:39:46 | svc[Back Camera]: loading AI model
+2026-10-18T06:39:46 | svc[Back Camera]: AI model loaded
+2026-10-18T06:39:50 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 707 ms, 0 dets on blank frame)
+2026-10-18T06:39:50 | svc[Back Camera]: accurate model too slow here (707 ms > 350) -> yolov8n.pt
+2026-10-18T06:39:51 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 332 ms, 0 dets on blank frame)
+2026-10-18T06:39:51 | open_stream: transport=tcp
+2026-10-18T06:39:56 | open_stream: transport=udp
+2026-10-18T06:40:01 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:40:01 | ffmpeg-pipe: starting
+2026-10-18T06:40:06 | open_stream: falling back to default backend
+2026-10-18T06:40:11 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:40:26 | svc[Back Camera]: loading AI model
+2026-10-18T06:40:26 | svc[Back Camera]: AI model loaded
+2026-10-18T06:40:29 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 899 ms, 0 dets on blank frame)
+2026-10-18T06:40:29 | svc[Back Camera]: accurate model too slow here (899 ms > 350) -> yolov8n.pt
+2026-10-18T06:40:30 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 566 ms, 0 dets on blank frame)
+2026-10-18T06:40:30 | open_stream: transport=tcp
+2026-10-18T06:40:35 | open_stream: transport=udp
+2026-10-18T06:40:40 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:40:40 | ffmpeg-pipe: starting
+2026-10-18T06:40:45 | open_stream: falling back to default backend
+2026-10-18T06:40:50 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:40:51 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:40:51 | person box ignored: janwar jaisa aakar (70x80, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (700, -15, 770, 65))
+2026-10-18T06:40:51 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:40:51 | event: Entry person track 1 (cross) -> /tmp/tmptff23_6o/snaps/2026-10-18/Entry_person_06-40-51-298.jpg
+2026-10-18T06:40:51 | event: Entry person track 1 (cross) -> /tmp/tmptff23_6o/snaps/2026-10-18/Entry_person_06-40-51-328.jpg
+2026-10-18T06:40:51 | event: Entry person track 1 (cross) -> /tmp/tmptff23_6o/snaps/2026-10-18/Entry_person_06-40-51-378.jpg
+2026-10-18T06:40:51 | person box ignored: janwar jaisa aakar (90x70, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (735, 10, 825, 80))
+2026-10-18T06:40:51 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:40:51 | event: Entry motorcycle track 1 (cross) -> /tmp/tmptff23_6o/snaps/2026-10-18/Entry_motorcycle_06-40-51-405.jpg
+2026-10-18T06:40:51 | === PROBE start: rtsp://****@127.0.0.1:51619/
+2026-10-18T06:40:51 | probe: 127.0.0.1:51619 reachable
+2026-10-18T06:40:51 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-10-18T06:40:51 | discover: try /Streaming/Channels/101 -> 200
+2026-10-18T06:40:51 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:51619/Streaming/Channels/101
+2026-10-18T06:40:51 | capture attempt transport=tcp wait=1.0s
+2026-10-18T06:40:51 | capture tcp: open FAILED
+2026-10-18T06:40:51 | capture attempt transport=udp wait=1.0s
+2026-10-18T06:40:51 | capture udp: open FAILED
+2026-10-18T06:40:51 | ffmpeg-pipe: starting
+2026-10-18T06:40:51 | ffmpeg-pipe: no frames (process exited)
+2026-10-18T06:40:51 | === PROBE start: rtsp://****@127.0.0.1:51619/
+2026-10-18T06:40:51 | probe: 127.0.0.1:51619 reachable
+2026-10-18T06:40:51 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-10-18T06:40:51 | capture attempt transport=tcp wait=1.0s
+2026-10-18T06:40:51 | capture tcp: open FAILED
+2026-10-18T06:40:51 | capture attempt transport=udp wait=1.0s
+2026-10-18T06:40:51 | capture udp: open FAILED
+2026-10-18T06:40:51 | ffmpeg-pipe: starting
+2026-10-18T06:40:51 | ffmpeg-pipe: no frames (process exited)
+2026-10-18T06:41:06 | svc[Back Camera]: loading AI model
+2026-10-18T06:41:06 | svc[Back Camera]: AI model loaded
+2026-10-18T06:41:07 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 595 ms, 0 dets on blank frame)
+2026-10-18T06:41:07 | svc[Back Camera]: accurate model too slow here (595 ms > 350) -> yolov8n.pt
+2026-10-18T06:41:08 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 384 ms, 0 dets on blank frame)
+2026-10-18T06:41:08 | open_stream: transport=tcp
+2026-10-18T06:41:13 | open_stream: transport=udp
+2026-10-18T06:41:18 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:41:18 | ffmpeg-pipe: starting
+2026-10-18T06:41:23 | open_stream: falling back to default backend
+2026-10-18T06:41:28 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:41:46 | svc[Back Camera]: loading AI model
+2026-10-18T06:41:46 | svc[Back Camera]: AI model loaded
+2026-10-18T06:41:47 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 546 ms, 0 dets on blank frame)
+2026-10-18T06:41:47 | svc[Back Camera]: accurate model too slow here (546 ms > 350) -> yolov8n.pt
+2026-10-18T06:41:48 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 297 ms, 0 dets on blank frame)
+2026-10-18T06:41:48 | open_stream: transport=tcp
+2026-10-18T06:41:53 | open_stream: transport=udp
+2026-10-18T06:41:58 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:41:58 | ffmpeg-pipe: starting
+2026-10-18T06:42:03 | open_stream: falling back to default backend
+2026-10-18T06:42:08 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:42:26 | svc[Back Camera]: loading AI model
+2026-10-18T06:42:26 | svc[Back Camera]: AI model loaded
+2026-10-18T06:42:27 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 477 ms, 0 dets on blank frame)
+2026-10-18T06:42:27 | svc[Back Camera]: accurate model too slow here (477 ms > 350) -> yolov8n.pt
+2026-10-18T06:42:28 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 243 ms, 0 dets on blank frame)
+2026-10-18T06:42:28 | open_stream: transport=tcp
+2026-10-18T06:42:33 | open_stream: transport=udp
+2026-10-18T06:42:35 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-10-18T06:42:38 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-18T06:42:38 | svc[Front Camera]: loading AI model
+2026-10-18T06:42:38 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:42:38 | ffmpeg-pipe: starting
+2026-10-18T06:42:38 | svc[Front Camera]: AI model loaded
+2026-10-18T06:42:39 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 445 ms, 0 dets on blank frame)
+2026-10-18T06:42:39 | svc[Front Camera]: accurate model too slow here (445 ms > 350) -> yolov8n.pt
+2026-10-18T06:42:39 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 175 ms, 0 dets on blank frame)
+2026-10-18T06:42:43 | open_stream: falling back to default backend
+2026-10-18T06:42:48 | open_stream: transport=tcp
+2026-10-18T06:42:48 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:42:55 | event: Exit car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Exit_car_06-42-55-587.jpg
+2026-10-18T06:42:55 | plate OCR: track 1 Exit queued (2 crops)
+2026-10-18T06:42:56 | plate OCR: track 1 event 1 -> 'MH12AB1234' (single-read, 2 crops)
+2026-10-18T06:42:57 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_car_06-42-57-217.jpg
+2026-10-18T06:42:57 | svc AI self-test error (#1):
+Traceback (most recent call last):
+  File "/app/9x_security/test_ai_health.py", line 48, in test_selftest_failure_disables_ai_and_marks_error
+    w._ai_selftest()
+  File "/app/9x_security/service.py", line 336, in _ai_selftest
+    self.engine.detector.detect(blank)  # warm-up (lazy torch init)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_ai_health.py", line 16, in detect
+    raise RuntimeError("operator torchvision::nms does not exist")
+RuntimeError: operator torchvision::nms does not exist
+
+2026-10-18T06:42:57 | svc: AI self-test OK (?, 0 ms, 0 dets on blank frame)
+2026-10-18T06:43:06 | svc[Back Camera]: loading AI model
+2026-10-18T06:43:06 | svc[Back Camera]: AI model loaded
+2026-10-18T06:43:10 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 794 ms, 0 dets on blank frame)
+2026-10-18T06:43:10 | svc[Back Camera]: accurate model too slow here (794 ms > 350) -> yolov8n.pt
+2026-10-18T06:43:11 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 392 ms, 0 dets on blank frame)
+2026-10-18T06:43:11 | open_stream: transport=tcp
+2026-10-18T06:43:16 | event: Exit car SNAPSHOT SAVE FAILED ([Errno 20] Not a directory: '/tmp/tmpw95gfwlp/snaps/2026-10-18') path=/tmp/tmpw95gfwlp/snaps/2026-10-18/Exit_car_06-43-16-261.jpg
+2026-10-18T06:43:16 | open_stream: transport=udp
+2026-10-18T06:43:16 | person box ignored: janwar jaisa aakar (120x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (720, 30, 840, 70))
+2026-10-18T06:43:16 | person box ignored: bahut chhota — dog/cat/bag, insaan nahi (box (778, 48, 782, 62))
+2026-10-18T06:43:16 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-43-16-343.jpg
+2026-10-18T06:43:16 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-43-16-370.jpg
+2026-10-18T06:43:16 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-43-16-395.jpg
+2026-10-18T06:43:16 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:43:16 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:43:16 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_truck_06-43-16-450.jpg
+2026-10-18T06:43:16 | person ignored: truck (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:43:16 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_car_06-43-16-478.jpg
+2026-10-18T06:43:16 | person ignored: car (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:43:16 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-43-16-515.jpg
+2026-10-18T06:43:16 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-43-16-548.jpg
+2026-10-18T06:43:16 | event: Entry motorcycle track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_motorcycle_06-43-16-579.jpg
+2026-10-18T06:43:16 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-43-16-613.jpg
+2026-10-18T06:43:16 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-43-16-645.jpg
+2026-10-18T06:43:16 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_person_06-43-16-654.jpg
+2026-10-18T06:43:16 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-18T06:43:16 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_car_06-43-16-690.jpg
+2026-10-18T06:43:16 | chime: person Entry — ghanti bajayi (event 7)
+2026-10-18T06:43:16 | chime: vehicle Entry — ghanti bajayi (event 8)
+2026-10-18T06:43:16 | chime: two_wheeler Exit — ghanti bajayi (event 9)
+2026-10-18T06:43:16 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_truck_06-43-16-811.jpg
+2026-10-18T06:43:16 | event: Entry truck track 3 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_truck_06-43-16-824.jpg
+2026-10-18T06:43:16 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_truck_06-43-16-858.jpg
+2026-10-18T06:43:16 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (720, 144, 840, 224))
+2026-10-18T06:43:16 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_truck_06-43-16-891.jpg
+2026-10-18T06:43:16 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (720, 210, 840, 290))
+2026-10-18T06:43:16 | event: Exit car track 2 (cross) -> /app/9x_security/snapshots/2026-10-18/Exit_car_06-43-16-907.jpg
+2026-10-18T06:43:17 | event: Exit car track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Exit_car_06-43-17-593.jpg
+2026-10-18T06:43:18 | === PROBE start: notaurl
+2026-10-18T06:43:18 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-10-18T06:43:21 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-18T06:43:21 | ffmpeg-pipe: starting
+2026-10-18T06:43:21 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:43:21 | ffmpeg-pipe: starting
+2026-10-18T06:43:21 | capture attempt transport=tcp wait=0.5s
+2026-10-18T06:43:26 | open_stream: falling back to default backend
+2026-10-18T06:43:26 | capture tcp: open FAILED
+2026-10-18T06:43:26 | UNIT_TEST_LINE_iter5
+2026-10-18T06:43:26 | MARKER_1792305806343
+2026-10-18T06:43:26 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-10-18T06:43:29 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-18T06:43:29 | ffmpeg-pipe: starting
+2026-10-18T06:43:29 | ffmpeg-pipe: starting
+2026-10-18T06:43:29 | ffmpeg-pipe: starting
+2026-10-18T06:43:29 | ffmpeg-pipe: OK first frame in 0.0s
+2026-10-18T06:43:29 | ffmpeg-pipe: starting
+2026-10-18T06:43:31 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:43:34 | ffmpeg-pipe: no frames (process exited)
+2026-10-18T06:43:34 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-10-18T06:43:37 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-18T06:43:38 | person box ignored: janwar jaisa aakar (35x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (656, 224, 691, 264))
+2026-10-18T06:43:38 | person box ignored: janwar jaisa aakar (35x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (660, 20, 695, 60))
+2026-10-18T06:43:38 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-43-38-679.jpg
+2026-10-18T06:43:38 | person box ignored: janwar jaisa aakar (35x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (656, 224, 691, 264))
+2026-10-18T06:43:38 | svc: loading AI model
+2026-10-18T06:43:38 | svc: AI model loaded
+2026-10-18T06:43:39 | svc: AI self-test OK (yolov8n.pt, 136 ms, 0 dets on blank frame)
+2026-10-18T06:43:39 | svc: source opened codec=hevc live=True
+2026-10-18T06:43:39 | svc: HEVC/H.265 stream — agar tasveer tooti/dhundli aaye to camera me H.264 ya sub-stream (Hikvision: /Streaming/Channels/102, Dahua: subtype=1) use karein
+2026-10-18T06:43:39 | svc: streaming started
+2026-10-18T06:43:42 | event: Exit bus track 1 (cross) -> /tmp/tmpgnyibxig/snaps/2026-10-18/Exit_bus_06-43-42-771.jpg
+2026-10-18T06:43:46 | svc[Back Camera]: loading AI model
+2026-10-18T06:43:46 | svc[Back Camera]: AI model loaded
+2026-10-18T06:43:49 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 1142 ms, 0 dets on blank frame)
+2026-10-18T06:43:49 | svc[Back Camera]: accurate model too slow here (1142 ms > 350) -> yolov8n.pt
+2026-10-18T06:43:50 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 599 ms, 0 dets on blank frame)
+2026-10-18T06:43:50 | open_stream: transport=tcp
+2026-10-18T06:43:50 | event: Entry bus track 1 (cross) -> /tmp/tmpgnyibxig/snaps/2026-10-18/Entry_bus_06-43-50-762.jpg
+2026-10-18T06:43:53 | svc: source opened codec=unknown live=True
+2026-10-18T06:43:53 | svc: source opened codec=unknown live=False
+2026-10-18T06:43:53 | event: Entry truck track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_truck_06-43-53-445.jpg
+2026-10-18T06:43:53 | event: Entry truck track 2 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_truck_06-43-53-457.jpg
+2026-10-18T06:43:53 | event: Entry truck track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_truck_06-43-53-467.jpg
+2026-10-18T06:43:53 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 2)
+2026-10-18T06:43:53 | event: Entry truck track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_truck_06-43-53-501.jpg
+2026-10-18T06:43:53 | event: Entry truck track 2 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_truck_06-43-53-512.jpg
+2026-10-18T06:43:53 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-10-18T06:43:53 | svc[Back]: standby khatam — stream khol raha hai
+2026-10-18T06:43:53 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-10-18T06:43:53 | svc[Back]: streaming started
+2026-10-18T06:43:53 | event: Exit car track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Exit_car_06-43-53-665.jpg
+2026-10-18T06:43:53 | plate OCR: track 1 Exit queued (2 crops)
+2026-10-18T06:43:53 | plate OCR: track 1 event 1 -> 'KA01MJ2022' (fake, 2 crops)
+2026-10-18T06:43:54 | plate manual: event 103 -> 'MH12AB1234'
+2026-10-18T06:43:54 | plate manual: event 103 -> '(cleared)'
+2026-10-18T06:43:55 | open_stream: transport=udp
+2026-10-18T06:44:00 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:44:00 | ffmpeg-pipe: starting
+2026-10-18T06:44:03 | plate OCR: track 1 event 1 -> 'MH12AB1234' (fake, 1 crops)
+2026-10-18T06:44:04 | plate OCR: track 2 event 2 -> 'MH12AB1234' (fake, 1 crops)
+2026-10-18T06:44:04 | plate OCR: track 3 event 3 -> 'MH12AB1234' (fake, 1 crops)
+2026-10-18T06:44:05 | open_stream: falling back to default backend
+2026-10-18T06:44:10 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:44:26 | svc: auto-connect — Back Camera se connect kar raha hai
+2026-10-18T06:44:26 | svc[Back Camera]: loading AI model
+2026-10-18T06:44:26 | svc[Back Camera]: AI model loaded
+2026-10-18T06:44:29 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 804 ms, 0 dets on blank frame)
+2026-10-18T06:44:29 | svc[Back Camera]: accurate model too slow here (804 ms > 350) -> yolov8n.pt
+2026-10-18T06:44:30 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 403 ms, 0 dets on blank frame)
+2026-10-18T06:44:30 | open_stream: transport=tcp
+2026-10-18T06:44:35 | open_stream: transport=udp
+2026-10-18T06:44:40 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:44:40 | ffmpeg-pipe: starting
+2026-10-18T06:44:45 | open_stream: falling back to default backend
+2026-10-18T06:44:50 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:45:06 | svc[Back Camera]: loading AI model
+2026-10-18T06:45:06 | svc[Back Camera]: AI model loaded
+2026-10-18T06:45:12 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 2777 ms, 0 dets on blank frame)
+2026-10-18T06:45:12 | svc[Back Camera]: accurate model too slow here (2777 ms > 350) -> yolov8n.pt
+2026-10-18T06:45:13 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 412 ms, 0 dets on blank frame)
+2026-10-18T06:45:13 | open_stream: transport=tcp
+2026-10-18T06:45:17 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:45:17 | person box ignored: janwar jaisa aakar (70x80, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (700, -15, 770, 65))
+2026-10-18T06:45:17 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:45:17 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-45-17-655.jpg
+2026-10-18T06:45:17 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-45-17-680.jpg
+2026-10-18T06:45:17 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-45-17-706.jpg
+2026-10-18T06:45:17 | person box ignored: janwar jaisa aakar (90x70, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (735, 10, 825, 80))
+2026-10-18T06:45:17 | person ignored: motorcycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:45:17 | event: Entry motorcycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-17-732.jpg
+2026-10-18T06:45:17 | === PROBE start: rtsp://****@127.0.0.1:51043/
+2026-10-18T06:45:17 | probe: 127.0.0.1:51043 reachable
+2026-10-18T06:45:17 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-10-18T06:45:17 | discover: try /Streaming/Channels/101 -> 200
+2026-10-18T06:45:17 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:51043/Streaming/Channels/101
+2026-10-18T06:45:17 | capture attempt transport=tcp wait=1.0s
+2026-10-18T06:45:17 | capture tcp: open FAILED
+2026-10-18T06:45:17 | capture attempt transport=udp wait=1.0s
+2026-10-18T06:45:17 | capture udp: open FAILED
+2026-10-18T06:45:17 | ffmpeg-pipe: starting
+2026-10-18T06:45:17 | ffmpeg-pipe: no frames (process exited)
+2026-10-18T06:45:17 | === PROBE start: rtsp://****@127.0.0.1:51043/
+2026-10-18T06:45:17 | probe: 127.0.0.1:51043 reachable
+2026-10-18T06:45:17 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-10-18T06:45:17 | capture attempt transport=tcp wait=1.0s
+2026-10-18T06:45:17 | capture tcp: open FAILED
+2026-10-18T06:45:17 | capture attempt transport=udp wait=1.0s
+2026-10-18T06:45:17 | capture udp: open FAILED
+2026-10-18T06:45:17 | ffmpeg-pipe: starting
+2026-10-18T06:45:17 | ffmpeg-pipe: no frames (process exited)
+2026-10-18T06:45:18 | svc: switched to sub-stream rtsp://u:p@cam/Streaming/Channels/102
+2026-10-18T06:45:18 | svc: switched back to main stream rtsp://u:p@cam/Streaming/Channels/101
+2026-10-18T06:45:18 | event: Entry truck track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_truck_06-45-18-162.jpg
+2026-10-18T06:45:18 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (720, 144, 840, 224))
+2026-10-18T06:45:18 | event: Entry truck track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_truck_06-45-18-195.jpg
+2026-10-18T06:45:18 | event: Entry truck track 2 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_truck_06-45-18-208.jpg
+2026-10-18T06:45:18 | event: Entry truck track 3 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_truck_06-45-18-218.jpg
+2026-10-18T06:45:18 | event: Entry truck track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_truck_06-45-18-251.jpg
+2026-10-18T06:45:18 | track 2 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (720, 98, 840, 178))
+2026-10-18T06:45:18 | event: Entry car track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_car_06-45-18-284.jpg
+2026-10-18T06:45:18 | event: Entry car track 2 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_car_06-45-18-292.jpg
+2026-10-18T06:45:18 | event: Entry truck track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_truck_06-45-18-319.jpg
+2026-10-18T06:45:18 | crossing ignored: duplicate (second box born on the same vehicle) of a vehicle counted <20s ago (track 2)
+2026-10-18T06:45:18 | event: Entry truck track 1 (appeared-at-line) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_truck_06-45-18-416.jpg
+2026-10-18T06:45:18 | event: Entry bicycle track 2 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_bicycle_06-45-18-484.jpg
+2026-10-18T06:45:18 | event: Entry bicycle track 5 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_bicycle_06-45-18-489.jpg
+2026-10-18T06:45:18 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 4)
+2026-10-18T06:45:18 | track 6 = wahi gaadi jo pehle count ho chuki hai (purana track 5, line par khadi/doosra box) — dobara count nahi hogi (box (601, 174, 637, 240))
+2026-10-18T06:45:18 | person ignored: bicycle (track 2) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:45:18 | person ignored: bicycle (track 5) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 3)
+2026-10-18T06:45:18 | event: Entry bicycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_bicycle_06-45-18-532.jpg
+2026-10-18T06:45:18 | event: Entry bicycle track 3 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_bicycle_06-45-18-538.jpg
+2026-10-18T06:45:18 | crossing rejected: track 5 bicycle Entry — line par khadi gaadi ka box hil raha hai (jitter): sirf 2px paar, saaf paar ke liye 27px chahiye (box (599, 179, 635, 245))
+2026-10-18T06:45:18 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 5)
+2026-10-18T06:45:18 | track 6 = wahi gaadi jo pehle count ho chuki hai (purana track 1, line par khadi/doosra box) — dobara count nahi hogi (box (542, 177, 578, 243))
+2026-10-18T06:45:18 | person ignored: bicycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:45:18 | person ignored: bicycle (track 3) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 4)
+2026-10-18T06:45:18 | open_stream: transport=udp
+2026-10-18T06:45:18 | event: Entry bicycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_bicycle_06-45-18-577.jpg
+2026-10-18T06:45:18 | event: Entry bicycle track 5 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_bicycle_06-45-18-583.jpg
+2026-10-18T06:45:18 | track 3 = wahi gaadi jo pehle count ho chuki hai (purana track 5, line par khadi/doosra box) — dobara count nahi hogi (box (607, 171, 639, 241))
+2026-10-18T06:45:18 | person ignored: bicycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:45:18 | person ignored: bicycle (track 3) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 4)
+2026-10-18T06:45:18 | track 6 = wahi gaadi jo pehle count ho chuki hai (purana track 5, line par khadi/doosra box) — dobara count nahi hogi (box (602, 261, 638, 327))
+2026-10-18T06:45:18 | event: Entry bicycle track 2 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_bicycle_06-45-18-624.jpg
+2026-10-18T06:45:18 | event: Entry bicycle track 5 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_bicycle_06-45-18-630.jpg
+2026-10-18T06:45:18 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 1)
+2026-10-18T06:45:18 | person ignored: bicycle (track 2) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 3)
+2026-10-18T06:45:18 | person ignored: bicycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 6)
+2026-10-18T06:45:18 | event: Entry bicycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_bicycle_06-45-18-668.jpg
+2026-10-18T06:45:18 | event: Entry bicycle track 4 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_bicycle_06-45-18-674.jpg
+2026-10-18T06:45:18 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 3)
+2026-10-18T06:45:18 | person ignored: bicycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:45:18 | person ignored: bicycle (track 3) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 5)
+2026-10-18T06:45:18 | crossing rejected: track 3 bicycle Entry — ek step me 66px jump (limit 56px) — teleport/galat match (box (541, 174, 573, 244))
+2026-10-18T06:45:18 | event: Entry bicycle track 5 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_bicycle_06-45-18-712.jpg
+2026-10-18T06:45:18 | person ignored: bicycle (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 2)
+2026-10-18T06:45:18 | person ignored: bicycle (track 5) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 4)
+2026-10-18T06:45:18 | event: Entry bicycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_bicycle_06-45-18-720.jpg
+2026-10-18T06:45:18 | track 3 = wahi gaadi jo pehle count ho chuki hai (purana track 5, line par khadi/doosra box) — dobara count nahi hogi (box (600, 191, 636, 257))
+2026-10-18T06:45:18 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 2)
+2026-10-18T06:45:18 | event: Entry bicycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_bicycle_06-45-18-770.jpg
+2026-10-18T06:45:18 | event: Entry motorcycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-18-803.jpg
+2026-10-18T06:45:18 | event: Entry motorcycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-18-837.jpg
+2026-10-18T06:45:18 | event: Entry motorcycle track 2 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-18-845.jpg
+2026-10-18T06:45:18 | event: Entry motorcycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-18-873.jpg
+2026-10-18T06:45:18 | event: Entry motorcycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-18-905.jpg
+2026-10-18T06:45:18 | event: Entry motorcycle track 2 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-18-919.jpg
+2026-10-18T06:45:18 | event: Entry motorcycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-18-948.jpg
+2026-10-18T06:45:18 | event: Entry motorcycle track 2 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-18-957.jpg
+2026-10-18T06:45:18 | event: Entry motorcycle track 3 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-18-965.jpg
+2026-10-18T06:45:18 | event: Entry motorcycle track 4 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-18-974.jpg
+2026-10-18T06:45:18 | event: Entry motorcycle track 5 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-18-983.jpg
+2026-10-18T06:45:18 | event: Entry motorcycle track 6 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-18-992.jpg
+2026-10-18T06:45:19 | event: Entry motorcycle track 7 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-19-001.jpg
+2026-10-18T06:45:19 | event: Entry motorcycle track 8 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-19-009.jpg
+2026-10-18T06:45:19 | event: Entry person track 2 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-45-19-044.jpg
+2026-10-18T06:45:19 | event: Entry car track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_car_06-45-19-095.jpg
+2026-10-18T06:45:19 | crossing rejected: track 1 car Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (660, 196, 780, 276))
+2026-10-18T06:45:19 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-45-19-155.jpg
+2026-10-18T06:45:19 | crossing rejected: track 1 person Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (220, 176, 260, 276))
+2026-10-18T06:45:19 | event: Entry motorcycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-19-207.jpg
+2026-10-18T06:45:19 | crossing rejected: track 1 motorcycle Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (205, 216, 275, 276))
+2026-10-18T06:45:19 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-45-19-263.jpg
+2026-10-18T06:45:19 | event: Entry motorcycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-19-274.jpg
+2026-10-18T06:45:19 | event: Entry car track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_car_06-45-19-310.jpg
+2026-10-18T06:45:19 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-45-19-321.jpg
+2026-10-18T06:45:19 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-45-19-362.jpg
+2026-10-18T06:45:19 | event: Entry car track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_car_06-45-19-378.jpg
+2026-10-18T06:45:19 | event: Exit person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Exit_person_06-45-19-424.jpg
+2026-10-18T06:45:19 | event: Entry car track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_car_06-45-19-440.jpg
+2026-10-18T06:45:19 | event: Entry motorcycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-19-486.jpg
+2026-10-18T06:45:19 | crossing ignored: same object: motorcycle ke roop me 0s pehle alert ho chuka (doosri line) (track 1 car)
+2026-10-18T06:45:19 | event: Entry motorcycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-19-533.jpg
+2026-10-18T06:45:19 | crossing ignored: duplicate (second box on the same vehicle) of a vehicle counted <20s ago (track 2)
+2026-10-18T06:45:19 | event: Entry car track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_car_06-45-19-567.jpg
+2026-10-18T06:45:19 | person ignored: car (track 1) ke upar/saath — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:45:19 | update auto-check failed: offline
+2026-10-18T06:45:20 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-10-18T06:45:20 | update: download cancelled by user
+2026-10-18T06:45:20 | update: FAILED HTTP 404 asset
+2026-10-18T06:45:21 | svc: loading AI model
+2026-10-18T06:45:21 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 370, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db, plate_reader=_plate_reader if cfg.get("enable_plate") else None)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-10-18T06:45:21 | svc: source opened codec=unknown live=True
+2026-10-18T06:45:21 | svc: streaming started
+2026-10-18T06:45:23 | svc: loading AI model
+2026-10-18T06:45:23 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 370, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db, plate_reader=_plate_reader if cfg.get("enable_plate") else None)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-10-18T06:45:23 | svc: source opened codec=unknown live=True
+2026-10-18T06:45:23 | svc: streaming started
+2026-10-18T06:45:23 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:45:23 | ffmpeg-pipe: starting
+2026-10-18T06:45:28 | zoom (doosri nazar) model: ?
+2026-10-18T06:45:28 | track 1 'person' nahi — zoom karke dekha: dog 0.60 vs person 0.00 (kul 0.60 vs 0.00) — janwar, alert nahi hoga (box (460, 92, 500, 192))
+2026-10-18T06:45:28 | zoom (doosri nazar) model: ?
+2026-10-18T06:45:28 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-45-28-309.jpg
+2026-10-18T06:45:28 | zoom check failed: model busy
+2026-10-18T06:45:28 | zoom check failed: model busy
+2026-10-18T06:45:28 | zoom check failed: model busy
+2026-10-18T06:45:28 | zoom check failed: model busy
+2026-10-18T06:45:28 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-45-28-339.jpg
+2026-10-18T06:45:28 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-45-28-349.jpg
+2026-10-18T06:45:28 | zoom (doosri nazar) model: ?
+2026-10-18T06:45:28 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-45-28-379.jpg
+2026-10-18T06:45:28 | zoom (doosri nazar) model: ?
+2026-10-18T06:45:28 | event: Entry motorcycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-45-28-430.jpg
+2026-10-18T06:45:28 | open_stream: falling back to default backend
+2026-10-18T06:45:30 | svc[Front Camera]: loading AI model
+2026-10-18T06:45:30 | svc[Front Camera]: AI model loaded
+2026-10-18T06:45:31 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 439 ms, 0 dets on blank frame)
+2026-10-18T06:45:31 | svc[Front Camera]: accurate model too slow here (439 ms > 350) -> yolov8n.pt
+2026-10-18T06:45:32 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 177 ms, 0 dets on blank frame)
+2026-10-18T06:45:33 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:45:33 | svc[Front Camera]: source opened codec=mjpg live=False
+2026-10-18T06:45:33 | svc[Front Camera]: streaming started
+2026-10-18T06:45:35 | svc[Front Camera]: loading AI model
+2026-10-18T06:45:35 | svc[Front Camera]: AI model loaded
+2026-10-18T06:45:36 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 432 ms, 0 dets on blank frame)
+2026-10-18T06:45:36 | svc[Front Camera]: accurate model too slow here (432 ms > 350) -> yolov8n.pt
+2026-10-18T06:45:37 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 216 ms, 0 dets on blank frame)
+2026-10-18T06:45:37 | svc[Front Camera]: source opened codec=mjpg live=False
+2026-10-18T06:45:37 | svc[Front Camera]: streaming started
+2026-10-18T06:45:42 | svc[Front Camera]: stream lost, reconnecting (watchdog)
+2026-10-18T06:45:42 | svc[Front Camera]: source opened codec=mjpg live=False
+2026-10-18T06:45:46 | svc[Back Camera]: loading AI model
+2026-10-18T06:45:46 | svc[Back Camera]: AI model loaded
+2026-10-18T06:45:47 | svc[Front Camera]: stream lost, reconnecting (watchdog)
+2026-10-18T06:45:47 | svc[Front Camera]: source opened codec=mjpg live=False
+2026-10-18T06:45:47 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 599 ms, 0 dets on blank frame)
+2026-10-18T06:45:47 | svc[Back Camera]: accurate model too slow here (599 ms > 350) -> yolov8n.pt
+2026-10-18T06:45:48 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 260 ms, 0 dets on blank frame)
+2026-10-18T06:45:48 | open_stream: transport=tcp
+2026-10-18T06:45:51 | svc[Front Camera]: stream lost, reconnecting (watchdog)
+2026-10-18T06:45:53 | open_stream: transport=udp
+2026-10-18T06:45:58 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:45:58 | ffmpeg-pipe: starting
+2026-10-18T06:46:00 | svc[Front Camera]: loading AI model
+2026-10-18T06:46:00 | svc[Front Camera]: AI model loaded
+2026-10-18T06:46:01 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-10-18/Entry_car_06-46-01-443.jpg
+2026-10-18T06:46:02 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 446 ms, 0 dets on blank frame)
+2026-10-18T06:46:02 | svc[Front Camera]: accurate model too slow here (446 ms > 350) -> yolov8n.pt
+2026-10-18T06:46:02 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 214 ms, 0 dets on blank frame)
+2026-10-18T06:46:03 | open_stream: falling back to default backend
+2026-10-18T06:46:08 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:46:08 | svc[Front Camera]: source opened codec=unknown live=False
+2026-10-18T06:46:10 | event: Exit car track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Exit_car_06-46-10-196.jpg
+2026-10-18T06:46:10 | plate OCR: track 1 Exit queued (2 crops)
+2026-10-18T06:46:11 | svc: camera added cam3 'TEST_Cam' gate='TEST_Gate'
+2026-10-18T06:46:11 | svc: cameras started: Back Camera, TEST_Cam
+2026-10-18T06:46:11 | svc[TEST_Cam]: loading AI model
+2026-10-18T06:46:11 | svc[Back Camera]: loading AI model
+2026-10-18T06:46:12 | svc: camera saved cam3 'TEST_Cam2' gate='TEST_Gate2' monitor=True window=off
+2026-10-18T06:46:12 | svc: viewing camera -> cam3 'TEST_Cam2' gate='TEST_Gate2'
+2026-10-18T06:46:12 | svc[Back Camera]: AI model loaded
+2026-10-18T06:46:12 | svc[TEST_Cam2]: AI model loaded
+2026-10-18T06:46:12 | svc: viewing camera -> cam1 'Front Camera' gate='Main Gate'
+2026-10-18T06:46:13 | svc: viewing camera -> cam3 'TEST_Cam2' gate='TEST_Gate2'
+2026-10-18T06:46:13 | svc: viewing camera -> cam1 'Front Camera' gate='Main Gate'
+2026-10-18T06:46:14 | svc: camera deleted cam3
+2026-10-18T06:46:14 | svc: camera added cam3 'TEST_L0' gate='G'
+2026-10-18T06:46:14 | svc[TEST_L0]: loading AI model
+2026-10-18T06:46:14 | svc: cameras started: TEST_L0
+2026-10-18T06:46:14 | svc: camera added cam4 'TEST_L1' gate='G'
+2026-10-18T06:46:14 | svc: cameras started: TEST_L1
+2026-10-18T06:46:14 | svc[TEST_L1]: loading AI model
+2026-10-18T06:46:14 | svc: camera added cam5 'TEST_L2' gate='G'
+2026-10-18T06:46:14 | svc[TEST_L2]: loading AI model
+2026-10-18T06:46:14 | svc: cameras started: TEST_L2
+2026-10-18T06:46:14 | svc: camera added cam6 'TEST_L3' gate='G'
+2026-10-18T06:46:14 | svc: cameras started: TEST_L3
+2026-10-18T06:46:14 | svc[TEST_L3]: loading AI model
+2026-10-18T06:46:14 | svc: camera added cam7 'TEST_L4' gate='G'
+2026-10-18T06:46:14 | svc: cameras started: TEST_L4
+2026-10-18T06:46:14 | svc[TEST_L4]: loading AI model
+2026-10-18T06:46:14 | svc: camera added cam8 'TEST_L5' gate='G'
+2026-10-18T06:46:14 | svc: cameras started: TEST_L5
+2026-10-18T06:46:14 | svc[TEST_L5]: loading AI model
+2026-10-18T06:46:14 | svc: camera deleted cam3
+2026-10-18T06:46:14 | svc: camera deleted cam4
+2026-10-18T06:46:14 | svc: camera deleted cam5
+2026-10-18T06:46:14 | svc: camera deleted cam6
+2026-10-18T06:46:14 | svc: camera deleted cam7
+2026-10-18T06:46:15 | svc: camera deleted cam8
+2026-10-18T06:46:15 | svc: camera added cam3 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN' gate='GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG'
+2026-10-18T06:46:15 | svc: cameras started: NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+2026-10-18T06:46:15 | svc[NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN]: loading AI model
+2026-10-18T06:46:15 | svc: camera deleted cam3
+2026-10-18T06:46:15 | svc: cameras started: Front Camera
+2026-10-18T06:46:15 | svc: camera saved cam1 'Front Camera' gate='Main Gate' monitor=True window=off
+2026-10-18T06:46:15 | svc[Front Camera]: loading AI model
+2026-10-18T06:46:15 | svc[Camera]: AI model loaded
+2026-10-18T06:46:15 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=20:00-08:00
+2026-10-18T06:46:16 | svc[Camera]: AI model loaded
+2026-10-18T06:46:16 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=20:00-08:00
+2026-10-18T06:46:16 | svc[Camera]: AI model loaded
+2026-10-18T06:46:16 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=False window=20:00-08:00
+2026-10-18T06:46:16 | svc[Camera]: AI model loaded
+2026-10-18T06:46:16 | plate OCR: track 1 event 1 -> 'Not detected' (low confidence: MH12AB1234 (votes=1 conf=0.46 fixes=2), 2 crops)
+2026-10-18T06:46:16 | svc[Camera]: AI model loaded
+2026-10-18T06:46:16 | svc[Camera]: AI model loaded
+2026-10-18T06:46:16 | svc[Camera]: AI model loaded
+2026-10-18T06:46:16 | svc[Front Camera]: AI model loaded
+2026-10-18T06:46:16 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 1711 ms, 0 dets on blank frame)
+2026-10-18T06:46:17 | svc[Camera]: AI self-test OK (yolov8s.pt, 1601 ms, 0 dets on blank frame)
+2026-10-18T06:46:17 | svc[Back Camera]: accurate model too slow here (1711 ms > 350) -> yolov8n.pt
+2026-10-18T06:46:17 | svc[Camera]: accurate model too slow here (1601 ms > 350) -> yolov8n.pt
+2026-10-18T06:46:19 | svc: cameras started: Back Camera
+2026-10-18T06:46:19 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=20:00-08:00
+2026-10-18T06:46:19 | svc[Back Camera]: loading AI model
+2026-10-18T06:46:20 | svc[Back Camera]: AI model loaded
+2026-10-18T06:46:21 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 1795 ms, 0 dets on blank frame)
+2026-10-18T06:46:21 | svc[Camera]: AI self-test OK (yolov8n.pt, 1997 ms, 0 dets on blank frame)
+2026-10-18T06:46:23 | svc[Camera]: AI self-test OK (yolov8s.pt, 2698 ms, 0 dets on blank frame)
+2026-10-18T06:46:23 | svc[Camera]: accurate model too slow here (2698 ms > 350) -> yolov8n.pt
+2026-10-18T06:46:23 | svc[Camera]: AI self-test OK (yolov8s.pt, 3002 ms, 0 dets on blank frame)
+2026-10-18T06:46:23 | svc[Camera]: AI self-test OK (yolov8s.pt, 2617 ms, 0 dets on blank frame)
+2026-10-18T06:46:23 | svc[Camera]: AI self-test OK (yolov8s.pt, 2619 ms, 0 dets on blank frame)
+2026-10-18T06:46:24 | svc[Camera]: AI self-test OK (yolov8s.pt, 2779 ms, 0 dets on blank frame)
+2026-10-18T06:46:24 | svc[Camera]: AI self-test OK (yolov8s.pt, 2807 ms, 0 dets on blank frame)
+2026-10-18T06:46:24 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 2609 ms, 0 dets on blank frame)
+2026-10-18T06:46:24 | svc[Camera]: accurate model too slow here (3002 ms > 350) -> yolov8n.pt
+2026-10-18T06:46:24 | svc[Camera]: AI self-test OK (yolov8s.pt, 2433 ms, 0 dets on blank frame)
+2026-10-18T06:46:24 | svc[Camera]: accurate model too slow here (2617 ms > 350) -> yolov8n.pt
+2026-10-18T06:46:24 | svc[Camera]: accurate model too slow here (2619 ms > 350) -> yolov8n.pt
+2026-10-18T06:46:24 | svc[Camera]: accurate model too slow here (2779 ms > 350) -> yolov8n.pt
+2026-10-18T06:46:24 | svc[Camera]: accurate model too slow here (2807 ms > 350) -> yolov8n.pt
+2026-10-18T06:46:24 | svc[Front Camera]: accurate model too slow here (2609 ms > 350) -> yolov8n.pt
+2026-10-18T06:46:24 | svc[Camera]: accurate model too slow here (2433 ms > 350) -> yolov8n.pt
+2026-10-18T06:46:25 | svc[Camera]: AI self-test OK (yolov8n.pt, 436 ms, 0 dets on blank frame)
+2026-10-18T06:46:25 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 926 ms, 0 dets on blank frame)
+2026-10-18T06:46:25 | svc[Back Camera]: accurate model too slow here (926 ms > 350) -> yolov8n.pt
+2026-10-18T06:46:26 | svc[Camera]: AI self-test OK (yolov8n.pt, 1102 ms, 0 dets on blank frame)
+2026-10-18T06:46:27 | svc[Camera]: AI self-test OK (yolov8n.pt, 989 ms, 0 dets on blank frame)
+2026-10-18T06:46:27 | svc[Camera]: AI self-test OK (yolov8n.pt, 985 ms, 0 dets on blank frame)
+2026-10-18T06:46:27 | svc[Camera]: AI self-test OK (yolov8n.pt, 829 ms, 0 dets on blank frame)
+2026-10-18T06:46:27 | svc[Camera]: AI self-test OK (yolov8n.pt, 800 ms, 0 dets on blank frame)
+2026-10-18T06:46:27 | svc[Camera]: AI self-test OK (yolov8n.pt, 794 ms, 0 dets on blank frame)
+2026-10-18T06:46:27 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 701 ms, 0 dets on blank frame)
+2026-10-18T06:46:27 | open_stream: transport=tcp
+2026-10-18T06:46:27 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 549 ms, 0 dets on blank frame)
+2026-10-18T06:46:32 | open_stream: transport=udp
+2026-10-18T06:46:37 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:46:37 | ffmpeg-pipe: starting
+2026-10-18T06:46:42 | open_stream: falling back to default backend
+2026-10-18T06:46:47 | open_stream: transport=tcp
+2026-10-18T06:46:47 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-18T06:46:50 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-18T06:46:52 | open_stream: transport=udp
+2026-10-18T06:46:56 | svc: viewing camera -> cam2 'Back Camera' gate='Back Gate'
+2026-10-18T06:46:56 | svc: cameras started: Front Camera
+2026-10-18T06:46:56 | svc[Front Camera]: loading AI model
+2026-10-18T06:46:56 | svc: viewing camera -> cam1 'Front Camera' gate='Main Gate'
+2026-10-18T06:46:56 | svc[Front Camera]: AI model loaded
+2026-10-18T06:46:57 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 463 ms, 0 dets on blank frame)
+2026-10-18T06:46:57 | svc[Front Camera]: accurate model too slow here (463 ms > 350) -> yolov8n.pt
+2026-10-18T06:46:57 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:46:57 | ffmpeg-pipe: starting
+2026-10-18T06:46:57 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 228 ms, 0 dets on blank frame)
+2026-10-18T06:47:02 | open_stream: falling back to default backend
+2026-10-18T06:47:07 | open_stream: transport=tcp
+2026-10-18T06:47:07 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:47:11 | svc[Back Camera]: loading AI model
+2026-10-18T06:47:11 | svc: cameras started: Back Camera
+2026-10-18T06:47:11 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=00:00-23:59
+2026-10-18T06:47:11 | svc[Back Camera]: AI model loaded
+2026-10-18T06:47:12 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 551 ms, 0 dets on blank frame)
+2026-10-18T06:47:12 | svc[Front Camera]: loading AI model
+2026-10-18T06:47:12 | svc[Front Camera]: loading AI model
+2026-10-18T06:47:12 | svc: camera added cam3 'TEST_Cam' gate='Side'
+2026-10-18T06:47:12 | svc: cameras started: TEST_Cam
+2026-10-18T06:47:12 | svc[TEST_Cam]: loading AI model
+2026-10-18T06:47:12 | svc: camera deleted cam3
+2026-10-18T06:47:13 | svc[Back Camera]: accurate model too slow here (551 ms > 350) -> yolov8n.pt
+2026-10-18T06:47:13 | svc: camera saved cam1 'Front Camera' gate='Main Gate' monitor=True window=off
+2026-10-18T06:47:13 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=20:00-08:00
+2026-10-18T06:47:13 | svc[Front Camera]: AI model loaded
+2026-10-18T06:47:13 | svc[Camera]: AI model loaded
+2026-10-18T06:47:13 | svc[Front Camera]: AI model loaded
+2026-10-18T06:47:13 | event: Entry car track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_car_06-47-13-356.jpg
+2026-10-18T06:47:13 | event: Entry car track 2 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_car_06-47-13-366.jpg
+2026-10-18T06:47:13 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-10-18T06:47:13 | event: Entry person track 1 (appeared-at-line) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-47-13-475.jpg
+2026-10-18T06:47:13 | event: Entry person track 1 (appeared-at-line) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-47-13-521.jpg
+2026-10-18T06:47:13 | event: Entry motorcycle track 1 (appeared-at-line) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_motorcycle_06-47-13-584.jpg
+2026-10-18T06:47:13 | event: Entry person track 2 (appeared-at-line) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-47-13-693.jpg
+2026-10-18T06:47:13 | crossing ignored: person schedule ke bahar (track 1)
+2026-10-18T06:47:14 | person/bike line set {'x1': 0.55, 'y1': 0.5, 'x2': 0.95, 'y2': 0.5} entry_direction2=pos (car/truck/bus main line par, person/bike is line par)
+2026-10-18T06:47:14 | person/bike line set {'x1': 0.95, 'y1': 0.5, 'x2': 0.55, 'y2': 0.5} entry_direction2=neg (car/truck/bus main line par, person/bike is line par)
+2026-10-18T06:47:14 | person/bike line set {'x1': 0.55, 'y1': 0.5, 'x2': 0.95, 'y2': 0.5} entry_direction2=pos (car/truck/bus main line par, person/bike is line par)
+2026-10-18T06:47:14 | person/bike line set {'x1': 0.55, 'y1': 0.5, 'x2': 0.95, 'y2': 0.5} entry_direction2=pos (car/truck/bus main line par, person/bike is line par)
+2026-10-18T06:47:14 | person/bike line removed — person & two-wheeler ab main line par count honge
+2026-10-18T06:47:14 | person/bike line removed — person & two-wheeler ab main line par count honge
+2026-10-18T06:47:14 | person/bike line set {'x1': 0.55, 'y1': 0.5, 'x2': 0.95, 'y2': 0.5} entry_direction2=neg (car/truck/bus main line par, person/bike is line par)
+2026-10-18T06:47:14 | person/bike line removed — person & two-wheeler ab main line par count honge
+2026-10-18T06:47:14 | person/bike line set {'x1': 0.55, 'y1': 0.5, 'x2': 0.95, 'y2': 0.5} entry_direction2=neg (car/truck/bus main line par, person/bike is line par)
+2026-10-18T06:47:14 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 635 ms, 0 dets on blank frame)
+2026-10-18T06:47:14 | open_stream: transport=tcp
+2026-10-18T06:47:14 | svc: viewing camera -> cam2 'Back Camera' gate='Back Gate'
+2026-10-18T06:47:15 | svc: viewing camera -> cam1 'Front Camera' gate='Main Gate'
+2026-10-18T06:47:15 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 659 ms, 0 dets on blank frame)
+2026-10-18T06:47:15 | svc[Front Camera]: accurate model too slow here (659 ms > 350) -> yolov8n.pt
+2026-10-18T06:47:15 | person/bike line removed — person & two-wheeler ab main line par count honge
+2026-10-18T06:47:15 | svc[Camera]: AI self-test OK (yolov8s.pt, 630 ms, 0 dets on blank frame)
+2026-10-18T06:47:15 | event: Entry car track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_car_06-47-15-777.jpg
+2026-10-18T06:47:15 | svc[Camera]: accurate model too slow here (630 ms > 350) -> yolov8n.pt
+2026-10-18T06:47:15 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-47-15-791.jpg
+2026-10-18T06:47:15 | crossing rejected: track 1 motorcycle Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (205, 216, 275, 276))
+2026-10-18T06:47:15 | crossing rejected: track 1 car Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (660, 196, 780, 276))
+2026-10-18T06:47:15 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-47-15-962.jpg
+2026-10-18T06:47:16 | event: Entry car track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_car_06-47-16-056.jpg
+2026-10-18T06:47:16 | event: Exit person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Exit_person_06-47-16-068.jpg
+2026-10-18T06:47:16 | event: Entry bicycle track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_bicycle_06-47-16-163.jpg
+2026-10-18T06:47:16 | crossing rejected: track 1 bicycle Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (205, 216, 275, 276))
+2026-10-18T06:47:16 | event: Entry truck track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_truck_06-47-16-272.jpg
+2026-10-18T06:47:16 | crossing rejected: track 1 truck Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (640, 176, 800, 276))
+2026-10-18T06:47:16 | event: Entry bus track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_bus_06-47-16-366.jpg
+2026-10-18T06:47:16 | crossing rejected: track 1 bus Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (640, 176, 800, 276))
+2026-10-18T06:47:16 | person/bike line removed — person & two-wheeler ab main line par count honge
+2026-10-18T06:47:16 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 1687 ms, 0 dets on blank frame)
+2026-10-18T06:47:16 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 489 ms, 0 dets on blank frame)
+2026-10-18T06:47:16 | svc[Camera]: AI self-test OK (yolov8n.pt, 470 ms, 0 dets on blank frame)
+2026-10-18T06:47:19 | open_stream: transport=udp
+2026-10-18T06:47:24 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:47:24 | ffmpeg-pipe: starting
+2026-10-18T06:47:29 | open_stream: falling back to default backend
+2026-10-18T06:47:31 | zoom (doosri nazar) model: ?
+2026-10-18T06:47:31 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-47-31-758.jpg
+2026-10-18T06:47:31 | person box ignored: janwar jaisa aakar (35x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (600, 20, 635, 60))
+2026-10-18T06:47:31 | zoom (doosri nazar) model: ?
+2026-10-18T06:47:31 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-47-31-793.jpg
+2026-10-18T06:47:31 | person box ignored: janwar jaisa aakar (35x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (700, 20, 735, 60))
+2026-10-18T06:47:31 | zoom (doosri nazar) model: ?
+2026-10-18T06:47:31 | event: Entry person track 2 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-47-31-826.jpg
+2026-10-18T06:47:31 | zoom (doosri nazar) model: ?
+2026-10-18T06:47:31 | track 1 'person' nahi — zoom karke dekha: dog 0.70 vs person 0.10 (kul 0.70 vs 0.10) — janwar, alert nahi hoga (box (460, 92, 500, 192))
+2026-10-18T06:47:31 | zoom (doosri nazar) model: ?
+2026-10-18T06:47:31 | track 1 'person' nahi — zoom karke dekha: dog 0.70 vs person 0.10 (kul 0.70 vs 0.10) — janwar, alert nahi hoga (box (460, 92, 500, 192))
+2026-10-18T06:47:31 | zoom (doosri nazar) model: ?
+2026-10-18T06:47:31 | track 1 'person' nahi — zoom karke dekha: dog 0.40 vs person 0.50 (kul 0.40 vs 0.50) — janwar, alert nahi hoga (box (460, 92, 500, 192))
+2026-10-18T06:47:31 | track 1 zoom par ab saaf insaan dikha (kul person 1.40 vs janwar 0.40) — person maana jayega
+2026-10-18T06:47:31 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-47-31-913.jpg
+2026-10-18T06:47:31 | event: Entry car track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_car_06-47-31-938.jpg
+2026-10-18T06:47:31 | event: Entry person track 1 (cross) -> /tmp/tmpoma63k_2/snaps/2026-10-18/Entry_person_06-47-31-967.jpg
+2026-10-18T06:47:31 | zoom (doosri nazar) model: ?
+2026-10-18T06:47:34 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:47:34 | open_stream: transport=tcp
+2026-10-18T06:47:39 | open_stream: transport=udp
+2026-10-18T06:47:42 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-10-18T06:47:44 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:47:44 | ffmpeg-pipe: starting
+2026-10-18T06:47:45 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-10-18T06:47:48 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-10-18T06:47:48 | purge: 0 old events removed (retention 7d, cutoff 2026-10-11)
+2026-10-18T06:47:51 | outbox: 1 pending WhatsApp alert(s) delivered
+2026-10-18T06:47:52 | svc: auto-connect — Front Camera, Back Camera se connect kar raha hai
+2026-10-18T06:47:52 | svc[Front Camera]: loading AI model
+2026-10-18T06:47:52 | svc[Back Camera]: loading AI model
+2026-10-18T06:47:54 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-10-18T06:47:54 | purge: 0 old events removed (retention 7d, cutoff 2026-10-11)
+2026-10-18T06:47:58 | svc: auto-connect — Front Camera, Back Camera se connect kar raha hai
+2026-10-18T06:47:58 | svc[Front Camera]: loading AI model
+2026-10-18T06:47:58 | svc[Back Camera]: loading AI model
+2026-10-18T06:48:00 | svc[Front Camera]: AI model loaded
+2026-10-18T06:48:00 | svc[Back Camera]: AI model loaded
+2026-10-18T06:48:02 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 640 ms, 0 dets on blank frame)
+2026-10-18T06:48:02 | svc[Front Camera]: accurate model too slow here (640 ms > 350) -> yolov8n.pt
+2026-10-18T06:48:02 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 647 ms, 0 dets on blank frame)
+2026-10-18T06:48:02 | svc[Back Camera]: accurate model too slow here (647 ms > 350) -> yolov8n.pt
+2026-10-18T06:48:03 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 274 ms, 0 dets on blank frame)
+2026-10-18T06:48:03 | open_stream: transport=tcp
+2026-10-18T06:48:03 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 269 ms, 0 dets on blank frame)
+2026-10-18T06:48:08 | open_stream: transport=udp
+2026-10-18T06:48:13 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:48:13 | ffmpeg-pipe: starting
+2026-10-18T06:48:18 | open_stream: falling back to default backend
+2026-10-18T06:48:23 | open_stream: transport=tcp
+2026-10-18T06:48:23 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-18T06:48:26 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-18T06:48:28 | open_stream: transport=udp
+2026-10-18T06:48:33 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:48:33 | ffmpeg-pipe: starting
+2026-10-18T06:48:38 | open_stream: falling back to default backend
+2026-10-18T06:48:38 | svc[Front Camera]: loading AI model
+2026-10-18T06:48:38 | svc[Front Camera]: AI model loaded
+2026-10-18T06:48:39 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 452 ms, 0 dets on blank frame)
+2026-10-18T06:48:39 | svc[Front Camera]: accurate model too slow here (452 ms > 350) -> yolov8n.pt
+2026-10-18T06:48:40 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 173 ms, 0 dets on blank frame)
+2026-10-18T06:48:43 | open_stream: transport=tcp
+2026-10-18T06:48:43 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:48:46 | svc: RTSP DESCRIBE -> 0 timed out
+2026-10-18T06:48:48 | open_stream: transport=udp
+2026-10-18T06:48:53 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:48:53 | ffmpeg-pipe: starting
+2026-10-18T06:48:58 | open_stream: falling back to default backend
+2026-10-18T06:49:03 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-18T06:49:18 | svc[Front Camera]: loading AI model
+2026-10-18T06:49:18 | svc[Back Camera]: loading AI model
+2026-10-18T06:49:18 | svc[Back Camera]: AI model loaded
+2026-10-18T06:49:18 | svc[Front Camera]: AI model loaded
+2026-10-18T06:49:20 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 708 ms, 0 dets on blank frame)
+2026-10-18T06:49:20 | svc[Back Camera]: accurate model too slow here (708 ms > 350) -> yolov8n.pt
+2026-10-18T06:49:20 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 727 ms, 0 dets on blank frame)
+2026-10-18T06:49:20 | svc[Front Camera]: accurate model too slow here (727 ms > 350) -> yolov8n.pt
+2026-10-18T06:49:20 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 267 ms, 0 dets on blank frame)
+2026-10-18T06:49:20 | open_stream: transport=tcp
+2026-10-18T06:49:21 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 241 ms, 0 dets on blank frame)
+2026-10-18T06:49:25 | open_stream: transport=udp
+2026-10-18T06:49:30 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:49:30 | ffmpeg-pipe: starting
+2026-10-18T06:49:35 | open_stream: falling back to default backend
+2026-10-18T06:49:40 | open_stream: transport=tcp
+2026-10-18T06:49:40 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:49:45 | open_stream: transport=udp
+2026-10-18T06:49:51 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:49:51 | ffmpeg-pipe: starting
+2026-10-18T06:49:56 | open_stream: falling back to default backend
+2026-10-18T06:49:58 | svc[Back Camera]: loading AI model
+2026-10-18T06:49:58 | svc[Back Camera]: AI model loaded
+2026-10-18T06:49:59 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 448 ms, 0 dets on blank frame)
+2026-10-18T06:49:59 | svc[Back Camera]: accurate model too slow here (448 ms > 350) -> yolov8n.pt
+2026-10-18T06:50:00 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 167 ms, 0 dets on blank frame)
+2026-10-18T06:50:01 | open_stream: transport=tcp
+2026-10-18T06:50:01 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-18T06:50:06 | open_stream: transport=udp
+2026-10-18T06:50:11 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:50:11 | ffmpeg-pipe: starting
+2026-10-18T06:50:16 | open_stream: falling back to default backend
+2026-10-18T06:50:21 | svc[Back Camera]: source opened codec=unknown live=True
+2026-10-18T06:50:38 | svc[Front Camera]: loading AI model
+2026-10-18T06:50:38 | svc[Back Camera]: loading AI model
+2026-10-18T06:50:38 | svc[Back Camera]: AI model loaded
+2026-10-18T06:50:38 | svc[Front Camera]: AI model loaded
+2026-10-18T06:50:40 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 594 ms, 0 dets on blank frame)
+2026-10-18T06:50:40 | svc[Front Camera]: accurate model too slow here (594 ms > 350) -> yolov8n.pt
+2026-10-18T06:50:40 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 615 ms, 0 dets on blank frame)
+2026-10-18T06:50:40 | svc[Back Camera]: accurate model too slow here (615 ms > 350) -> yolov8n.pt
+2026-10-18T06:50:40 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 242 ms, 0 dets on blank frame)
+2026-10-18T06:50:40 | open_stream: transport=tcp
+2026-10-18T06:50:40 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 249 ms, 0 dets on blank frame)
+2026-10-18T06:50:45 | open_stream: transport=udp
+2026-10-18T06:50:50 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:50:50 | ffmpeg-pipe: starting
+2026-10-18T06:50:55 | open_stream: falling back to default backend
+2026-10-18T06:51:00 | open_stream: transport=tcp
+2026-10-18T06:51:00 | svc[Front Camera]: source opened codec=unknown live=True
+2026-10-18T06:51:05 | open_stream: transport=udp
+2026-10-18T06:51:10 | open_stream: trying FFmpeg engine fallback
+2026-10-18T06:51:10 | ffmpeg-pipe: starting
+2026-10-18T06:51:15 | open_stream: falling back to default backend
+2026-10-18T06:51:20 | svc[Back Camera]: source opened codec=unknown live=True

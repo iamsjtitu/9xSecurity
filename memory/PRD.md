@@ -1188,3 +1188,27 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   tests/test_iter39_zoom_verdict.py 10 (agent), regression 213 green, live API 54; A/B tests/zoom_offline_ab_check.py
   (zoom off = 1 person event, zoom on = 0); live E2E tests/zoom_real_yolo_check.py PASS (dog 0, person 1).
 - AWAITING USER: no more dog/cat PERSON photos at night; a real person at night must still alert (zoom confirms).
+
+
+## Implemented (update 2026-06 #65) — Dogs STILL sent as PERSON after #64: zoom was blind on the fast model (iteration_40: 100%)
+- USER (18-10, 'kal bhi aya hai kutte ka photo', 5 WhatsApp frames from one night: 00:25, 01:14, 01:15, 21:45, 21:59): far
+  dogs 17-52 px wide at 960x540, all captioned 'Entry — PERSON'. Reproduced on the user's own frames: with yolov8n the
+  #64 zoomed look returned person 0.0 / animal 0.0 on 4 of 5 dogs (too few pixels for the nano model even zoomed) and
+  the engine treated 'nothing found' as 'not an animal' -> alert. yolov8s on the same crops: 'dog' 0.34-0.79 on 5/5.
+  Auto mode swaps to yolov8n when yolov8s is slower than AUTO_MODEL_MAX_MS (350 ms) — likely on the user's multi-camera PC.
+- DETECTOR: zoom_model_for() — zoomed looks ALWAYS run on yolov8s when the camera's main model is yolov8n and yolov8s.pt
+  is bundled (one shared instance per process, lazy, inference under a lock); an accurate camera zooms with its own
+  model. second_opinion() is multi-scale (ZOOM_SCALES 1.5x/320 -> 1.5x/640 -> 3x/640), cheapest first, stops when
+  clear (animal >= 0.30 & >= 0.7 person, or person >= 0.50 & animal < 0.35 person); returns best-per-class + model +
+  looks. User dogs: 5/5 'dog' on the FIRST (320 px) look; night person 0.92 on the first look.
+- ENGINE fail-closed (_animal_on_zoom): a person alert is dropped when the track's zoomed looks never saw a person
+  (sum < ZOOM_PERSON_MIN 0.25) AND the full-frame 'person' detections averaged < PERSON_SURE_CONF 0.70
+  (Track.person_conf). log: 'zoom par N baar dekha, insaan kahin nahi dikha (…) — chhota/dhundhla janwar ya saaya,
+  insaan confirm nahi'. Confident full-frame person or zoom-confirmed person still alerts; second_opinion None /
+  exception stays fail-open. Model logged once per engine: 'zoom (doosri nazar) model: yolov8s.pt'.
+- Tests: tests/test_iter40_zoom_failclosed.py 18 (real model on tests/assets/user_dog_1..5.jpg = the user's frames,
+  both tiers + engine stubs), tests/test_iter41_zoom_edges.py 24 (agent: lock serialises, early stop, person_conf,
+  boundaries, concurrency), regression 119/119 + full suite 469 green, live E2E zoom_real_yolo_check PASS (fast tier).
+  Agent exploratory: night person shrunk to 16x38 px (frame conf 0.54) still zooms person 0.90 -> not dropped.
+- AWAITING USER: install the new build (Diagnostics shows version 1.0.<build>), then no dog PERSON photos; a real
+  night walker must still alert. If a dog still comes: camera_log lines with 'zoom' around that time + the image.

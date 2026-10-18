@@ -1,0 +1,32 @@
+{
+  "summary": "Backend-only test of iter-40 fix (shared yolov8s zoom for fast-model cameras + multi-scale early stop + fail-closed person rule). All requested regression files: 119/119 passed. Live-service E2E tests/zoom_real_yolo_check.py: 'RESULT: PASS [True, True]' (dog 0 events, person 1 event, fast tier). Added tests/test_iter41_zoom_edges.py with 24 new edge-case tests (scripted early stop / best-per-class / None handling, off-frame no inference, shared zoom lock serialises concurrent inference across 2 fast detectors x 3 threads (peak concurrency 1), accurate camera no lock, missing yolov8s fallback, Track.person_conf maths incl. via CentroidTracker.update, _animal_on_zoom boundaries at exactly 0.25 / 0.70, exception & unknown-track fail-open, full-res box scaling, two real fast detectors zooming user dogs concurrently, 2x upscaled user dog) — 24/24 pass. Exploratory real-model check: night_person shrunk to 0.6/0.4/0.3 scale (down to 16x38 px, frame conf 0.54) still zooms as person 0.90 on yolov8s with looks=1 on both tiers, so the fail-closed rule did not drop a genuine small person in these checks. Full suite (minus tests/real): 469 passed, 2 skipped; the only failures (1 F + 16 E) are in test_service_api.py, caused by test_engine.py leaving requests.post patched; test_service_api.py passes 20/20 when run on its own.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "test_engine.py (test isolation)", "issue": "test_engine.py lines 125/166/432 assign whatsapp.requests.post = fake_post without restoring it. whatsapp.requests is the global requests module, so later test_service_api.py tests in the same run get the fake response (login wrong password -> 200, 'R' object has no attribute ...). This existed before this change. Use monkeypatch.setattr."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/9x_security/tests/test_iter41_zoom_edges.py",
+    "/app/test_reports/pytest/iter41_regression.xml",
+    "/app/test_reports/pytest/iter41_edges.xml"
+  ],
+  "action_items": [
+    "Optional: make test_engine.py restore whatsapp.requests.post (monkeypatch) so the full suite runs clean in one pytest invocation",
+    "Optional: preload the shared yolov8s zoom model in the background at engine start on fast-tier PCs. Right now the first zoom loads it (~5 s) inside the frame loop, holding _ZOOM_LOCK."
+  ],
+  "critical_code_review_comments": [
+    "engine._animal_on_zoom: tr.zoom_person is a SUM over looks, so several weak noise looks (e.g. 0.12+0.12+0.02) add up past ZOOM_PERSON_MIN=0.25 and let a hesitant full-frame person through. test_noise_person_scores_sum_over_looks documents this. If that is not intended, use max (or the mean) of the zoomed person scores.",
+    "detector.zoom_model_for: if yolov8s.pt exists but fails to load (corrupt file or partial update), YOLO() raises every time and the load is retried on every zoom while holding _ZOOM_LOCK. Every look then goes through the exception path, which fails open, so animals would alert again. Cache the failure, fall back to the camera's own model, and log it once.",
+    "Fast-tier CPU cost: each person track near the line gets up to 3 yolov8s looks per ZOOM_EVERY_S, serialised across all fast cameras by one lock. On a slow multi-camera PC this can back up the frame loop. Consider a non-blocking acquire or a per-second zoom budget.",
+    "second_opinion scales (1.5,320) and (1.5,640) use the same crop. That is fine, but stopping as soon as an animal is 'clear' means a person who briefly looks dog-like on the 320 look never gets the 640 look. Given the user's no-animal requirement this is an acceptable bias."
+  ],
+  "updated_files": ["/app/9x_security/tests/test_iter41_zoom_edges.py (new)"],
+  "success_rate": {"backend": "100% of feature tests (119 regression + 24 new + live E2E); full suite 469 passed, 17 test_service_api.py tests failing only because test_engine.py leaks a patched requests.post (pass when run alone)", "frontend": "N/A (not requested)"},
+  "test_credentials": "admin / 9xsecurity (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None. zoom_real_yolo_check.py cleaned up after itself; cam1/cam2 were already in settings before this run.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run from /app/9x_security: python3 -m pytest -q -p no:cacheprovider tests/test_iter40_zoom_failclosed.py tests/test_iter41_zoom_edges.py ... ; service on 127.0.0.1:8971 (nohup python3 service.py &). Run test_service_api.py separately from test_engine.py (requests.post leak). The user dog assets are 400x400 cuts with person boxes in USER_DOGS. On these frames yolov8s detects dogs 2-5 as 'dog' at full frame and dog 1 as person 0.59; yolov8n sees dog 1 as person 0.49 and misses dogs 3-5."
+}

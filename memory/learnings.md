@@ -48,3 +48,8 @@
   set e.detector.second_opinion = callable(frame, bbox) -> {person, animal, animal_label}. Track.verdict (from zoom
   evidence) beats frame votes. Real-model test assets: /app/9x_security/tests/assets/night_*.jpg (generated);
   night_dog_sitting.jpg @ scale 1.0 is the one the fast model calls 'person' (discriminating A/B).
+- #65: a 'nothing found' second look is NOT exoneration. yolov8n is blind to a 17-50 px night dog even zoomed
+  (0.0/0.0); yolov8s names it. Zoomed looks always use yolov8s (detector.zoom_model_for, shared + lock) and the
+  person alert fails closed when zoom never saw a person and frame conf < 0.70. Test real user frames, not only
+  generated assets: tests/assets/user_dog_1..5.jpg (400x400 cuts) with boxes in tests/test_iter40_zoom_failclosed.py.
+  Stubbed engine tests that expect a person event with a NOTHING zoom must use conf >= 0.7 boxes.

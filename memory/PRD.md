@@ -1311,3 +1311,14 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Workflow: "Download EasyOCR models" -> python ci/gh_fetch.py --easyocr easyocr_models; "Download YOLOv8s" -> gh_fetch with
   --min-bytes 20000000; both steps get GITHUB_TOKEN. Verified from the container during the live outage: github.com 504 ->
   api endpoint fetched both model zips (md5 OK, 'models ready'); yolov8s.pt fetched.
+
+## Implemented (update 2026-06 #71) — Build run 52 failed at "Build Electron UI + NSIS installer" (log tail not visible) -> retry + mirror fallback
+- Facts (GitHub API, public): runs 50/51 failed at EasyOCR download (504), run 52 passed everything up to Electron step and failed
+  there after 185 s (successful runs: 123-196 s) -> failure near the end (electron-builder). Last success run 49 = 20 days earlier
+  => Actions caches (Electron binaries / EasyOCR models) evicted (7 idle days) => electron zip + nsis/winCodeSign had to be
+  downloaded from github.com/.../releases/download during the same 504 outage. Only 4 small electron files changed since run 49
+  (electron-main open-url, preload openUrl, UpdateProgress, SettingsPage) and vite build passes locally. By ~08:30 UTC all
+  github.com release URLs answered 302 again.
+- Workflow step now pwsh: Retry() 4 attempts, 60 s apart, for `yarn install` and `yarn electron-builder`; 4th attempt sets
+  ELECTRON_MIRROR + ELECTRON_BUILDER_BINARIES_MIRROR (npmmirror.com; checksums still verified). `yarn build` failure is
+  reported as "vite build (UI) failed". Could not see the actual error line: user asked to send the bottom of that step if it fails again.

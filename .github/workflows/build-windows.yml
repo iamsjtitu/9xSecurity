@@ -141,10 +141,29 @@ jobs:
 
       - name: Build Electron UI + NSIS installer
         working-directory: 9x_security/electron
+        shell: pwsh
         run: |
-          yarn install
+          # Electron zip + NSIS/winCodeSign come from github.com/.../releases/download, which answers 504 for a
+          # while at times (and the Actions cache is evicted after 7 idle days). Retry; last attempt via mirror.
+          function Retry($name, $cmd) {
+            foreach ($i in 1..4) {
+              if ($i -eq 4) {
+                Write-Host "::warning::GitHub release downloads keep failing - last attempt via npmmirror.com mirror (electron-builder verifies sha512 of nsis/winCodeSign, @electron/get verifies SHASUMS256)"
+                $env:ELECTRON_MIRROR = "https://npmmirror.com/mirrors/electron/"
+                $env:ELECTRON_BUILDER_BINARIES_MIRROR = "https://npmmirror.com/mirrors/electron-builder-binaries/"
+              }
+              & $cmd
+              if ($LASTEXITCODE -eq 0) { return }
+              Write-Host "$name attempt $i failed (exit $LASTEXITCODE) - retrying in 60s"
+              Start-Sleep 60
+            }
+            Write-Host "::error::$name failed 4 times - see the output above for the real error"
+            exit 1
+          }
+          Retry "yarn install" { yarn install }
           yarn build
-          yarn electron-builder --win nsis --publish never
+          if ($LASTEXITCODE -ne 0) { Write-Host "::error::vite build (UI) failed"; exit 1 }
+          Retry "electron-builder" { yarn electron-builder --win nsis --publish never }
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

@@ -132,6 +132,7 @@ def test_download_sends_bearer_and_octet(monkeypatch, tmp_path):
 
     class Resp:
         headers = {"Content-Length": "3"}
+        status_code = 200
 
         def __enter__(self):
             return self

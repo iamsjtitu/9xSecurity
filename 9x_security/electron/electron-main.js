@@ -249,6 +249,11 @@ ipcMain.handle('open-path', (_e, p) => {
   return 'blocked';
 });
 ipcMain.handle('quit-app', () => { quitting = true; app.quit(); });
+ipcMain.handle('open-url', (_e, u) => {
+  const s = String(u || '');
+  if (/^https:\/\/(www\.)?github\.com\//i.test(s)) return shell.openExternal(s);
+  return 'blocked';
+});
 
 // ---- start with Windows: THREE independent ways (any one is enough) + a watchdog ----
 //  1. registry Run key (Electron loginItem)      2. Startup-folder shortcut

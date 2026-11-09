@@ -1879,7 +1879,7 @@ def update_check(request: Request):
 
 _UPDATE_ACTIVE = ("checking", "downloading", "installing")
 _update_job = {"state": "idle", "percent": 0, "read": 0, "total": 0, "message": "",
-               "latest": "", "ok": False, "started_at": 0.0}
+               "latest": "", "page": "", "ok": False, "started_at": 0.0}
 _update_cancel = threading.Event()
 
 
@@ -1893,18 +1893,22 @@ def _run_update_job(repo, token):
     dest = ""
     try:
         _job_set(state="checking", message="Release ki jaankari li ja rahi hai...")
-        tag, asset, _page = updater.check_latest(repo, token=token)
-        if not tag or not asset:
+        tag, urls, page = updater.release_assets(repo, token=token)
+        if not tag or not urls:
             raise RuntimeError("Release/asset nahi mila.")
-        ext = ".zip" if asset.lower().endswith(".zip") else ".exe"
+        ext = ".zip" if urls[0].lower().endswith(".zip") else ".exe"
         dest = os.path.join(tempfile.gettempdir(), "9xSecuritySetup_new" + ext)
-        _job_set(state="downloading", latest=tag, message=f"v{tag} download ho raha hai...")
+        _job_set(state="downloading", latest=tag, page=page, message=f"v{tag} download ho raha hai...")
 
         def prog(read, total):
             _job_set(read=read, total=total, percent=int(read * 100 / total) if total else 0)
 
-        got = updater.download(asset, dest, progress=prog, token=token,
-                               should_stop=_update_cancel.is_set)
+        def status(text):
+            clog(f"update: {text}")
+            _job_set(message=text)
+
+        got = updater.download(urls, dest, progress=prog, token=token,
+                               should_stop=_update_cancel.is_set, status=status)
         if got is None:
             _job_set(state="cancelled", message="Download cancel kiya gaya.")
             clog("update: download cancelled by user")
@@ -1939,7 +1943,7 @@ def update_apply(request: Request):
         raise HTTPException(400, "Update source sirf installed build me set hota hai (dev mode).")
     _update_cancel.clear()
     _update_job.update(state="checking", percent=0, read=0, total=0, message="Shuru ho raha hai...",
-                       latest="", ok=False, started_at=time.time())
+                       latest="", page=_update_info.get("page", ""), ok=False, started_at=time.time())
     threading.Thread(target=_run_update_job, args=(repo, token), daemon=True).start()
     return dict(_update_job)
 

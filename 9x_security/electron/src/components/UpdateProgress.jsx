@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Loader2, XCircle, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Loader2, XCircle, CheckCircle2, AlertTriangle, ExternalLink } from 'lucide-react';
 
 const mb = (b) => (b / 1048576).toFixed(b > 104857600 ? 0 : 1);
 const ACTIVE = ['checking', 'downloading', 'installing'];
+const openUrl = (u) => (window.native?.openUrl ? window.native.openUrl(u) : window.open(u, '_blank', 'noopener'));
 
-export default function UpdateProgress({ job, onCancel }) {
+export default function UpdateProgress({ job, onCancel, page }) {
   const [speed, setSpeed] = useState(0);
   const prev = useRef({ read: 0, t: Date.now() });
 
@@ -55,6 +56,11 @@ export default function UpdateProgress({ job, onCancel }) {
       {(job.state === 'checking' || job.state === 'downloading') && (
         <button className="btn-ghost !text-rose-700" onClick={onCancel} data-testid="update-cancel-btn">
           <XCircle size={14} /> Cancel
+        </button>
+      )}
+      {job.state === 'error' && page && (
+        <button className="btn-ghost" onClick={() => openUrl(page)} data-testid="update-browser-download-btn">
+          <ExternalLink size={14} /> Browser me download karo (GitHub release page)
         </button>
       )}
     </div>

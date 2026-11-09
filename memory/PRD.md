@@ -1286,3 +1286,20 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Tests updated: iter42 (+test_vehicles_only_filter_and_detail_grouping), iter43 live (Entry 3 / Exit 2), iter44
   (+test_generate_range_include_all), iter45 live (+test_range_all_types_option, xlsx 13 cols / 6 rows).
 - AWAITING USER: next scheduled PDF on Windows should list only trucks/cars etc. with plate-wise Entry/Exit detail.
+
+## Implemented (update 2026-06 #69) — In-app update "504 Gateway Time-out" (github.com release download) -> retry + alternate endpoint + resume (self-tested; reproduced live)
+- Reproduced from the container: github.com/<repo>/releases/download/... answered HTTP 504 while
+  api.github.com/repos/<repo>/releases/assets/<id> (Accept: application/octet-stream) served the same 435 MB file (206, Range OK).
+- updater.release_assets(repo, token) -> (tag, [urls], page): public = [browser_download_url, api asset url]; private (token) =
+  [api url] only. check_latest unchanged (urls[0]). updater.download(url|urls, ...): 6 attempts, RETRY_WAIT 3/6/12/20/30 s,
+  transient = 5xx/408/429 + ConnectionError/Timeout/ChunkedEncoding/short read; alternates endpoints per attempt; resumes with
+  Range: bytes=<read>- (206, Content-Range total), restarts if the server ignores Range; status(text) callback; cancel honoured
+  during the wait; 4xx (404/401/403) not retried; final RuntimeError explains retry/browser fallback.
+- service._run_update_job uses release_assets + status -> job.message shows "rukawat (HTTP 504) — 6 sec baad dobara koshish (2/6)";
+  _update_job has `page`. UI: UpdateProgress shows "Browser me download karo (GitHub release page)" button on error
+  (window.native.openUrl -> ipc open-url, https://github.com/ only, shell.openExternal). Workflow: lapx preinstalled (no ultralytics
+  AutoUpdate mid-build).
+- Tests: tests/test_iter46_update_retry.py (6: 504->alternate, drop->Range resume, give-up message, cancel in wait, 404 no retry,
+  release_assets public/private); test_iter7 fake Resp got status_code. Service API 20 green.
+- NOTE for the user: the currently installed (old) updater has no retry — this time run the browser-downloaded Setup manually;
+  from the next build the in-app update self-heals.

@@ -493,7 +493,7 @@ export default function SettingsPage({ showToast, tab = 'whatsapp', setTab }) {
                 )}
               </div>
             )}
-            <UpdateProgress job={job} onCancel={cancelUpdate} />
+            <UpdateProgress job={job} onCancel={cancelUpdate} page={job?.page || updInfo?.page || ''} />
           </div>
         )}
       </div>

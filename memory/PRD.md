@@ -1303,3 +1303,11 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   release_assets public/private); test_iter7 fake Resp got status_code. Service API 20 green.
 - NOTE for the user: the currently installed (old) updater has no retry — this time run the browser-downloaded Setup manually;
   from the next build the in-app update self-heals.
+
+## Implemented (update 2026-06 #70) — CI build failed: EasyOCR model download HTTP 504 (same github.com outage) -> ci/gh_fetch.py
+- 9x_security/ci/gh_fetch.py: fetch(url, dest, min_bytes) = 6 attempts (5/10/20/40/60 s), from attempt 2 alternates with the
+  api.github.com asset url (resolved via /releases/tags/<tag>, GITHUB_TOKEN for rate limit; Accept octet-stream), atomic .part;
+  --easyocr <dir> downloads craft_mlt_25k + english_g2 zips (md5 from easyocr.config), unzips, verifies md5, loads Reader offline.
+- Workflow: "Download EasyOCR models" -> python ci/gh_fetch.py --easyocr easyocr_models; "Download YOLOv8s" -> gh_fetch with
+  --min-bytes 20000000; both steps get GITHUB_TOKEN. Verified from the container during the live outage: github.com 504 ->
+  api endpoint fetched both model zips (md5 OK, 'models ready'); yolov8s.pt fetched.

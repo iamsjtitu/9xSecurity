@@ -6614,3 +6614,79 @@ Error opening input files: Connection timed out
 [in#0 @ 0x3830f960] Error opening input: Connection timed out
 Error opening input file rtsp://u:p@192.0.2.9:554/s.
 Error opening input files: Connection timed out
+[tcp @ 0x18eba740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x18eb7960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x3e035740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x3e032960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0xac00740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0xabfd960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x2f957740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x2f954960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x1a79d740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x1a79a960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x40942740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x4093f960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x322f7740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x322f4960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x11a76740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x11a73960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x42d24740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x42d21960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x1d4d1740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x1d4ce960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x3c914740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x3c911960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x181f4740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x181f1960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x20983740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x20980960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x30045740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x30042960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x1dc95740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x1dc92960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x26716740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x26713960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0xd621740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0xd61e960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x41a2b740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x41a28960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out
+[tcp @ 0x27fe4740] Connection to tcp://192.0.2.9:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x27fe1960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.9:554/s.
+Error opening input files: Connection timed out

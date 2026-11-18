@@ -194,7 +194,7 @@ def test_stream_once_unreachable_sets_status_and_retries_fast(monkeypatch):
     opened = []
     monkeypatch.setattr(service.time, "sleep", lambda s: None)
     w = service.Worker.__new__(service.Worker)
-    w.open_error, w.open_detail, w._unreach_logged = "", "", 0.0
+    w.open_error, w.open_detail, w._unreach_logged, w._unreach_since, w._autofind_at = "", "", 0.0, 0.0, 0.0
     logs = []
     w._log = logs.append
     w._gen = 0

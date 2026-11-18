@@ -15,6 +15,7 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
   const [firstPoint, setFirstPoint] = useState(null);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [stale, setStale] = useState(false);
+  const [finding, setFinding] = useState(false);
   const [ptzSupported, setPtzSupported] = useState(true);
   const boxRef = useRef(null);
   const canvasRef = useRef(null);
@@ -40,6 +41,25 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
       refreshState();
     } catch (e) {
       showToast(e.message, 'error');
+    }
+  };
+
+  const autoFind = async () => {
+    setFinding(true);
+    try {
+      const r = await api('/api/camera/autofind', { method: 'POST', body: JSON.stringify({}), timeout: 150000 });
+      if (r.ok) {
+        urlTouched.current = false;
+        setUrl(r.url);
+        showToast(`Camera naye IP par mil gaya — URL update: ${r.url.replace(/\/\/.*@/, '//***@')}`, 'success');
+      } else {
+        showToast(r.status || 'Camera LAN par nahi mila', 'error');
+      }
+      refreshState();
+    } catch (e) {
+      showToast(e.message, 'error');
+    } finally {
+      setFinding(false);
     }
   };
 
@@ -333,10 +353,23 @@ export default function CameraPanel({ state, refreshState, showToast, drawMode, 
             )}
             {stale && (
               <div
-                className="absolute inset-x-0 top-1/2 -translate-y-1/2 mx-auto w-fit rounded-lg bg-amber-500/95 px-4 py-2 text-sm font-semibold text-black"
+                className="absolute inset-x-0 top-1/2 -translate-y-1/2 mx-auto w-fit max-w-[85%] rounded-lg bg-amber-500/95 px-4 py-2 text-sm font-semibold text-black text-center"
                 data-testid="stale-overlay"
               >
-                Stream ruk gaya — engine dobara connect kar raha hai…
+                {String(state.status || '').startsWith('ERROR:')
+                  ? String(state.status).slice(6).trim()
+                  : (state.status && /dhundh raha|mil gaya/i.test(state.status) ? state.status : 'Stream ruk gaya — engine dobara connect kar raha hai…')}
+                {/jawab nahi|nahi mila|RTSP nahi mila/i.test(state.status || '') && (
+                  <button
+                    className="ml-3 rounded bg-black/80 px-2 py-1 text-[11px] font-bold text-white hover:bg-black disabled:opacity-50"
+                    disabled={finding}
+                    onClick={autoFind}
+                    data-testid="camera-autofind-btn"
+                    title="LAN scan karke yahi camera naye IP par dhundhe aur URL update kare"
+                  >
+                    {finding ? 'Dhundh raha hai…' : 'Camera auto-dhundho'}
+                  </button>
+                )}
               </div>
             )}
             <div className="absolute bottom-3 right-3 flex items-center gap-1.5" data-testid="zoom-controls">

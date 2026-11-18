@@ -719,3 +719,7 @@
 2026-11-18T09:13:33 | image | to=911234567890 | status=401 | {"detail":"Invalid API token"}
 2026-11-18T09:13:40 | text | to=919876543210 | status=201 | {"success":true}
 2026-11-18T09:13:44 | image | to=919812345678 | status=200 | {"success":true}
+2026-11-18T09:29:09 | text | to=911234567890 | status=401 | {"detail":"Invalid API token"}
+2026-11-18T09:29:10 | image | to=911234567890 | status=401 | {"detail":"Invalid API token"}
+2026-11-18T09:31:29 | text | to=911234567890 | status=401 | {"detail":"Invalid API token"}
+2026-11-18T09:31:29 | image | to=911234567890 | status=401 | {"detail":"Invalid API token"}

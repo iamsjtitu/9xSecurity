@@ -63,3 +63,6 @@
   tests/test_iter47_update_handoff.py; worker tests use fake rtsp://cam/... URLs with mocked open_stream.
 - Never let the engine launch the NSIS Setup directly while app/engine run: watchdog task (5 min) + locked DLLs => half install.
   Flow is: detached bat waits for exit -> Setup /S --force-run; engine exits 75; Electron quits on 75.
+- If dev login suddenly 401s with "Galat username ya password": check `git diff config.json` — a test that mocks service._cfg
+  and then triggers any config.save_config path writes DEFAULTS (empty auth_hash) into the real config.json. Restore with
+  `git checkout -- config.json`. Worker-side config writers: _auto_fix_source, _save_camera_field (auto_find/fingerprint).

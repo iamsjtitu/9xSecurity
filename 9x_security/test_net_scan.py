@@ -34,7 +34,7 @@ def cam():
 def test_parse_probe_match_hikvision_and_dahua():
     h = ns.parse_probe_match(HIK_MATCH)
     assert h == {"ip": "192.168.1.64", "xaddr": "http://192.168.1.64/onvif/device_service",
-                 "name": "HIKVISION DS-2CD1023G0-I", "hardware": "DS-2CD1023G0-I"}
+                 "name": "HIKVISION DS-2CD1023G0-I", "hardware": "DS-2CD1023G0-I", "uuid": h["uuid"]}
     d = ns.parse_probe_match(DAHUA_MATCH)
     assert d["ip"] == "192.168.1.108" and d["name"] == "IPC-HDW1230T1"
     assert ns.parse_probe_match("<x/>") is None

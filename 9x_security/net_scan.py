@@ -69,7 +69,8 @@ def local_subnets(extra_hosts=()):
 
 
 def parse_probe_match(xml, from_ip=""):
-    """-> {ip, xaddr, name, hardware} from a WS-Discovery ProbeMatch (or None)."""
+    """-> {ip, xaddr, name, hardware, uuid} from a WS-Discovery ProbeMatch (or None).
+    uuid = the device's EndpointReference (stable across IP changes on most cameras)."""
     m = re.search(r"<[^>]*XAddrs>\s*([^<]+)<", xml)
     if not m:
         return None
@@ -83,7 +84,8 @@ def parse_probe_match(xml, from_ip=""):
             name = unquote(sc.split("/name/", 1)[1]).replace("_", " ")
         elif "/hardware/" in low:
             hardware = unquote(sc.split("/hardware/", 1)[1])
-    return {"ip": ip, "xaddr": xaddr, "name": name, "hardware": hardware}
+    ep = re.search(r"EndpointReference>.*?Address>\s*(?:urn:)?uuid:([0-9a-fA-F-]+)", xml, re.S)
+    return {"ip": ip, "xaddr": xaddr, "name": name, "hardware": hardware, "uuid": ep.group(1).lower() if ep else ""}
 
 
 def ws_discovery(timeout=2.5):

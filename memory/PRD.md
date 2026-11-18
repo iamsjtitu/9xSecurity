@@ -1347,3 +1347,24 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   root conftest.py autouse fixture stubs rtsp_port_reachable for all other worker tests. 63 + 113 green; UI build OK.
 - USER STEPS NOW (old updater on their PC): tray > Exit > reopen (or reboot); if torch._C persists -> run the browser-downloaded
   Setup with the app closed. Camera: check power/LAN, find the camera's current IP (router / Scan), update URL.
+
+## Implemented (update 2026-06 #73) — Camera Auto Find: camera ka IP badle to LAN scan karke wahi camera dhundh kar URL khud update (self-tested: 12 new tests + 80 regression green; live overlay screenshot OK)
+- camera_find.py: arp_table() (Windows `arp -a` / Linux `ip neigh`), onvif_device_info() (GetDeviceInformation -> serial/model),
+  fingerprint(url) = {ip, port, at, mac (same-LAN only), server, realm, serial, model, manufacturer, uuid, name, hardware},
+  relocate(url, fp, exclude_ips) -> (new_url, how): sweep local subnets (+old camera subnet) for the RTSP port, WS-Discovery,
+  then identity in order MAC -> ONVIF endpoint uuid -> serial -> our creds+path answer 200 on exactly one other host
+  (tie-break RTSP server/realm); never the old IP nor another configured camera's IP; 'ambiguous:<ips>' / 'not-found'.
+  net_scan.parse_probe_match now also returns `uuid` (EndpointReference).
+- service.Worker: _stream_once unreachable branch tracks _unreach_since; after AUTOFIND_AFTER_S=45 s silent -> auto_find()
+  (one scan at a time, _autofind_lock), retried every AUTOFIND_EVERY_S=600 s. auto_find saves rtsp_url via _save_camera_field
+  (camera entry + top-level when active, sync_cameras-safe), status "Camera naye IP x par mil gaya (how) — connect ho raha hai",
+  log "autofind: <cam> ka IP badla a -> b", WhatsApp text note via WhatsAppNotifier.send_report(text, "") when WA enabled.
+  Not found -> status keeps the no-answer text + " · LAN scan: camera nahi mila" / "N cameras yahi password maante hain".
+  _maybe_fingerprint() after "streaming started" (live only; per camera every 6 h or when IP changed; background thread) ->
+  collect_fingerprint() saves cam["fingerprint"]. POST /api/camera/autofind {camera_id?} -> {ok, url, status} (manual).
+- UI (CameraPanel): stale overlay now shows the real ERROR reason (status minus "ERROR:") and, for "jawab nahi de raha /
+  nahi mila", a "Camera auto-dhundho" button (data-testid camera-autofind-btn) -> /api/camera/autofind, toast + URL update.
+- Tests: tests/test_iter48_camera_autofind.py (arp parsing win/linux, probe uuid, relocate by mac/uuid/serial/creds/ambiguous/
+  exclude/never-old-ip, worker save + other camera protected, not-found status, 45 s / 10 min trigger timing, fingerprint saved,
+  endpoint + 401). conftest autouse also stubs Worker._maybe_fingerprint (a worker test had written DEFAULTS into the dev
+  config.json and wiped the admin hash — restored via git checkout).

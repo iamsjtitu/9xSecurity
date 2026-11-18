@@ -104,6 +104,10 @@ class SharedPlateReader:
 
 _plate_reader = SharedPlateReader()
 _open_lock = threading.Lock()  # open_stream sets process-wide FFmpeg env options: one open at a time
+_autofind_lock = threading.Lock()  # one LAN auto-find scan at a time (several cameras may go dark together)
+AUTOFIND_AFTER_S = 45    # camera host silent this long -> look for it on the LAN (power blip is shorter)
+AUTOFIND_EVERY_S = 600   # and retry the scan at most every 10 min while it stays silent
+FINGERPRINT_EVERY_S = 6 * 3600
 _restart_lock = threading.Lock()
 _restart_scheduled = False
 BROKEN_INSTALL_HINT = ("software ki AI files adhoori hain (update beech me ruka?) — Setup dobara install karein: "
@@ -199,6 +203,9 @@ class Worker:
         self.open_error = ""      # why the last live open failed: '' | auth | none | no-answer | path-ok
         self.open_detail = ""     # for no-answer: 'timed out' / 'connection refused' text
         self._unreach_logged = 0.0
+        self._unreach_since = 0.0   # camera host not answering since (0 = answering)
+        self._autofind_at = 0.0     # last LAN auto-find attempt
+        self._fp_at = 0.0           # last fingerprint collection
         self._gen = 0             # run generation: a restarted loop never keeps an old thread alive
         self.thread = None
         self.status = "Idle — camera URL daal kar Connect dabayein"
@@ -404,6 +411,100 @@ class Worker:
         self._fix_attempts.pop(source, None)
         return fixed
 
+    def _other_camera_ips(self, cfg):
+        from rtsp_discover import split_url
+
+        ips = set()
+        for c in cfg.get("cameras") or []:
+            if c.get("id") != self.cam_id and (c.get("rtsp_url") or "").strip():
+                try:
+                    ips.add(split_url(normalize_rtsp_url(c["rtsp_url"]))[0])
+                except Exception:
+                    continue
+        return ips
+
+    def _save_camera_field(self, key, value, also_global=False):
+        cfg = _cfg()
+        cam = config.camera_by_id(cfg, self.cam_id)
+        if cam is not None:
+            cam[key] = value
+        if cam is None or (also_global and cfg.get("active_camera_id") == self.cam_id):
+            cfg[key] = value
+        config.save_config(cfg)
+        return cfg
+
+    def auto_find(self, source=None, log=None):
+        """Camera host silent -> look for the SAME camera on the LAN (MAC / ONVIF id / our creds+path) and save its
+        new URL. Returns the new URL or ''. One scan at a time across workers (a 2nd caller just skips)."""
+        import camera_find
+        from rtsp_discover import split_url
+
+        log = log or self._log
+        cfg = _cfg()
+        cam = config.camera_by_id(cfg, self.cam_id)
+        source = source or normalize_rtsp_url(self.cam_cfg(cfg).get("rtsp_url", ""))
+        if not (isinstance(source, str) and source.lower().startswith("rtsp")):
+            return ""
+        if not _autofind_lock.acquire(blocking=False):
+            log("autofind: doosre camera ka scan chal raha hai — baad me")
+            return ""
+        try:
+            old_ip = split_url(source)[0]
+            self.status = f"Camera {old_ip} jawab nahi de raha — LAN par yahi camera dhundh raha hai (IP badla?)..."
+            fp = (cam or cfg).get("fingerprint") or {}
+            new_url, how = camera_find.relocate(source, fp, self._other_camera_ips(cfg), log=log)
+        except Exception as e:
+            log(f"autofind: error {e}")
+            return ""
+        finally:
+            _autofind_lock.release()
+        if not new_url:
+            self.status = no_answer_status(source, self.open_detail) + (
+                f" · LAN scan: {len(how.split(':')[1].split(','))} cameras yahi password maante hain, "
+                "Cameras manage > Scan se sahi wala chunein" if how.startswith("ambiguous") else " · LAN scan: camera nahi mila")
+            return ""
+        new_ip = split_url(new_url)[0]
+        self._save_camera_field("rtsp_url", new_url, also_global=True)
+        self._unreach_since = 0.0
+        self.status = f"Camera naye IP {new_ip} par mil gaya ({how}) — URL update, connect ho raha hai..."
+        log(f"autofind: {self.name} ka IP badla {old_ip} -> {new_ip} ({how}) — URL update kar diya")
+        threading.Thread(target=self._notify_ip_change, args=(cfg, old_ip, new_ip), daemon=True).start()
+        return new_url
+
+    def _notify_ip_change(self, cfg, old_ip, new_ip):
+        if not (cfg.get("wa_enabled") and cfg.get("wa_api_key")):
+            return
+        try:
+            text = (f"ℹ️ 9x Security — {self.name}: camera ka IP badal gaya tha ({old_ip} → {new_ip}). "
+                    "Software ne LAN par camera khud dhundh kar URL update kar diya — monitoring wapas chalu. "
+                    "(Dobara na ho iske liye camera/router me static IP set karein.)")
+            WhatsAppNotifier(cfg, db=_db).send_report(text, "")
+        except Exception as e:
+            self._log(f"autofind: whatsapp note failed {e}")
+
+    def collect_fingerprint(self, source):
+        """Learn the camera's identity (MAC / ONVIF id / RTSP server) while it works; saved per camera for auto_find."""
+        import camera_find
+
+        try:
+            fp = camera_find.fingerprint(source, log=self._log)
+            self._save_camera_field("fingerprint", fp)
+        except Exception as e:
+            self._log(f"fingerprint: error {e}")
+
+    def _maybe_fingerprint(self, source, live):
+        if not live:
+            return
+        cam = self.camera() or _cfg()
+        fp = cam.get("fingerprint") or {}
+        host = source.split("@")[-1].split("/")[0].split(":")[0]
+        if fp.get("ip") == host and time.time() - float(fp.get("at") or 0) < FINGERPRINT_EVERY_S:
+            return
+        if time.time() - self._fp_at < 300:
+            return
+        self._fp_at = time.time()
+        threading.Thread(target=self.collect_fingerprint, args=(source,), daemon=True).start()
+
     def _open_error_status(self):
         why = getattr(self, "open_error", "")
         if why == "auth":
@@ -505,14 +606,22 @@ class Worker:
                 # and re-check every 10 s so the camera is back within seconds of power/IP being fixed
                 self.open_error, self.open_detail = "no-answer", detail
                 self.status = no_answer_status(source, detail)
-                if time.time() - self._unreach_logged > 600:
-                    self._unreach_logged = time.time()
+                now = time.time()
+                if not self._unreach_since:
+                    self._unreach_since = now
+                if now - self._unreach_logged > 600:
+                    self._unreach_logged = now
                     self._log(f"camera host not reachable ({detail}) — retrying every 10 s")
+                if now - self._unreach_since >= AUTOFIND_AFTER_S and now - self._autofind_at >= AUTOFIND_EVERY_S:
+                    self._autofind_at = now
+                    if self.auto_find(source):
+                        return True  # config now has the new URL: next loop connects to it
                 for _ in range(10):
                     if not self._alive(gen):
                         break
                     time.sleep(1)
                 return True
+            self._unreach_since = 0.0
         self.status = "Camera se connect ho raha hai..."
         cap = self._open(source, live, gen)
         if (cap is None or not cap.isOpened()) and live and self._alive(gen):
@@ -532,6 +641,7 @@ class Worker:
             return False
         self.status = self._live_status()
         self._log("streaming started")
+        self._maybe_fingerprint(source, live)
         fail = 0
         paused = False
         last_ok = time.time()
@@ -1165,6 +1275,18 @@ def camera_scan(body: dict, request: Request):
     if subnets and not all(re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}$", str(s)) for s in subnets):
         raise HTTPException(400, "Subnet aise likhein: 192.168.1")
     return scan_network(subnets=subnets, port=port, extra_hosts=extra, log=clog)
+
+
+@app.post("/api/camera/autofind")
+def camera_autofind(body: dict, request: Request):
+    """Manual 'Camera auto-dhundho': LAN scan for the (active) camera whose host went silent — same identity
+    checks as the automatic one (MAC / ONVIF id / our creds+path) — and save its new URL."""
+    _check(request)
+    cfg = _cfg()
+    cam_id = str(body.get("camera_id") or cfg.get("active_camera_id") or "")
+    w = pool.get(cam_id)
+    url = w.auto_find()
+    return {"ok": bool(url), "url": url, "status": w.status}
 
 
 @app.post("/api/camera/test")

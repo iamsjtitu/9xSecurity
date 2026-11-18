@@ -21,13 +21,13 @@ def client(monkeypatch):
     c = TestClient(service.app)
     c.headers["X-Auth-Token"] = tok
     monkeypatch.setattr(updater, "DEFAULT_REPO", "o/r")
-    monkeypatch.setattr(updater, "check_latest", lambda repo, token=None: ("9.9.9", "http://x/setup.exe", ""))
+    monkeypatch.setattr(updater, "release_assets", lambda repo, token=None: ("9.9.9", ["http://x/setup.exe"], ""))
     service._update_job.update(state="idle")
     return c
 
 
 def _fake_download(total=10, step=0.05):
-    def dl(asset_url, dest, progress=None, token=None, should_stop=None):
+    def dl(asset_url, dest, progress=None, token=None, should_stop=None, status=None):
         with open(dest, "wb") as f:
             for i in range(1, total + 1):
                 if should_stop and should_stop():
@@ -98,6 +98,7 @@ def test_updater_download_stop_and_progress_without_total(monkeypatch, tmp_path)
     class R:
         headers = {}
         content = b""
+        status_code = 200
 
         def raise_for_status(self):
             pass

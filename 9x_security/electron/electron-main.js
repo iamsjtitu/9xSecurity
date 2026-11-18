@@ -60,8 +60,21 @@ function startEngine() {
   engineProc.on('exit', (code, signal) => {
     engineProc = null;
     supLog(`engine exited code=${code} signal=${signal}`);
+    if (code === UPDATE_EXIT_CODE) {
+      // the engine handed a downloaded Setup to a detached script that waits for us to exit,
+      // then installs and relaunches the app: quit now so no file is locked during the install
+      supLog('update: engine handed over to the installer -> app quits, Setup relaunches it');
+      quitting = true;
+      app.quit();
+      return;
+    }
     scheduleEngineRestart();
   });
+}
+const UPDATE_EXIT_CODE = 75;
+const UPDATE_MARKER = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), '9xSecurity', 'update_in_progress');
+function updateInstalling() {
+  try { return Date.now() - fs.statSync(UPDATE_MARKER).mtimeMs < 15 * 60 * 1000; } catch (_) { return false; }
 }
 
 // ---- engine supervisor: the engine must never stay dead/hung while the app is open ----
@@ -211,8 +224,13 @@ function createWindow() {
   });
 }
 
-const gotLock = app.requestSingleInstanceLock();
-if (!gotLock) {
+const gotLock = process.argv.includes('--watchdog') && updateInstalling() ? null : app.requestSingleInstanceLock();
+if (gotLock === null) {
+  // the 5-minute watchdog probe fired while the Setup is still extracting files: starting now would
+  // launch the engine from a half-written folder (torch/numpy "No module named" -> AI dead until restart)
+  supLog('watchdog start skipped: update is installing (Setup relaunches the app when done)');
+  app.quit();
+} else if (!gotLock) {
   app.quit();
 } else {
   app.on('second-instance', (_e, argv) => {

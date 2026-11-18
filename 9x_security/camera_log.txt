@@ -29380,3 +29380,270 @@ RuntimeError: no AI in test
 2026-11-09T08:00:11 | svc[Back Camera]: accurate model too slow here (612 ms > 350) -> yolov8n.pt
 2026-11-09T08:00:11 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 261 ms, 0 dets on blank frame)
 2026-11-09T08:00:11 | svc[Back Camera]: standby — apne time window ke bahar, stream band
+2026-11-18T09:09:37 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-18T09:09:37 | update: engine exiting for the installer (app quits; Setup relaunches it)
+2026-11-18T09:09:37 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-18T09:09:46 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-18T09:09:46 | update: engine exiting for the installer (app quits; Setup relaunches it)
+2026-11-18T09:09:46 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-18T09:10:01 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-11-18T09:10:01 | purge: 0 old events removed (retention 7d, cutoff 2026-11-11)
+2026-11-18T09:10:03 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-11-18T09:10:05 | svc: auto-connect — Back Camera se connect kar raha hai
+2026-11-18T09:10:05 | svc[Back Camera]: loading AI model
+2026-11-18T09:10:06 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-11-18T09:10:06 | svc[Front Camera]: loading AI model
+2026-11-18T09:10:13 | svc[Front Camera]: AI model loaded
+2026-11-18T09:10:13 | svc[Back Camera]: AI model loaded
+2026-11-18T09:10:17 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 955 ms, 0 dets on blank frame)
+2026-11-18T09:10:17 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 976 ms, 0 dets on blank frame)
+2026-11-18T09:10:17 | svc[Front Camera]: accurate model too slow here (976 ms > 350) -> yolov8n.pt
+2026-11-18T09:10:17 | svc[Back Camera]: accurate model too slow here (955 ms > 350) -> yolov8n.pt
+2026-11-18T09:10:18 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 619 ms, 0 dets on blank frame)
+2026-11-18T09:10:18 | svc[Back Camera]: standby — apne time window ke bahar, stream band
+2026-11-18T09:10:18 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 690 ms, 0 dets on blank frame)
+2026-11-18T09:10:21 | svc[Front Camera]: camera host not reachable (timed out) — retrying every 10 s
+2026-11-18T09:10:22 | === PROBE start: rtsp://****@127.0.0.1:33295/
+2026-11-18T09:10:22 | probe: 127.0.0.1:33295 reachable
+2026-11-18T09:10:22 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-11-18T09:10:22 | discover: try /Streaming/Channels/101 -> 200
+2026-11-18T09:10:22 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:33295/Streaming/Channels/101
+2026-11-18T09:10:22 | capture attempt transport=tcp wait=1.0s
+2026-11-18T09:10:22 | capture tcp: open FAILED
+2026-11-18T09:10:22 | capture attempt transport=udp wait=1.0s
+2026-11-18T09:10:22 | capture udp: open FAILED
+2026-11-18T09:10:22 | ffmpeg-pipe: starting
+2026-11-18T09:10:22 | ffmpeg-pipe: no frames (process exited)
+2026-11-18T09:10:22 | === PROBE start: rtsp://****@127.0.0.1:33295/
+2026-11-18T09:10:22 | probe: 127.0.0.1:33295 reachable
+2026-11-18T09:10:22 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-11-18T09:10:22 | capture attempt transport=tcp wait=1.0s
+2026-11-18T09:10:22 | capture tcp: open FAILED
+2026-11-18T09:10:22 | capture attempt transport=udp wait=1.0s
+2026-11-18T09:10:22 | capture udp: open FAILED
+2026-11-18T09:10:22 | ffmpeg-pipe: starting
+2026-11-18T09:10:22 | ffmpeg-pipe: no frames (process exited)
+2026-11-18T09:10:22 | svc: loading AI model
+2026-11-18T09:10:22 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 459, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db, plate_reader=_plate_reader if cfg.get("enable_plate") else None)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-11-18T09:10:22 | svc: camera host not reachable ([Errno -5] No address associated with hostname) — retrying every 10 s
+2026-11-18T09:10:25 | update: FAILED GitHub ne access mana kar diya (HTTP 401). Agar repo PRIVATE hai to Settings > Updates me GitHub token daalein, ya thodi der baad try karein (rate limit).
+2026-11-18T09:10:25 | update: FAILED GitHub ne access mana kar diya (HTTP 401). Agar repo PRIVATE hai to Settings > Updates me GitHub token daalein, ya thodi der baad try karein (rate limit).
+2026-11-18T09:10:26 | update: FAILED GitHub ne access mana kar diya (HTTP 401). Agar repo PRIVATE hai to Settings > Updates me GitHub token daalein, ya thodi der baad try karein (rate limit).
+2026-11-18T09:10:26 | update: FAILED GitHub ne access mana kar diya (HTTP 401). Agar repo PRIVATE hai to Settings > Updates me GitHub token daalein, ya thodi der baad try karein (rate limit).
+2026-11-18T09:10:26 | update auto-check failed: offline
+2026-11-18T09:10:30 | ffmpeg-pipe: starting
+2026-11-18T09:10:31 | ffmpeg-pipe: starting
+2026-11-18T09:10:31 | ffmpeg-pipe: starting
+2026-11-18T09:10:31 | ffmpeg-pipe: OK first frame in 0.0s
+2026-11-18T09:10:31 | ffmpeg-pipe: starting
+2026-11-18T09:10:36 | ffmpeg-pipe: no frames (process exited)
+2026-11-18T09:10:36 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-11-18T09:10:39 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-11-18T09:10:39 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-11-18T09:10:39 | svc[Back]: standby khatam — stream khol raha hai
+2026-11-18T09:10:39 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-11-18T09:10:39 | svc[Back]: camera host not reachable ([Errno -2] Name or service not known) — retrying every 10 s
+2026-11-18T09:10:50 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-11-18T09:10:53 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-11-18T09:10:53 | svc[Front Camera]: loading AI model
+2026-11-18T09:10:53 | svc[Front Camera]: AI model loaded
+2026-11-18T09:10:54 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 484 ms, 0 dets on blank frame)
+2026-11-18T09:10:54 | svc[Front Camera]: accurate model too slow here (484 ms > 350) -> yolov8n.pt
+2026-11-18T09:10:55 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 290 ms, 0 dets on blank frame)
+2026-11-18T09:10:59 | === PROBE start: rtsp://****@127.0.0.1:33545/
+2026-11-18T09:10:59 | probe: 127.0.0.1:33545 reachable
+2026-11-18T09:10:59 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-11-18T09:10:59 | discover: try /Streaming/Channels/101 -> 200
+2026-11-18T09:10:59 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:33545/Streaming/Channels/101
+2026-11-18T09:10:59 | capture attempt transport=tcp wait=1.0s
+2026-11-18T09:10:59 | capture tcp: open FAILED
+2026-11-18T09:10:59 | capture attempt transport=udp wait=1.0s
+2026-11-18T09:10:59 | capture udp: open FAILED
+2026-11-18T09:10:59 | ffmpeg-pipe: starting
+2026-11-18T09:10:59 | ffmpeg-pipe: no frames (process exited)
+2026-11-18T09:10:59 | === PROBE start: rtsp://****@127.0.0.1:33545/
+2026-11-18T09:10:59 | probe: 127.0.0.1:33545 reachable
+2026-11-18T09:10:59 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-11-18T09:10:59 | capture attempt transport=tcp wait=1.0s
+2026-11-18T09:10:59 | capture tcp: open FAILED
+2026-11-18T09:10:59 | capture attempt transport=udp wait=1.0s
+2026-11-18T09:10:59 | capture udp: open FAILED
+2026-11-18T09:10:59 | ffmpeg-pipe: starting
+2026-11-18T09:10:59 | ffmpeg-pipe: no frames (process exited)
+2026-11-18T09:10:59 | svc: loading AI model
+2026-11-18T09:10:59 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 459, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db, plate_reader=_plate_reader if cfg.get("enable_plate") else None)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-11-18T09:10:59 | svc: camera host not reachable ([Errno -5] No address associated with hostname) — retrying every 10 s
+2026-11-18T09:11:02 | update: FAILED GitHub ne access mana kar diya (HTTP 401). Agar repo PRIVATE hai to Settings > Updates me GitHub token daalein, ya thodi der baad try karein (rate limit).
+2026-11-18T09:11:02 | update: FAILED GitHub ne access mana kar diya (HTTP 401). Agar repo PRIVATE hai to Settings > Updates me GitHub token daalein, ya thodi der baad try karein (rate limit).
+2026-11-18T09:11:02 | update: FAILED GitHub ne access mana kar diya (HTTP 401). Agar repo PRIVATE hai to Settings > Updates me GitHub token daalein, ya thodi der baad try karein (rate limit).
+2026-11-18T09:11:02 | update: FAILED GitHub ne access mana kar diya (HTTP 401). Agar repo PRIVATE hai to Settings > Updates me GitHub token daalein, ya thodi der baad try karein (rate limit).
+2026-11-18T09:11:02 | update auto-check failed: offline
+2026-11-18T09:11:07 | ffmpeg-pipe: starting
+2026-11-18T09:11:07 | ffmpeg-pipe: starting
+2026-11-18T09:11:07 | ffmpeg-pipe: starting
+2026-11-18T09:11:07 | ffmpeg-pipe: OK first frame in 0.0s
+2026-11-18T09:11:07 | ffmpeg-pipe: starting
+2026-11-18T09:11:12 | ffmpeg-pipe: no frames (process exited)
+2026-11-18T09:11:12 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-11-18T09:11:15 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-11-18T09:11:15 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-11-18T09:11:15 | svc[Back]: standby khatam — stream khol raha hai
+2026-11-18T09:11:15 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-11-18T09:11:15 | svc[Back]: camera host not reachable ([Errno -2] Name or service not known) — retrying every 10 s
+2026-11-18T09:12:27 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-11-18T09:12:30 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-11-18T09:12:30 | svc[Front Camera]: loading AI model
+2026-11-18T09:12:30 | svc[Front Camera]: AI model loaded
+2026-11-18T09:12:31 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 529 ms, 0 dets on blank frame)
+2026-11-18T09:12:31 | svc[Front Camera]: accurate model too slow here (529 ms > 350) -> yolov8n.pt
+2026-11-18T09:12:32 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 278 ms, 0 dets on blank frame)
+2026-11-18T09:12:36 | === PROBE start: rtsp://****@127.0.0.1:33097/
+2026-11-18T09:12:36 | probe: 127.0.0.1:33097 reachable
+2026-11-18T09:12:36 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-11-18T09:12:36 | discover: try /Streaming/Channels/101 -> 200
+2026-11-18T09:12:36 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:33097/Streaming/Channels/101
+2026-11-18T09:12:36 | capture attempt transport=tcp wait=1.0s
+2026-11-18T09:12:36 | capture tcp: open FAILED
+2026-11-18T09:12:36 | capture attempt transport=udp wait=1.0s
+2026-11-18T09:12:36 | capture udp: open FAILED
+2026-11-18T09:12:36 | ffmpeg-pipe: starting
+2026-11-18T09:12:36 | ffmpeg-pipe: no frames (process exited)
+2026-11-18T09:12:36 | === PROBE start: rtsp://****@127.0.0.1:33097/
+2026-11-18T09:12:36 | probe: 127.0.0.1:33097 reachable
+2026-11-18T09:12:36 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-11-18T09:12:36 | capture attempt transport=tcp wait=1.0s
+2026-11-18T09:12:36 | capture tcp: open FAILED
+2026-11-18T09:12:36 | capture attempt transport=udp wait=1.0s
+2026-11-18T09:12:36 | capture udp: open FAILED
+2026-11-18T09:12:36 | ffmpeg-pipe: starting
+2026-11-18T09:12:36 | ffmpeg-pipe: no frames (process exited)
+2026-11-18T09:12:36 | svc: loading AI model
+2026-11-18T09:12:36 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 459, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db, plate_reader=_plate_reader if cfg.get("enable_plate") else None)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-11-18T09:12:36 | svc: source opened codec=unknown live=True
+2026-11-18T09:12:36 | svc: streaming started
+2026-11-18T09:12:37 | svc: loading AI model
+2026-11-18T09:12:37 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 459, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db, plate_reader=_plate_reader if cfg.get("enable_plate") else None)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-11-18T09:12:37 | svc: source opened codec=unknown live=True
+2026-11-18T09:12:37 | svc: streaming started
+2026-11-18T09:12:40 | update: FAILED _fake_download.<locals>.dl() got an unexpected keyword argument 'status'
+2026-11-18T09:12:40 | update: FAILED _fake_download.<locals>.dl() got an unexpected keyword argument 'status'
+2026-11-18T09:12:40 | update: FAILED _fake_download.<locals>.dl() got an unexpected keyword argument 'status'
+2026-11-18T09:12:40 | update: FAILED HTTP 404 asset
+2026-11-18T09:12:40 | update auto-check failed: offline
+2026-11-18T09:12:45 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-18T09:12:45 | update: engine exiting for the installer (app quits; Setup relaunches it)
+2026-11-18T09:12:45 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-18T09:12:46 | ffmpeg-pipe: starting
+2026-11-18T09:12:46 | ffmpeg-pipe: starting
+2026-11-18T09:12:46 | ffmpeg-pipe: starting
+2026-11-18T09:12:46 | ffmpeg-pipe: OK first frame in 0.0s
+2026-11-18T09:12:46 | ffmpeg-pipe: starting
+2026-11-18T09:12:51 | ffmpeg-pipe: no frames (process exited)
+2026-11-18T09:12:51 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-11-18T09:12:54 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-11-18T09:12:54 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-11-18T09:12:54 | svc[Back]: standby khatam — stream khol raha hai
+2026-11-18T09:12:54 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-11-18T09:12:54 | svc[Back]: streaming started
+2026-11-18T09:12:54 | svc: switched to sub-stream rtsp://u:p@cam/Streaming/Channels/102
+2026-11-18T09:12:54 | svc: switched back to main stream rtsp://u:p@cam/Streaming/Channels/101
+2026-11-18T09:13:03 | update: FAILED _fake_download.<locals>.dl() got an unexpected keyword argument 'status'
+2026-11-18T09:13:03 | update: FAILED _fake_download.<locals>.dl() got an unexpected keyword argument 'status'
+2026-11-18T09:13:04 | update: FAILED _fake_download.<locals>.dl() got an unexpected keyword argument 'status'
+2026-11-18T09:13:04 | update: FAILED HTTP 404 asset
+2026-11-18T09:13:23 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-18T09:13:23 | update: download cancelled by user
+2026-11-18T09:13:23 | update: FAILED HTTP 404 asset
+2026-11-18T09:13:24 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-11-18T09:13:27 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-11-18T09:13:27 | svc[Front Camera]: loading AI model
+2026-11-18T09:13:27 | svc[Front Camera]: AI model loaded
+2026-11-18T09:13:28 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 575 ms, 0 dets on blank frame)
+2026-11-18T09:13:28 | svc[Front Camera]: accurate model too slow here (575 ms > 350) -> yolov8n.pt
+2026-11-18T09:13:29 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 319 ms, 0 dets on blank frame)
+2026-11-18T09:13:33 | svc: loading AI model
+2026-11-18T09:13:33 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 459, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db, plate_reader=_plate_reader if cfg.get("enable_plate") else None)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-11-18T09:13:33 | svc: source opened codec=unknown live=True
+2026-11-18T09:13:33 | svc: streaming started
+2026-11-18T09:13:35 | svc: loading AI model
+2026-11-18T09:13:35 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 459, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db, plate_reader=_plate_reader if cfg.get("enable_plate") else None)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-11-18T09:13:35 | svc: source opened codec=unknown live=True
+2026-11-18T09:13:35 | svc: streaming started
+2026-11-18T09:13:37 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-11-18T09:13:37 | svc[Back]: standby khatam — stream khol raha hai
+2026-11-18T09:13:37 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-11-18T09:13:37 | svc[Back]: streaming started
+2026-11-18T09:13:37 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-18T09:13:37 | update: engine exiting for the installer (app quits; Setup relaunches it)
+2026-11-18T09:13:37 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-18T09:13:37 | event: Exit car track 1 (cross) -> /tmp/tmpyoranz49/snaps/2026-11-18/Exit_car_09-13-37-767.jpg
+2026-11-18T09:13:41 | === PROBE start: notaurl
+2026-11-18T09:13:41 | === PROBE start: rtsp://****@192.0.2.1:554/stream1
+2026-11-18T09:13:44 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-11-18T09:13:44 | ffmpeg-pipe: starting

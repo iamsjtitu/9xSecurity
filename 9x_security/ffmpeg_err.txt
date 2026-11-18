@@ -7286,3 +7286,33 @@ Error opening input files: Connection timed out
 [in#0 @ 0x3473b960] Error opening input: Connection timed out
 Error opening input file rtsp://u:p@192.0.2.9:554/s.
 Error opening input files: Connection timed out
+[in#0 @ 0x15c5a960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:33295/Streaming/Channels/101.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0x22bde960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:wrong@127.0.0.1:33295/.
+Error opening input files: Invalid data found when processing input
+[tcp @ 0x205c6740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x205c3960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[in#0 @ 0x3c0b7960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:33545/Streaming/Channels/101.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0x41892960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:wrong@127.0.0.1:33545/.
+Error opening input files: Invalid data found when processing input
+[tcp @ 0x1e452740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x1e44f960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out
+[in#0 @ 0x27d10960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:Admin%40123@127.0.0.1:33097/Streaming/Channels/101.
+Error opening input files: Invalid data found when processing input
+[in#0 @ 0x33ac3960] Error opening input: Invalid data found when processing input
+Error opening input file rtsp://admin:wrong@127.0.0.1:33097/.
+Error opening input files: Invalid data found when processing input
+[tcp @ 0x312b8740] Connection to tcp://192.0.2.1:554?timeout=5000000 failed: Connection timed out
+[in#0 @ 0x312b5960] Error opening input: Connection timed out
+Error opening input file rtsp://u:p@192.0.2.1:554/s.
+Error opening input files: Connection timed out

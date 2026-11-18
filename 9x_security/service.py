@@ -3,6 +3,7 @@
 Runs on 127.0.0.1 only. The Electron renderer talks to it over HTTP and
 receives live video as an MJPEG stream.
 """
+import json
 import os
 import re
 import secrets
@@ -103,6 +104,86 @@ class SharedPlateReader:
 
 _plate_reader = SharedPlateReader()
 _open_lock = threading.Lock()  # open_stream sets process-wide FFmpeg env options: one open at a time
+_restart_lock = threading.Lock()
+_restart_scheduled = False
+BROKEN_INSTALL_HINT = ("software ki AI files adhoori hain (update beech me ruka?) — Setup dobara install karein: "
+                       "Settings > Updates > 'Browser me download' ya tray > Exit karke Setup chalayein")
+
+
+def schedule_broken_install_restart(log=None, exit_fn=os._exit, timer=threading.Timer, now=None):
+    """AI libraries failed to IMPORT inside the frozen build = the install folder is incomplete, usually because
+    the app came up while the installer was still extracting. A fresh process (20 s later) sees the finished
+    files, so restart — at most 3 times in 30 min (the Electron supervisor restarts the engine on exit).
+    Returns '' when a restart is scheduled, else a hint for the UI."""
+    global _restart_scheduled
+    log = log or clog
+    now = now or time.time()
+    path = os.path.join(config.BASE_DIR, "ai_restart.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            times = [t for t in json.load(f).get("times", []) if now - float(t) < 1800]
+    except Exception:
+        times = []
+    with _restart_lock:
+        if _restart_scheduled:
+            return ""
+        if len(times) >= 3:
+            log(f"AI library import failed {len(times)} times in 30 min — not restarting again; reinstall needed")
+            return BROKEN_INSTALL_HINT
+        _restart_scheduled = True
+        times.append(now)
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump({"times": times}, f)
+        except Exception:
+            pass
+    log(f"AI library import failed (install incomplete?) — engine restarts in 20 s (try {len(times)}/3)")
+    t = timer(20.0, lambda: exit_fn(76))
+    t.daemon = True
+    t.start()
+    return ""
+
+
+def rtsp_port_reachable(source, timeout=2.5):
+    """Fast TCP connect to the camera's RTSP host:port -> (True, '') or (False, 'timed out' | 'connection refused' | err).
+    Anything we cannot parse counts as reachable (the open ladder decides)."""
+    from urllib.parse import urlsplit
+
+    try:
+        u = urlsplit(str(source))
+        host, port = u.hostname, u.port or 554
+    except Exception:
+        return True, ""
+    if not host:
+        return True, ""
+    try:
+        socket.create_connection((host, port), timeout=timeout).close()
+        return True, ""
+    except socket.timeout:
+        return False, "timed out"
+    except ConnectionRefusedError:
+        return False, "connection refused"
+    except OSError as e:
+        return False, str(e)[:80]
+
+
+def no_answer_status(source, detail=""):
+    """Status line when the camera host did not answer RTSP at all (timeout / refused): say which host:port
+    and what to check — the usual cause is a changed DHCP IP or power/LAN."""
+    from urllib.parse import urlsplit
+
+    try:
+        u = urlsplit(str(source))
+        where = f"{u.hostname or '?'}:{u.port or 554}"
+    except Exception:
+        where = "camera"
+    d = (detail or "").lower()
+    if "refused" in d or "10061" in d:
+        return (f"ERROR: {where} par koi camera/RTSP nahi mila (connection refused) — is IP par ab shayad doosra device hai: "
+                "camera ka IP badal gaya hoga (router DHCP). 'Cameras manage' > Scan se naya IP dhundhein, "
+                "ya camera me static IP set karein")
+    return (f"ERROR: Camera {where} jawab nahi de raha (timeout) — camera ki power / LAN cable / switch check karein; "
+            "PC se camera ka web page khul raha hai? IP badla ho to 'Cameras manage' > Scan karein")
 
 
 class Worker:
@@ -116,6 +197,8 @@ class Worker:
         self.user_stopped = False  # set by Disconnect: auto-connect stays quiet until Connect
         self._fix_attempts = {}   # source url -> ts of last stream-path discovery attempt
         self.open_error = ""      # why the last live open failed: '' | auth | none | no-answer | path-ok
+        self.open_detail = ""     # for no-answer: 'timed out' / 'connection refused' text
+        self._unreach_logged = 0.0
         self._gen = 0             # run generation: a restarted loop never keeps an old thread alive
         self.thread = None
         self.status = "Idle — camera URL daal kar Connect dabayein"
@@ -306,6 +389,9 @@ class Worker:
             self._log(f"stream path discovery error: {e}")
             return ""
         self.open_error = why
+        if why.startswith("no-answer"):
+            self.open_detail = why.partition("|")[2]
+            self.open_error = "no-answer"
         if not fixed:
             return ""
         cfg = _cfg()
@@ -325,6 +411,8 @@ class Worker:
         if why == "none":
             return ("ERROR: Camera par ye stream path nahi hai aur auto-detect nahi hua — camera ke brand ka "
                     "RTSP path lagayein (Test dabakar hints dekhein)")
+        if why == "no-answer":
+            return no_answer_status(self.cam_cfg().get("rtsp_url", ""), getattr(self, "open_detail", ""))
         return "ERROR: Camera nahi khula — 'Test' se step-by-step jaanch karein"
 
     def _ai_selftest(self):
@@ -371,12 +459,16 @@ class Worker:
             self.engine = SecurityEngine(cfg=cfg, db=_db, plate_reader=_plate_reader if cfg.get("enable_plate") else None)
             self.engine.on_event = self._on_event
             self._log("AI model loaded")
-        except Exception:
+        except Exception as e:
             import traceback
 
             self._log("MODEL LOAD FAILED:\n" + traceback.format_exc())
             self.engine = None
             self.ai_error = "model load: " + traceback.format_exc().strip().splitlines()[-1][:200]
+            if isinstance(e, ImportError) and getattr(sys, "frozen", False):
+                hint = schedule_broken_install_restart(self._log)
+                if hint:
+                    self.ai_error += " — " + hint
         if self.engine is not None:
             try:
                 self.ai_ms = self._ai_selftest()
@@ -406,6 +498,21 @@ class Worker:
         url = cfg.get("rtsp_url", "").strip()
         source = normalize_rtsp_url(url) if url else 0
         live = isinstance(source, str) and source.lower().startswith("rtsp")
+        if live:
+            ok, detail = rtsp_port_reachable(source)
+            if not ok:
+                # host not answering on its RTSP port: skip the 2-minute open ladder, say exactly what is wrong
+                # and re-check every 10 s so the camera is back within seconds of power/IP being fixed
+                self.open_error, self.open_detail = "no-answer", detail
+                self.status = no_answer_status(source, detail)
+                if time.time() - self._unreach_logged > 600:
+                    self._unreach_logged = time.time()
+                    self._log(f"camera host not reachable ({detail}) — retrying every 10 s")
+                for _ in range(10):
+                    if not self._alive(gen):
+                        break
+                    time.sleep(1)
+                return True
         self.status = "Camera se connect ho raha hai..."
         cap = self._open(source, live, gen)
         if (cap is None or not cap.isOpened()) and live and self._alive(gen):
@@ -1918,8 +2025,13 @@ def _run_update_job(repo, token):
         clog(f"update: downloaded v{tag} -> {dest}, launching installer")
         launched = updater.apply_update(dest)
         _job_set(state="done", ok=launched,
-                 message=("Installer chal gaya — app band hoke nayi version ke saath khulegi."
+                 message=("Installer taiyar — app 3 sec me band hogi aur 1–2 min me nayi version ke saath khud khulegi."
                           if launched else f"Dev mode: installer yahan save hua: {dest}"))
+        if launched:
+            # exit so no engine file (torch/numpy DLL) is locked while the installer replaces it;
+            # Electron sees UPDATE_EXIT_CODE and quits too, the detached script then runs the Setup
+            clog("update: engine exiting for the installer (app quits; Setup relaunches it)")
+            threading.Timer(3.0, lambda: os._exit(updater.UPDATE_EXIT_CODE)).start()
     except Exception as e:
         clog(f"update: FAILED {e}")
         _job_set(state="error", message=f"Update fail: {e}")

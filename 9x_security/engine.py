@@ -521,7 +521,7 @@ def auto_fix_stream_url(source, log=clog):
     if code == 401:
         return "", "auth"
     if code == 0:
-        return "", "no-answer"
+        return "", f"no-answer|{first}"
     found, why = discover_stream_url(source, log=log)
     if found:
         log(f"svc: stream path auto-detected via {why}: {redact_url(found)}")

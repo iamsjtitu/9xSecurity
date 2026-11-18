@@ -203,9 +203,41 @@ def apply_update(path):
     return _run_installer(path)
 
 
+UPDATE_EXIT_CODE = 75  # engine exits with this right after handing over to the installer; Electron quits on it
+WATCHDOG_TASK = "9x Security Watchdog"
+
+
 def _run_installer(setup_exe):
-    # electron-builder NSIS installer: /S = silent, --force-run = relaunch app after
-    subprocess.Popen([setup_exe, "/S", "--force-run"])
+    """Hand the Setup to a detached cmd script that (1) pauses the watchdog task so it cannot relaunch the
+    app into a half-extracted folder, (2) waits until the app AND the engine have exited (no torch/numpy
+    DLL is locked while NSIS replaces it), (3) runs the silent installer, which relaunches the app, and
+    (4) re-enables the watchdog. The caller must exit the engine with UPDATE_EXIT_CODE right after."""
+    import config
+
+    marker = os.path.join(config.BASE_DIR, "update_in_progress")
+    bat = os.path.join(tempfile.gettempdir(), "9x_update.bat")
+    script = (
+        "@echo off\r\n"
+        f'echo %date% %time% > "{marker}"\r\n'
+        f'schtasks /Change /TN "{WATCHDOG_TASK}" /DISABLE >nul 2>&1\r\n'
+        "set n=0\r\n"
+        ":wait\r\n"
+        "timeout /t 1 /nobreak >nul\r\n"
+        "set /a n+=1\r\n"
+        "if %n% geq 90 goto run\r\n"
+        'tasklist /FI "IMAGENAME eq 9xEngine.exe" | find /I "9xEngine.exe" >nul && goto wait\r\n'
+        'tasklist /FI "IMAGENAME eq 9x Security.exe" | find /I "9x Security.exe" >nul && goto wait\r\n'
+        ":run\r\n"
+        'taskkill /F /T /IM "9xEngine.exe" >nul 2>&1\r\n'
+        'taskkill /F /T /IM "9x Security.exe" >nul 2>&1\r\n'
+        f'start "" /wait "{setup_exe}" /S --force-run\r\n'
+        f'schtasks /Change /TN "{WATCHDOG_TASK}" /ENABLE >nul 2>&1\r\n'
+        f'del "{marker}" >nul 2>&1\r\n'
+        'del "%~f0"\r\n'
+    )
+    with open(bat, "w") as f:
+        f.write(script)
+    subprocess.Popen(["cmd", "/c", bat], creationflags=0x00000008 | 0x00000200, close_fds=True)  # detached, new group
     return True
 
 

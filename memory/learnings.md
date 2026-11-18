@@ -59,3 +59,7 @@
   (MIN_GAP_S 1.2 after the response). Never commit the user's key; never store it in the tracked dev config.json.
   Engine tests that call _emit_crossing write snapshots into config.SNAPSHOT_DIR -> monkeypatch it to tmp_path.
   reports/ is gitignored (user data).
+- conftest.py (root) autouse fixture stubs service.rtsp_port_reachable -> (True, "") for every test file except
+  tests/test_iter47_update_handoff.py; worker tests use fake rtsp://cam/... URLs with mocked open_stream.
+- Never let the engine launch the NSIS Setup directly while app/engine run: watchdog task (5 min) + locked DLLs => half install.
+  Flow is: detached bat waits for exit -> Setup /S --force-run; engine exits 75; Electron quits on 75.

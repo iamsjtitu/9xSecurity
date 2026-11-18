@@ -1322,3 +1322,28 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
 - Workflow step now pwsh: Retry() 4 attempts, 60 s apart, for `yarn install` and `yarn electron-builder`; 4th attempt sets
   ELECTRON_MIRROR + ELECTRON_BUILDER_BINARIES_MIRROR (npmmirror.com; checksums still verified). `yarn build` failure is
   reported as "vite build (UI) failed". Could not see the actual error line: user asked to send the bottom of that step if it fails again.
+
+## Implemented (update 2026-06 #72) — Field report v1.0.53: AI dead after in-app update ("No module named torch._C") + camera host unreachable shown as generic "connect ho raha hai"
+- Diagnosis from user logs: 14:24:19 installer launched by the ENGINE (Popen Setup /S --force-run) while app+engine kept running;
+  14:25:22 engine_out: numpy C-ext missing -> crash; 14:25:27 new engine (v1.0.53) torch._C missing -> ai_loaded false forever.
+  => app/engine came up while NSIS was still extracting (watchdog task fires every 5 min with --watchdog; locked torch/numpy
+  DLLs of the still-running old engine also break the overwrite). Camera: RTSP DESCRIBE timed out / WinError 10061 refused on
+  192.168.1.7:554 = camera IP changed (DHCP) or power/LAN; events_total 0 with 7-day retention, last WA image 26-10.
+- updater._run_installer -> detached cmd script (DETACHED_PROCESS|CREATE_NEW_PROCESS_GROUP): writes BASE_DIR/update_in_progress,
+  `schtasks /Change /TN "9x Security Watchdog" /DISABLE`, waits (<=90 s) until no 9xEngine.exe / "9x Security.exe", taskkill as
+  last resort, `start "" /wait Setup /S --force-run`, re-ENABLE watchdog, deletes marker. UPDATE_EXIT_CODE=75.
+  service._run_update_job: after apply_update() -> message "app 3 sec me band hogi…", threading.Timer(3, os._exit(75)).
+  electron-main: engine exit code 75 -> quitting=true, app.quit() (no supervisor restart); `--watchdog` start is skipped while
+  %LOCALAPPDATA%\9xSecurity\update_in_progress is < 15 min old.
+- service.schedule_broken_install_restart(): on ImportError during model load in the frozen build -> engine exits (76) after
+  20 s so the supervisor restarts a fresh process (sees completed files); max 3 times / 30 min (BASE_DIR/ai_restart.json),
+  then ai_error gets BROKEN_INSTALL_HINT (reinstall Setup). Once per process (_restart_scheduled).
+- Camera unreachable: service.rtsp_port_reachable(source) (TCP connect 2.5 s) runs BEFORE the 2-minute open ladder in
+  _stream_once; if it fails -> status no_answer_status(): "ERROR: host:port par koi camera/RTSP nahi mila (connection refused) —
+  IP badal gaya hoga (DHCP) -> Cameras manage > Scan / static IP" or "jawab nahi de raha (timeout) -> power/LAN"; worker loops
+  with a 10 s re-check (reconnects within seconds once the camera is back), log once / 10 min. engine.auto_fix_stream_url
+  returns "no-answer|<detail>" (service splits). Credentials never in the status (hostname:port only).
+- Tests: tests/test_iter47_update_handoff.py (11), test_update_progress updated (release_assets mock, status kwarg, R.status_code),
+  root conftest.py autouse fixture stubs rtsp_port_reachable for all other worker tests. 63 + 113 green; UI build OK.
+- USER STEPS NOW (old updater on their PC): tray > Exit > reopen (or reboot); if torch._C persists -> run the browser-downloaded
+  Setup with the app closed. Camera: check power/LAN, find the camera's current IP (router / Scan), update URL.

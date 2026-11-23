@@ -15,7 +15,7 @@ import updater  # noqa: E402
 
 
 # ---------------- update hand-off ----------------
-def test_run_installer_script_waits_for_app_and_pauses_watchdog(tmp_path, monkeypatch):
+def test_run_installer_script_hidden_waits_for_app_then_installs(tmp_path, monkeypatch):
     import config
 
     monkeypatch.setattr(config, "BASE_DIR", str(tmp_path))
@@ -25,16 +25,19 @@ def test_run_installer_script_waits_for_app_and_pauses_watchdog(tmp_path, monkey
     assert updater._run_installer(r"C:\Temp\9xSecuritySetup_new.exe") is True
     (args,), kw = calls[0]
     assert args[:2] == ["cmd", "/c"] and args[2].endswith("9x_update.bat")
-    assert kw["creationflags"] & 0x00000008  # detached: survives the engine exiting
+    assert kw["creationflags"] & 0x08000000 and not kw["creationflags"] & 0x00000008  # hidden console, NOT detached
+    assert kw["stdin"] == updater.subprocess.DEVNULL and kw["stdout"] == updater.subprocess.DEVNULL
     bat = open(args[2]).read()
     marker = os.path.join(str(tmp_path), "update_in_progress")
-    assert f'> "{marker}"' in bat and f'del "{marker}"' in bat
-    assert 'schtasks /Change /TN "9x Security Watchdog" /DISABLE' in bat
-    assert 'schtasks /Change /TN "9x Security Watchdog" /ENABLE' in bat
-    assert bat.index("/DISABLE") < bat.index('start "" /wait') < bat.index("/ENABLE") < bat.index(f'del "{marker}"')
+    log = os.path.join(str(tmp_path), "engine_out.log")
+    assert f'> "{marker}"' in bat and f'del "{marker}"' in bat and f'>> "{log}"' in bat
+    assert "schtasks" not in bat  # watchdog is never disabled (a killed script must not leave it off)
+    assert "ping -n 2 127.0.0.1 >nul" in bat and "timeout /t" not in bat  # timeout needs console input
     assert 'tasklist /FI "IMAGENAME eq 9xEngine.exe"' in bat and 'tasklist /FI "IMAGENAME eq 9x Security.exe"' in bat
     assert "if %n% geq 90 goto run" in bat and 'taskkill /F /T /IM "9xEngine.exe"' in bat  # never waits forever
     assert 'start "" /wait "C:\\Temp\\9xSecuritySetup_new.exe" /S --force-run' in bat
+    assert bat.index(":wait") < bat.index(":run") < bat.index('start "" /wait') < bat.index(f'del "{marker}"')
+    assert "exit code %ERRORLEVEL%" in bat
     assert updater.UPDATE_EXIT_CODE == 75
 
 

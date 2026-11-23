@@ -156,7 +156,7 @@ def rtsp_port_reachable(source, timeout=2.5):
 
     try:
         u = urlsplit(str(source))
-        host, port = u.hostname, u.port or 554
+        host, port = u.hostname, u.port or {"http": 80, "https": 443}.get((u.scheme or "").lower(), 554)
     except Exception:
         return True, ""
     if not host:
@@ -214,6 +214,10 @@ class Worker:
         self._fp_at = 0.0           # last fingerprint collection
         self._reject_count = 0      # consecutive opens the camera refused (401 / connection reset)
         self.backoff_until = 0.0    # auto-connect must not retry before this (IP-lock protection)
+        self.http_mode = ""         # '' (RTSP) | 'snapshot' | 'mjpeg' — video coming over HTTP because RTSP failed
+        self._http_attempts = {}    # host -> last HTTP discovery time (10 min apart)
+        self._rtsp_recheck_at = 0.0
+        self._rtsp_back = False
         self._gen = 0             # run generation: a restarted loop never keeps an old thread alive
         self.thread = None
         self.status = "Idle — camera URL daal kar Connect dabayein"
@@ -337,6 +341,9 @@ class Worker:
 
     def _live_status(self):
         s = "Connected — live monitoring chalu hai"
+        if self.http_mode:
+            s += (" · HTTP MJPEG mode (RTSP nahi chala)" if self.http_mode == "mjpeg"
+                  else " · HTTP snapshot mode ~2–5 fps (RTSP nahi chala; RTSP wapas aate hi usi par laut aayenge)")
         if self.ai_error:
             s += " (AI ERROR — Settings > Diagnostics dekhein)"
         elif self.engine is None:
@@ -374,7 +381,18 @@ class Worker:
 
     def _open(self, source, live, gen=None):
         """open_stream + (for live RTSP) a latest-frame reader so the decoder never
-        waits for the AI. Records the stream codec for diagnostics."""
+        waits for the AI. Records the stream codec for diagnostics. http(s):// URLs open as
+        MJPEG stream / JPEG snapshot polling."""
+        if isinstance(source, str) and source.lower().startswith(("http://", "https://")):
+            import http_source
+
+            src = http_source.open_http(source, log=self._log)
+            if src is None:
+                self.open_error = "http"
+                return None
+            self.codec, self.http_mode, self.frames_dropped = src.kind, src.kind, 0
+            self._log(f"source opened http {src.kind} live={live}")
+            return LatestFrameReader(src)
         with _open_lock:
             cap = open_stream(source, (lambda: self._alive(gen)) if gen is not None else (lambda: self._running))
         if cap is None:
@@ -418,6 +436,49 @@ class Worker:
         config.save_config(cfg)
         self._fix_attempts.pop(source, None)
         return fixed
+
+    def _http_fallback(self, source, gen):
+        """RTSP failed (disabled / blocked / IP-locked RTSP service): use the camera's HTTP video instead —
+        the saved http_url first, else discover it (MJPEG CGI -> ONVIF GetSnapshotUri -> snapshot CGI) and
+        remember it per camera. -> LatestFrameReader or None. Discovery re-tried per host every 10 min."""
+        import http_source
+        from rtsp_discover import split_url
+
+        cam = self.camera() or _cfg()
+        host, _port, user, pw, _path = split_url(source)
+        url, how = (cam.get("http_url") or "").strip(), "saved"
+        if not url:
+            if time.time() - self._http_attempts.get(host, 0.0) < 600:
+                return None
+            self._http_attempts[host] = time.time()
+            self.status = "RTSP nahi chala — camera ki HTTP picture / MJPEG dhundh raha hai (ONVIF, CGI)..."
+            url, kind, how = http_source.discover_http(host, user, pw, log=self._log)
+            if not url:
+                self._log(f"http fallback: {how}")
+                return None
+            self._save_camera_field("http_url", url)
+            self._log(f"http fallback: {kind} via {how} — is camera ka HTTP URL save kiya")
+        if not self._alive(gen):
+            return None
+        src = http_source.open_http(url, log=self._log)
+        if src is None:
+            if how == "saved":  # stale: forget it so the next failure rediscovers
+                self._save_camera_field("http_url", "")
+                self._log("http fallback: saved HTTP URL ab nahi chala — hataya, agli baar dobara dhundhenge")
+            return None
+        self.codec, self.http_mode, self.frames_dropped = src.kind, src.kind, 0
+        self._rtsp_recheck_at, self._rtsp_back = time.time(), False
+        self._log(f"HTTP {src.kind} mode chalu ({how}) — RTSP nahi chala; har 10 min RTSP wapas check hoga")
+        return LatestFrameReader(src)
+
+    def _check_rtsp_back(self, source):
+        from rtsp_discover import rtsp_describe
+
+        try:
+            if rtsp_describe(source, timeout=3.0)[0] == 200:
+                self._rtsp_back = True
+        except Exception:
+            pass
 
     def _other_camera_ips(self, cfg):
         from rtsp_discover import split_url
@@ -537,6 +598,9 @@ class Worker:
                     "RTSP path lagayein (Test dabakar hints dekhein)")
         if why == "no-answer":
             return no_answer_status(self.cam_cfg().get("rtsp_url", ""), getattr(self, "open_detail", ""))
+        if why == "http":
+            return ("ERROR: Is HTTP URL par video/JPEG nahi mila — 'Test' dabakar dekhein ki URL kya de raha hai, ya camera ka "
+                    "rtsp:// URL daalein (RTSP fail hone par software khud HTTP picture dhundh leta hai)")
         return "ERROR: Camera nahi khula — 'Test' se step-by-step jaanch karein"
 
     def _ai_selftest(self):
@@ -621,7 +685,8 @@ class Worker:
         """Open the camera and process frames until stop / standby. Returns True to continue (standby)."""
         url = cfg.get("rtsp_url", "").strip()
         source = normalize_rtsp_url(url) if url else 0
-        live = isinstance(source, str) and source.lower().startswith("rtsp")
+        is_http = isinstance(source, str) and source.lower().startswith(("http://", "https://"))
+        live = (isinstance(source, str) and source.lower().startswith("rtsp")) or is_http
         if live:
             ok, detail = rtsp_port_reachable(source)
             if not ok:
@@ -646,8 +711,9 @@ class Worker:
                 return True
             self._unreach_since = 0.0
         self.status = "Camera se connect ho raha hai..."
+        self.http_mode = ""  # set again by _open (http URL) / _http_fallback when video comes over HTTP
         cap = self._open(source, live, gen)
-        if (cap is None or not cap.isOpened()) and live and self._alive(gen):
+        if (cap is None or not cap.isOpened()) and live and not is_http and self._alive(gen):
             fixed = self._auto_fix_source(source)
             if fixed:
                 if cap is not None:
@@ -655,6 +721,11 @@ class Worker:
                 source = fixed
                 self.status = "Stream path mil gaya — dobara connect ho raha hai..."
                 cap = self._open(source, live, gen)
+        rtsp_primary = source if (live and not is_http) else ""
+        if (cap is None or not cap.isOpened()) and rtsp_primary and self._alive(gen):
+            if cap is not None:
+                cap.release()
+            cap = self._http_fallback(source, gen)
         if cap is None or not cap.isOpened():
             if cap is not None:
                 cap.release()
@@ -684,6 +755,16 @@ class Worker:
                 if not self.should_stream():
                     to_standby = True
                     break
+                if self.http_mode and rtsp_primary:
+                    if self._rtsp_back:
+                        self._rtsp_back = False
+                        self._log("RTSP wapas aa gaya — HTTP mode chhod kar RTSP par laut rahe hain")
+                        self.status = "RTSP wapas mila — dobara connect ho raha hai..."
+                        cap.release()
+                        return True
+                    if last_sched_check - self._rtsp_recheck_at > 600:
+                        self._rtsp_recheck_at = last_sched_check
+                        threading.Thread(target=self._check_rtsp_back, args=(rtsp_primary,), daemon=True).start()
             if not ok:
                 fail += 1
                 # watchdog: reconnect on 50 bad reads OR >15s without a good frame
@@ -691,6 +772,8 @@ class Worker:
                     self.status = "Stream toota — dobara connect ho raha hai..."
                     self._log("stream lost, reconnecting (watchdog)")
                     cap.release()
+                    if self.http_mode:
+                        return True  # back through _stream_once: RTSP first, then the saved HTTP URL
                     cap = self._open(source, live, gen)
                     if cap is None:
                         return False

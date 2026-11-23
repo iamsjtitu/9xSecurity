@@ -29993,3 +29993,315 @@ RuntimeError: no AI in test
 2026-11-23T06:32:25 | svc[Back Camera]: autofind: camera 192.0.2.9:554 jawab nahi de raha — scanning ['10.38.0', '192.0.2']
 2026-11-23T06:32:31 | svc[Back Camera]: autofind: port 554 open on 0 other host(s), onvif devices 0
 2026-11-23T06:32:31 | svc[Back Camera]: autofind: camera LAN par nahi mila
+2026-11-23T06:41:41 | svc[Back Camera]: camera host not reachable (timed out) — retrying every 10 s
+2026-11-23T06:42:31 | svc[Back Camera]: autofind: camera 192.0.2.9:554 jawab nahi de raha — scanning ['10.38.0', '192.0.2']
+2026-11-23T06:42:36 | svc[Back Camera]: autofind: port 554 open on 0 other host(s), onvif devices 0
+2026-11-23T06:42:36 | svc[Back Camera]: autofind: camera LAN par nahi mila
+2026-11-23T06:51:46 | svc[Back Camera]: camera host not reachable (timed out) — retrying every 10 s
+2026-11-23T06:52:36 | svc[Back Camera]: autofind: camera 192.0.2.9:554 jawab nahi de raha — scanning ['10.38.0', '192.0.2']
+2026-11-23T06:52:42 | svc[Back Camera]: autofind: port 554 open on 0 other host(s), onvif devices 0
+2026-11-23T06:52:42 | svc[Back Camera]: autofind: camera LAN par nahi mila
+2026-11-23T06:56:57 | === PROBE start: http://****@127.0.0.1:32847/cgi-bin/snapshot.cgi?channel=1
+2026-11-23T06:57:00 | probe http: Camera network (127.0.0.1:32847) -> True Camera network par mil gaya
+2026-11-23T06:57:00 | probe http: HTTP video -> True JPEG snapshot (polling) mil gaya (image/jpeg)
+2026-11-23T06:57:00 | probe http: Video frame -> True 64x48, ~5.7 frame/sec (snapshot polling)
+2026-11-23T06:57:00 | === PROBE start: http://127.0.0.1:32847/html
+2026-11-23T06:57:00 | probe http: Camera network (127.0.0.1:32847) -> True Camera network par mil gaya
+2026-11-23T06:57:00 | probe http: HTTP video -> False Is URL par video/image nahi mila (HTTP 200 text/html — video/image nahi hai). Ca
+2026-11-23T06:57:31 | === PROBE start: http://****@127.0.0.1:33191/cgi-bin/snapshot.cgi?channel=1
+2026-11-23T06:57:35 | probe http: Camera network (127.0.0.1:33191) -> True Camera network par mil gaya
+2026-11-23T06:57:35 | probe http: HTTP video -> True JPEG snapshot (polling) mil gaya (image/jpeg)
+2026-11-23T06:57:35 | probe http: Video frame -> True 64x48, ~5.7 frame/sec (snapshot polling)
+2026-11-23T06:57:35 | === PROBE start: http://127.0.0.1:33191/html
+2026-11-23T06:57:35 | probe http: Camera network (127.0.0.1:33191) -> True Camera network par mil gaya
+2026-11-23T06:57:35 | probe http: HTTP video -> False Is URL par video/image nahi mila (HTTP 200 text/html — video/image nahi hai). Ca
+2026-11-23T07:01:52 | svc[Back Camera]: camera host not reachable (timed out) — retrying every 10 s
+2026-11-23T07:02:42 | svc[Back Camera]: autofind: camera 192.0.2.9:554 jawab nahi de raha — scanning ['10.38.0', '192.0.2']
+2026-11-23T07:02:47 | svc[Back Camera]: autofind: port 554 open on 0 other host(s), onvif devices 0
+2026-11-23T07:02:47 | svc[Back Camera]: autofind: camera LAN par nahi mila
+2026-11-23T07:03:47 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-23T07:03:47 | update: engine exiting for the installer (app quits; Setup relaunches it)
+2026-11-23T07:03:47 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-23T07:05:07 | === PROBE start: http://****@127.0.0.1:32865/cgi-bin/snapshot.cgi?channel=1
+2026-11-23T07:05:10 | probe http: Camera network (127.0.0.1:32865) -> True Camera network par mil gaya
+2026-11-23T07:05:10 | probe http: HTTP video -> True JPEG snapshot (polling) mil gaya (image/jpeg)
+2026-11-23T07:05:10 | probe http: Video frame -> True 64x48, ~5.7 frame/sec (snapshot polling)
+2026-11-23T07:05:10 | === PROBE start: http://127.0.0.1:32865/html
+2026-11-23T07:05:10 | probe http: Camera network (127.0.0.1:32865) -> True Camera network par mil gaya
+2026-11-23T07:05:10 | probe http: HTTP video -> False Is URL par video/image nahi mila (HTTP 200 text/html — video/image nahi hai). Ca
+2026-11-23T07:08:38 | === PROBE start: http://****@127.0.0.1:33117/cgi-bin/snapshot.cgi?channel=1
+2026-11-23T07:08:41 | probe http: Camera network (127.0.0.1:33117) -> True Camera network par mil gaya
+2026-11-23T07:08:41 | probe http: HTTP video -> True JPEG snapshot (polling) mil gaya (image/jpeg)
+2026-11-23T07:08:41 | probe http: Video frame -> True 64x48, ~5.7 frame/sec (snapshot polling)
+2026-11-23T07:08:41 | === PROBE start: http://127.0.0.1:33117/html
+2026-11-23T07:08:41 | probe http: Camera network (127.0.0.1:33117) -> True Camera network par mil gaya
+2026-11-23T07:08:41 | probe http: HTTP video -> False Is URL par video/image nahi mila (HTTP 200 text/html — video/image nahi hai). Ca
+2026-11-23T07:10:26 | === PROBE start: http://****@127.0.0.1:33199/cgi-bin/snapshot.cgi?channel=1
+2026-11-23T07:10:29 | probe http: Camera network (127.0.0.1:33199) -> True Camera network par mil gaya
+2026-11-23T07:10:29 | probe http: HTTP video -> True JPEG snapshot (polling) mil gaya (image/jpeg)
+2026-11-23T07:10:29 | probe http: Video frame -> True 64x48, ~5.7 frame/sec (snapshot polling)
+2026-11-23T07:10:29 | === PROBE start: http://127.0.0.1:33199/html
+2026-11-23T07:10:29 | probe http: Camera network (127.0.0.1:33199) -> True Camera network par mil gaya
+2026-11-23T07:10:29 | probe http: HTTP video -> False Is URL par video/image nahi mila (HTTP 200 text/html — video/image nahi hai). Ca
+2026-11-23T07:10:37 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-23T07:10:37 | update: engine exiting for the installer (app quits; Setup relaunches it)
+2026-11-23T07:10:37 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-23T07:11:43 | svc[Front Camera]: loading AI model
+2026-11-23T07:11:43 | svc[Front Camera]: AI model loaded
+2026-11-23T07:11:44 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 471 ms, 0 dets on blank frame)
+2026-11-23T07:11:44 | svc[Front Camera]: accurate model too slow here (471 ms > 350) -> yolov8n.pt
+2026-11-23T07:11:45 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 268 ms, 0 dets on blank frame)
+2026-11-23T07:11:45 | svc[Front Camera]: source opened codec=mjpg live=False
+2026-11-23T07:11:45 | svc[Front Camera]: streaming started
+2026-11-23T07:11:47 | svc[Front Camera]: loading AI model
+2026-11-23T07:11:47 | svc[Front Camera]: AI model loaded
+2026-11-23T07:11:48 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 475 ms, 0 dets on blank frame)
+2026-11-23T07:11:48 | svc[Front Camera]: accurate model too slow here (475 ms > 350) -> yolov8n.pt
+2026-11-23T07:11:48 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 249 ms, 0 dets on blank frame)
+2026-11-23T07:11:48 | svc[Front Camera]: source opened codec=mjpg live=False
+2026-11-23T07:11:48 | svc[Front Camera]: streaming started
+2026-11-23T07:11:53 | svc[Front Camera]: stream lost, reconnecting (watchdog)
+2026-11-23T07:11:53 | svc[Front Camera]: source opened codec=mjpg live=False
+2026-11-23T07:11:57 | svc[Back Camera]: camera host not reachable (timed out) — retrying every 10 s
+2026-11-23T07:11:58 | svc[Front Camera]: stream lost, reconnecting (watchdog)
+2026-11-23T07:11:58 | svc[Front Camera]: source opened codec=mjpg live=False
+2026-11-23T07:12:03 | svc[Front Camera]: stream lost, reconnecting (watchdog)
+2026-11-23T07:12:03 | svc[Front Camera]: source opened codec=mjpg live=False
+2026-11-23T07:12:08 | svc[Front Camera]: stream lost, reconnecting (watchdog)
+2026-11-23T07:12:08 | svc[Front Camera]: source opened codec=mjpg live=False
+2026-11-23T07:12:09 | svc[Front Camera]: loading AI model
+2026-11-23T07:12:09 | svc[Front Camera]: AI model loaded
+2026-11-23T07:12:10 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_car_07-12-10-094.jpg
+2026-11-23T07:12:10 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 563 ms, 0 dets on blank frame)
+2026-11-23T07:12:10 | svc[Front Camera]: accurate model too slow here (563 ms > 350) -> yolov8n.pt
+2026-11-23T07:12:11 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 357 ms, 0 dets on blank frame)
+2026-11-23T07:12:25 | event: Exit car track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Exit_car_07-12-25-728.jpg
+2026-11-23T07:12:25 | plate OCR: track 1 Exit queued (2 crops)
+2026-11-23T07:12:27 | svc: camera added cam3 'TEST_Cam' gate='TEST_Gate'
+2026-11-23T07:12:27 | svc[TEST_Cam]: loading AI model
+2026-11-23T07:12:27 | svc: cameras started: TEST_Cam
+2026-11-23T07:12:27 | svc: camera saved cam3 'TEST_Cam2' gate='TEST_Gate2' monitor=True window=off
+2026-11-23T07:12:27 | svc: viewing camera -> cam3 'TEST_Cam2' gate='TEST_Gate2'
+2026-11-23T07:12:27 | svc[TEST_Cam2]: AI model loaded
+2026-11-23T07:12:28 | svc: viewing camera -> cam1 'Front Camera' gate='Main Gate'
+2026-11-23T07:12:28 | svc: viewing camera -> cam3 'TEST_Cam2' gate='TEST_Gate2'
+2026-11-23T07:12:29 | svc: viewing camera -> cam1 'Front Camera' gate='Main Gate'
+2026-11-23T07:12:29 | svc: camera deleted cam3
+2026-11-23T07:12:29 | svc: camera added cam3 'TEST_L0' gate='G'
+2026-11-23T07:12:29 | svc[TEST_L0]: loading AI model
+2026-11-23T07:12:29 | svc: cameras started: TEST_L0
+2026-11-23T07:12:29 | svc: camera added cam4 'TEST_L1' gate='G'
+2026-11-23T07:12:29 | svc[TEST_L1]: loading AI model
+2026-11-23T07:12:29 | svc: cameras started: TEST_L1
+2026-11-23T07:12:29 | svc: camera added cam5 'TEST_L2' gate='G'
+2026-11-23T07:12:29 | svc: cameras started: TEST_L2
+2026-11-23T07:12:29 | svc[TEST_L2]: loading AI model
+2026-11-23T07:12:29 | svc: camera added cam6 'TEST_L3' gate='G'
+2026-11-23T07:12:29 | svc: cameras started: TEST_L3
+2026-11-23T07:12:29 | svc[TEST_L3]: loading AI model
+2026-11-23T07:12:29 | svc: camera added cam7 'TEST_L4' gate='G'
+2026-11-23T07:12:29 | svc: cameras started: TEST_L4
+2026-11-23T07:12:29 | svc[TEST_L4]: loading AI model
+2026-11-23T07:12:29 | svc: camera added cam8 'TEST_L5' gate='G'
+2026-11-23T07:12:29 | svc: cameras started: TEST_L5
+2026-11-23T07:12:29 | svc[TEST_L5]: loading AI model
+2026-11-23T07:12:29 | svc: camera deleted cam3
+2026-11-23T07:12:30 | svc: camera deleted cam4
+2026-11-23T07:12:30 | svc: camera deleted cam5
+2026-11-23T07:12:30 | svc: camera deleted cam6
+2026-11-23T07:12:30 | svc: camera deleted cam7
+2026-11-23T07:12:30 | svc: camera deleted cam8
+2026-11-23T07:12:31 | svc: camera added cam3 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN' gate='GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG'
+2026-11-23T07:12:31 | svc: cameras started: NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+2026-11-23T07:12:31 | svc[Camera]: loading AI model
+2026-11-23T07:12:31 | svc: camera deleted cam3
+2026-11-23T07:12:31 | plate OCR: track 1 event 1 -> 'Not detected' (local: low confidence: MH12AB1234 (votes=1 conf=0.46 fixes=2), 2 crops)
+2026-11-23T07:12:31 | svc: cameras started: Front Camera
+2026-11-23T07:12:31 | svc: camera saved cam1 'Front Camera' gate='Main Gate' monitor=True window=off
+2026-11-23T07:12:31 | svc[Front Camera]: loading AI model
+2026-11-23T07:12:31 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=20:00-08:00
+2026-11-23T07:12:31 | svc[Camera]: AI model loaded
+2026-11-23T07:12:31 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=20:00-08:00
+2026-11-23T07:12:31 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=False window=20:00-08:00
+2026-11-23T07:12:32 | svc[Camera]: AI model loaded
+2026-11-23T07:12:32 | svc[Camera]: AI model loaded
+2026-11-23T07:12:32 | svc[Camera]: AI model loaded
+2026-11-23T07:12:32 | svc[Camera]: AI model loaded
+2026-11-23T07:12:32 | svc[Camera]: AI model loaded
+2026-11-23T07:12:32 | svc[Camera]: AI model loaded
+2026-11-23T07:12:32 | svc[Front Camera]: AI model loaded
+2026-11-23T07:12:32 | svc: cameras started: Back Camera
+2026-11-23T07:12:32 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=20:00-08:00
+2026-11-23T07:12:32 | svc[Back Camera]: loading AI model
+2026-11-23T07:12:33 | svc[Camera]: AI self-test OK (yolov8s.pt, 1167 ms, 0 dets on blank frame)
+2026-11-23T07:12:33 | svc[Back Camera]: AI model loaded
+2026-11-23T07:12:33 | svc[Camera]: accurate model too slow here (1167 ms > 350) -> yolov8n.pt
+2026-11-23T07:12:37 | svc[Camera]: AI self-test OK (yolov8n.pt, 1191 ms, 0 dets on blank frame)
+2026-11-23T07:12:38 | svc[Camera]: AI self-test OK (yolov8s.pt, 2699 ms, 0 dets on blank frame)
+2026-11-23T07:12:38 | svc[Camera]: accurate model too slow here (2699 ms > 350) -> yolov8n.pt
+2026-11-23T07:12:39 | svc[Camera]: AI self-test OK (yolov8s.pt, 2517 ms, 0 dets on blank frame)
+2026-11-23T07:12:39 | svc[Camera]: accurate model too slow here (2517 ms > 350) -> yolov8n.pt
+2026-11-23T07:12:39 | svc[Camera]: AI self-test OK (yolov8s.pt, 2703 ms, 0 dets on blank frame)
+2026-11-23T07:12:40 | svc[Camera]: AI self-test OK (yolov8s.pt, 2805 ms, 0 dets on blank frame)
+2026-11-23T07:12:40 | svc[Camera]: AI self-test OK (yolov8s.pt, 2712 ms, 0 dets on blank frame)
+2026-11-23T07:12:40 | svc[Camera]: accurate model too slow here (2703 ms > 350) -> yolov8n.pt
+2026-11-23T07:12:40 | svc[Camera]: AI self-test OK (yolov8s.pt, 2608 ms, 0 dets on blank frame)
+2026-11-23T07:12:40 | svc[Camera]: AI self-test OK (yolov8s.pt, 2705 ms, 0 dets on blank frame)
+2026-11-23T07:12:40 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 2615 ms, 0 dets on blank frame)
+2026-11-23T07:12:40 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 2425 ms, 0 dets on blank frame)
+2026-11-23T07:12:40 | svc[Camera]: AI self-test OK (yolov8n.pt, 578 ms, 0 dets on blank frame)
+2026-11-23T07:12:41 | svc[Camera]: accurate model too slow here (2805 ms > 350) -> yolov8n.pt
+2026-11-23T07:12:41 | svc[Camera]: accurate model too slow here (2712 ms > 350) -> yolov8n.pt
+2026-11-23T07:12:41 | svc[Camera]: accurate model too slow here (2608 ms > 350) -> yolov8n.pt
+2026-11-23T07:12:41 | svc[Front Camera]: accurate model too slow here (2615 ms > 350) -> yolov8n.pt
+2026-11-23T07:12:41 | svc[Camera]: accurate model too slow here (2705 ms > 350) -> yolov8n.pt
+2026-11-23T07:12:41 | svc[Back Camera]: accurate model too slow here (2425 ms > 350) -> yolov8n.pt
+2026-11-23T07:12:41 | svc[Camera]: AI self-test OK (yolov8n.pt, 313 ms, 0 dets on blank frame)
+2026-11-23T07:12:43 | svc[Camera]: AI self-test OK (yolov8n.pt, 1006 ms, 0 dets on blank frame)
+2026-11-23T07:12:43 | svc[Camera]: AI self-test OK (yolov8n.pt, 813 ms, 0 dets on blank frame)
+2026-11-23T07:12:43 | svc[Camera]: AI self-test OK (yolov8n.pt, 808 ms, 0 dets on blank frame)
+2026-11-23T07:12:43 | svc[Camera]: AI self-test OK (yolov8n.pt, 813 ms, 0 dets on blank frame)
+2026-11-23T07:12:43 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 791 ms, 0 dets on blank frame)
+2026-11-23T07:12:43 | svc[Camera]: AI self-test OK (yolov8n.pt, 696 ms, 0 dets on blank frame)
+2026-11-23T07:12:43 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 709 ms, 0 dets on blank frame)
+2026-11-23T07:12:46 | svc[Back Camera]: autofind: camera 192.0.2.9:554 jawab nahi de raha — scanning ['10.38.0', '192.0.2']
+2026-11-23T07:12:51 | svc[Back Camera]: autofind: port 554 open on 0 other host(s), onvif devices 0
+2026-11-23T07:12:51 | svc[Back Camera]: autofind: camera LAN par nahi mila
+2026-11-23T07:13:09 | svc: viewing camera -> cam2 'Back Camera' gate='Back Gate'
+2026-11-23T07:13:09 | svc: viewing camera -> cam1 'Front Camera' gate='Main Gate'
+2026-11-23T07:13:24 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=00:00-23:59
+2026-11-23T07:13:24 | svc[Front Camera]: loading AI model
+2026-11-23T07:13:24 | svc: camera added cam3 'TEST_Cam' gate='Side'
+2026-11-23T07:13:24 | svc: cameras started: TEST_Cam
+2026-11-23T07:13:24 | svc[TEST_Cam]: loading AI model
+2026-11-23T07:13:24 | svc: camera deleted cam3
+2026-11-23T07:13:24 | svc[Front Camera]: AI model loaded
+2026-11-23T07:13:24 | svc: camera saved cam1 'Front Camera' gate='Main Gate' monitor=True window=off
+2026-11-23T07:13:24 | svc: camera saved cam2 'Back Camera' gate='Back Gate' monitor=True window=20:00-08:00
+2026-11-23T07:13:24 | svc[Camera]: AI model loaded
+2026-11-23T07:13:24 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_car_07-13-24-709.jpg
+2026-11-23T07:13:24 | event: Entry car track 2 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_car_07-13-24-720.jpg
+2026-11-23T07:13:24 | person ignored: baitha hua aur tez (1.7 body-height/s, box 60x95) — bike/gaadi par sawaar — gaadi/bike ke saath hai, akela paidal nahi (track 1)
+2026-11-23T07:13:24 | event: Entry person track 1 (appeared-at-line) -> /app/9x_security/snapshots/2026-11-23/Entry_person_07-13-24-791.jpg
+2026-11-23T07:13:24 | event: Entry person track 1 (appeared-at-line) -> /app/9x_security/snapshots/2026-11-23/Entry_person_07-13-24-821.jpg
+2026-11-23T07:13:24 | event: Entry motorcycle track 1 (appeared-at-line) -> /app/9x_security/snapshots/2026-11-23/Entry_motorcycle_07-13-24-849.jpg
+2026-11-23T07:13:24 | event: Entry person track 2 (appeared-at-line) -> /app/9x_security/snapshots/2026-11-23/Entry_person_07-13-24-979.jpg
+2026-11-23T07:13:25 | crossing ignored: person schedule ke bahar (track 1)
+2026-11-23T07:13:25 | person/bike line set {'x1': 0.55, 'y1': 0.5, 'x2': 0.95, 'y2': 0.5} entry_direction2=pos (car/truck/bus main line par, person/bike is line par)
+2026-11-23T07:13:25 | person/bike line set {'x1': 0.95, 'y1': 0.5, 'x2': 0.55, 'y2': 0.5} entry_direction2=neg (car/truck/bus main line par, person/bike is line par)
+2026-11-23T07:13:25 | person/bike line set {'x1': 0.55, 'y1': 0.5, 'x2': 0.95, 'y2': 0.5} entry_direction2=pos (car/truck/bus main line par, person/bike is line par)
+2026-11-23T07:13:25 | person/bike line set {'x1': 0.55, 'y1': 0.5, 'x2': 0.95, 'y2': 0.5} entry_direction2=pos (car/truck/bus main line par, person/bike is line par)
+2026-11-23T07:13:25 | person/bike line removed — person & two-wheeler ab main line par count honge
+2026-11-23T07:13:25 | person/bike line removed — person & two-wheeler ab main line par count honge
+2026-11-23T07:13:25 | person/bike line set {'x1': 0.55, 'y1': 0.5, 'x2': 0.95, 'y2': 0.5} entry_direction2=neg (car/truck/bus main line par, person/bike is line par)
+2026-11-23T07:13:25 | person/bike line removed — person & two-wheeler ab main line par count honge
+2026-11-23T07:13:25 | person/bike line set {'x1': 0.55, 'y1': 0.5, 'x2': 0.95, 'y2': 0.5} entry_direction2=neg (car/truck/bus main line par, person/bike is line par)
+2026-11-23T07:13:25 | svc: viewing camera -> cam2 'Back Camera' gate='Back Gate'
+2026-11-23T07:13:26 | svc: viewing camera -> cam1 'Front Camera' gate='Main Gate'
+2026-11-23T07:13:26 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 663 ms, 0 dets on blank frame)
+2026-11-23T07:13:26 | svc[Camera]: AI self-test OK (yolov8s.pt, 645 ms, 0 dets on blank frame)
+2026-11-23T07:13:26 | svc[Front Camera]: accurate model too slow here (663 ms > 350) -> yolov8n.pt
+2026-11-23T07:13:26 | svc[Camera]: accurate model too slow here (645 ms > 350) -> yolov8n.pt
+2026-11-23T07:13:26 | person/bike line removed — person & two-wheeler ab main line par count honge
+2026-11-23T07:13:26 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_car_07-13-26-692.jpg
+2026-11-23T07:13:26 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_person_07-13-26-705.jpg
+2026-11-23T07:13:26 | crossing rejected: track 1 motorcycle Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (205, 216, 275, 276))
+2026-11-23T07:13:26 | crossing rejected: track 1 car Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (660, 196, 780, 276))
+2026-11-23T07:13:26 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_person_07-13-26-902.jpg
+2026-11-23T07:13:26 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_car_07-13-26-986.jpg
+2026-11-23T07:13:27 | event: Exit person track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Exit_person_07-13-26-998.jpg
+2026-11-23T07:13:27 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 324 ms, 0 dets on blank frame)
+2026-11-23T07:13:27 | svc[Camera]: AI self-test OK (yolov8n.pt, 309 ms, 0 dets on blank frame)
+2026-11-23T07:13:27 | event: Entry bicycle track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_bicycle_07-13-27-051.jpg
+2026-11-23T07:13:27 | crossing rejected: track 1 bicycle Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (205, 216, 275, 276))
+2026-11-23T07:13:27 | event: Entry truck track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_truck_07-13-27-113.jpg
+2026-11-23T07:13:27 | crossing rejected: track 1 truck Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (640, 176, 800, 276))
+2026-11-23T07:13:27 | event: Entry bus track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_bus_07-13-27-150.jpg
+2026-11-23T07:13:27 | crossing rejected: track 1 bus Entry — line ko drawn segment ke bahar cross kiya (line chhoti hai?) (box (640, 176, 800, 276))
+2026-11-23T07:13:27 | person/bike line removed — person & two-wheeler ab main line par count honge
+2026-11-23T07:13:29 | svc[Front Camera]: camera host not reachable (timed out) — retrying every 10 s
+2026-11-23T07:13:29 | svc[Front Camera]: autofind: camera 192.0.2.1:554 jawab nahi de raha — scanning ['10.38.0', '192.0.2']
+2026-11-23T07:13:34 | svc[Front Camera]: autofind: port 554 open on 0 other host(s), onvif devices 0
+2026-11-23T07:13:34 | svc[Front Camera]: autofind: camera LAN par nahi mila
+2026-11-23T07:13:42 | zoom (doosri nazar) model: ?
+2026-11-23T07:13:42 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_person_07-13-42-259.jpg
+2026-11-23T07:13:42 | person box ignored: janwar jaisa aakar (35x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (600, 20, 635, 60))
+2026-11-23T07:13:42 | zoom (doosri nazar) model: ?
+2026-11-23T07:13:42 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_person_07-13-42-297.jpg
+2026-11-23T07:13:42 | person box ignored: janwar jaisa aakar (35x40, insaan ki lambai chaudai se 1.3x hoti hai) — dog/cat/bag, insaan nahi (box (700, 20, 735, 60))
+2026-11-23T07:13:42 | zoom (doosri nazar) model: ?
+2026-11-23T07:13:42 | event: Entry person track 2 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_person_07-13-42-344.jpg
+2026-11-23T07:13:42 | zoom (doosri nazar) model: ?
+2026-11-23T07:13:42 | track 1 'person' nahi — zoom karke dekha: dog 0.70 vs person 0.10 (kul 0.70 vs 0.10) — janwar, alert nahi hoga (box (460, 92, 500, 192))
+2026-11-23T07:13:42 | zoom (doosri nazar) model: ?
+2026-11-23T07:13:42 | track 1 'person' nahi — zoom karke dekha: dog 0.70 vs person 0.10 (kul 0.70 vs 0.10) — janwar, alert nahi hoga (box (460, 92, 500, 192))
+2026-11-23T07:13:42 | zoom (doosri nazar) model: ?
+2026-11-23T07:13:42 | track 1 'person' nahi — zoom karke dekha: dog 0.40 vs person 0.50 (kul 0.40 vs 0.50) — janwar, alert nahi hoga (box (460, 92, 500, 192))
+2026-11-23T07:13:42 | track 1 zoom par ab saaf insaan dikha (kul person 1.40 vs janwar 0.40) — person maana jayega
+2026-11-23T07:13:42 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_person_07-13-42-459.jpg
+2026-11-23T07:13:42 | event: Entry car track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_car_07-13-42-500.jpg
+2026-11-23T07:13:42 | event: Entry person track 1 (cross) -> /app/9x_security/snapshots/2026-11-23/Entry_person_07-13-42-537.jpg
+2026-11-23T07:13:42 | zoom (doosri nazar) model: ?
+2026-11-23T07:13:53 | plate OCR: track 1 event 1 -> 'MH12AB1234' (cloud: cloud-detail, 1 crops)
+2026-11-23T07:13:53 | event: Entry person track 1 (cross) -> /tmp/pytest-of-root/pytest-8/test_ocr_only_for_vehicles0/snaps/2026-11-23/Entry_person_07-13-53-960.jpg
+2026-11-23T07:13:53 | event: Entry motorcycle track 1 (cross) -> /tmp/pytest-of-root/pytest-8/test_ocr_only_for_vehicles0/snaps/2026-11-23/Entry_motorcycle_07-13-53-966.jpg
+2026-11-23T07:13:53 | event: Entry car track 1 (cross) -> /tmp/pytest-of-root/pytest-8/test_ocr_only_for_vehicles0/snaps/2026-11-23/Entry_car_07-13-53-971.jpg
+2026-11-23T07:13:53 | plate OCR: track 1 Entry queued (1 crops)
+2026-11-23T07:13:54 | daily report 2026-09-15 (manual) [14-09-2026 09:00 PM se 15-09-2026 09:00 PM tak]: Entry 3 / Exit 2 -> PROBLEM: API key khaali hai. Settings > WhatsApp me API key daalein.
+2026-11-23T07:13:54 | daily report: ON at 07:43 — pehli PDF aaj 07:43 AM
+2026-11-23T07:13:54 | daily report: ON at 06:43 — pehli PDF kal 06:43 AM
+2026-11-23T07:13:55 | plate cloud: key check -> FAIL HTTP 403: API key galat hai — app.platerecognizer.com par Snapshot > API Token se dobara copy karein [{"detail":"Invalid
+2026-11-23T07:13:55 | plate cloud: key check -> FAIL API key khaali hai
+2026-11-23T07:13:56 | range report 2026-11-17..2026-11-23 (pdf): 5 events, Entry 3 / Exit 2
+2026-11-23T07:13:56 | range report 2026-11-17..2026-11-23 (pdf, all types): 7 events, Entry 4 / Exit 4
+2026-11-23T07:13:56 | range report 2026-11-17..2026-11-23 (xlsx): 5 events, Entry 3 / Exit 2
+2026-11-23T07:13:56 | range report 2026-11-23..2026-11-23 (pdf): 2 events, Entry 1 / Exit 1
+2026-11-23T07:14:03 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-23T07:14:03 | update: engine exiting for the installer (app quits; Setup relaunches it)
+2026-11-23T07:14:03 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-23T07:14:03 | svc[Gate 1]: autofind: Gate 1 ka IP badla 192.168.1.7 -> 192.168.1.23 (mac) — URL update kar diya
+2026-11-23T07:14:03 | svc[Gate 1]: camera host not reachable (timed out) — retrying every 10 s
+2026-11-23T07:14:03 | svc[Gate 1]: camera host not reachable (timed out) — retrying every 10 s
+2026-11-23T07:14:04 | svc[Gate 1]: autofind: Gate 1 ka IP badla 192.168.1.7 -> 192.168.1.23 (creds) — URL update kar diya
+2026-11-23T07:14:04 | === PROBE start: rtsp://****@192.168.31.180:554/cam/realmonitor?channel=1&subtype=0
+2026-11-23T07:14:04 | probe: 192.168.31.180:554 reachable
+2026-11-23T07:14:04 | probe: DESCRIBE -> 0 [WinError 10054] An existing connection was forcibly closed by the remote host
+2026-11-23T07:14:04 | probe: RTSP answers on port 8554 (code 401) -> rtsp://****@192.168.31.180:8554/cam/realmonitor?channel=1&subtype=0
+2026-11-23T07:14:04 | probe: DESCRIBE on 8554 -> 401 RTSP/1.0 401 Unauthorized
+2026-11-23T07:14:04 | === PROBE start: rtsp://****@192.168.31.180:554/video
+2026-11-23T07:14:04 | probe: 192.168.31.180:554 reachable
+2026-11-23T07:14:04 | probe: DESCRIBE -> 0 timed out
+2026-11-23T07:14:04 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-11-23T07:14:07 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-11-23T07:14:10 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-11-23T07:14:10 | purge: 0 old events removed (retention 7d, cutoff 2026-11-16)
+2026-11-23T07:14:13 | outbox: 1 pending WhatsApp alert(s) delivered
+2026-11-23T07:14:14 | svc: auto-connect — Front Camera, Back Camera se connect kar raha hai
+2026-11-23T07:14:14 | svc[Front Camera]: loading AI model
+2026-11-23T07:14:14 | svc[Back Camera]: loading AI model
+2026-11-23T07:14:16 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-11-23T07:14:16 | purge: 0 old events removed (retention 7d, cutoff 2026-11-16)
+2026-11-23T07:14:20 | svc[Front Camera]: loading AI model
+2026-11-23T07:14:20 | svc: auto-connect — Front Camera, Back Camera se connect kar raha hai
+2026-11-23T07:14:20 | svc[Back Camera]: loading AI model
+2026-11-23T07:14:22 | svc[Front Camera]: AI model loaded
+2026-11-23T07:14:22 | svc[Back Camera]: AI model loaded
+2026-11-23T07:14:24 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 905 ms, 0 dets on blank frame)
+2026-11-23T07:14:24 | svc[Back Camera]: accurate model too slow here (905 ms > 350) -> yolov8n.pt
+2026-11-23T07:14:24 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 894 ms, 0 dets on blank frame)
+2026-11-23T07:14:24 | svc[Front Camera]: accurate model too slow here (894 ms > 350) -> yolov8n.pt
+2026-11-23T07:14:25 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 572 ms, 0 dets on blank frame)
+2026-11-23T07:14:26 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 441 ms, 0 dets on blank frame)
+2026-11-23T07:14:28 | svc[Back Camera]: camera host not reachable (timed out) — retrying every 10 s
+2026-11-23T07:14:28 | svc[Front Camera]: camera host not reachable (timed out) — retrying every 10 s
+2026-11-23T07:15:18 | svc[Back Camera]: autofind: camera 192.0.2.9:554 jawab nahi de raha — scanning ['10.38.0', '192.0.2']
+2026-11-23T07:15:18 | svc[Front Camera]: autofind: doosre camera ka scan chal raha hai — baad me
+2026-11-23T07:15:23 | svc[Back Camera]: autofind: port 554 open on 0 other host(s), onvif devices 0
+2026-11-23T07:15:23 | svc[Back Camera]: autofind: camera LAN par nahi mila
+2026-11-23T07:16:43 | === PROBE start: http://****@127.0.0.1:32783/cgi-bin/snapshot.cgi?channel=1
+2026-11-23T07:16:47 | probe http: Camera network (127.0.0.1:32783) -> True Camera network par mil gaya
+2026-11-23T07:16:47 | probe http: HTTP video -> True JPEG snapshot (polling) mil gaya (image/jpeg)
+2026-11-23T07:16:47 | probe http: Video frame -> True 64x48, ~5.7 frame/sec (snapshot polling)
+2026-11-23T07:16:47 | === PROBE start: http://127.0.0.1:32783/html
+2026-11-23T07:16:47 | probe http: Camera network (127.0.0.1:32783) -> True Camera network par mil gaya
+2026-11-23T07:16:47 | probe http: HTTP video -> False Is URL par video/image nahi mila (HTTP 200 text/html — video/image nahi hai). Ca

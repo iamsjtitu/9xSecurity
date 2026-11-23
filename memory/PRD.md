@@ -1388,3 +1388,38 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   sockets (closed / reset / RTSP 401), probe steps + port switch, backoff timing/clear, connect endpoint clears. 89 regression green.
 - USER ADVICE: close app (or wait) 30 min / power-cycle camera to clear the lock, then Connect once with the right password;
   check RTSP enabled on the camera web page/app; verify in VLC from the same PC; tell us the camera brand.
+
+## Implemented (update 2026-06 #75) — HTTP/HTTPS camera fallback (user approved: RTSP fail -> 2–5 fps HTTP ok; brands CP Plus, TP-Link VIGI)
+- http_source.py (new): split/with-creds for http(s) URLs, HTTP Digest + Basic auth (one challenge, then cached), SnapshotSource
+  (polls JPEG at ~3 fps, same frame never re-emitted, backoff on errors), MjpegSource (multipart boundary reader), probe_http_url
+  (image / multipart / html / 401 / unreachable), discover_http(host, user, pw) order: vendor MJPEG CGI (Dahua/CP Plus
+  /cgi-bin/mjpg/video.cgi, Hikvision/VIGI ISAPI /ISAPI/Streaming/channels/102/httpPreview, generic /video, /mjpg/video.mjpg…)
+  -> ONVIF GetSnapshotUri -> snapshot CGI (/cgi-bin/snapshot.cgi, /ISAPI/Streaming/channels/101/picture, /snapshot.jpg…),
+  open_http(url) -> source or None, probe_steps(url) for the Test button. Ports tried: 80, 443 (https), 8080, 8000.
+- engine: normalize_rtsp_url also encodes '@' in http(s) passwords; probe_rtsp routes http(s) URLs to http_source.probe_steps.
+- service.Worker: _stream_once -> RTSP ladder as before; if nothing opened and URL is rtsp -> _http_fallback(): saved cam["http_url"]
+  first (stale -> forget), else discover (rate-limited 10 min per host) -> LatestFrameReader(src); http_mode = 'snapshot'|'mjpeg'
+  shown in status ("HTTP MJPEG mode (RTSP nahi chala)" / "HTTP snapshot mode ~3 fps"). Every 10 min a thread DESCRIBEs the RTSP
+  URL; 200 -> "RTSP wapas aa gaya" log, loop returns -> next _stream_once reconnects over RTSP. User-entered http(s) URL opens
+  directly (no RTSP discovery). rtsp_port_reachable is scheme-aware (80/443 default for http/https). Stream-lost in HTTP mode
+  goes back through _stream_once (RTSP first).
+- Tests: tests/test_iter50_http_fallback.py (13) with a real local HTTP camera simulator (Digest 401, snapshot, MJPEG, html):
+  creds roundtrip, probe kinds, snapshot polling w/ one digest challenge, mjpeg stream, non-video -> None, discovery order,
+  probe steps, worker fallback + saves http_url, saved URL reused / stale forgotten, per-host rate limit, RTSP-back switch,
+  user http URL direct, scheme default ports. Full suite: 306 passed, 2 skipped (+13 http). Fixture stubs _maybe_fingerprint
+  (its thread had written a 127.0.0.1 fingerprint into the dev config after the tmp CONFIG_PATH was restored).
+- LIMITS (told to user): snapshot mode ~2–5 fps -> very fast bikes may be missed; depends on camera's HTTP/ONVIF being enabled
+  with the same user/password. Needs live validation on the CP Plus camera (192.168.31.180) and a VIGI.
+
+## Implemented (update 2026-06 #76) — Update install showed a stuck "find /I 9xEngine.exe" Terminal window (user screenshot, DELL PC)
+- Cause: updater._run_installer launched the wait-then-install .bat with DETACHED_PROCESS; cmd's children (tasklist/find/
+  timeout) are console apps -> Windows allocated a NEW visible console (Windows Terminal tab titled with the running command)
+  that stayed on screen for the whole wait (<=90 s) + silent install (1–2 min) and invited the user to close it mid-install
+  (which would have left the watchdog task DISABLED and the app closed).
+- Fix: Popen with CREATE_NO_WINDOW | CREATE_NEW_PROCESS_GROUP + stdin/stdout/stderr DEVNULL (hidden console, children inherit
+  it); `timeout /t` replaced by `ping -n 2 127.0.0.1` (timeout errors when stdin is not a console); schtasks /DISABLE /ENABLE
+  removed — Electron's --watchdog start already skips while the update_in_progress marker (<15 min) exists, so a killed script
+  can no longer leave the watchdog off; script now appends phase lines + Setup exit code to %LOCALAPPDATA%\9xSecurity\
+  engine_out.log ("updater: …") for diagnostics. Test updated (test_iter47: hidden flags, no schtasks, ping, log, order).
+- NOTE: the window will appear ONE more time when updating FROM 1.0.54 (old updater runs); user must let it finish (it closes
+  itself after the install). From the next version on it is invisible.

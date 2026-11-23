@@ -204,40 +204,44 @@ def apply_update(path):
 
 
 UPDATE_EXIT_CODE = 75  # engine exits with this right after handing over to the installer; Electron quits on it
-WATCHDOG_TASK = "9x Security Watchdog"
 
 
 def _run_installer(setup_exe):
-    """Hand the Setup to a detached cmd script that (1) pauses the watchdog task so it cannot relaunch the
-    app into a half-extracted folder, (2) waits until the app AND the engine have exited (no torch/numpy
-    DLL is locked while NSIS replaces it), (3) runs the silent installer, which relaunches the app, and
-    (4) re-enables the watchdog. The caller must exit the engine with UPDATE_EXIT_CODE right after."""
+    """Hand the Setup to a hidden, detached cmd script that (1) marks 'update in progress' so the 5-min watchdog
+    start is skipped (Electron checks the marker), (2) waits until the app AND the engine have exited (no
+    torch/numpy DLL is locked while NSIS replaces it), (3) runs the silent installer, which relaunches the app.
+    No console window: a visible one invites the user to close it mid-install. Progress goes to engine_out.log.
+    The caller must exit the engine with UPDATE_EXIT_CODE right after."""
     import config
 
     marker = os.path.join(config.BASE_DIR, "update_in_progress")
+    log = os.path.join(config.BASE_DIR, "engine_out.log")
     bat = os.path.join(tempfile.gettempdir(), "9x_update.bat")
     script = (
         "@echo off\r\n"
+        f'echo %date% %time% ^| updater: waiting for app + engine to exit >> "{log}"\r\n'
         f'echo %date% %time% > "{marker}"\r\n'
-        f'schtasks /Change /TN "{WATCHDOG_TASK}" /DISABLE >nul 2>&1\r\n'
         "set n=0\r\n"
         ":wait\r\n"
-        "timeout /t 1 /nobreak >nul\r\n"
+        "ping -n 2 127.0.0.1 >nul\r\n"
         "set /a n+=1\r\n"
         "if %n% geq 90 goto run\r\n"
         'tasklist /FI "IMAGENAME eq 9xEngine.exe" | find /I "9xEngine.exe" >nul && goto wait\r\n'
         'tasklist /FI "IMAGENAME eq 9x Security.exe" | find /I "9x Security.exe" >nul && goto wait\r\n'
         ":run\r\n"
+        f'echo %date% %time% ^| updater: app closed after %n% s, running Setup /S >> "{log}"\r\n'
         'taskkill /F /T /IM "9xEngine.exe" >nul 2>&1\r\n'
         'taskkill /F /T /IM "9x Security.exe" >nul 2>&1\r\n'
         f'start "" /wait "{setup_exe}" /S --force-run\r\n'
-        f'schtasks /Change /TN "{WATCHDOG_TASK}" /ENABLE >nul 2>&1\r\n'
+        f'echo %date% %time% ^| updater: Setup finished, exit code %ERRORLEVEL% >> "{log}"\r\n'
         f'del "{marker}" >nul 2>&1\r\n'
         'del "%~f0"\r\n'
     )
     with open(bat, "w") as f:
         f.write(script)
-    subprocess.Popen(["cmd", "/c", bat], creationflags=0x00000008 | 0x00000200, close_fds=True)  # detached, new group
+    # CREATE_NO_WINDOW | CREATE_NEW_PROCESS_GROUP: hidden console (tasklist/find/ping need one), survives our exit
+    subprocess.Popen(["cmd", "/c", bat], creationflags=0x08000000 | 0x00000200, close_fds=True,
+                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return True
 
 

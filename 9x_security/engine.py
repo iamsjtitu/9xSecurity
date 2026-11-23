@@ -125,11 +125,11 @@ def _segment_hits_box(a, b, box):
 
 
 def normalize_rtsp_url(url):
-    """Fix RTSP URLs whose password contains special chars like '@'.
+    """Fix camera URLs whose password contains special chars like '@' (rtsp:// and http(s):// alike).
     e.g. rtsp://admin:Admin@123@host:554/s -> rtsp://admin:Admin%40123@host:554/s
     Idempotent (already-encoded URLs stay unchanged)."""
     url = (url or "").strip()
-    m = re.match(r"^(rtsps?://)(.*)$", url, re.IGNORECASE)
+    m = re.match(r"^(rtsps?://|https?://)(.*)$", url, re.IGNORECASE)
     if not m or "@" not in m.group(2):
         return url
     scheme, rest = m.groups()
@@ -429,6 +429,13 @@ def probe_rtsp(url, wait=10.0):
     steps = []
     fixed = normalize_rtsp_url(url)
     clog(f"=== PROBE start: {redact_url(fixed)}")
+    if fixed.lower().startswith(("http://", "https://")):
+        import http_source
+
+        ok, hsteps, fixed = http_source.probe_steps(fixed, wait=min(wait, 8.0))
+        for s in hsteps:
+            clog(f"probe http: {s[0]} -> {s[1]} {s[2][:80]}")
+        return ok, [("URL check", True, "HTTP/HTTPS camera URL (snapshot ya MJPEG)")] + hsteps, fixed
     steps.append(("URL check", True,
                   f"Password ke special characters auto-fix kiye:\n    {fixed}" if fixed != url
                   else "URL format theek hai"))

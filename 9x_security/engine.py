@@ -480,9 +480,22 @@ def probe_rtsp(url, wait=10.0):
                           "TP-Link: /stream1, Reolink: /h264Preview_01_main"))
             return False, steps, fixed
     else:
-        steps.append(("RTSP handshake", False,
-                      f"Camera ne RTSP jawab nahi diya ({first}) — camera settings me RTSP enable hai? "
-                      "Port 554 sahi hai? Fir bhi video try kar rahe hain..."))
+        from rtsp_discover import explain_no_rtsp, find_rtsp_port, split_url, with_creds
+
+        steps.append(("RTSP handshake", False, explain_no_rtsp(host, port, first) + " Doosre RTSP ports bhi dekh rahe hain..."))
+        _h, _p, user, pw, path = split_url(fixed)
+        alt, acode = find_rtsp_port(host, user, pw, path)
+        if alt:
+            fixed = with_creds(fixed, user, pw, host=host, port=alt)
+            clog(f"probe: RTSP answers on port {alt} (code {acode}) -> {redact_url(fixed)}")
+            steps.append(("RTSP port", True, f"Port {port} par nahi, par {alt} par camera RTSP jawab deta hai (code {acode}) — "
+                                             f"URL me port {alt} kar diya:\n    {fixed}"))
+            code, first = rtsp_describe(fixed)
+            clog(f"probe: DESCRIBE on {alt} -> {code} {first}")
+            auth_failed = code == 401
+        else:
+            steps.append(("RTSP port", False, "Common RTSP ports (8554, 10554, 5554, 1554, 88, 7447) par bhi RTSP nahi mila — "
+                                              "upar wali wajah check karein; video fir bhi try kar rahe hain..."))
 
     ok, detail = _try_capture(fixed, "tcp", wait)
     steps.append(("Video stream (TCP)", ok, detail))

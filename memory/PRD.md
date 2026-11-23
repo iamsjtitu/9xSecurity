@@ -1368,3 +1368,23 @@ number plate bhi capture karna hai. Platform: Windows desktop. AI: offline & fre
   exclude/never-old-ip, worker save + other camera protected, not-found status, 45 s / 10 min trigger timing, fingerprint saved,
   endpoint + 401). conftest autouse also stubs Worker._maybe_fingerprint (a worker test had written DEFAULTS into the dev
   config.json and wiped the admin hash — restored via git checkout).
+
+## Implemented (update 2026-06 #74) — Field report (DELL PC, v1.0.54, camera 192.168.31.180): port 554 open but every RTSP request gets WinError 10054 (reset)
+- Diagnosis: TCP connect OK ("probe: reachable") but DESCRIBE/ffmpeg/OpenCV all get "connection forcibly closed" instantly =
+  camera accepts TCP then drops our RTSP request. Typical: camera-side IP lock after wrong passwords (first URLs in the log used
+  `Admin%123`, later `Admin%40123` = Admin@123), RTSP service disabled on a Wi-Fi camera (Imou/EZVIZ/Tapo/V380; Xiaomi has no
+  RTSP), or connection limit. Our status wrongly said "timeout — power/LAN check" (no_answer_status had no reset branch) and
+  the worker kept retrying every ~40 s, which keeps such a lock alive.
+- rtsp_discover: ALT_RTSP_PORTS (8554, 10554, 5554, 1554, 88, 7447), is_reset(detail), explain_no_rtsp(host, port, detail)
+  (reset -> IP LOCK / RTSP OFF / connections full advice; else silent-host text), find_rtsp_port(host, user, pw, path) ->
+  (port, code) by TCP connect + DESCRIBE. engine.probe_rtsp code==0 branch: step "RTSP handshake" = explain_no_rtsp, new step
+  "RTSP port": switches `fixed` to the answering port (URL updated, re-DESCRIBE, 401 -> auth hint) or reports none found.
+- service: no_answer_status reset branch (network par hai par RTSP request par connection kaat deta hai — IP lock / RTSP OFF /
+  NVR-app connections — 'Test' se detail). Worker._set_backoff(): 2 consecutive rejections (open_error auth, or no-answer with
+  reset) -> backoff_until = now + 10 min (auth) / 5 min (reset), status gets "IP lock se bachne ke liye N min tak khud dobara
+  try nahi…", log; any other failure resets the counter; success clears. WorkerPool.sync(auto=True) skips workers in backoff;
+  POST /api/camera/connect clears backoff + counter (user changed something -> try now).
+- Tests: tests/test_iter49_rtsp_reset.py (8): is_reset/explanations, status reset branch, find_rtsp_port with real local
+  sockets (closed / reset / RTSP 401), probe steps + port switch, backoff timing/clear, connect endpoint clears. 89 regression green.
+- USER ADVICE: close app (or wait) 30 min / power-cycle camera to clear the lock, then Connect once with the right password;
+  check RTSP enabled on the camera web page/app; verify in VLC from the same PC; tell us the camera brand.

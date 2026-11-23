@@ -31,6 +31,7 @@ from engine import (
     HEVC_CODECS, LatestFrameReader, SecurityEngine, auto_fix_stream_url, clog, codec_name, draw_line2, line2_px,
     normalize_rtsp_url, open_stream, probe_rtsp, substream_url,
 )
+from rtsp_discover import is_reset
 from whatsapp import WhatsAppNotifier, parse_recipients
 
 PORT = int(os.environ.get("ENGINE_PORT", "8971"))
@@ -186,6 +187,11 @@ def no_answer_status(source, detail=""):
         return (f"ERROR: {where} par koi camera/RTSP nahi mila (connection refused) — is IP par ab shayad doosra device hai: "
                 "camera ka IP badal gaya hoga (router DHCP). 'Cameras manage' > Scan se naya IP dhundhein, "
                 "ya camera me static IP set karein")
+    if is_reset(d):
+        return (f"ERROR: Camera {where} network par hai par RTSP request par connection turant kaat deta hai — ya to galat "
+                "password ke baad camera ne is PC ka IP LOCK kiya hai (30 min koi try na karein, phir sahi password se Connect), "
+                "ya camera me RTSP service OFF hai (camera app/web me ON karein; Imou/EZVIZ/Tapo/V380 me alag se), ya NVR/phone "
+                "app ne saare connections le rakhe hain — 'Test' dabakar detail dekhein")
     return (f"ERROR: Camera {where} jawab nahi de raha (timeout) — camera ki power / LAN cable / switch check karein; "
             "PC se camera ka web page khul raha hai? IP badla ho to 'Cameras manage' > Scan karein")
 
@@ -206,6 +212,8 @@ class Worker:
         self._unreach_since = 0.0   # camera host not answering since (0 = answering)
         self._autofind_at = 0.0     # last LAN auto-find attempt
         self._fp_at = 0.0           # last fingerprint collection
+        self._reject_count = 0      # consecutive opens the camera refused (401 / connection reset)
+        self.backoff_until = 0.0    # auto-connect must not retry before this (IP-lock protection)
         self._gen = 0             # run generation: a restarted loop never keeps an old thread alive
         self.thread = None
         self.status = "Idle — camera URL daal kar Connect dabayein"
@@ -505,6 +513,21 @@ class Worker:
         self._fp_at = time.time()
         threading.Thread(target=self.collect_fingerprint, args=(source,), daemon=True).start()
 
+    def _set_backoff(self):
+        """Don't hammer a camera that rejects us: repeated 401s / connection resets make Hikvision/Dahua-class
+        cameras LOCK this PC's IP for up to 30 min — and the lock never expires while we keep retrying.
+        A manual Connect/Test clears the backoff (the user fixed the password)."""
+        if self.open_error == "auth" or (self.open_error == "no-answer" and is_reset(self.open_detail)):
+            self._reject_count += 1
+            if self._reject_count >= 2:
+                mins = 10 if self.open_error == "auth" else 5
+                self.backoff_until = time.time() + mins * 60
+                self.status += (f" · IP lock se bachne ke liye {mins} min tak khud dobara try nahi karenge — "
+                                "password/URL theek karke Connect dabayein to turant try hoga")
+                self._log(f"camera rejects us ({self.open_error}) x{self._reject_count} — auto-connect paused {mins} min")
+        else:
+            self._reject_count = 0
+
     def _open_error_status(self):
         why = getattr(self, "open_error", "")
         if why == "auth":
@@ -637,8 +660,10 @@ class Worker:
                 cap.release()
             if self._alive(gen):
                 self.status = self._open_error_status()
+                self._set_backoff()
                 self._running = False
             return False
+        self._reject_count, self.backoff_until = 0, 0.0
         self.status = self._live_status()
         self._log("streaming started")
         self._maybe_fingerprint(source, live)
@@ -801,6 +826,8 @@ class WorkerPool:
                         "Is camera ka RTSP URL khaali hai — Settings > Cameras me URL daalein"
                 continue
             if auto and not w.connected and not w._running and not w.user_stopped:
+                if time.time() < w.backoff_until:
+                    continue  # camera rejected us repeatedly: wait (IP-lock protection), status explains
                 w.status = "Auto-connect: camera se connect ho raha hai..."
                 w.start()
                 started.append(cam.get("name", cid))
@@ -938,6 +965,7 @@ def camera_connect(body: dict, request: Request):
     ptz.reset_cache()
     w = pool.active(cfg)
     w.user_stopped = False
+    w._reject_count, w.backoff_until = 0, 0.0  # the user changed something: try right away
     w.start()
     pool.sync(cfg)
     return {"ok": True}

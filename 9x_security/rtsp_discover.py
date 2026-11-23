@@ -172,6 +172,41 @@ def rtsp_describe(url, timeout=3.0):
         return 0, str(e)
 
 
+ALT_RTSP_PORTS = (8554, 10554, 5554, 1554, 88, 7447)  # where cameras put RTSP when it is not on 554
+
+
+def is_reset(detail):
+    """Socket error text = the camera accepted TCP and then slammed the door on our RTSP request."""
+    d = str(detail or "").lower()
+    return "10054" in d or "forcibly closed" in d or "reset" in d
+
+
+def explain_no_rtsp(host, port, detail):
+    """Hindi explanation for 'port open but no RTSP answer' — reset vs silence need different advice."""
+    if is_reset(detail):
+        return (f"Camera {host}:{port} network par hai (port khula) par RTSP request par connection turant kaat deta hai "
+                f"({detail}). Aam wajah: (1) pehle galat password ke baad camera ne is PC ka IP LOCK kar diya — "
+                "Hikvision/Prama ~30 min, CP Plus/Dahua 5–30 min: itni der koi try na karein, phir sahi password se Connect; "
+                "(2) camera ke web page/app me RTSP service OFF hai — ON karein (Wi-Fi cameras Imou/EZVIZ/Tapo/V380 me alag se "
+                "enable hota hai, EZVIZ me video encryption OFF); (3) camera par connections full hain — NVR/phone app ka stream "
+                "band karke dekhen")
+    return (f"Camera ne RTSP jawab nahi diya ({detail}) — camera settings me RTSP enable hai? Port {port} sahi hai? "
+            "Camera ka web page PC se khul raha hai?")
+
+
+def find_rtsp_port(host, user, pw, path, ports=ALT_RTSP_PORTS, timeout=1.5):
+    """Configured port gives no RTSP: look on the other ports cameras use -> (port, rtsp_code) or (0, 0)."""
+    for p in ports:
+        try:
+            socket.create_connection((host, p), timeout=timeout).close()
+        except OSError:
+            continue
+        code, _ = rtsp_describe(with_creds(f"rtsp://{host}:{p}{path or '/'}", user, pw, host=host, port=p), timeout=3.0)
+        if code:
+            return p, code
+    return 0, 0
+
+
 def onvif_stream_uris(host, user, pw, timeout=4):
     """RTSP URIs of the camera's media profiles (main first), or [] when ONVIF is unavailable."""
     import ptz

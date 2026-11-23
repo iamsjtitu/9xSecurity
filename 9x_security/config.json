@@ -121,8 +121,8 @@
   "wa_account_email": "",
   "wa_account_password": "",
   "auth_user": "admin",
-  "auth_salt": "da182318dc04eb23c1c59c4d846500f5",
-  "auth_hash": "9f88f82b55f43c8b01262a79a3f2198e4ac2960cc284ce25b8e0dc8e02fcce77",
+  "auth_salt": "fb9fbb92a8bbddfa1b8cbab89427bc57",
+  "auth_hash": "aba1c759547ceb2c4e14df9398321547da04ab99fdd16067281efe56e0c0be1c",
   "github_repo": "",
   "gh_token": "TEST_GH",
   "rtsp_url_main": ""

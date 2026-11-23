@@ -29882,3 +29882,114 @@ RuntimeError: no AI in test
 2026-11-18T09:33:54 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 546 ms, 0 dets on blank frame)
 2026-11-18T09:33:55 | svc[Front Camera]: accurate model too slow here (546 ms > 350) -> yolov8n.pt
 2026-11-18T09:33:55 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 311 ms, 0 dets on blank frame)
+2026-11-23T06:31:04 | === PROBE start: rtsp://****@192.168.31.180:554/cam/realmonitor?channel=1&subtype=0
+2026-11-23T06:31:04 | probe: 192.168.31.180:554 reachable
+2026-11-23T06:31:04 | probe: DESCRIBE -> 0 [WinError 10054] An existing connection was forcibly closed by the remote host
+2026-11-23T06:31:04 | probe: RTSP answers on port 8554 (code 401) -> rtsp://****@192.168.31.180:8554/cam/realmonitor?channel=1&subtype=0
+2026-11-23T06:31:04 | probe: DESCRIBE on 8554 -> 401 RTSP/1.0 401 Unauthorized
+2026-11-23T06:31:04 | === PROBE start: rtsp://****@192.168.31.180:554/video
+2026-11-23T06:31:04 | probe: 192.168.31.180:554 reachable
+2026-11-23T06:31:04 | probe: DESCRIBE -> 0 timed out
+2026-11-23T06:31:18 | svc: starting on 127.0.0.1:8971 v1.0.0
+2026-11-23T06:31:18 | purge: 0 old events removed (retention 7d, cutoff 2026-11-16)
+2026-11-23T06:31:22 | svc: auto-connect — Back Camera se connect kar raha hai
+2026-11-23T06:31:22 | svc[Back Camera]: loading AI model
+2026-11-23T06:31:29 | svc[Back Camera]: AI model loaded
+2026-11-23T06:31:31 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-23T06:31:31 | update: engine exiting for the installer (app quits; Setup relaunches it)
+2026-11-23T06:31:31 | update: downloaded v9.9.9 -> /tmp/9xSecuritySetup_new.exe, launching installer
+2026-11-23T06:31:31 | svc[Gate 1]: autofind: Gate 1 ka IP badla 192.168.1.7 -> 192.168.1.23 (mac) — URL update kar diya
+2026-11-23T06:31:31 | svc[Gate 1]: camera host not reachable (timed out) — retrying every 10 s
+2026-11-23T06:31:31 | svc[Gate 1]: camera host not reachable (timed out) — retrying every 10 s
+2026-11-23T06:31:31 | svc[Gate 1]: autofind: Gate 1 ka IP badla 192.168.1.7 -> 192.168.1.23 (creds) — URL update kar diya
+2026-11-23T06:31:31 | === PROBE start: rtsp://****@192.168.31.180:554/cam/realmonitor?channel=1&subtype=0
+2026-11-23T06:31:31 | probe: 192.168.31.180:554 reachable
+2026-11-23T06:31:31 | probe: DESCRIBE -> 0 [WinError 10054] An existing connection was forcibly closed by the remote host
+2026-11-23T06:31:31 | probe: RTSP answers on port 8554 (code 401) -> rtsp://****@192.168.31.180:8554/cam/realmonitor?channel=1&subtype=0
+2026-11-23T06:31:31 | probe: DESCRIBE on 8554 -> 401 RTSP/1.0 401 Unauthorized
+2026-11-23T06:31:31 | === PROBE start: rtsp://****@192.168.31.180:554/video
+2026-11-23T06:31:31 | probe: 192.168.31.180:554 reachable
+2026-11-23T06:31:31 | probe: DESCRIBE -> 0 timed out
+2026-11-23T06:31:32 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-11-23T06:31:32 | svc[Back Camera]: AI self-test OK (yolov8s.pt, 541 ms, 0 dets on blank frame)
+2026-11-23T06:31:32 | svc[Back Camera]: accurate model too slow here (541 ms > 350) -> yolov8n.pt
+2026-11-23T06:31:33 | svc[Back Camera]: AI self-test OK (yolov8n.pt, 254 ms, 0 dets on blank frame)
+2026-11-23T06:31:35 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-11-23T06:31:35 | svc[Front Camera]: loading AI model
+2026-11-23T06:31:35 | svc[Front Camera]: AI model loaded
+2026-11-23T06:31:35 | svc[Back Camera]: camera host not reachable (timed out) — retrying every 10 s
+2026-11-23T06:31:36 | svc[Front Camera]: AI self-test OK (yolov8s.pt, 477 ms, 0 dets on blank frame)
+2026-11-23T06:31:36 | svc[Front Camera]: accurate model too slow here (477 ms > 350) -> yolov8n.pt
+2026-11-23T06:31:37 | svc[Front Camera]: AI self-test OK (yolov8n.pt, 262 ms, 0 dets on blank frame)
+2026-11-23T06:31:39 | svc[Front Camera]: camera host not reachable (timed out) — retrying every 10 s
+2026-11-23T06:31:41 | === PROBE start: rtsp://****@127.0.0.1:32985/
+2026-11-23T06:31:41 | probe: 127.0.0.1:32985 reachable
+2026-11-23T06:31:41 | probe: DESCRIBE -> 404 RTSP/1.0 404 Not Found
+2026-11-23T06:31:41 | discover: try /Streaming/Channels/101 -> 200
+2026-11-23T06:31:41 | probe: stream path auto-detected via common-path: rtsp://****@127.0.0.1:32985/Streaming/Channels/101
+2026-11-23T06:31:41 | capture attempt transport=tcp wait=1.0s
+2026-11-23T06:31:41 | capture tcp: open FAILED
+2026-11-23T06:31:41 | capture attempt transport=udp wait=1.0s
+2026-11-23T06:31:41 | capture udp: open FAILED
+2026-11-23T06:31:42 | ffmpeg-pipe: starting
+2026-11-23T06:31:42 | ffmpeg-pipe: no frames (process exited)
+2026-11-23T06:31:42 | === PROBE start: rtsp://****@127.0.0.1:32985/
+2026-11-23T06:31:42 | probe: 127.0.0.1:32985 reachable
+2026-11-23T06:31:42 | probe: DESCRIBE -> 401 RTSP/1.0 401 Unauthorized
+2026-11-23T06:31:42 | capture attempt transport=tcp wait=1.0s
+2026-11-23T06:31:42 | capture tcp: open FAILED
+2026-11-23T06:31:42 | capture attempt transport=udp wait=1.0s
+2026-11-23T06:31:42 | capture udp: open FAILED
+2026-11-23T06:31:42 | ffmpeg-pipe: starting
+2026-11-23T06:31:42 | ffmpeg-pipe: no frames (process exited)
+2026-11-23T06:31:42 | svc: loading AI model
+2026-11-23T06:31:42 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 583, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db, plate_reader=_plate_reader if cfg.get("enable_plate") else None)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-11-23T06:31:42 | svc: source opened codec=unknown live=True
+2026-11-23T06:31:42 | svc: streaming started
+2026-11-23T06:31:43 | svc: loading AI model
+2026-11-23T06:31:43 | svc: MODEL LOAD FAILED:
+Traceback (most recent call last):
+  File "/app/9x_security/service.py", line 583, in _run_impl
+    self.engine = SecurityEngine(cfg=cfg, db=_db, plate_reader=_plate_reader if cfg.get("enable_plate") else None)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <lambda>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/9x_security/test_worker_restart.py", line 49, in <genexpr>
+    monkeypatch.setattr(service, "SecurityEngine", lambda **kw: (_ for _ in ()).throw(RuntimeError("no AI in test")))
+RuntimeError: no AI in test
+
+2026-11-23T06:31:43 | svc: source opened codec=unknown live=True
+2026-11-23T06:31:43 | svc: streaming started
+2026-11-23T06:31:45 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-11-23T06:31:45 | svc[Back]: standby khatam — stream khol raha hai
+2026-11-23T06:31:45 | svc[Back]: standby — apne time window ke bahar, stream band
+2026-11-23T06:31:45 | svc[Back]: streaming started
+2026-11-23T06:31:45 | scan: subnets=['10.38.0', '192.0.2'] port=554
+2026-11-23T06:31:48 | scan: onvif devices=0
+2026-11-23T06:31:50 | scan: rtsp port open on 0 host(s)
+2026-11-23T06:31:51 | scan: subnets=['127.0.0'] port=33315
+2026-11-23T06:31:54 | scan: onvif devices=0
+2026-11-23T06:31:54 | scan: rtsp port open on 1 host(s)
+2026-11-23T06:31:54 | ffmpeg-pipe: starting
+2026-11-23T06:31:54 | ffmpeg-pipe: starting
+2026-11-23T06:31:54 | ffmpeg-pipe: starting
+2026-11-23T06:31:54 | ffmpeg-pipe: OK first frame in 0.0s
+2026-11-23T06:31:54 | ffmpeg-pipe: starting
+2026-11-23T06:31:59 | ffmpeg-pipe: no frames (process exited)
+2026-11-23T06:31:59 | === PROBE start: rtsp://****@192.0.2.1:554/s
+2026-11-23T06:32:02 | probe: 192.0.2.1:554 UNREACHABLE (timed out)
+2026-11-23T06:32:25 | svc[Back Camera]: autofind: camera 192.0.2.9:554 jawab nahi de raha — scanning ['10.38.0', '192.0.2']
+2026-11-23T06:32:31 | svc[Back Camera]: autofind: port 554 open on 0 other host(s), onvif devices 0
+2026-11-23T06:32:31 | svc[Back Camera]: autofind: camera LAN par nahi mila
